@@ -1,0 +1,12 @@
+{
+  "name": "polymath-observability",
+  "version": "0.1.0",
+  "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design; the three pillars without the bloat.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["observability", "logging", "tracing", "otel", "metrics", "red", "use"]
+}
