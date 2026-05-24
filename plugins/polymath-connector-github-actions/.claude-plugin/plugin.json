@@ -1,0 +1,12 @@
+{
+  "name": "polymath-connector-github-actions",
+  "version": "0.1.0",
+  "description": "GitHub Actions connector: workflow-focused skills + Stop hook that suggests re-run on a failed CI; uses polymath-connector-github's MCP server.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core", "polymath-connector-github"],
+  "keywords": ["connector", "github-actions", "ci", "workflow"]
+}
