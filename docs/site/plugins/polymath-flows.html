@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-flows · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core, polymath-product, polymath-engineering, polymath-release</p>
+<pre><code>claude plugin install polymath-flows@polymath</code></pre>
+<h1>polymath-flows</h1>
+
+<p>flows-lite: a deterministic serial workflow runner for the Polymath marketplace. v0.1 ships the <code>shipFeature</code> workflow end-to-end.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>Skills: <code>run-workflow</code>, <code>resume-workflow</code>, <code>list-workflows</code>.</li>
+<li>Executable: <code>bin/polymath-flow</code> — owns YAML validation, state, mustPass checks.</li>
+<li>Workflows: <code>workflows/shipFeature.yaml</code>.</li>
+</ul>
+
+<h2>Why two layers (skill + executable)?</h2>
+
+<p>Claude Code&#x27;s runtime is a single LLM-driven loop. It has no built-in DAG executor, state store, resumable runner, or nested slash-command invoker. So:</p>
+
+<ul>
+<li>The <strong>skill</strong> drives the loop, announces steps, and performs the actual Claude work (PRD drafting, implementation, review, …).</li>
+<li>The <strong>executable</strong> owns deterministic concerns: validating YAML, advancing state, evaluating <code>mustPass</code>.</li>
+</ul>
+
+<p>Neither alone is sufficient. Both must work for v0.1 to pass.</p>
+
+<h2>State</h2>
+
+<p>Run state lives under <code>${CLAUDE_PLUGIN_DATA}/workflows/&lt;run_id&gt;/</code>:</p>
+
+<pre><code>
+state.json        — current step index, status, per-step status
+inputs.json       — user-supplied inputs
+trace.jsonl       — append-only event log
+budget.json       — runtime token estimate (soft/hard ceiling)
+step-summaries/&lt;step-id&gt;.md
+artifacts/        — files the workflow produced (optional)
+</code></pre>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-flows@polymath
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+<li><code>polymath-product</code></li>
+<li><code>polymath-engineering</code></li>
+<li><code>polymath-release</code></li>
+</ul>
+
+<h2>Running the golden demo</h2>
+
+<pre><code>
+claude
+&gt; /polymath-flows:run-workflow shipFeature title=&quot;Rate-limit /login&quot; scope=small
+</code></pre>
+
+<p>The session must produce a PRD, acceptance criteria, an implementation diff, a code-review summary, a CHANGELOG entry, and a PR draft. Resumption is verified with <code>/polymath-flows:resume-workflow</code>.</p>
+
+<h2>Out of scope (v0.1)</h2>
+
+<ul>
+<li>Parallel steps.</li>
+<li>Agent panels.</li>
+<li>Connector events (<code>wait-for-event</code>).</li>
+<li>AI-based cross-artifact alignment as a blocking gate.</li>
+<li>Real PR creation through GitHub.</li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

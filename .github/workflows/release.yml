@@ -1,0 +1,89 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: "Plugin to release (e.g. polymath-core). Leave empty to tag every plugin whose version changed since the last release."
+        required: false
+        type: string
+      dry_run:
+        description: "Print what would be tagged without pushing."
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Tag + release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configure git identity
+        run: |
+          git config user.name  "polymath-release-bot"
+          git config user.email "polymath-release-bot@users.noreply.github.com"
+      - name: Verify gates green
+        run: |
+          bash tools/validate-all.sh
+          bash tools/lint-skills.sh
+          bash tools/token-budget.sh
+          python3 -m unittest discover -s plugins/polymath-flows/tests -v
+      - name: Verify conformance
+        run: bash tools/conformance.sh --all
+      - name: Plan plugin tags
+        id: plan
+        run: |
+          python3 - <<'PY' "$INPUT_PLUGIN" "$INPUT_DRY_RUN"
+          import json, pathlib, subprocess, sys
+          target_plugin = sys.argv[1] if len(sys.argv) > 1 else ""
+          dry_run = (sys.argv[2] if len(sys.argv) > 2 else "true").lower() == "true"
+
+          mp = json.loads(pathlib.Path(".claude-plugin/marketplace.json").read_text())
+          plans = []
+          for p in mp["plugins"]:
+              if target_plugin and p["name"] != target_plugin:
+                  continue
+              manifest = json.loads(pathlib.Path(p["source"].lstrip("./") + "/.claude-plugin/plugin.json").read_text())
+              tag = f"{p['name']}-v{manifest['version']}"
+              try:
+                  subprocess.run(["git", "rev-parse", tag], check=True, capture_output=True)
+                  print(f"skip:  {tag} (already exists)")
+              except subprocess.CalledProcessError:
+                  plans.append((p["name"], manifest["version"], tag))
+
+          if not plans:
+              print("no new tags to create.")
+              sys.exit(0)
+
+          print("Would create:" if dry_run else "Creating:")
+          for name, version, tag in plans:
+              print(f"  {tag}")
+
+          if dry_run:
+              sys.exit(0)
+
+          for name, version, tag in plans:
+              changelog = pathlib.Path(p["source"].lstrip("./") + "/CHANGELOG.md")
+              message = f"{name} v{version}"
+              if changelog.exists():
+                  message = changelog.read_text(errors="ignore")[:4000]
+              subprocess.run(["git", "tag", "-a", tag, "-m", message], check=True)
+              print(f"tagged: {tag}")
+          subprocess.run(["git", "push", "--tags"], check=True)
+          print("pushed tags.")
+          PY
+        env:
+          INPUT_PLUGIN: ${{ inputs.plugin }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+      - name: Note
+        run: |
+          echo "::notice::release.yml is a per-plugin tagger. \`claude plugin tag --push\` from the plugin directory is the canonical local equivalent."

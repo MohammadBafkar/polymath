@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-jira · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-jira@polymath</code></pre>
+<h1>polymath-connector-jira</h1>
+
+<p>Jira connector for the Polymath marketplace.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>MCP server: Atlassian MCP server (default: <code>@modelcontextprotocol/server-atlassian</code>) via <code>npx</code>.</li>
+<li>Skills: <code>jira-triage</code>, <code>file-bug-from-incident</code>.</li>
+<li>Hooks: <code>UserPromptSubmit</code> — detects Jira keys (<code>PROJ-123</code>) and <code>https://*.atlassian.net/browse/...</code> URLs in the prompt; hints the model to fetch via the MCP.</li>
+<li>Reference: <a href="references/jira-tools.md"><code>references/jira-tools.md</code></a>.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-jira@polymath
+# You&#x27;ll be prompted for jiraUrl, jiraEmail, and jiraApiToken (sensitive).
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

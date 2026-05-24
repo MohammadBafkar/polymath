@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-release · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-release@polymath</code></pre>
+<h1>polymath-release</h1>
+
+<p>Release craft for the Polymath marketplace. Drafts commit messages, PR descriptions, CHANGELOG entries, and release notes.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>Commands: <code>/commit</code>, <code>/pr</code>, <code>/changelog</code>, <code>/release-notes</code>.</li>
+<li>Templates: <code>CHANGELOG-entry.md</code>, <code>PR-description.md</code> (materialized from <code>shared/templates/</code>).</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-release@polymath
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>Why commands, not skills</h2>
+
+<p>Each component is a thin alias around a procedure that does not bundle scripts or references — the canonical guidance is short and the templates are imported separately. If a future need bundles tooling (e.g. a semver bumper), promote that to a skill.</p>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

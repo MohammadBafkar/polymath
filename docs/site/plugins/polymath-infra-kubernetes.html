@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-infra-kubernetes · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-infra-kubernetes@polymath</code></pre>
+<h1>polymath-infra-kubernetes</h1>
+
+<p>Kubernetes craft for the Polymath marketplace.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>Skills: <code>write-manifest</code>, <code>audit-rbac-grants</code>, <code>propose-pod-security-standards</code>.</li>
+<li>Hook: <code>PreToolUse(Bash)</code> — blocks mutating kubectl commands when the current kube-context name matches <code>prod</code> (configurable via <code>POLYMATH_K8S_PROD_PATTERN</code>). Bypass per-call by including the literal token <code>POLYMATH_ACK_PROD</code> in the command.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-infra-kubernetes@polymath
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>
