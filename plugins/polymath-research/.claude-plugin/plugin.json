@@ -1,0 +1,12 @@
+{
+  "name": "polymath-research",
+  "version": "0.1.0",
+  "description": "Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["research", "interview", "persona", "journey"]
+}
