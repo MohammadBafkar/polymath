@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "pagerduty": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@pagerduty/mcp-server"],
+      "env": {
+        "PAGERDUTY_API_KEY": "${POLYMATH_CONNECTOR_PAGERDUTY_PAGERDUTYAPIKEY}"
+      }
+    }
+  }
+}
