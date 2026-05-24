@@ -91,6 +91,62 @@
       "version": "0.1.0",
       "category": "security",
       "tags": ["security", "stride", "owasp"]
+    },
+    {
+      "name": "polymath-frontend",
+      "source": "./plugins/polymath-frontend",
+      "description": "Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.",
+      "version": "0.1.0",
+      "category": "engineering",
+      "tags": ["frontend", "web-vitals", "bundle"]
+    },
+    {
+      "name": "polymath-backend",
+      "source": "./plugins/polymath-backend",
+      "description": "Backend craft: REST API design, relational schema design, safe online migrations.",
+      "version": "0.1.0",
+      "category": "engineering",
+      "tags": ["backend", "api", "rest", "migrations"]
+    },
+    {
+      "name": "polymath-lang-python",
+      "source": "./plugins/polymath-lang-python",
+      "description": "Python craft: pytest authoring, ruff linting, type annotations.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["python", "pytest", "ruff"]
+    },
+    {
+      "name": "polymath-lang-typescript",
+      "source": "./plugins/polymath-lang-typescript",
+      "description": "TypeScript craft: vitest authoring, biome linting, version migration.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["typescript", "vitest", "biome"]
+    },
+    {
+      "name": "polymath-lang-dotnet",
+      "source": "./plugins/polymath-lang-dotnet",
+      "description": ".NET craft: xUnit authoring, csproj modernization audit, nullable rollout.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["dotnet", "csharp", "xunit"]
+    },
+    {
+      "name": "polymath-data",
+      "source": "./plugins/polymath-data",
+      "description": "Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.",
+      "version": "0.1.0",
+      "category": "data",
+      "tags": ["sql", "metrics", "analytics"]
+    },
+    {
+      "name": "polymath-ai",
+      "source": "./plugins/polymath-ai",
+      "description": "AI craft: prompt engineering, RAG architecture, eval-plan design.",
+      "version": "0.1.0",
+      "category": "ai",
+      "tags": ["ai", "llm", "rag", "eval"]
     }
   ]
 }
