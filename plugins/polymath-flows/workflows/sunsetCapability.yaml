@@ -1,0 +1,74 @@
+schemaVersion: 0.1
+name: sunsetCapability
+version: 0.1.0
+description: Sunset a capability — write the customer-facing notice, deprecate in code with warnings, then later remove + release-note the change.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-content
+    - polymath-engineering
+    - polymath-release
+inputs:
+  - name: capability
+    type: string
+    required: true
+    description: The capability being sunset, in customer language (e.g. "POST /v1/refunds endpoint").
+  - name: sunsetDate
+    type: string
+    required: true
+    description: ISO date when deprecation warnings begin (new usage blocked).
+  - name: removalDate
+    type: string
+    required: true
+    description: ISO date when the capability stops working.
+  - name: replacement
+    type: string
+    required: true
+    description: The supported alternative customers should migrate to.
+  - name: stage
+    type: enum
+    values: [announce, remove]
+    default: announce
+    description: announce = write the notice + add deprecation warnings now. remove = the removal-date has arrived; execute the removal.
+guards:
+  - id: sunset-notes-dir
+    type: command
+    command: mkdir -p docs/sunsets && [ -w docs/sunsets ]
+steps:
+  - id: notice
+    invoke: polymath-content:write-sunset-notice
+    prompt: Author the sunset notice for ${inputs.capability}. Sunset date ${inputs.sunsetDate}, removal date ${inputs.removalDate}, replacement ${inputs.replacement}. Save to docs/sunsets/${workflow.slug}.md.
+    artifacts:
+      - docs/sunsets/${workflow.slug}.md
+  - id: deprecate-in-code
+    invoke: polymath-engineering:feature-dev
+    prompt: Add deprecation warnings to ${inputs.capability} in code. New usage rejected (return error / throw exception with the sunset-notice URL); existing usage warned (log line / response header). Do NOT remove the capability yet — that's the remove stage.
+    needs: [notice]
+  - id: remove-if-stage
+    invoke: polymath-engineering:feature-dev
+    prompt: If inputs.stage is "remove" AND today is on or after ${inputs.removalDate}, remove ${inputs.capability}. Otherwise this step is a no-op — output a one-line note stating which condition failed.
+    needs: [deprecate-in-code]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Verify the deprecation (or removal) — calls to the old capability behave as the notice describes; tests cover the new error path; the replacement still works. Summary must include "test" or "verified".
+    needs: [remove-if-stage]
+  - id: release-comms
+    invoke: polymath-release:release-notes
+    prompt: Add the sunset (or removal) to the customer-facing release notes for the next release. Link the sunset notice. For removal stage, this is a breaking-change entry.
+    needs: [verify]
+mustPass:
+  - id: sunset-notice-exists
+    type: fileExists
+    path: docs/sunsets/${workflow.slug}.md
+  - id: notice-has-both-dates
+    type: fileMatches
+    path: docs/sunsets/${workflow.slug}.md
+    pattern: "(sunset_date|removal_date|sunset|removal)"
+  - id: notice-has-replacement
+    type: fileMatches
+    path: docs/sunsets/${workflow.slug}.md
+    pattern: "(replacement|replaces|Use)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"

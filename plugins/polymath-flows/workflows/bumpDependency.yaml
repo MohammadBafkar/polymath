@@ -1,0 +1,56 @@
+schemaVersion: 0.1
+name: bumpDependency
+version: 0.1.0
+description: Bump a dependency safely — vuln triage first, scoped read-code, smallest update, lint + tests, review.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-connector-snyk
+    - polymath-engineering
+inputs:
+  - name: dependency
+    type: string
+    required: true
+    description: Package name being bumped (e.g. "lodash", "@types/node", "django").
+  - name: targetVersion
+    type: string
+    required: false
+    description: Explicit target version. Absent → bump to latest minor within the current major.
+guards:
+  - id: bump-notes-dir
+    type: command
+    command: mkdir -p docs/dep-bumps && [ -w docs/dep-bumps ]
+steps:
+  - id: vuln-triage
+    invoke: polymath-connector-snyk:triage-vulns
+    prompt: Triage Snyk findings on ${inputs.dependency}. If there are open critical findings, prefer a target version that closes them. Save findings classification to docs/dep-bumps/${workflow.slug}-vulns.md.
+    artifacts:
+      - docs/dep-bumps/${workflow.slug}-vulns.md
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: Locate every call site of ${inputs.dependency} in this codebase. Note any uses of APIs that the target version's release notes flag as breaking.
+    needs: [vuln-triage]
+  - id: bump
+    invoke: polymath-engineering:feature-dev
+    prompt: Apply the smallest version bump of ${inputs.dependency} that closes the criticals from vuln-triage. Use ${inputs.targetVersion} if provided; otherwise pick the smallest safe bump. Adjust call sites only where breaking changes require it; do not opportunistically refactor.
+    needs: [orient]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff for correctness, scope creep (no opportunistic refactors), and missing tests around the changed call sites.
+    needs: [bump]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run lint + typecheck + tests. Confirm the criticals from vuln-triage are closed (re-scan or check fixed-versions). Summary must include "test" or "verified".
+    needs: [review]
+mustPass:
+  - id: vulns-doc-exists
+    type: fileExists
+    path: docs/dep-bumps/${workflow.slug}-vulns.md
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: review-checks-scope
+    type: stepSummaryMatches
+    step: review
+    pattern: "(scope|refactor|simpl|missing)"

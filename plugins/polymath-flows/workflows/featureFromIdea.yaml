@@ -1,0 +1,88 @@
+schemaVersion: 0.1
+name: featureFromIdea
+version: 0.1.0
+description: Extend shipFeature with discovery — interview guide, persona refresh, then PRD → acceptance → implement → review → verify → changelog → PR draft.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-research
+    - polymath-product
+    - polymath-engineering
+    - polymath-release
+inputs:
+  - name: title
+    type: string
+    required: true
+  - name: researchQuestion
+    type: string
+    required: true
+    description: The one research question this round of discovery is trying to answer.
+  - name: scope
+    type: enum
+    values: [small, medium]
+    default: small
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: interview-guide
+    invoke: polymath-research:interview-guide
+    prompt: Write a Mom-Test-shaped interview guide for the research question "${inputs.researchQuestion}". Target N ≥ 5. Save to docs/research/${workflow.slug}-guide.md.
+    artifacts:
+      - docs/research/${workflow.slug}-guide.md
+  - id: persona-refresh
+    invoke: polymath-research:persona
+    prompt: After interviews are run, distill the persona for this feature. Quotes verbatim; N ≥ 5; anti-persona named. If interviews haven't been run, surface that and pause — we will not write a PRD on assumptions for this workflow.
+    needs: [interview-guide]
+  - id: prd
+    invoke: polymath-product:prd
+    prompt: Write the PRD for ${inputs.title}, grounded in the persona from the previous step. Save to docs/prds/${workflow.slug}.md.
+    needs: [persona-refresh]
+    artifacts:
+      - docs/prds/${workflow.slug}.md
+  - id: acceptance
+    invoke: polymath-product:acceptance-criteria
+    prompt: Add Given/When/Then acceptance criteria to docs/prds/${workflow.slug}.md. Tie each criterion to a persona behavior the interviews surfaced.
+    needs: [prd]
+  - id: implement
+    invoke: polymath-engineering:feature-dev
+    prompt: Implement the smallest safe change satisfying the PRD and acceptance criteria.
+    needs: [acceptance]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff for correctness, simplicity, missing tests.
+    needs: [implement]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run repository-appropriate verification. Summary must include "test" or "verified".
+    needs: [review]
+  - id: release
+    invoke: polymath-release:changelog
+    prompt: Draft CHANGELOG entry under [Unreleased].
+    needs: [verify]
+    artifacts:
+      - CHANGELOG.md
+  - id: pr
+    invoke: polymath-release:pr
+    prompt: Draft the PR description at docs/pr/${workflow.slug}.md, linking the persona doc and the PRD.
+    needs: [release]
+    artifacts:
+      - docs/pr/${workflow.slug}.md
+mustPass:
+  - id: interview-guide-exists
+    type: fileExists
+    path: docs/research/${workflow.slug}-guide.md
+  - id: prd-exists
+    type: fileExists
+    path: docs/prds/${workflow.slug}.md
+  - id: tests-mentioned
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: changelog-touched
+    type: fileExists
+    path: CHANGELOG.md
+  - id: pr-draft-exists
+    type: fileExists
+    path: docs/pr/${workflow.slug}.md

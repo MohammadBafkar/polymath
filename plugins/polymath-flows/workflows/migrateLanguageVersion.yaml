@@ -1,0 +1,64 @@
+schemaVersion: 0.1
+name: migrateLanguageVersion
+version: 0.1.0
+description: Migrate a TypeScript codebase to a new TS version in phases (pin → fix → strict) with explicit gates between phases.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-lang-typescript
+    - polymath-engineering
+inputs:
+  - name: targetVersion
+    type: string
+    required: true
+    description: Target TypeScript version (e.g. "5.6", "5.7").
+  - name: currentVersion
+    type: string
+    required: true
+    description: Current pinned version from package.json devDependencies.typescript.
+guards:
+  - id: migration-notes-dir
+    type: command
+    command: mkdir -p docs/migrations && [ -w docs/migrations ]
+steps:
+  - id: plan
+    invoke: polymath-lang-typescript:migrate-ts-version
+    prompt: Plan the TypeScript upgrade ${inputs.currentVersion} → ${inputs.targetVersion}. Output the phased plan (PIN → FIX → STRICT) to docs/migrations/${workflow.slug}-plan.md. Categorize breaking-changes notes; identify which apply to this codebase.
+    artifacts:
+      - docs/migrations/${workflow.slug}-plan.md
+  - id: pin
+    invoke: polymath-engineering:feature-dev
+    prompt: Phase A (PIN). Bump devDependencies.typescript to ${inputs.targetVersion}. Temporarily relax any newly-strict tsconfig flag the migration plan flagged. Goal is a green build, not full strictness.
+    needs: [plan]
+  - id: fix
+    invoke: polymath-engineering:feature-dev
+    prompt: Phase B (FIX). Address the error categories from the migration plan in small batches (per-package or per-folder). Don't bundle into one giant diff. Each batch is its own logical commit.
+    needs: [pin]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run tsc --noEmit + tests on the changed files after each batch and at the end. Confirm green. Summary must include "test" or "verified".
+    needs: [fix]
+  - id: strict
+    invoke: polymath-engineering:feature-dev
+    prompt: Phase C (STRICT). Re-enable the tsconfig flag(s) relaxed in pin. Remove temporary @ts-expect-error annotations introduced during fix. Validate everything still passes.
+    needs: [verify]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Final review of the migration. Look for opportunistic refactors that crept in (should not have), missing tests, and any remaining ts-expect-error annotations.
+    needs: [strict]
+mustPass:
+  - id: plan-exists
+    type: fileExists
+    path: docs/migrations/${workflow.slug}-plan.md
+  - id: plan-categorizes-changes
+    type: fileMatches
+    path: docs/migrations/${workflow.slug}-plan.md
+    pattern: "(breaking|strictness|inference|removal)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: review-checks-residue
+    type: stepSummaryMatches
+    step: review
+    pattern: "(ts-expect-error|scope|refactor|missing)"
