@@ -1,0 +1,27 @@
+{
+  "name": "polymath-connector-snyk",
+  "version": "0.1.0",
+  "description": "Snyk connector: MCP server for vulnerability test/monitor + Stop hook that warns if the current branch has open critical vulns.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["connector", "snyk", "security", "vulnerabilities", "sca"],
+  "userConfig": {
+    "snykToken": {
+      "type": "string",
+      "title": "Snyk API token",
+      "description": "Snyk auth token (Account settings → General → Auth Token).",
+      "sensitive": true,
+      "required": true
+    },
+    "snykOrg": {
+      "type": "string",
+      "title": "Snyk org slug",
+      "description": "Default Snyk org slug or ID; passed as --org to commands.",
+      "required": false
+    }
+  }
+}
