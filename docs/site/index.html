@@ -14,7 +14,7 @@
   <main>
 <h2>Install the marketplace</h2>
 <pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>
-<p class="plugin-meta">67 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
+<p class="plugin-meta">71 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
 <h2 id="cat-foundation">Foundation</h2>
 <div class="cards">
 <div class="card">
@@ -177,9 +177,24 @@
 <h2 id="cat-infra">Infra</h2>
 <div class="cards">
 <div class="card">
+<h3><a href="plugins/polymath-infra-aws.html">polymath-infra-aws</a></h3>
+<p>AWS write-side: design-aws-pattern (Lambda/ECS/EKS, S3/EFS, RDS/DynamoDB/Aurora) with cost driver + ops shape + quantitative flip conditions.</p>
+<div class="tags"><span>aws</span><span>infrastructure</span><span>iac</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-infra-azure.html">polymath-infra-azure</a></h3>
+<p>Azure write-side: design-azure-pattern (Functions/Container Apps/App Service/AKS, Azure SQL/Cosmos/Postgres Flex) with cost driver + flip conditions.</p>
+<div class="tags"><span>azure</span><span>infrastructure</span><span>iac</span></div>
+</div>
+<div class="card">
 <h3><a href="plugins/polymath-infra-docker.html">polymath-infra-docker</a></h3>
 <p>Docker craft: Dockerfile audit (base-image, multi-stage, USER, HEALTHCHECK, secrets) + compose audit (pinning, networks, secrets, depends_on).</p>
 <div class="tags"><span>docker</span><span>containers</span><span>compose</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-infra-gcp.html">polymath-infra-gcp</a></h3>
+<p>GCP write-side: design-gcp-pattern (Cloud Run/GKE/Functions, Cloud SQL/Spanner/Firestore, BigQuery) with cost driver + flip conditions.</p>
+<div class="tags"><span>gcp</span><span>google-cloud</span><span>infrastructure</span></div>
 </div>
 <div class="card">
 <h3><a href="plugins/polymath-infra-kubernetes.html">polymath-infra-kubernetes</a></h3>
@@ -195,6 +210,11 @@
 <h3><a href="plugins/polymath-infra-redis.html">polymath-infra-redis</a></h3>
 <p>Redis craft: design-cache-layer (versioned keys, jittered TTL, NX-lock stampede) + audit-redis-config (maxmemory, persistence, ACL, TLS).</p>
 <div class="tags"><span>redis</span><span>cache</span><span>key-value</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-infra-terraform-stack.html">polymath-infra-terraform-stack</a></h3>
+<p>Terraform composition: design-stack-composition picks blast-radius-aligned states, foundational→platform→service plumbing, workspaces vs directories.</p>
+<div class="tags"><span>terraform</span><span>modules</span><span>state</span></div>
 </div>
 </div>
 <h2 id="cat-sre">Sre</h2>

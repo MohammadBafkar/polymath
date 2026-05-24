@@ -237,6 +237,38 @@
       "tags": ["redis", "cache", "key-value"]
     },
     {
+      "name": "polymath-infra-aws",
+      "source": "./plugins/polymath-infra-aws",
+      "description": "AWS write-side: design-aws-pattern (Lambda/ECS/EKS, S3/EFS, RDS/DynamoDB/Aurora) with cost driver + ops shape + quantitative flip conditions.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["aws", "infrastructure", "iac"]
+    },
+    {
+      "name": "polymath-infra-gcp",
+      "source": "./plugins/polymath-infra-gcp",
+      "description": "GCP write-side: design-gcp-pattern (Cloud Run/GKE/Functions, Cloud SQL/Spanner/Firestore, BigQuery) with cost driver + flip conditions.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["gcp", "google-cloud", "infrastructure"]
+    },
+    {
+      "name": "polymath-infra-azure",
+      "source": "./plugins/polymath-infra-azure",
+      "description": "Azure write-side: design-azure-pattern (Functions/Container Apps/App Service/AKS, Azure SQL/Cosmos/Postgres Flex) with cost driver + flip conditions.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["azure", "infrastructure", "iac"]
+    },
+    {
+      "name": "polymath-infra-terraform-stack",
+      "source": "./plugins/polymath-infra-terraform-stack",
+      "description": "Terraform composition: design-stack-composition picks blast-radius-aligned states, foundational→platform→service plumbing, workspaces vs directories.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["terraform", "modules", "state"]
+    },
+    {
       "name": "polymath-devops",
       "source": "./plugins/polymath-devops",
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
