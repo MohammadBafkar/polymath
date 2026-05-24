@@ -347,6 +347,30 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "linear", "issues"]
+    },
+    {
+      "name": "polymath-connector-launchdarkly",
+      "source": "./plugins/polymath-connector-launchdarkly",
+      "description": "LaunchDarkly connector: MCP for flag list/get/update + flag-rollout-plan skill (internal→beta→canary→ramp + retirement).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "launchdarkly", "feature-flags"]
+    },
+    {
+      "name": "polymath-connector-statuspage",
+      "source": "./plugins/polymath-connector-statuspage",
+      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity→impact + customer-safe body).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "statuspage", "public-comms"]
+    },
+    {
+      "name": "polymath-connector-terraform",
+      "source": "./plugins/polymath-connector-terraform",
+      "description": "Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "terraform", "iac"]
     }
   ]
 }

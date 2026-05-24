@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-statuspage · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-statuspage@polymath</code></pre>
+<h1>polymath-connector-statuspage</h1>
+
+<p>Statuspage (Atlassian) connector for the Polymath marketplace. Translates internal incident comms into customer-facing public updates.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>MCP server: Statuspage MCP server (default: <code>@statuspage/mcp-server</code>) via <code>npx</code>.</li>
+<li>Skills: <code>post-statuspage-update</code> — severity → public-impact mapping, component scoping, customer-safe body rewrite.</li>
+<li>Reference: <a href="references/statuspage-tools.md"><code>references/statuspage-tools.md</code></a>.</li>
+</ul>
+
+<h2>Pairs with</h2>
+
+<ul>
+<li><a href="../polymath-incident/README.md"><code>polymath-incident</code></a> — <code>comms-update</code> writes the internal body; this plugin posts the external one.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-statuspage@polymath \
+  --config statuspageApiKey=&lt;key&gt; \
+  --config statuspagePageId=&lt;page-id&gt;
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

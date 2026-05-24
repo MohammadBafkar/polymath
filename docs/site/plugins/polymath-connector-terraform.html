@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-terraform · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-terraform@polymath</code></pre>
+<h1>polymath-connector-terraform</h1>
+
+<p>Terraform / OpenTofu connector for the Polymath marketplace. Reviews <code>terraform plan</code> output for destructive changes, drift, and unsafe diffs.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>Skills: <code>plan-review</code> — classifies every resource change, flags destructive patterns by resource type, separates drift from intent, and outputs a categorized go/no-go.</li>
+<li>Reference: <a href="references/terraform-tools.md"><code>references/terraform-tools.md</code></a>.</li>
+</ul>
+
+<p>No MCP server: Terraform&#x27;s CLI is the API, and this connector calls it locally (binary configurable via <code>userConfig.terraformBinary</code>).</p>
+
+<h2>Pairs with</h2>
+
+<ul>
+<li><code>polymath-infra-aws</code> / <code>polymath-infra-gcp</code> / <code>polymath-infra-azure</code> — those plugins ship the *write* side; this plugin reviews the *plan* side before apply.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-terraform@polymath
+# optional:
+# claude plugin install polymath-connector-terraform@polymath --config terraformBinary=tofu
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

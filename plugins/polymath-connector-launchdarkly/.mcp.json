@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "launchdarkly": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@launchdarkly/mcp-server"],
+      "env": {
+        "LAUNCHDARKLY_API_TOKEN": "${POLYMATH_CONNECTOR_LAUNCHDARKLY_LAUNCHDARKLYAPIKEY}",
+        "LAUNCHDARKLY_PROJECT": "${POLYMATH_CONNECTOR_LAUNCHDARKLY_LAUNCHDARKLYPROJECT}"
+      }
+    }
+  }
+}

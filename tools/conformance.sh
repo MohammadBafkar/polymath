@@ -103,8 +103,11 @@ check_one() {
     # A connector may delegate to another connector for the MCP server
     # (e.g. polymath-connector-github-actions reuses connector-github's
     # @modelcontextprotocol/server-github). In that case .mcp.json is
-    # allowed to be absent.
+    # allowed to be absent. A connector may also wrap a local CLI rather
+    # than a remote service (e.g. polymath-connector-terraform shells out
+    # to `terraform`); those declare the `polymath-cli-only` keyword.
     delegates_mcp=0
+    cli_only=0
     if [[ -f "$manifest" ]]; then
       delegates_mcp="$(python3 -c "
 import json, sys
@@ -112,13 +115,21 @@ d = json.load(open(sys.argv[1]))
 deps = d.get('dependencies') or []
 print(1 if any(isinstance(x,str) and x.startswith('polymath-connector-') for x in deps) else 0)
 " "$manifest" 2>/dev/null || echo 0)"
+      cli_only="$(python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+kw = d.get('keywords') or []
+print(1 if 'polymath-cli-only' in kw else 0)
+" "$manifest" 2>/dev/null || echo 0)"
     fi
     if [[ -f "$plugin_dir/.mcp.json" ]]; then
       echo "  ✓ CONNECTOR-1: .mcp.json"
     elif [[ "$delegates_mcp" -eq 1 ]]; then
       echo "  ✓ CONNECTOR-1: no .mcp.json — delegates to a connector dependency"
+    elif [[ "$cli_only" -eq 1 ]]; then
+      echo "  ✓ CONNECTOR-1: no .mcp.json — declared 'polymath-cli-only' keyword"
     else
-      echo "  ✗ CONNECTOR-1: .mcp.json missing (and no connector dependency to delegate to)"
+      echo "  ✗ CONNECTOR-1: .mcp.json missing (and no connector dependency or cli-only keyword)"
       fail=1
     fi
     ls "$plugin_dir/references/"*.md >/dev/null 2>&1 \
