@@ -1,0 +1,12 @@
+{
+  "name": "polymath-content",
+  "version": "0.1.0",
+  "description": "Customer-facing content craft: release notes, sunset notice, security/breaking-change advisory.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["content", "release-notes", "sunset", "advisory"]
+}
