@@ -1,0 +1,9 @@
+{
+  "name": "polymath-lang-java",
+  "version": "0.1.0",
+  "description": "Java craft: JUnit 5 + AssertJ idiom, parameterized tests, build-tool audit (Maven/Gradle) for version pinning and module separation.",
+  "license": "Apache-2.0",
+  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
+  "dependencies": ["polymath-core", "polymath-engineering"],
+  "keywords": ["java", "junit5", "assertj", "maven", "gradle"]
+}

@@ -133,6 +133,30 @@
       "tags": ["dotnet", "csharp", "xunit"]
     },
     {
+      "name": "polymath-lang-go",
+      "source": "./plugins/polymath-lang-go",
+      "description": "Go craft: table-driven testing.T tests with t.Cleanup, go.mod modernization + govulncheck-reachable findings.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["go", "golang", "testing", "go-mod"]
+    },
+    {
+      "name": "polymath-lang-rust",
+      "source": "./plugins/polymath-lang-rust",
+      "description": "Rust craft: #[test]/#[tokio::test]/proptest! patterns; Cargo.toml edition + MSRV + workspace inheritance + cargo-audit/cargo-deny hygiene.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["rust", "cargo", "tokio", "proptest"]
+    },
+    {
+      "name": "polymath-lang-java",
+      "source": "./plugins/polymath-lang-java",
+      "description": "Java craft: JUnit 5 + AssertJ + Mockito idiom (@ParameterizedTest, @Nested); Maven/Gradle pinning + BOM + reachable vulnerabilities.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["java", "junit5", "assertj", "maven", "gradle"]
+    },
+    {
       "name": "polymath-data",
       "source": "./plugins/polymath-data",
       "description": "Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.",
