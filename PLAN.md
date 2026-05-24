@@ -36,6 +36,31 @@
 
 ---
 
+## 2.1 Implementation status
+
+> Single source of truth for "what's done". Updated after every material batch of work (see [`feedback_plan_progress.md`](.claude/projects/.../memory/feedback_plan_progress.md) memory).
+
+| Phase | Status | Notes |
+|---|---|---|
+| Phase 0 — Bootstrap | `[done]` 2026-05-23 | marketplace.json, LICENSE, shared/templates, shared/schemas/workflow.schema.json, tools/, CI workflows, docs, CODEOWNERS. Commits `d4b3a29`, `17c0dcc`. |
+| Phase 1a — `polymath-core` + `polymath-product` | `[done]` 2026-05-23 | Commits `3ce84aa`, `e93292f`. |
+| Phase 1b — `polymath-engineering` + `polymath-release` | `[done]` 2026-05-23 | Commits `1d43942`, `70fc07d`. |
+| Phase 1c — `polymath-flows` (flows-lite + shipFeature) | `[done]` 2026-05-23 | Commit `8b1ba21`. |
+| Phase 1d — hardening + golden demo | `[partial]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. **Live `claude` demo against fresh local marketplace install still pending.** |
+| Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[pending]` | Three substrate items: artifact frontmatter schemas, scheduled-work queue contract, topology label. |
+| Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[pending]` | |
+| Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[pending]` | |
+| Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
+| Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
+
+Local gates green as of 2026-05-24: `claude plugin validate --strict` on all 5 plugins, `tools/lint-skills.sh`, `tools/token-budget.sh` (588 / 1,500 measured), `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml`, `python3 -m unittest discover -s plugins/polymath-flows/tests` (13/13 pass).
+
+CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
+
+**Immediate next milestone:** finish Phase 1d by running the live `shipFeature` golden demo end-to-end against a fresh `claude` install (PLAN.md § 9 exit criteria), then start Phase 1.5.
+
+---
+
 ## 3. Ideas absorbed from your tree (additions to the original tier plan)
 
 The tree you shared earlier surfaced eight concrete gaps in the original tier plan. Each is integrated into the catalog below as a targeted addition, not a replacement:
@@ -751,17 +776,19 @@ No `output-styles/` directory — Polymath uses reference-content skills instead
 
 ## 9. MVP scope (Phase 1)
 
+**Status:** scaffolded and committed; live `claude` golden demo still pending.
+
 **Goal**: a usable v0.1 that proves the marketplace mechanics with one complete, resumable feature-shipping loop. The MVP is intentionally not a company-in-a-box catalog.
 
 **Five plugins**:
 
-| # | Plugin | Why MVP | What ships in v0.1 |
-|---|---|---|---|
-| 1 | `polymath-core` | Foundation | conventions, glossary, `/polymath-core:plugin-budget`, minimal SessionStart hook |
-| 2 | `polymath-product` | The workflow needs a PRD | `prd`, `acceptance-criteria`, `decompose-epic`; materialized `PRD.md` and `User-story-map.md` templates |
-| 3 | `polymath-engineering` | Single biggest user value | `feature-dev`, `code-review`, `verify-change`, `read-code`; secret-scan hook and formatter hook only when config exists |
-| 4 | `polymath-release` | Closes the loop without requiring a connector | `/polymath-release:commit`, `/polymath-release:pr`, `/polymath-release:changelog`, `/polymath-release:release-notes`; commit message and PR description drafts |
-| 5 | `polymath-flows` | Proves orchestration | **flows-lite** executor, `run-workflow`, `resume-workflow`, `list-workflows`, one workflow: `shipFeature` |
+| # | Plugin | Why MVP | What ships in v0.1 | Status |
+|---|---|---|---|---|
+| 1 | `polymath-core` | Foundation | conventions, glossary, `/polymath-core:plugin-budget`, minimal SessionStart hook | `[done]` commit `3ce84aa` |
+| 2 | `polymath-product` | The workflow needs a PRD | `prd`, `acceptance-criteria`, `decompose-epic`; materialized `PRD.md` and `User-story-map.md` templates | `[done]` commit `e93292f` |
+| 3 | `polymath-engineering` | Single biggest user value | `feature-dev`, `code-review`, `verify-change`, `read-code`; secret-scan hook and formatter hook only when config exists | `[done]` commit `1d43942` |
+| 4 | `polymath-release` | Closes the loop without requiring a connector | `/polymath-release:commit`, `/polymath-release:pr`, `/polymath-release:changelog`, `/polymath-release:release-notes`; commit message and PR description drafts | `[done]` commit `70fc07d` |
+| 5 | `polymath-flows` | Proves orchestration | **flows-lite** executor, `run-workflow`, `resume-workflow`, `list-workflows`, one workflow: `shipFeature` | `[done]` commit `8b1ba21` |
 
 **Explicit MVP dependencies**:
 
@@ -769,7 +796,7 @@ No `output-styles/` directory — Polymath uses reference-content skills instead
 - No MVP workflow invokes `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-qa`, `polymath-security`, `polymath-performance`, or `polymath-design`.
 - Security/performance/a11y panel review is a Phase 1.5/2 enhancement, not a v0.1 promise.
 
-**MVP token-budget target**: measured after scaffolding with `claude plugin details --json`; target ≤ 1,500 listing tokens total for all five plugins. The number is not accepted until measured in CI.
+**MVP token-budget target**: measured after scaffolding with `claude plugin details --json`; target ≤ 1,500 listing tokens total for all five plugins. The number is not accepted until measured in CI. **`[done]` Measured locally: 588 / 1,500 tokens (every plugin ≤ 400) via `tools/token-budget.sh`.**
 
 **MVP exit criteria** (end-to-end demo):
 
@@ -788,6 +815,12 @@ claude
 ```
 
 The session must produce a PRD, acceptance criteria, an implementation diff with tests, a code-review summary, a `CHANGELOG.md` entry or patch, and a PR description draft. It does **not** need to open a real GitHub PR in v0.1. Resumption from a paused workflow is verified with `/polymath-flows:resume-workflow`.
+
+**Exit criteria status:**
+
+- `[done]` Executor-only walk: `start → 7× complete → assert` returns `status=completed, checks=4` against a scratch repo (CI job `executable-e2e`, also covered by `plugins/polymath-flows/tests/test_polymath_flow.py`).
+- `[done]` Resumption logic: covered by unit + e2e tests; `bin/polymath-flow resume <run_id>` flips status from paused → active and re-emits the next pending step.
+- `[pending]` Live `claude` demo from a fresh local marketplace install — the runner [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh) drives this when `claude` is on PATH; CI job `claude-cli-fixtures` runs it once `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
 ---
 
@@ -828,23 +861,38 @@ Estimate is for a small team (2 maintainers, ~10 hrs/wk each). The only committe
 
 ### Phase 0 — Bootstrap (weeks 1–2)
 
+**Status:** `[done]` (commit `17c0dcc`, 2026-05-23).
+
 **Exit**: `claude plugin marketplace add .` works from a local checkout; CI validates a hello-world plugin; template materialization works without cross-plugin symlinks.
 
-1. `.claude-plugin/marketplace.json` (name: `polymath`, owner, source: github).
-2. Scaffolders for plugin, skill, command, and workflow files.
-3. `shared/templates/` with only MVP templates: `PRD.md`, `User-story-map.md`, `CHANGELOG-entry.md`, `PR-description.md`.
-4. `shared/schemas/workflow.schema.json` for flows-lite, deliberately smaller than the full future schema.
-5. CI: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, `golden-tests.yml`.
-6. `docs/PLUGIN-AUTHORING.md` and `docs/WORKFLOW-SCHEMA.md` scoped to MVP.
-7. CODEOWNERS, issue/PR templates, LICENSE (Apache-2.0).
+1. `[done]` `.claude-plugin/marketplace.json` (name: `polymath`, owner, source: github).
+2. `[done]` Scaffolders for plugin, skill, command, and workflow files (`tools/new-{plugin,skill,command,workflow}.sh`).
+3. `[done]` `shared/templates/` with only MVP templates: `PRD.md`, `User-story-map.md`, `CHANGELOG-entry.md`, `PR-description.md`, `Workflow.yaml`.
+4. `[done]` `shared/schemas/workflow.schema.json` for flows-lite, deliberately smaller than the full future schema.
+5. `[done]` CI: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, `golden-tests.yml`.
+6. `[done]` `docs/PLUGIN-AUTHORING.md` and `docs/WORKFLOW-SCHEMA.md` scoped to MVP. Also added `docs/CONTRIBUTING.md`.
+7. `[done]` CODEOWNERS, issue/PR templates, LICENSE (Apache-2.0).
 
 ### Phase 1 — MVP (weeks 3–9)
+
+**Status:** `[partial]` — five plugins shipped, hardening shipped; live `claude` demo against a fresh local-marketplace install still pending.
 
 Ship the five MVP plugins per § 9. Order: `polymath-core` + `polymath-product` → `polymath-engineering` + `polymath-release` → `polymath-flows` with flows-lite. Per plugin: scaffold → author minimum useful skills → materialize templates → validate → golden fixture → README → add to `marketplace.json`.
 
 Phase 1 ends only when the `shipFeature` demo works from a fresh local marketplace install and resumes after interruption.
 
+Sub-status:
+
+- `[done]` `polymath-core` + `polymath-product` (commits `3ce84aa`, `e93292f`).
+- `[done]` `polymath-engineering` + `polymath-release` (commits `1d43942`, `70fc07d`).
+- `[done]` `polymath-flows` (`bin/polymath-flow`, three skills, `shipFeature.yaml`) (commit `8b1ba21`).
+- `[done]` Hardening: per-plugin golden fixture skeletons + `bin/polymath-flow` unit tests + CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs (commits `afa18bf`, `e9f20ff`, `45c20c3`).
+- `[done]` CLI-based fixture runner that works with `claude` subscription auth (not gated on `ANTHROPIC_API_KEY`) (commit `f493089`).
+- `[pending]` Live golden demo: `claude plugin marketplace add .` + install + `/polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small` end-to-end against a real `claude` session, plus the resume-from-interrupt variant.
+
 ### Phase 1.5 — Quality lane
+
+**Status:** `[pending]` — not started.
 
 Add `polymath-qa`, `polymath-security`, `polymath-thinking`, `polymath-planning`, and `polymath-writing`. Add `reviewPR` only after these plugins are installed dependencies. This is where security/perf/a11y-style panels start becoming legitimate.
 
@@ -856,17 +904,25 @@ Phase 1.5 also lands three substrate additions deferred from v0.1:
 
 ### Phase 2 — Stack specialize
 
+**Status:** `[pending]` — not started.
+
 Add `polymath-frontend`, `polymath-backend`, first language plugins, `polymath-data`, and `polymath-ai`. Each must bring one concrete golden fixture and measured listing cost before merging.
 
 ### Phase 3 — Operate
+
+**Status:** `[pending]` — not started.
 
 Add platform, DevOps, Kubernetes, SRE, observability, and incident plugins. Do not ship incident workflows before at least one observability or pager connector exists.
 
 ### Phase 4 — Connectors
 
+**Status:** `[pending]` — not started.
+
 Connectors wave 1: GitHub, GitHub Actions, Jira. Wave 2: PagerDuty, Datadog, Snyk. Each connector must define real MCP tools, hook payloads, required credentials, and smoke tests. Connector-dependent workflows stay disabled unless dependencies are installed.
 
 ### Phase 5 — Catalog hardening
+
+**Status:** `[pending]` — not started.
 
 - GitHub Pages catalog (auto-generated from `marketplace.json` + plugin READMEs).
 - Demo media per stable plugin.
@@ -1290,6 +1346,16 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
+**Status snapshot (2026-05-24):**
+
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 5 plugins.
+- `[done]` `tools/token-budget.sh` — 588 / 1,500 tokens measured locally.
+- `[done]` `tools/lint-skills.sh` — green.
+- `[done]` `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml` — green.
+- `[done]` Executable-only walk (`start → 7× complete → assert`) returns `status=completed, checks=4` (covered by `plugins/polymath-flows/tests/test_polymath_flow.py` and CI job `executable-e2e`).
+- `[pending]` Live `claude` end-to-end demo (steps 1–4 below) against a fresh local marketplace install. Runner: [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh).
+- `[pending]` Live resumability demo (Ctrl-C mid-flow → `resume-workflow` in a new session).
+
 End-to-end after Phase 1:
 
 ```bash
@@ -1334,11 +1400,11 @@ claude
 
 CI verification:
 
-- `validate.yml` green per PR.
-- `token-budget.yml` posts the measured budget table; MVP total ≤ 1,500 tokens unless an override is explicitly justified.
-- `golden-tests.yml` runs `claude -p` against each plugin's golden fixture and the `shipFeature` workflow golden.
-- `link-check.yml` confirms no broken cross-plugin references.
-- `workflow-schema.yml` validates all workflow YAML files against `shared/schemas/workflow.schema.json`.
+- `[done]` `validate.yml` green per PR.
+- `[done]` `token-budget.yml` posts the measured budget table; MVP total ≤ 1,500 tokens unless an override is explicitly justified.
+- `[partial]` `golden-tests.yml`: jobs `executable-unit`, `executable-e2e`, and `fixtures-parse` are green. The live job `claude-cli-fixtures` runs once `CLAUDE_CODE_OAUTH_TOKEN` (subscription, preferred) or `ANTHROPIC_API_KEY` is added to repo secrets — until then it skips with a warning rather than failing.
+- `[done]` `link-check.yml` confirms no broken cross-plugin references.
+- `[done]` Workflow YAML schema validation runs inside `validate.yml` (no separate `workflow-schema.yml` was added; the check lives in the validate job).
 
 ---
 
@@ -1346,9 +1412,9 @@ CI verification:
 
 The core v0.1 design is locked enough to build. Remaining items are operational:
 
-1. **Phase 0 kickoff timing**: scaffold the repo and assign CODEOWNERS.
-2. **MVP authorship order**: `polymath-core` + `polymath-product` → `polymath-engineering` + `polymath-release` → `polymath-flows`.
-3. **Workflow count**: v0.1 ships exactly `shipFeature`; `reviewPR` and `bugTriage` wait for Phase 1.5.
-4. **Test infrastructure**: golden-test fixtures need `claude -p` available in CI, or a documented local-only fallback.
-5. **Executor implementation language**: choose the smallest runtime with reliable YAML/schema support and no network install during plugin use.
-6. **Connector bundles**: defer until at least three connectors are real and used.
+1. `[done]` **Phase 0 kickoff timing**: scaffold the repo and assign CODEOWNERS. (Done 2026-05-23, commit `17c0dcc`.)
+2. `[done]` **MVP authorship order**: `polymath-core` + `polymath-product` → `polymath-engineering` + `polymath-release` → `polymath-flows`. (Followed exactly; see Phase 1 commits.)
+3. `[done]` **Workflow count**: v0.1 ships exactly `shipFeature`; `reviewPR` and `bugTriage` wait for Phase 1.5. (Only `shipFeature` shipped.)
+4. `[partial]` **Test infrastructure**: golden-test fixtures need `claude -p` available in CI, or a documented local-only fallback. (Runner [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh) handles local; CI uses `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` — pending: actually adding one of those secrets to enable the live `claude-cli-fixtures` job.)
+5. `[done]` **Executor implementation language**: Python 3 (stdlib-only, with an inline minimal-YAML subset parser as a PyYAML-free fallback). Decision recorded in `bin/polymath-flow` header.
+6. `[pending]` **Connector bundles**: defer until at least three connectors are real and used. Re-evaluate during Phase 4.
