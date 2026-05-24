@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "datadog": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@datadog/mcp-server"],
+      "env": {
+        "DD_API_KEY": "${POLYMATH_CONNECTOR_DATADOG_DATADOGAPIKEY}",
+        "DD_APP_KEY": "${POLYMATH_CONNECTOR_DATADOG_DATADOGAPPKEY}",
+        "DD_SITE": "${POLYMATH_CONNECTOR_DATADOG_DATADOGSITE}"
+      }
+    }
+  }
+}
