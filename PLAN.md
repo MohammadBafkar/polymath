@@ -47,17 +47,25 @@
 | Phase 1b — `polymath-engineering` + `polymath-release` | `[done]` 2026-05-23 | Commits `1d43942`, `70fc07d`. |
 | Phase 1c — `polymath-flows` (flows-lite + shipFeature) | `[done]` 2026-05-23 | Commit `8b1ba21`. |
 | Phase 1d — hardening + golden demo | `[done]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. Live `claude` smoke verified end-to-end: marketplace add, install ×5, `claude plugin details` reports 1,007 / 1,500 tokens, `claude -p` invokes `/plugin-budget` and `/list-workflows` correctly, and `shipFeature` start persists state that a later session can see. Full 7-step Claude-driven shipFeature walk deferred (would consume significant tokens; orchestration substrate proven). |
-| Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[pending]` | Three substrate items: artifact frontmatter schemas, scheduled-work queue contract, topology label. |
+| Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[done]` 2026-05-24 | All three substrate items shipped (S1 topology label, S2 SessionStart queue, S3 artifact schemas + artifactValid). Five plugins shipped + `reviewPR` fanout workflow. Commits `9cdc38c`, `43b33cd`, `b3862ab`, `4c724c6`, `0bff86c`, `dacc1d5`, `d6543fd`, `492bf19`, `2262d7e`, `0f63772`. |
 | Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[pending]` | |
 | Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[pending]` | |
 | Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
 | Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
 
-Local gates green as of 2026-05-24: `claude plugin validate --strict` on all 5 plugins, `tools/lint-skills.sh`, `tools/token-budget.sh` heuristic (588 / 1,500), `claude plugin details` authoritative measurement (1,007 / 1,500), `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml`, `python3 -m unittest discover -s plugins/polymath-flows/tests` (13/13 pass), and live `claude -p` invocations of `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, and `shipFeature` start (state persisted + cross-session visible).
+Local gates green as of 2026-05-24 (post Phase 1.5):
+
+- `claude plugin validate --strict` on all 10 plugins.
+- `tools/lint-skills.sh` green.
+- `tools/token-budget.sh` heuristic 1,163 / 1,500.
+- `claude plugin details` authoritative measurement: 2,015 tokens across 10 plugins; 200/plugin average; max 274 (well under the 400 cap).
+- `bin/polymath-flow validate` green on `shipFeature.yaml` and `reviewPR.yaml`.
+- `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass (was 13; added 9 for topology + artifactValid).
+- Live `claude -p` invocations: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys` all route + execute correctly.
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
-**Immediate next milestone:** Phase 1.5. Substrate first (artifact frontmatter schemas, scheduled-work queue contract, topology label on workflow steps), then five plugins (`polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-qa`, `polymath-security`), then the `reviewPR` workflow.
+**Immediate next milestone:** Phase 2 — stack specialization. Order: `polymath-frontend` + `polymath-backend` first (each must bring one concrete golden fixture and measured listing cost), then language wave 1 (`polymath-lang-python`, `polymath-lang-typescript`, `polymath-lang-dotnet`), then `polymath-data` + `polymath-ai`.
 
 ---
 
@@ -893,15 +901,15 @@ Sub-status:
 
 ### Phase 1.5 — Quality lane
 
-**Status:** `[pending]` — not started.
+**Status:** `[done]` 2026-05-24 — five plugins, reviewPR workflow, and all three substrate items shipped.
 
-Add `polymath-qa`, `polymath-security`, `polymath-thinking`, `polymath-planning`, and `polymath-writing`. Add `reviewPR` only after these plugins are installed dependencies. This is where security/perf/a11y-style panels start becoming legitimate.
+Added `polymath-qa`, `polymath-security`, `polymath-thinking`, `polymath-planning`, and `polymath-writing`. `reviewPR` ships in `polymath-flows/workflows/reviewPR.yaml`. This is where security/perf/a11y-style panels start becoming legitimate.
 
-Phase 1.5 also lands three substrate additions deferred from v0.1:
+Phase 1.5 also landed three substrate additions deferred from v0.1:
 
-1. **Artifact frontmatter schemas.** Add `shared/schemas/artifacts/` with JSON Schemas for the YAML frontmatter blocks of `PRD.md`, `ADR.md`, `Postmortem.md`, and `Threat-model.md`. Body stays free-form Markdown. `mustPass` gains a `type: artifactValid` check that validates only the frontmatter against the schema — strictly more useful than `fileExists` at the same authoring cost.
-2. **Scheduled-work queue contract (§ 11.6).** Ship the `polymath-core` `SessionStart` hook that reads `${CLAUDE_PLUGIN_DATA}/polymath-core/queue.json` and surfaces pending items. No Polymath component writes to that file yet; the contract just needs to exist before any plugin can rely on it.
-3. **Topology label on workflow steps (§ 4.6).** The executor treats `topology:` as an opt-in field; `series` remains the implicit default. Required before `reviewPR` can declare a `fanout` step.
+1. `[done]` **Artifact frontmatter schemas.** `shared/schemas/artifacts/` now holds JSON Schemas for `PRD.md`, `ADR.md`, `Postmortem.md`, and `Threat-model.md`. Body stays free-form Markdown. `mustPass` gained a `type: artifactValid` check — implemented in `bin/polymath-flow` with a minimal JSON-Schema subset validator so the plugin stays stdlib-only.
+2. `[done]` **Scheduled-work queue contract (§ 11.6).** `polymath-core` SessionStart hook now reads `${CLAUDE_PLUGIN_DATA}/polymath-core/queue.json` and surfaces entries whose `due` ≤ now. Contract documented in `plugins/polymath-core/references/scheduled-queue.md`. No Polymath component writes to that file — owned by external schedulers (Cloud Routines, GitHub Actions, OS cron).
+3. `[done]` **Topology label on workflow steps (§ 4.6).** The executor accepts `topology: series` (implicit default) and `topology: fanout`. The `next` payload surfaces a note when fanout is declared. Executor still runs serially in v0.1.5 — fanout is honest declaration of parallel intent for downstream tooling and future runtimes. `reviewPR.yaml` exercises the field.
 
 ### Phase 2 — Stack specialize
 
@@ -1347,16 +1355,16 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24):**
+**Status snapshot (2026-05-24, post Phase 1.5):**
 
-- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 5 plugins.
-- `[done]` `tools/token-budget.sh` — 588 / 1,500 tokens measured locally.
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 10 plugins.
+- `[done]` `tools/token-budget.sh` — heuristic 1,163 / 1,500.
+- `[done]` `claude plugin details` — authoritative 2,015 tokens across 10 plugins (200/plugin average; max 274; cap 400).
 - `[done]` `tools/lint-skills.sh` — green.
-- `[done]` `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml` — green.
-- `[done]` Executable-only walk (`start → 7× complete → assert`) returns `status=completed, checks=4` (covered by `plugins/polymath-flows/tests/test_polymath_flow.py` and CI job `executable-e2e`).
-- `[done]` Live `claude` end-to-end smoke against the local marketplace (2026-05-24): all four steps below execute, `claude plugin details` reports 1,007 / 1,500 listing tokens, `/polymath-core:plugin-budget` and `/polymath-flows:list-workflows` and `shipFeature` start all route correctly via `claude -p`.
-- `[done]` Cross-session state visibility: started `shipFeature` in one `claude -p` session, listed it from another — both see the same run via `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json`. Runner: [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh).
-- `[deferred]` Full 7-step Claude-driven workflow (Ctrl-C mid-flow → `resume-workflow`). Gated behind CI `claude-cli-fixtures` job; orchestration substrate is proven without it.
+- `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml` and `reviewPR.yaml`.
+- `[done]` Unit tests — 22/22 pass (covers YAML subset parser, schema validation including topology and artifact checks, full shipFeature walk, mustPass for PRD/ADR/Postmortem/ThreatModel frontmatter).
+- `[done]` Live `claude` smoke (5 invocations): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys` all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session.
+- `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
 
 End-to-end after Phase 1:
 
