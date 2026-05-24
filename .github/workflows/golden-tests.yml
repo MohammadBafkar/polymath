@@ -1,0 +1,35 @@
+name: golden-tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install pyyaml jsonschema
+      - name: Run flows-lite executable smoke tests
+        run: |
+          if [[ -x plugins/polymath-flows/bin/polymath-flow ]]; then
+            plugins/polymath-flows/bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml
+            echo "✓ shipFeature workflow validates"
+          else
+            echo "::warning::polymath-flows executable not present yet"
+          fi
+      - name: Claude golden fixtures
+        if: env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [[ -d tests/golden ]]; then
+            echo "Golden fixtures will run here once claude -p is wired in CI"
+          else
+            echo "::warning::no tests/golden directory yet"
+          fi

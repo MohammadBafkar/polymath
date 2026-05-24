@@ -1,0 +1,31 @@
+schemaVersion: 0.1
+name: {{name}}
+version: 0.1.0
+description: {{one_line_description}}
+requires:
+  plugins:
+    - polymath-core
+    # Add any other plugins this workflow invokes.
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the work being driven through the workflow.
+  - name: scope
+    type: enum
+    values: [small, medium]
+    default: small
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: first-step
+    invoke: polymath-core:conventions
+    prompt: Replace this with the first instruction the executor should drive.
+    artifacts:
+      - docs/{{workflow.slug}}-notes.md
+mustPass:
+  - id: notes-exist
+    type: fileExists
+    path: docs/{{workflow.slug}}-notes.md

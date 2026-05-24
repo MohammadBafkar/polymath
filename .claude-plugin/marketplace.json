@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/marketplace.json",
+  "name": "polymath",
+  "description": "A public, open-source Claude Code marketplace of work-shaped plugins covering the full lifecycle of building software products.",
+  "owner": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "plugins": [
+    {
+      "name": "polymath-core",
+      "source": "./plugins/polymath-core",
+      "description": "Foundation: conventions, glossary, tone references, plugin-budget reporter, SessionStart hook.",
+      "version": "0.1.0",
+      "category": "foundation",
+      "tags": ["foundation", "core", "conventions"]
+    },
+    {
+      "name": "polymath-product",
+      "source": "./plugins/polymath-product",
+      "description": "Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.",
+      "version": "0.1.0",
+      "category": "product",
+      "tags": ["product", "prd", "acceptance-criteria"]
+    },
+    {
+      "name": "polymath-engineering",
+      "source": "./plugins/polymath-engineering",
+      "description": "Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation.",
+      "version": "0.1.0",
+      "category": "engineering",
+      "tags": ["engineering", "tdd", "code-review"]
+    },
+    {
+      "name": "polymath-release",
+      "source": "./plugins/polymath-release",
+      "description": "Release craft: Conventional Commits, PR descriptions, CHANGELOG, release notes.",
+      "version": "0.1.0",
+      "category": "release",
+      "tags": ["release", "changelog", "conventional-commits"]
+    },
+    {
+      "name": "polymath-flows",
+      "source": "./plugins/polymath-flows",
+      "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
+      "version": "0.1.0",
+      "category": "orchestration",
+      "tags": ["orchestration", "workflow", "shipFeature"]
+    }
+  ]
+}

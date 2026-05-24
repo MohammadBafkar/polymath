@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/shared/schemas/workflow.schema.json",
+  "title": "Polymath flows-lite workflow",
+  "description": "Workflow YAML schema for polymath-flows v0.1. Serial step replacement / insertion only. Unsupported keys must fail closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "version", "steps"],
+  "properties": {
+    "schemaVersion": {
+      "description": "Schema version. v0.1 accepts 0.1 only.",
+      "type": "number",
+      "enum": [0.1]
+    },
+    "name": {
+      "description": "Workflow identifier. Must be camelCase.",
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*$"
+    },
+    "version": {
+      "description": "Workflow semver.",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "description": "One-sentence summary of what the workflow does.",
+      "type": "string",
+      "maxLength": 200
+    },
+    "extends": {
+      "description": "Parent workflow reference in the form '<plugin>:<workflow>@<version>'. v0.1 supports serial step replacement and named-anchor insertion only.",
+      "type": "string",
+      "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*@\\d+\\.\\d+$"
+    },
+    "requires": {
+      "description": "Hard dependencies. Workflow validation fails if any required plugin is not installed.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plugins": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "inputs": {
+      "description": "User-supplied inputs that the workflow expects at start time.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+          "type": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "enum"]
+          },
+          "required": { "type": "boolean", "default": false },
+          "default": {},
+          "description": { "type": "string", "maxLength": 200 },
+          "values": {
+            "description": "For type=enum: allowed values.",
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "guards": {
+      "description": "Preconditions checked before the first step. Failing guard pauses workflow before any work.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "steps": {
+      "description": "Ordered serial steps. v0.1: each step runs after the prior step completes successfully.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "invoke", "prompt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "invoke": {
+            "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call.",
+            "type": "string",
+            "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*$"
+          },
+          "prompt": {
+            "description": "Instruction the executor presents when reaching this step. May reference ${inputs.*} and ${workflow.*} placeholders.",
+            "type": "string",
+            "minLength": 1
+          },
+          "needs": {
+            "description": "Step IDs that must be complete before this step. v0.1 expects a single predecessor (implicit serial order).",
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+            "uniqueItems": true
+          },
+          "artifacts": {
+            "description": "Files this step is expected to produce or update.",
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "topology": {
+            "description": "Reserved for Phase 1.5+ (§ 4.6). v0.1 treats absence as 'series'.",
+            "type": "string",
+            "enum": ["series"]
+          }
+        }
+      }
+    },
+    "override": {
+      "description": "When 'extends' is set, replace steps in the parent with the same id.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "steps": { "$ref": "#/properties/steps" }
+      }
+    },
+    "insertAfter": {
+      "description": "When 'extends' is set, insert additional steps after a named anchor step id in the parent.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/properties/steps/items" }
+      }
+    },
+    "mustPass": {
+      "description": "Deterministic checks the executor runs after the last step. Failure pauses the workflow with a violation summary.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "type": {
+          "type": "string",
+          "enum": ["fileExists", "fileMatches", "commandSucceeds", "stepSummaryMatches", "command"]
+        },
+        "path": { "type": "string" },
+        "pattern": { "type": "string" },
+        "command": { "type": "string" },
+        "step": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "fileExists" } }, "required": ["type"] },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "fileMatches" } }, "required": ["type"] },
+          "then": { "required": ["path", "pattern"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "commandSucceeds" } }, "required": ["type"] },
+          "then": { "required": ["command"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "command" } }, "required": ["type"] },
+          "then": { "required": ["command"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "stepSummaryMatches" } }, "required": ["type"] },
+          "then": { "required": ["step", "pattern"] }
+        }
+      ]
+    }
+  }
+}
