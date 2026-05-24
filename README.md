@@ -4,9 +4,9 @@
 
 ## The marketplace
 
-**39 plugins** across foundation, mind & craft, product, engineering, languages, quality & safety, platform & operate, people & content, connectors, orchestration, and authoring. **11 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`.
+**71 plugins** across foundation, mind & craft, product, engineering, languages, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **12 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`.
 
-Install only what you need. Per-plugin always-on listing cost stays under 400 tokens; the canonical CLI-measured total across all plugins is ~8 k — for users who install everything. Most teams install 5–10.
+Install only what you need. Per-plugin always-on listing cost stays under 400 tokens; the canonical CLI-measured total across all plugins is ~6.6 k — for users who install everything. Most teams install 5–10.
 
 ## Quick start
 
@@ -32,11 +32,12 @@ The full catalog is at [docs/site/index.html](docs/site/index.html) (also publis
 - **Mind & craft** — `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-decisions`, `polymath-learning`.
 - **Product & discovery** — `polymath-product`, `polymath-research`, `polymath-design`.
 - **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
-- **Languages** — `polymath-lang-python`, `polymath-lang-typescript`, `polymath-lang-dotnet`.
+- **Languages** — `polymath-lang-python`, `-typescript`, `-dotnet`, `-go`, `-rust`, `-java`, `-swift`, `-kotlin`, `-ruby`, `-php`.
 - **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
-- **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-infra-kubernetes`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
+- **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
+- **Infra** — `polymath-infra-kubernetes`, `-docker`, `-postgres`, `-redis`, `-aws`, `-gcp`, `-azure`, `-terraform-stack`.
 - **People & content** — `polymath-communication`, `polymath-leadership`, `polymath-content`.
-- **Connectors (MCP + hooks)** — `polymath-connector-github`, `-github-actions`, `-jira`, `-pagerduty`, `-datadog`, `-snyk`.
+- **Connectors (MCP + hooks; some are CLI-only)** — `polymath-connector-github`, `-github-actions`, `-jira`, `-pagerduty`, `-datadog`, `-snyk`, `-slack`, `-sentry`, `-linear`, `-launchdarkly`, `-statuspage`, `-terraform`, `-figma`, `-notion`, `-asana`, `-aws`, `-gcp`, `-azure`, `-stripe`, `-vercel`, `-cloudflare`, `-elastic`, `-grafana`, `-honeycomb`.
 - **Orchestration** — `polymath-flows` (the workflow runner).
 - **Authoring** — `polymath-author` (governance + scaffolders + skill review).
 
