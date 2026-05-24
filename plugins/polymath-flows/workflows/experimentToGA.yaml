@@ -1,0 +1,78 @@
+schemaVersion: 0.1
+name: experimentToGA
+version: 0.1.0
+description: Take a feature from experiment plan through pre-registration, flag rollout staging, results analysis, and GA decision artifact.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-data
+    - polymath-product
+    - polymath-release
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the experiment (e.g. "refund-async-writes").
+  - name: scope
+    type: enum
+    values: [small, medium, large]
+    default: small
+    description: Sizing hint that influences sample-size + duration defaults.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: plan
+    invoke: polymath-data:run-experiment
+    prompt: Author the experiment plan for ${inputs.title}. Save to docs/experiments/${workflow.slug}.md. Pre-register by freezing the plan content; cite the commit SHA in the file.
+    artifacts:
+      - docs/experiments/${workflow.slug}.md
+
+  - id: rollout-plan
+    invoke: polymath-connector-launchdarkly:flag-rollout-plan
+    prompt: Author the LaunchDarkly rollout plan for ${inputs.title}, gated by the experiment plan in docs/experiments/${workflow.slug}.md. Save to docs/rollouts/${workflow.slug}.md. If polymath-connector-launchdarkly is not installed, describe the rollout stages inline in docs/experiments/${workflow.slug}.md and create an empty docs/rollouts/${workflow.slug}.md as a placeholder.
+    needs: [plan]
+    artifacts:
+      - docs/rollouts/${workflow.slug}.md
+
+  - id: launch-checklist
+    invoke: polymath-product:acceptance-criteria
+    prompt: Produce a launch checklist for ${inputs.title} — flag at internal-only, observability live, dashboards up. Save to docs/launches/${workflow.slug}-checklist.md.
+    needs: [rollout-plan]
+    artifacts:
+      - docs/launches/${workflow.slug}-checklist.md
+
+  - id: results-analysis
+    invoke: polymath-data:run-experiment
+    prompt: After the experiment runs, analyse results against the pre-registered plan in docs/experiments/${workflow.slug}.md. Surface primary, guardrails, and stop-condition match. Save to docs/experiments/${workflow.slug}-results.md.
+    needs: [launch-checklist]
+    artifacts:
+      - docs/experiments/${workflow.slug}-results.md
+
+  - id: ga-decision
+    invoke: polymath-release:pr
+    prompt: Draft the GA decision artifact for ${inputs.title} — verdict (ship / hold / kill), evidence (results doc), retirement plan for the flag. Save to docs/launches/${workflow.slug}-ga.md.
+    needs: [results-analysis]
+    artifacts:
+      - docs/launches/${workflow.slug}-ga.md
+
+mustPass:
+  - id: plan-exists
+    type: fileExists
+    path: docs/experiments/${workflow.slug}.md
+  - id: plan-has-primary-and-guardrails
+    type: fileMatches
+    path: docs/experiments/${workflow.slug}.md
+    pattern: "(?i)(primary metric|guardrail)"
+  - id: plan-has-stop-conditions
+    type: fileMatches
+    path: docs/experiments/${workflow.slug}.md
+    pattern: "(?i)(stop condition|success|failure|inconclusive)"
+  - id: results-references-pre-registration
+    type: fileMatches
+    path: docs/experiments/${workflow.slug}-results.md
+    pattern: "(?i)(pre.?registered|frozen|baseline plan)"
+  - id: ga-decision-exists
+    type: fileExists
+    path: docs/launches/${workflow.slug}-ga.md
