@@ -12,7 +12,7 @@ Curated, role-shaped extensions for Claude Code that real teams can install a-la
 
 ## 2. Status snapshot
 
-**39 plugins**, **11 workflows**, **all gates green**.
+**42 plugins**, **11 workflows**, **all gates green**.
 
 Done:
 
@@ -22,20 +22,21 @@ Done:
 - Stack specialize — frontend / backend / 3 langs / data / ai (Phase 2).
 - Operate — platform / devops / k8s / sre / observability / incident (Phase 3).
 - Connectors wave 1+2 — github / gh-actions / jira / pagerduty / datadog / snyk + `respondToIncident` (Phase 4).
+- Connectors wave 3a — slack / sentry / linear.
 - Catalog hardening — author plugin + Pages + release CI + conformance + privacy (Phase 5).
 - Tier-1 craft completion — decisions, research, design, communication, leadership, learning, performance, content, mobile.
 - Workflow library — bugTriage, perfRegression, refactorWithSafety, securityFinding, bumpDependency, migrateLanguageVersion, sunsetCapability, featureFromIdea.
 
 Pending:
 
-- **Connector wave 3+** — slack, sentry, linear, figma, notion, asana, aws, gcp, azure, stripe, vercel, cloudflare, elastic, grafana, honeycomb, launchdarkly, statuspage, terraform.
+- **Connector wave 3b** — figma, notion, asana, aws, gcp, azure, stripe, vercel, cloudflare, elastic, grafana, honeycomb, launchdarkly, statuspage, terraform.
 - **Language wave 2** — go, rust, java, swift, kotlin, ruby, php.
 - **Infra waves** — aws, gcp, azure, terraform-stack, docker, postgres, redis.
 - **One more workflow** — `experimentToGA` (blocked on a `run-experiment` skill in polymath-data).
 - **Live golden-fixture CI** (operational) — requires `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets.
 - **Community-marketplace submission** (operational) — once proven plugins surface.
 
-Local gate measurements: 7,704 canonical listing tokens across 39 plugins (avg 197 / max 345 / cap 400). 22/22 `bin/polymath-flow` unit tests pass. `tools/conformance.sh --all` green.
+Local gate measurements: 8,061 canonical listing tokens across 42 plugins (avg 191 / max 345 / cap 400). 22/22 `bin/polymath-flow` unit tests pass. `tools/conformance.sh --all` green.
 
 ---
 
@@ -74,7 +75,7 @@ Operate      — polymath-platform, polymath-devops, polymath-infra-kubernetes,
                polymath-release
 People       — polymath-communication, polymath-leadership, polymath-content
 Connectors   — polymath-connector-{github, github-actions, jira,
-               pagerduty, datadog, snyk}
+               pagerduty, datadog, snyk, slack, sentry, linear}
 Orchestration — polymath-flows
 Authoring    — polymath-author
 ```
@@ -153,14 +154,10 @@ Deferred: full multi-step `claude -p` runs of every workflow end-to-end. Token-e
 
 ## 7. Remaining work (prioritized)
 
-### Priority 1 — Connector wave 3
+### Priority 1 — Connector wave 3 (continued)
 
-Highest user-impact: each connector unlocks an entire integration surface and existing workflows compose them.
-
-- **polymath-connector-slack** — incident comms via `polymath-incident:comms-update`, status updates from `respondToIncident`, weekly-review nudges.
-- **polymath-connector-sentry** — error context for `bugTriage` and `respondToIncident`.
-- **polymath-connector-linear** — alternative to Jira for teams on Linear; `triage-issue` parallel to `polymath-connector-jira:jira-triage`.
-- **polymath-connector-launchdarkly / -statuspage / -terraform** — already designed in PLAN sec 6's table; build when needed.
+- **polymath-connector-slack / -sentry / -linear** — `[done]`.
+- **polymath-connector-launchdarkly / -statuspage / -terraform** — already designed in the original tier-7 table; build next.
 - Future: figma, notion, asana, aws, gcp, azure, stripe, vercel, cloudflare, elastic, grafana, honeycomb.
 
 ### Priority 2 — Language wave 2
