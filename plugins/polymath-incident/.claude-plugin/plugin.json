@@ -1,0 +1,12 @@
+{
+  "name": "polymath-incident",
+  "version": "0.1.0",
+  "description": "Incident craft: triage decision tree, blameless postmortem authoring, comms-update template; templates for Postmortem + Comms-update.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["incident", "postmortem", "comms", "sev1"]
+}
