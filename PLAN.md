@@ -50,22 +50,22 @@
 | Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[done]` 2026-05-24 | All three substrate items shipped (S1 topology label, S2 SessionStart queue, S3 artifact schemas + artifactValid). Five plugins shipped + `reviewPR` fanout workflow. Commits `9cdc38c`, `43b33cd`, `b3862ab`, `4c724c6`, `0bff86c`, `dacc1d5`, `d6543fd`, `492bf19`, `2262d7e`, `0f63772`. |
 | Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[done]` 2026-05-24 | 7 plugins (frontend, backend, lang-python, lang-typescript, lang-dotnet, data, ai) + 7 golden fixtures. Per-plugin live measurement; descriptions trimmed for lang plugins to stay under 400-tok cap. Commits `eab1655`, `d245fa7`, `e0efaea`, `e521370`, `ec3fb0e`, `98de18f`, `de0933e`, `87f315d`, `bb49a1d`. |
 | Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[done]` 2026-05-24 | 6 plugins + 6 golden fixtures + Postmortem/Comms-update templates + kubectl-prod-confirm PreToolUse hook. No workflow (waits for Phase 4 connectors per PLAN.md sec 10). Commits `b2f71aa`, `ff11640`, `813c0c2`, `aefcefc`, `8a1fa54`, `08dceda`, `b4f4cc5`. |
-| Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
+| Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[done]` 2026-05-24 | 6 connector plugins + 6 golden fixtures + `respondToIncident` workflow (the first multi-connector flow, now legitimate per PLAN.md sec 10). Commits `fb6936e`, `3cb144e`, `f0efc5a`, `78a8b63`, `62c52f4`, `c9d556b`, `2489203`. |
 | Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
 
-Local gates green as of 2026-05-24 (post Phase 3):
+Local gates green as of 2026-05-24 (post Phase 4):
 
-- `claude plugin validate --strict` on all 23 plugins.
+- `claude plugin validate --strict` on all 29 plugins.
 - `tools/lint-skills.sh` green.
-- `tools/token-budget.sh` heuristic 2,772 / 5,750 (target scales with plugin count).
-- `claude plugin details` authoritative measurement: 4,990 tokens across 23 plugins; 216/plugin average; max 345 (under the 400 cap).
-- `bin/polymath-flow validate` green on `shipFeature.yaml` and `reviewPR.yaml`.
+- `tools/token-budget.sh` heuristic 3,124 / 7,250 (target scales with plugin count).
+- `claude plugin details` authoritative measurement: 5,636 tokens across 29 plugins; 194/plugin average; max 345 (under the 400 cap).
+- `bin/polymath-flow validate` green on `shipFeature.yaml`, `reviewPR.yaml`, and `respondToIncident.yaml`.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass.
-- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook (blocked-then-allowed via `POLYMATH_ACK_PROD` token).
+- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook (blocked-then-allowed via `POLYMATH_ACK_PROD` token), and a Jira-key detect-vs-vendor-ID test (PROJ-123 matches, SNYK-JS-LODASH-1234567 / CVE-2024-1234 / GHSA-… correctly ignored).
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
-**Immediate next milestone:** Phase 4 — connectors. Wave 1: `polymath-connector-github` + `polymath-connector-github-actions` + `polymath-connector-jira`. Wave 2: `polymath-connector-pagerduty` + `polymath-connector-datadog` + `polymath-connector-snyk`. Each connector ships an `.mcp.json` defining MCP tools, hook payloads for triggers, required credentials via `userConfig.sensitive: true`, and a smoke test. After at least one observability or pager connector lands, `respondToIncident` workflow becomes legitimate.
+**Immediate next milestone:** Phase 5 — catalog hardening. Order: GitHub Pages catalog auto-generated from `marketplace.json` + plugin READMEs; demo media per stable plugin; signed git tags via `claude plugin tag --push`; `polymath-author` with governance components (`/new-plugin`, `/new-skill`, `/new-connector`, `/new-workflow`, `/conformance`, `/audit`, plus governance officers). Telemetry opt-in (`POLYMATH_TELEMETRY=1`) requires a privacy note + local-disable path before shipping. Submit only proven, low-surprise plugins to the community marketplace.
 
 ---
 
@@ -944,9 +944,20 @@ Plus two new shared templates: `shared/templates/Postmortem.md` (schema-matching
 
 ### Phase 4 — Connectors
 
-**Status:** `[pending]` — not started.
+**Status:** `[done]` 2026-05-24 — 6 connector plugins + 6 golden fixtures + `respondToIncident` workflow.
 
-Connectors wave 1: GitHub, GitHub Actions, Jira. Wave 2: PagerDuty, Datadog, Snyk. Each connector must define real MCP tools, hook payloads, required credentials, and smoke tests. Connector-dependent workflows stay disabled unless dependencies are installed.
+Shipped:
+
+- `polymath-connector-github` — `.mcp.json` (server-github), UserPromptSubmit PR-URL hook, Stop unpushed-commits nudge, `open-pr` + `triage-issue` skills. 127 tok.
+- `polymath-connector-github-actions` — depends on `connector-github` for the MCP server; Stop hook checks the latest run on the current branch via `gh` CLI and nudges on failure; `diagnose-ci-failure` skill. 82 tok.
+- `polymath-connector-jira` — `.mcp.json` (Atlassian), UserPromptSubmit ticket-key detect (vendor IDs like `SNYK-JS-LODASH-…` / `CVE-…` correctly filtered out), `jira-triage` + `file-bug-from-incident` skills. 136 tok.
+- `polymath-connector-pagerduty` — `.mcp.json` (PagerDuty), UserPromptSubmit incident-URL/ID detect, `page-context` skill. 68 tok.
+- `polymath-connector-datadog` — `.mcp.json` (Datadog), `author-monitor` + `query-during-incident` skills. 156 tok.
+- `polymath-connector-snyk` — `.mcp.json` (Snyk), Stop hook on cached open criticals, `triage-vulns` skill. 77 tok.
+
+All six connector plugins ship `userConfig` blocks with `title`, `description`, and `sensitive: true` on credentials. Live-installed via `claude plugin install --config KEY=VALUE`.
+
+Per PLAN.md sec 10's discipline: `respondToIncident.yaml` ships **now** that pager (PagerDuty), observability (Datadog), and ticketing (Jira) connectors exist. Sequence: `page-context` → `incident-triage` → `query-during-incident` → `postmortem-blameless` → `file-bug-from-incident`. mustPass includes `artifactValid` against the Postmortem schema and `stepSummaryMatches` for triage roles + ticket-filing.
 
 ### Phase 5 — Catalog hardening
 
@@ -1374,16 +1385,16 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24, post Phase 3):**
+**Status snapshot (2026-05-24, post Phase 4):**
 
-- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 23 plugins.
-- `[done]` `tools/token-budget.sh` — heuristic 2,772 / 5,750 (target scales with plugin count).
-- `[done]` `claude plugin details` — authoritative 4,990 tokens across 23 plugins (216/plugin average; max 345; cap 400).
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 29 plugins.
+- `[done]` `tools/token-budget.sh` — heuristic 3,124 / 7,250 (target scales with plugin count).
+- `[done]` `claude plugin details` — authoritative 5,636 tokens across 29 plugins (194/plugin average; max 345; cap 400).
 - `[done]` `tools/lint-skills.sh` — green.
-- `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml` and `reviewPR.yaml`.
+- `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml`, `reviewPR.yaml`, and `respondToIncident.yaml`.
 - `[done]` Unit tests — 22/22 pass.
-- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design` — all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session. PreToolUse `kubectl-prod-confirm` hook smoke-tested against a fake kubeconfig (blocks mutating verbs, allows with `POLYMATH_ACK_PROD` token).
-- `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
+- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns` — all route + execute correctly. PreToolUse `kubectl-prod-confirm` hook smoke-tested against a fake kubeconfig. Jira detect-ticket-key hook verified to filter vendor IDs (`SNYK-JS-LODASH-1234567`, `CVE-…`, `GHSA-…`).
+- `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk + full 5-step `respondToIncident` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
 
 End-to-end after Phase 1:
 
