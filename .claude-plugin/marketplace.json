@@ -251,6 +251,30 @@
       "version": "0.1.0",
       "category": "author",
       "tags": ["author", "governance", "conformance"]
+    },
+    {
+      "name": "polymath-decisions",
+      "source": "./plugins/polymath-decisions",
+      "description": "Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.",
+      "version": "0.1.0",
+      "category": "decisions",
+      "tags": ["decisions", "daci", "tradeoff", "cynefin"]
+    },
+    {
+      "name": "polymath-research",
+      "source": "./plugins/polymath-research",
+      "description": "Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.",
+      "version": "0.1.0",
+      "category": "research",
+      "tags": ["research", "interview", "persona", "journey"]
+    },
+    {
+      "name": "polymath-design",
+      "source": "./plugins/polymath-design",
+      "description": "Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.",
+      "version": "0.1.0",
+      "category": "design",
+      "tags": ["design", "a11y", "wcag", "ui"]
     }
   ]
 }
