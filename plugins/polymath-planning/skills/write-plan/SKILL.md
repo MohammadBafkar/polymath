@@ -21,7 +21,7 @@ description: Write a project / change plan to docs/plans/<slug>.md from the cano
 
 ## Procedure
 
-1. Read [`Plan.md`](../../templates/Plan.md) (materialized from `shared/templates/Plan.md`).
+1. Read [`Plan.md`](../../templates/Plan.md).
 2. Compute slug from the title.
 3. Draft `docs/plans/<slug>.md`:
    - **What** — outcome in one paragraph.

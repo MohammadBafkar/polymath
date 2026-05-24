@@ -5,7 +5,7 @@ Release craft for the Polymath marketplace. Drafts commit messages, PR descripti
 ## What it ships
 
 - Commands: `/commit`, `/pr`, `/changelog`, `/release-notes`.
-- Templates: `CHANGELOG-entry.md`, `PR-description.md` (materialized from `shared/templates/`).
+- Templates: `CHANGELOG-entry.md`, `PR-description.md`.
 
 ## Installation
 

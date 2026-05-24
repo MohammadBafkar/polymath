@@ -20,7 +20,7 @@ description: Map one persona's path through one JTBD — stages, what they're do
 
 ## Procedure
 
-1. Read [`Customer-journey.md`](../../templates/Customer-journey.md) (materialized from `shared/templates/`).
+1. Read [`Customer-journey.md`](../../templates/Customer-journey.md).
 2. Compute slug from the JTBD.
 3. Draft `docs/research/journeys/<slug>.md`:
    - **JTBD** — verbatim in the doc.

@@ -6,7 +6,7 @@ Incident craft for the Polymath marketplace.
 
 - Skills: `incident-triage`, `postmortem-blameless`, `comms-update`.
 - Commands: `/incident-start`, `/postmortem`.
-- Templates: `Postmortem.md`, `Comms-update.md` (materialized from `shared/templates/`).
+- Templates: `Postmortem.md`, `Comms-update.md`.
 - Postmortem frontmatter validates against the `Postmortem` artifact schema; workflows can gate with `mustPass: artifactValid`.
 
 ## Why no workflow yet?

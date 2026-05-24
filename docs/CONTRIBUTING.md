@@ -8,7 +8,7 @@ Thanks for considering a contribution. Polymath is a public, open-source Claude 
 2. **Per-plugin always-on listing cost ≤ 400 tokens.** Measured by `tools/token-budget.sh`. CI enforces.
 3. **Skill body ≤ 500 lines.** Reference material spills to `references/`.
 4. **Description ≤ 200 chars**, trigger phrase first.
-5. **Templates centralized in `shared/templates/`.** Materialized into plugins by `tools/link-templates.sh`. No cross-plugin or upward symlinks.
+5. **Each plugin owns its templates** in `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Postmortem, ThreatModel, …) is validated against the corresponding JSON schema in `shared/schemas/artifacts/`.
 6. **No secrets** in commits. The `polymath-engineering` secret-scan hook is a backstop, not a permission slip.
 
 ## Workflow
@@ -20,7 +20,7 @@ Thanks for considering a contribution. Polymath is a public, open-source Claude 
    - `tools/validate-all.sh`
    - `tools/lint-skills.sh`
    - `tools/token-budget.sh`
-   - `tools/link-templates.sh` (if you added templates)
+   - `tools/conformance.sh --all` (catches structural gaps)
 5. Add at least one golden fixture under `tests/golden/<plugin>/<scenario>.md`.
 6. Update `.claude-plugin/marketplace.json` if you added or renamed a plugin.
 7. Open a PR. CI runs validate / lint / token-budget / link-check / golden-tests.
@@ -29,7 +29,7 @@ Thanks for considering a contribution. Polymath is a public, open-source Claude 
 
 - Conventional Commits (`feat:`, `fix:`, `refactor:`, …). The `polymath-release` plugin enforces this on its own bumps; we ask contributors to follow the same rule.
 - PR titles mirror the headline commit.
-- PR descriptions follow [`shared/templates/PR-description.md`](../shared/templates/PR-description.md).
+- PR descriptions follow [`plugins/polymath-release/templates/PR-description.md`](../plugins/polymath-release/templates/PR-description.md).
 
 ## Authoring discipline (lifted from `docs/PLUGIN-AUTHORING.md`)
 
@@ -45,7 +45,7 @@ Reviewers check:
 1. Does this fit the work-shaped plugin model (no primitive-shaped catch-alls)?
 2. Is the always-on cost under budget?
 3. Are there at least one golden fixture and one README entry?
-4. Are templates referenced through `shared/templates/`?
+4. Does each artifact-producing skill link the right template under its plugin's `templates/` directory?
 5. Does the PR include a CHANGELOG update?
 
 ## Reporting bugs

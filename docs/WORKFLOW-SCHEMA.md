@@ -1,7 +1,7 @@
 # Workflow YAML schema (v0.1 — flows-lite)
 
 Canonical schema: [`shared/schemas/workflow.schema.json`](../shared/schemas/workflow.schema.json).
-Canonical template: [`shared/templates/Workflow.yaml`](../shared/templates/Workflow.yaml).
+Scaffolder template: [`tools/scaffolder-templates/Workflow.yaml`](../tools/scaffolder-templates/Workflow.yaml) (used by `tools/new-workflow.sh`).
 
 flows-lite v0.1 is **serial only**. Parallel steps, agent panels, connector events, and `wait-for-event` are out of scope.
 

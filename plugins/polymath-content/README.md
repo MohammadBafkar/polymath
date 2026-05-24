@@ -5,7 +5,7 @@ Customer-facing content craft for the Polymath marketplace. Distinct from `polym
 ## What it ships
 
 - Skills: `write-release-notes`, `write-sunset-notice`, `write-advisory`.
-- Templates: `Sunset-notice.md`, `Advisory.md` (materialized from `shared/templates/`).
+- Templates: `Sunset-notice.md`, `Advisory.md`.
 
 ## Installation
 

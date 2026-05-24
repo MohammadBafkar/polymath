@@ -21,7 +21,7 @@ description: Produce a STRIDE threat model for a system/scope; writes docs/threa
 
 ## Procedure
 
-1. Read [`Threat-model.md`](../../templates/Threat-model.md) (materialized from `shared/templates/Threat-model.md`).
+1. Read [`Threat-model.md`](../../templates/Threat-model.md).
 2. Compute slug from system name (kebab-case).
 3. Draft `docs/threat-models/<slug>.md`:
    - **Scope** — explicit boundary; what is and isn't covered.

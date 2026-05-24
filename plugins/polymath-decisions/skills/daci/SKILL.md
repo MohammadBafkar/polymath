@@ -21,7 +21,7 @@ description: Run a DACI decision (Driver, Approver, Contributors, Informed) for 
 
 ## Procedure
 
-1. Read [`DACI-decision.md`](../../templates/DACI-decision.md) (materialized from `shared/templates/`).
+1. Read [`DACI-decision.md`](../../templates/DACI-decision.md).
 2. Compute the slug.
 3. Write `docs/decisions/<slug>.md`:
    - **Driver** — one person. Not the Approver. Drives the process; doesn't get to decide.

@@ -22,7 +22,7 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
 
 ## Procedure
 
-1. Read [`PRD.md`](../../templates/PRD.md) at `plugins/polymath-product/templates/PRD.md` (materialized from `shared/templates/PRD.md`).
+1. Read [`PRD.md`](../../templates/PRD.md).
 2. Compute a slug from the title: lowercase, kebab-case, no special characters.
 3. Create `docs/prds/<slug>.md` if it does not exist; otherwise update in place after surfacing the diff.
 4. Fill each section:

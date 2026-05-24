@@ -67,13 +67,22 @@ check_one() {
   done < <(find "$plugin_dir" -type f -name SKILL.md -print0 2>/dev/null)
   echo "  ✓ SKILL-1: SKILL.md discipline (all under limits)"
 
-  # TEMPLATE-1
-  if [[ -f "$plugin_dir/.claude-plugin/templates.json" ]]; then
-    if bash "$root/tools/link-templates.sh" 2>&1 | grep -q "✗ $name"; then
-      echo "  ✗ TEMPLATE-1: templates.json references missing shared template"
-      fail=1
-    else
-      echo "  ✓ TEMPLATE-1: templates materialize"
+  # TEMPLATE-1: plugin-owned templates exist; full-artifact templates (those
+  # matching a shared/schemas/artifacts/<Name>.schema.json) have frontmatter.
+  # Snippet templates (e.g. CHANGELOG-entry.md) are not required to have
+  # frontmatter.
+  if [[ -d "$plugin_dir/templates" ]]; then
+    template_count="$(find "$plugin_dir/templates" -maxdepth 1 -type f \( -name "*.md" -o -name "*.yaml" \) | wc -l | tr -d ' ')"
+    if [[ "$template_count" -gt 0 ]]; then
+      missing=0
+      while IFS= read -r -d '' tmpl; do
+        base="$(basename "$tmpl" .md)"
+        schema="$root/shared/schemas/artifacts/${base}.schema.json"
+        if [[ -f "$schema" ]]; then
+          head -1 "$tmpl" | grep -q "^---" || { echo "  ✗ TEMPLATE-1: $tmpl missing frontmatter (schema exists at $schema)"; missing=1; fail=1; }
+        fi
+      done < <(find "$plugin_dir/templates" -maxdepth 1 -type f -name "*.md" -print0 2>/dev/null)
+      [[ "$missing" -eq 0 ]] && echo "  ✓ TEMPLATE-1: $template_count plugin template(s); frontmatter present where a schema requires it"
     fi
   fi
 

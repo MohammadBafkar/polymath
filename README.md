@@ -2,62 +2,100 @@
 
 > A public, open-source Claude Code marketplace of work-shaped plugins covering the full lifecycle of building software products — from idea to incident, from thinking-craft to platform engineering. Installable a-la-carte.
 
-## Status
+## The marketplace
 
-**v0.1 — Phase 1 MVP**: five plugins prove the marketplace mechanics with one complete, resumable feature-shipping loop.
+**39 plugins** across foundation, mind & craft, product, engineering, languages, quality & safety, platform & operate, people & content, connectors, orchestration, and authoring. **11 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`.
 
-- `polymath-core` — Foundation: conventions, glossary, plugin-budget reporter, SessionStart hook.
-- `polymath-product` — PRD, acceptance criteria, epic decomposition.
-- `polymath-engineering` — TDD feature-dev, code review, change verification, codebase orientation.
-- `polymath-release` — Conventional Commits, PR descriptions, CHANGELOG, release notes.
-- `polymath-flows` — flows-lite serial workflow runner + `shipFeature` workflow.
+Install only what you need. Per-plugin always-on listing cost stays under 400 tokens; the canonical CLI-measured total across all plugins is ~8 k — for users who install everything. Most teams install 5–10.
 
 ## Quick start
 
 ```bash
-# 1. Add the marketplace from a local checkout
+# 1. Add the marketplace from this checkout (or its GitHub URL)
 claude plugin marketplace add /path/to/polymath
 
-# 2. Install the MVP set
+# 2. Install a starter set
 claude plugin install \
-  polymath-core@polymath polymath-product@polymath polymath-engineering@polymath \
+  polymath-core@polymath polymath-engineering@polymath \
   polymath-release@polymath polymath-flows@polymath
 
-# 3. Run the golden demo
+# 3. Run a workflow
 claude
 > /polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small
 ```
+
+The full catalog is at [docs/site/index.html](docs/site/index.html) (also published as the marketplace's GitHub Pages site).
+
+## Catalog by tier
+
+- **Foundation** — `polymath-core` (conventions, glossary, plugin-budget, SessionStart hook).
+- **Mind & craft** — `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-decisions`, `polymath-learning`.
+- **Product & discovery** — `polymath-product`, `polymath-research`, `polymath-design`.
+- **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
+- **Languages** — `polymath-lang-python`, `polymath-lang-typescript`, `polymath-lang-dotnet`.
+- **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
+- **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-infra-kubernetes`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
+- **People & content** — `polymath-communication`, `polymath-leadership`, `polymath-content`.
+- **Connectors (MCP + hooks)** — `polymath-connector-github`, `-github-actions`, `-jira`, `-pagerduty`, `-datadog`, `-snyk`.
+- **Orchestration** — `polymath-flows` (the workflow runner).
+- **Authoring** — `polymath-author` (governance + scaffolders + skill review).
+
+## Design principles
+
+- **Work-shaped plugins.** One role / lifecycle stage / language / target per plugin. Not primitive-shaped catch-alls.
+- **Token budget discipline.** ≤ 400 tokens always-on per plugin; the CLI's `claude plugin details` is the authoritative measurement, the heuristic in `tools/token-budget.sh` is informational.
+- **Commands vs. skills.** Skills bundle templates / scripts / references. Commands are thin aliases (≤ 20 lines).
+- **Agents only when justified.** Reserved for forked context or panel critique. No custom agents without a golden fixture proving they outperform a skill.
+- **Workflows are YAML.** Driven by a deterministic executable (`polymath-flows/bin/polymath-flow`) that owns validation, state, and `mustPass` checks. The skill drives the loop; the script owns state.
+- **Deterministic enforcement.** `mustPass:` types: `fileExists`, `fileMatches`, `commandSucceeds`, `stepSummaryMatches`, `artifactValid` (validates artifact frontmatter against `shared/schemas/artifacts/<Name>.schema.json`). AI cross-checks are advisory.
+- **Each plugin owns its templates.** Artifact templates live under `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Postmortem, ThreatModel) is gated by the matching JSON schema.
+- **Connectors share a shape.** `.mcp.json` for the upstream MCP server, `userConfig` for credentials (`sensitive: true`), hooks for event-driven reactions, a `references/<service>-tools.md` doc.
+- **No native scheduler.** Recurring work lives in external schedulers (Cloud Routines, GitHub Actions, OS cron) that write to a queue file the `polymath-core` SessionStart hook surfaces.
+- **No telemetry.** See [docs/PRIVACY.md](docs/PRIVACY.md).
 
 ## Repo layout
 
 ```text
 polymath/
 ├── .claude-plugin/marketplace.json
-├── plugins/                # one directory per plugin
-├── shared/
-│   ├── templates/          # canonical artifact templates (PRD, ADR, …)
-│   ├── schemas/            # workflow.schema.json, etc.
-│   └── scripts/            # validate-frontmatter, secret-scan, compute-dora
-├── tools/                  # scaffolders, validators, token-budget reporter
-├── docs/                   # PLUGIN-AUTHORING, WORKFLOW-SCHEMA, CONTRIBUTING
-└── .github/workflows/      # CI: validate, token-budget, lint, link-check, golden-tests
+├── plugins/                          # one directory per plugin
+│   └── polymath-<name>/
+│       ├── .claude-plugin/plugin.json
+│       ├── skills/<skill>/SKILL.md
+│       ├── templates/                # plugin-owned artifact templates
+│       ├── commands/<cmd>.md
+│       ├── hooks/                    # event-driven hook scripts
+│       ├── .mcp.json                 # connector plugins only
+│       ├── workflows/*.yaml          # polymath-flows only
+│       ├── README.md, CHANGELOG.md
+│       └── tests/
+├── shared/schemas/                   # workflow + artifact + conformance schemas
+├── tools/                            # scaffolders, validators, conformance, catalog generator
+├── tests/golden/                     # one fixture per plugin + one per workflow
+├── docs/                             # PLUGIN-AUTHORING, WORKFLOW-SCHEMA, CONTRIBUTING, PRIVACY
+└── .github/workflows/                # validate, token-budget, lint, link-check, golden-tests, pages, release
 ```
 
 See [docs/PLUGIN-AUTHORING.md](docs/PLUGIN-AUTHORING.md) and [docs/WORKFLOW-SCHEMA.md](docs/WORKFLOW-SCHEMA.md).
 
-## Design principles
+## Gates
 
-- Plugins are work-shaped (one role / lifecycle stage / language / target each), not primitive-shaped.
-- Per-plugin always-on token budget ≤ 400; MVP total ≤ 1,500 measured.
-- Commands for thin aliases; skills when bundling templates/scripts/references.
-- Agents only when a forked context or panel critique is justified.
-- Workflows are YAML driven by a deterministic executable (`polymath-flows/bin/polymath-flow`); skills present the steps but the script owns state.
-- Enforcement = deterministic `mustPass:` checks (`fileExists`, `fileMatches`, `commandSucceeds`, `stepSummaryMatches`). AI cross-checks are advisory.
+Every change runs locally and in CI:
 
-## License
+- `tools/validate-all.sh` — `claude plugin validate --strict` per plugin.
+- `tools/lint-skills.sh` — description ≤ 200 chars, SKILL.md ≤ 500 lines.
+- `tools/token-budget.sh` — per-plugin cap of 400 tokens; total target scales with plugin count.
+- `tools/conformance.sh --all` — 12-criterion structural check.
+- `tools/build-catalog.py --check` — verifies the GitHub Pages catalog regenerates reproducibly.
+- `bin/polymath-flow validate` — every workflow YAML against the schema.
+- `python3 -m unittest discover -s plugins/polymath-flows/tests` — executable unit tests.
 
-Apache-2.0. See [LICENSE](LICENSE).
+The `claude-cli-fixtures` CI job runs `tests/golden/run-fixtures.sh` against the Claude Code CLI when either `CLAUDE_CODE_OAUTH_TOKEN` (subscription) or `ANTHROPIC_API_KEY` is in repo secrets; otherwise it skips with a warning while frontmatter parsing still runs.
 
 ## Contributing
 
-See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [polymath-author](plugins/polymath-author/) — the meta-plugin that scaffolds new plugins, validates them against every gate, reviews SKILL.md quality, and measures the listing-token cost.
+
+## License
+
+[Apache-2.0](LICENSE).

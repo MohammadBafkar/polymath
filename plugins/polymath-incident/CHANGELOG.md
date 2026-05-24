@@ -6,5 +6,5 @@
 
 - Initial v0.1 components: `incident-triage`, `postmortem-blameless`, `comms-update` skills.
 - Commands: `/incident-start`, `/postmortem` (thin aliases).
-- Materialized `Postmortem.md` + `Comms-update.md` templates from `shared/templates/`.
+- Ships `Postmortem.md` + `Comms-update.md` templates under `templates/`.
 - Postmortem frontmatter validates against the `Postmortem` artifact schema.

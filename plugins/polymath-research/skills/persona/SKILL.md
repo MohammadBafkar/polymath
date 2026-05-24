@@ -19,7 +19,7 @@ description: Author a persona grounded in ≥ 5 real interviews; verbatim quotes
 
 ## Procedure
 
-1. Read [`Persona.md`](../../templates/Persona.md) (materialized from `shared/templates/`).
+1. Read [`Persona.md`](../../templates/Persona.md).
 2. Compute the slug from the persona's defining characteristic (e.g. `solo-platform-engineer`, not `power-user`).
 3. Draft `docs/research/personas/<slug>.md`:
    - **Role and context** — including what they're doing in the 30 seconds before and after they touch your product.

@@ -20,7 +20,7 @@ description: Write a blameless postmortem to docs/postmortems/<incident-id>.md; 
 
 ## Procedure
 
-1. Read [`Postmortem.md`](../../templates/Postmortem.md) (materialized from `shared/templates/Postmortem.md`).
+1. Read [`Postmortem.md`](../../templates/Postmortem.md).
 2. Compute `incident_id` (e.g. `IC-2026-09`) and slug.
 3. Draft `docs/postmortems/<incident-id>.md`:
    - **Summary** — one paragraph, plain language.

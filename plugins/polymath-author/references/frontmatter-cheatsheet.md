@@ -66,14 +66,19 @@ Treat commands as thin aliases. If a command grows beyond 20 lines, promote
 it to a skill (move to `skills/<name>/SKILL.md`) and keep the command as the
 alias.
 
-## 4. .claude-plugin/templates.json (plugins that materialize shared templates)
+## 4. templates/ (plugins that ship artifact templates)
 
-```json
-["PRD.md", "User-story-map.md"]
+A plugin owns its templates in `plugins/<plugin>/templates/`. Each template
+is a Markdown (or YAML) file with `{{placeholder}}` fields that the skill
+fills in. Skills reference templates by relative path:
+
+```markdown
+1. Read [`PRD.md`](../../templates/PRD.md).
 ```
 
-`tools/link-templates.sh` reads this and copies the named files from
-`shared/templates/` into `plugins/<plugin>/templates/`.
+The plugin templates have frontmatter that the corresponding artifact schema
+(`shared/schemas/artifacts/<Artifact>.schema.json`) validates via the
+`artifactValid` `mustPass` check in a workflow.
 
 ## 5. hooks/hooks.json (plugins that ship hooks)
 

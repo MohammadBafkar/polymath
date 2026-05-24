@@ -14,7 +14,7 @@ name="$1"
 plugin="${2:-polymath-flows}"
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-template="$root/shared/templates/Workflow.yaml"
+template="$root/tools/scaffolder-templates/Workflow.yaml"
 target="$root/plugins/$plugin/workflows/$name.yaml"
 
 if [[ ! -f "$template" ]]; then

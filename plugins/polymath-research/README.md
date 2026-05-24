@@ -5,7 +5,7 @@ Research craft for the Polymath marketplace.
 ## What it ships
 
 - Skills: `interview-guide`, `persona`, `customer-journey`.
-- Templates: `Interview-guide.md`, `Persona.md`, `Customer-journey.md` (materialized from `shared/templates/`).
+- Templates: `Interview-guide.md`, `Persona.md`, `Customer-journey.md`.
 
 ## Installation
 

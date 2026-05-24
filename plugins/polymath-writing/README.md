@@ -5,7 +5,7 @@ Writing craft for the Polymath marketplace.
 ## What it ships
 
 - Skills: `adr`, `rfc`, `runbook`, `architecture-doc`.
-- Templates: `ADR.md`, `RFC.md`, `Runbook.md`, `Architecture-doc.md` (materialized from `shared/templates/`).
+- Templates: `ADR.md`, `RFC.md`, `Runbook.md`, `Architecture-doc.md`.
 - Workflows can validate ADR frontmatter via `mustPass: artifactValid` against the `ADR` artifact schema.
 
 ## Installation

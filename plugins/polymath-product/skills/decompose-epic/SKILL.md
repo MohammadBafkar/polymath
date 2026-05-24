@@ -20,7 +20,7 @@ description: Decompose a PRD or epic into vertically-sliced user stories using a
 
 ## Procedure
 
-1. Read [`User-story-map.md`](../../templates/User-story-map.md) at `plugins/polymath-product/templates/User-story-map.md`.
+1. Read [`User-story-map.md`](../../templates/User-story-map.md).
 2. Read the PRD's **Problem**, **Goals**, **Requirements**, **Acceptance criteria**.
 3. Identify 2–5 high-level user activities (the **backbone**, left to right).
 4. For each activity, list the user tasks vertically. Order by frequency or sequence.

@@ -20,7 +20,7 @@ description: Write a Mom-Test-shaped interview guide for one research question; 
 
 ## Procedure
 
-1. Read [`Interview-guide.md`](../../templates/Interview-guide.md) (materialized from `shared/templates/`).
+1. Read [`Interview-guide.md`](../../templates/Interview-guide.md).
 2. Compute the slug from the question.
 3. Draft `docs/research/<slug>-guide.md`:
    - **Research question** — exactly one. Reject bundled questions; pick the most important and spin the others off.

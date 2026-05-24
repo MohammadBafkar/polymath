@@ -21,13 +21,12 @@ Polymath does not ship output styles — tone control lives in reference-content
 ```text
 plugins/polymath-<name>/
 ├── .claude-plugin/
-│   ├── plugin.json
-│   └── templates.json         # optional: list of shared template names to materialize
+│   └── plugin.json
 ├── skills/<skill>/
 │   ├── SKILL.md
 │   ├── references/            # optional
-│   ├── templates/             # materialized from shared/templates at release time
 │   └── scripts/               # optional
+├── templates/                 # plugin-owned artifact templates (PRD.md, etc.)
 ├── commands/<cmd>.md
 ├── agents/<role>.md
 ├── hooks/
@@ -64,7 +63,7 @@ plugins/polymath-<name>/
 - `name`: bare kebab-case slug.
 - `description`: ≤ 200 chars, trigger phrase first, present tense.
 - `SKILL.md` body ≤ 500 lines. Spill to `references/`.
-- Reference shared templates as siblings of `SKILL.md` (materialized via `tools/link-templates.sh`).
+- Reference the plugin's templates via relative path from the skill (e.g. `[\`PRD.md\`](../../templates/PRD.md)`).
 
 Example:
 
@@ -130,13 +129,9 @@ CI fails ≥ 50-token regressions without an explicit `expected-cost:` override.
 
 ## 9. Templates
 
-Author canonical templates in `shared/templates/`. Opt a plugin into materialization via `.claude-plugin/templates.json`:
+Each plugin owns its artifact templates under `plugins/<plugin>/templates/`. Skills reference templates by relative path; workflows validate the frontmatter via `mustPass: artifactValid` against the matching JSON schema in `shared/schemas/artifacts/`.
 
-```json
-["PRD.md", "User-story-map.md"]
-```
-
-`tools/link-templates.sh` copies them into `plugins/<plugin>/templates/`. **Do not** rely on cross-plugin or upward symlinks.
+Run `tools/conformance.sh <plugin>` to check that template + frontmatter + schema agree.
 
 ## 10. Tests
 

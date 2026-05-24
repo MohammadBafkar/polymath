@@ -22,7 +22,7 @@ description: Write an Architecture Decision Record (Michael Nygard format) to do
 
 1. Determine the next ADR number: scan `docs/adrs/` for the highest existing `NNNN-` prefix and add 1. Default to 0001 if the directory is empty.
 2. Compute slug from the title.
-3. Read [`ADR.md`](../../templates/ADR.md) (materialized from `shared/templates/ADR.md`).
+3. Read [`ADR.md`](../../templates/ADR.md).
 4. Draft `docs/adrs/NNNN-<slug>.md`:
    - **Status** — proposed (default) or accepted, depending on context.
    - **Context** — quote the constraint that forced the decision.
