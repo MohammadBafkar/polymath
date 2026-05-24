@@ -1,0 +1,72 @@
+schemaVersion: 0.1
+name: shipFeature
+version: 0.1.0
+description: Ship a small feature from PRD to PR draft.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-product
+    - polymath-engineering
+    - polymath-release
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the feature.
+  - name: scope
+    type: enum
+    values: [small, medium]
+    default: small
+    description: Sizing hint that influences acceptance-criteria depth.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: prd
+    invoke: polymath-product:prd
+    prompt: Write a PRD for ${inputs.title}. Save to docs/prds/${workflow.slug}.md.
+    artifacts:
+      - docs/prds/${workflow.slug}.md
+  - id: acceptance
+    invoke: polymath-product:acceptance-criteria
+    prompt: Add Given/When/Then acceptance criteria to docs/prds/${workflow.slug}.md.
+    needs: [prd]
+  - id: implement
+    invoke: polymath-engineering:feature-dev
+    prompt: Implement the smallest safe change satisfying the PRD and acceptance criteria.
+    needs: [acceptance]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff for correctness, simplicity, and missing tests.
+    needs: [implement]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run the repository-appropriate verification for the changed files.
+    needs: [review]
+  - id: changelog
+    invoke: polymath-release:changelog
+    prompt: Append a user-facing CHANGELOG entry under [Unreleased] for this change.
+    needs: [verify]
+    artifacts:
+      - CHANGELOG.md
+  - id: pr
+    invoke: polymath-release:pr
+    prompt: Draft the PR description and save to docs/pr/${workflow.slug}.md.
+    needs: [changelog]
+    artifacts:
+      - docs/pr/${workflow.slug}.md
+mustPass:
+  - id: prd-exists
+    type: fileExists
+    path: docs/prds/${workflow.slug}.md
+  - id: tests-mentioned
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: changelog-touched
+    type: fileExists
+    path: CHANGELOG.md
+  - id: pr-draft-exists
+    type: fileExists
+    path: docs/pr/${workflow.slug}.md

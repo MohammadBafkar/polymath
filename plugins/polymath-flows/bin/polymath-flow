@@ -1,0 +1,736 @@
+#!/usr/bin/env python3
+"""polymath-flow — deterministic flows-lite workflow runner.
+
+Owns:
+  - workflow YAML validation against shared/schemas/workflow.schema.json
+  - workflow state (start, next, complete, fail, resume, list)
+  - mustPass deterministic checks (fileExists, fileMatches, commandSucceeds,
+    stepSummaryMatches, command guards)
+
+Does NOT own (those live in the skill / lead model context):
+  - performing the actual work for a step
+  - composing summaries
+
+State layout:
+  ${CLAUDE_PLUGIN_DATA}/workflows/<run_id>/
+    ├── state.json
+    ├── inputs.json
+    ├── trace.jsonl
+    ├── budget.json
+    ├── step-summaries/<step-id>.md
+    └── artifacts/
+
+Exit codes:
+  0  — success
+  2  — validation or assertion failure (caller should display reason)
+  3  — workflow not found / state corrupt
+  4  — unsupported schema or unknown field
+
+This script ships with the polymath-flows plugin and uses only the Python
+standard library plus PyYAML when available. If PyYAML is missing and the
+workflow file is .yaml, the script attempts a tiny shim parser; for v0.1 we
+recommend installing pyyaml (the marketplace's CI does).
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import textwrap
+from typing import Any
+
+# ---------------------------------------------------------------------------
+# YAML loader
+# ---------------------------------------------------------------------------
+
+try:
+    import yaml  # type: ignore
+
+    def _load_yaml(text: str) -> Any:
+        return yaml.safe_load(text)
+except ImportError:
+    # Minimal YAML subset parser sufficient for flows-lite workflow YAMLs.
+    # Handles: top-level mappings, nested mappings (indent = 2 spaces),
+    # lists with `-` items, quoted and unquoted scalars, numbers and booleans.
+    # Does NOT handle: anchors, flow style, multi-line scalars, !tags.
+
+    def _scalar(token: str) -> Any:
+        token = token.strip()
+        if not token:
+            return None
+        if (token.startswith('"') and token.endswith('"')) or (
+            token.startswith("'") and token.endswith("'")
+        ):
+            return token[1:-1]
+        if token.startswith("[") and token.endswith("]"):
+            inner = token[1:-1].strip()
+            if not inner:
+                return []
+            return [_scalar(p) for p in inner.split(",")]
+        low = token.lower()
+        if low in {"true", "yes"}:
+            return True
+        if low in {"false", "no"}:
+            return False
+        if low in {"null", "~", ""}:
+            return None
+        try:
+            return int(token)
+        except ValueError:
+            pass
+        try:
+            return float(token)
+        except ValueError:
+            pass
+        return token
+
+    def _indent_of(line: str) -> int:
+        return len(line) - len(line.lstrip(" "))
+
+    def _load_yaml(text: str) -> Any:  # noqa: C901 — small but branchy
+        lines: list[tuple[int, str]] = []
+        for raw in text.splitlines():
+            # strip trailing comments that are not inside quotes
+            stripped = raw.rstrip()
+            if not stripped.strip() or stripped.lstrip().startswith("#"):
+                continue
+            # remove inline comments (best-effort; ignore # inside quotes)
+            out = []
+            in_q: str | None = None
+            for ch in stripped:
+                if in_q:
+                    out.append(ch)
+                    if ch == in_q:
+                        in_q = None
+                else:
+                    if ch in ("'", '"'):
+                        in_q = ch
+                        out.append(ch)
+                    elif ch == "#":
+                        break
+                    else:
+                        out.append(ch)
+            cleaned = "".join(out).rstrip()
+            if cleaned.strip():
+                lines.append((_indent_of(cleaned), cleaned.lstrip()))
+
+        pos = 0
+
+        def parse_block(indent: int) -> Any:
+            nonlocal pos
+            if pos >= len(lines):
+                return None
+            first_indent, first_line = lines[pos]
+            if first_indent < indent:
+                return None
+            # list?
+            if first_line.startswith("- "):
+                items: list[Any] = []
+                while pos < len(lines):
+                    cur_indent, cur_line = lines[pos]
+                    if cur_indent < indent or not cur_line.startswith("- "):
+                        break
+                    body = cur_line[2:]
+                    if ":" in body and not body.startswith("{"):
+                        # inline mapping start: "- key: value"
+                        # rewrite as a mapping at indent+2 and parse
+                        # We carve out a virtual mapping block.
+                        key, _, val = body.partition(":")
+                        key = key.strip()
+                        val = val.strip()
+                        item: dict = {}
+                        if val:
+                            item[key] = _scalar(val)
+                        else:
+                            item[key] = None
+                        pos += 1
+                        # subsequent indented lines belong to this item
+                        sub_indent = indent + 2
+                        while pos < len(lines):
+                            ni, nl = lines[pos]
+                            if ni < sub_indent:
+                                break
+                            if ni == sub_indent and ":" in nl and not nl.startswith("- "):
+                                k, _, v = nl.partition(":")
+                                k = k.strip()
+                                v = v.strip()
+                                if v == "":
+                                    pos += 1
+                                    item[k] = parse_block(sub_indent + 2)
+                                else:
+                                    item[k] = _scalar(v)
+                                    pos += 1
+                            elif ni == sub_indent and nl.startswith("- "):
+                                # nested list under this key — should not happen at top of item
+                                break
+                            else:
+                                # deeper nested content for previously seen key
+                                last_key = list(item.keys())[-1]
+                                if item[last_key] is None:
+                                    item[last_key] = parse_block(ni)
+                                else:
+                                    break
+                        items.append(item)
+                    else:
+                        items.append(_scalar(body))
+                        pos += 1
+                return items
+            # mapping
+            result: dict = {}
+            while pos < len(lines):
+                cur_indent, cur_line = lines[pos]
+                if cur_indent < indent:
+                    break
+                if cur_indent > indent:
+                    break
+                if cur_line.startswith("- "):
+                    break
+                if ":" not in cur_line:
+                    break
+                key, _, val = cur_line.partition(":")
+                key = key.strip()
+                val = val.strip()
+                if val == "":
+                    pos += 1
+                    result[key] = parse_block(indent + 2)
+                else:
+                    result[key] = _scalar(val)
+                    pos += 1
+            return result
+
+        return parse_block(0)
+
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+PLUGIN_ROOT = SCRIPT_DIR.parent
+
+
+def _data_root() -> pathlib.Path:
+    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if base:
+        return pathlib.Path(base)
+    return pathlib.Path.home() / ".claude" / "plugins" / "data" / "polymath-flows"
+
+
+def _workflow_runs_dir() -> pathlib.Path:
+    return _data_root() / "workflows"
+
+
+def _resolve_workflow(name: str) -> pathlib.Path:
+    """Three-layer resolution: project → user → marketplace."""
+    project = pathlib.Path.cwd() / ".claude" / "polymath" / "workflows" / f"{name}.yaml"
+    if project.exists():
+        return project
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
+    if config_dir:
+        user = pathlib.Path(config_dir) / "polymath" / "workflows" / f"{name}.yaml"
+        if user.exists():
+            return user
+    user_fallback = pathlib.Path.home() / ".claude" / "polymath" / "workflows" / f"{name}.yaml"
+    if user_fallback.exists():
+        return user_fallback
+    marketplace = PLUGIN_ROOT / "workflows" / f"{name}.yaml"
+    if marketplace.exists():
+        return marketplace
+    raise FileNotFoundError(
+        f"workflow '{name}' not found in project, user, or marketplace layers"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+
+SUPPORTED_SCHEMA_VERSIONS = {0.1}
+ALLOWED_TOP_LEVEL = {
+    "schemaVersion",
+    "name",
+    "version",
+    "description",
+    "extends",
+    "requires",
+    "inputs",
+    "guards",
+    "steps",
+    "override",
+    "insertAfter",
+    "mustPass",
+}
+ALLOWED_STEP_KEYS = {"id", "invoke", "prompt", "needs", "artifacts", "topology"}
+ALLOWED_CHECK_TYPES = {
+    "fileExists",
+    "fileMatches",
+    "commandSucceeds",
+    "stepSummaryMatches",
+    "command",
+}
+
+
+def _err(msg: str, *, code: int = 2) -> None:
+    print(f"polymath-flow: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+
+def _validate(workflow: dict) -> list[str]:
+    errs: list[str] = []
+    schema_version = workflow.get("schemaVersion")
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
+        errs.append(
+            f"unsupported schemaVersion: {schema_version} (this executor supports {sorted(SUPPORTED_SCHEMA_VERSIONS)})"
+        )
+    name = workflow.get("name")
+    if not isinstance(name, str) or not re.match(r"^[a-z][a-zA-Z0-9]*$", name):
+        errs.append(f"name must be camelCase (got {name!r})")
+    version = workflow.get("version")
+    if not isinstance(version, str) or not re.match(r"^\d+\.\d+\.\d+$", version):
+        errs.append(f"version must be semver (got {version!r})")
+    unknown = set(workflow.keys()) - ALLOWED_TOP_LEVEL
+    if unknown:
+        errs.append(f"unknown top-level keys: {sorted(unknown)}")
+
+    steps = workflow.get("steps")
+    if steps is None and "extends" not in workflow:
+        errs.append("non-extending workflows must declare steps")
+    if isinstance(steps, list):
+        seen = set()
+        for i, step in enumerate(steps):
+            if not isinstance(step, dict):
+                errs.append(f"step #{i} is not a mapping")
+                continue
+            sid = step.get("id")
+            if sid in seen:
+                errs.append(f"duplicate step id: {sid!r}")
+            seen.add(sid)
+            if not isinstance(sid, str) or not re.match(r"^[a-z][a-z0-9-]*$", sid):
+                errs.append(f"step id must be kebab-case (got {sid!r})")
+            if "invoke" not in step:
+                errs.append(f"step {sid!r} missing 'invoke'")
+            elif not re.match(r"^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*$", step["invoke"]):
+                errs.append(f"step {sid!r} invoke must be '<plugin>:<capability>' (got {step['invoke']!r})")
+            if "prompt" not in step or not isinstance(step["prompt"], str) or not step["prompt"].strip():
+                errs.append(f"step {sid!r} missing non-empty 'prompt'")
+            unknown_keys = set(step.keys()) - ALLOWED_STEP_KEYS
+            if unknown_keys:
+                errs.append(f"step {sid!r} has unknown keys: {sorted(unknown_keys)}")
+            if "topology" in step and step["topology"] != "series":
+                errs.append(f"step {sid!r} topology '{step['topology']}' not supported in v0.1 (only 'series')")
+
+    for section, items in (("guards", workflow.get("guards", [])), ("mustPass", workflow.get("mustPass", []))):
+        if not isinstance(items, list):
+            errs.append(f"{section} must be a list")
+            continue
+        for i, check in enumerate(items):
+            if not isinstance(check, dict):
+                errs.append(f"{section}[{i}] is not a mapping")
+                continue
+            t = check.get("type")
+            if t not in ALLOWED_CHECK_TYPES:
+                errs.append(f"{section}[{i}] unknown check type: {t!r}")
+            if not re.match(r"^[a-z][a-z0-9-]*$", str(check.get("id", ""))):
+                errs.append(f"{section}[{i}] missing or invalid id")
+    return errs
+
+
+# ---------------------------------------------------------------------------
+# Placeholder substitution
+# ---------------------------------------------------------------------------
+
+def _slugify(text: str) -> str:
+    text = text.lower().strip()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text or "untitled"
+
+
+def _substitute(text: str, *, inputs: dict, workflow_meta: dict) -> str:
+    def repl(match: re.Match[str]) -> str:
+        expr = match.group(1).strip()
+        if expr.startswith("inputs."):
+            key = expr[len("inputs.") :]
+            return str(inputs.get(key, ""))
+        if expr.startswith("workflow."):
+            key = expr[len("workflow.") :]
+            return str(workflow_meta.get(key, ""))
+        return match.group(0)
+
+    return re.sub(r"\$\{([^}]+)\}", repl, text)
+
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    path = pathlib.Path(args.workflow)
+    if not path.exists():
+        _err(f"workflow file not found: {path}", code=3)
+    workflow = _load_yaml(path.read_text())
+    if not isinstance(workflow, dict):
+        _err("workflow root must be a mapping", code=2)
+    errs = _validate(workflow)
+    if errs:
+        for e in errs:
+            print(f"  ✗ {e}")
+        print(f"FAIL: {len(errs)} error(s)")
+        return 2
+    print(f"OK: {path}")
+    return 0
+
+
+def cmd_start(args: argparse.Namespace) -> int:
+    workflow_path = _resolve_workflow(args.name)
+    workflow = _load_yaml(workflow_path.read_text())
+    errs = _validate(workflow)
+    if errs:
+        for e in errs:
+            print(f"  ✗ {e}")
+        return 2
+
+    inputs: dict[str, Any] = {}
+    for raw in args.input or []:
+        if "=" not in raw:
+            _err(f"--input must be key=value (got {raw!r})", code=2)
+        k, v = raw.split("=", 1)
+        inputs[k] = v
+    for declared in workflow.get("inputs", []):
+        n = declared["name"]
+        if declared.get("required") and n not in inputs:
+            _err(f"missing required input: {n}", code=2)
+        if n not in inputs and "default" in declared:
+            inputs[n] = declared["default"]
+
+    title = inputs.get("title", workflow["name"])
+    slug = _slugify(str(title))
+    now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%dT%H-%M")
+    run_id = f"{now}-{workflow['name']}-{slug}"
+
+    run_dir = _workflow_runs_dir() / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "step-summaries").mkdir(exist_ok=True)
+    (run_dir / "artifacts").mkdir(exist_ok=True)
+    (run_dir / "inputs.json").write_text(json.dumps(inputs, indent=2))
+
+    steps = workflow.get("steps", []) or []
+    state = {
+        "run_id": run_id,
+        "workflow": workflow["name"],
+        "version": workflow["version"],
+        "workflow_path": str(workflow_path),
+        "status": "active",
+        "started": now,
+        "current_step_index": 0,
+        "steps": [
+            {"id": s["id"], "invoke": s["invoke"], "status": "pending"} for s in steps
+        ],
+    }
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    (run_dir / "budget.json").write_text(json.dumps({
+        "run_id": run_id,
+        "soft_ceiling_tokens": 80000,
+        "hard_ceiling_tokens": 150000,
+        "estimated_consumed_tokens": 0,
+        "per_step": {},
+    }, indent=2))
+
+    _trace(run_dir, "start", {"inputs": inputs, "workflow": workflow["name"]})
+    print(json.dumps({"run_id": run_id, "status": "active"}, indent=2))
+    return 0
+
+
+def cmd_next(args: argparse.Namespace) -> int:
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
+    inputs = json.loads((run_dir / "inputs.json").read_text())
+    title = inputs.get("title", state["workflow"])
+    workflow_meta = {
+        "id": state["run_id"],
+        "slug": _slugify(str(title)),
+        "name": state["workflow"],
+    }
+
+    if state["status"] != "active":
+        print(json.dumps({"status": state["status"]}, indent=2))
+        return 0
+
+    idx = state["current_step_index"]
+    steps = workflow.get("steps", []) or []
+    if idx >= len(steps):
+        # All steps complete; assert mustPass
+        result = _assert(run_dir, workflow, inputs, workflow_meta)
+        return 0 if result == 0 else 2
+
+    step = steps[idx]
+    payload = {
+        "run_id": state["run_id"],
+        "step_id": step["id"],
+        "invoke": step["invoke"],
+        "prompt": _substitute(step["prompt"], inputs=inputs, workflow_meta=workflow_meta),
+        "artifacts": [
+            _substitute(a, inputs=inputs, workflow_meta=workflow_meta)
+            for a in step.get("artifacts", [])
+        ],
+        "remaining_steps": len(steps) - idx,
+    }
+    print(json.dumps(payload, indent=2))
+    return 0
+
+
+def cmd_complete(args: argparse.Namespace) -> int:
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    step_id = args.step
+
+    summary = ""
+    if args.summary:
+        sp = pathlib.Path(args.summary)
+        if sp.exists():
+            summary = sp.read_text()
+        else:
+            summary = args.summary
+    if summary:
+        (run_dir / "step-summaries" / f"{step_id}.md").write_text(summary)
+
+    for s in state["steps"]:
+        if s["id"] == step_id:
+            s["status"] = "complete"
+            break
+    else:
+        _err(f"step {step_id} not found in run {args.run_id}", code=3)
+
+    state["current_step_index"] = max(
+        state["current_step_index"],
+        next((i + 1 for i, s in enumerate(state["steps"]) if s["id"] == step_id), 0),
+    )
+
+    if state["current_step_index"] >= len(state["steps"]):
+        # Pre-finalize; mustPass is run by `assert` or by `next`.
+        state["status"] = "active"  # remain active until assert passes
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _trace(run_dir, "complete", {"step": step_id})
+    print(json.dumps({"step": step_id, "status": "complete"}, indent=2))
+    return 0
+
+
+def cmd_fail(args: argparse.Namespace) -> int:
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    state["status"] = "paused"
+    state["pause_reason"] = args.summary or "step failed"
+    for s in state["steps"]:
+        if s["id"] == args.step:
+            s["status"] = "failed"
+            break
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _trace(run_dir, "fail", {"step": args.step, "reason": state["pause_reason"]})
+    print(json.dumps({"status": "paused", "step": args.step}, indent=2))
+    return 0
+
+
+def cmd_resume(args: argparse.Namespace) -> int:
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    if state["status"] == "paused":
+        state["status"] = "active"
+        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        _trace(run_dir, "resume", {})
+    return cmd_next(argparse.Namespace(run_id=args.run_id))
+
+
+def cmd_assert(args: argparse.Namespace) -> int:
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
+    inputs = json.loads((run_dir / "inputs.json").read_text())
+    workflow_meta = {
+        "id": state["run_id"],
+        "slug": _slugify(str(inputs.get("title", state["workflow"]))),
+        "name": state["workflow"],
+    }
+    return _assert(run_dir, workflow, inputs, workflow_meta)
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    base = _workflow_runs_dir()
+    if not base.exists():
+        print(json.dumps([], indent=2))
+        return 0
+    results = []
+    for d in sorted(base.iterdir()):
+        sp = d / "state.json"
+        if not sp.exists():
+            continue
+        s = json.loads(sp.read_text())
+        if args.status and s["status"] != args.status:
+            continue
+        results.append({"run_id": s["run_id"], "workflow": s["workflow"], "status": s["status"]})
+    print(json.dumps(results, indent=2))
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# mustPass check engine
+# ---------------------------------------------------------------------------
+
+def _assert(run_dir: pathlib.Path, workflow: dict, inputs: dict, workflow_meta: dict) -> int:
+    checks = workflow.get("mustPass", []) or []
+    if not checks:
+        state = json.loads((run_dir / "state.json").read_text())
+        state["status"] = "completed"
+        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        print(json.dumps({"status": "completed", "checks": 0}, indent=2))
+        return 0
+
+    failures: list[dict] = []
+    for check in checks:
+        ok, detail = _run_check(check, run_dir, inputs, workflow_meta)
+        if not ok:
+            failures.append({"id": check["id"], "type": check["type"], "detail": detail})
+
+    state = json.loads((run_dir / "state.json").read_text())
+    if failures:
+        state["status"] = "paused"
+        state["pause_reason"] = f"{len(failures)} mustPass check(s) failed"
+        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        _trace(run_dir, "assert-fail", {"failures": failures})
+        print(json.dumps({"status": "paused", "failures": failures}, indent=2))
+        return 2
+
+    state["status"] = "completed"
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _trace(run_dir, "complete", {"checks": len(checks)})
+    print(json.dumps({"status": "completed", "checks": len(checks)}, indent=2))
+    return 0
+
+
+def _run_check(
+    check: dict, run_dir: pathlib.Path, inputs: dict, workflow_meta: dict
+) -> tuple[bool, str]:
+    t = check["type"]
+    if t == "fileExists":
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        ok = pathlib.Path(path).exists()
+        return ok, f"path={path} exists={ok}"
+    if t == "fileMatches":
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        p = pathlib.Path(path)
+        if not p.exists():
+            return False, f"path={path} not found"
+        pattern = check["pattern"]
+        ok = bool(re.search(pattern, p.read_text(errors="ignore")))
+        return ok, f"path={path} pattern={pattern!r} match={ok}"
+    if t in {"commandSucceeds", "command"}:
+        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta)
+        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        ok = proc.returncode == 0
+        return ok, f"exit={proc.returncode}"
+    if t == "stepSummaryMatches":
+        step = check["step"]
+        pattern = check["pattern"]
+        sp = run_dir / "step-summaries" / f"{step}.md"
+        if not sp.exists():
+            return False, f"step summary {step} not found"
+        ok = bool(re.search(pattern, sp.read_text(errors="ignore")))
+        return ok, f"step={step} pattern={pattern!r} match={ok}"
+    return False, f"unknown check type: {t}"
+
+
+def _trace(run_dir: pathlib.Path, event: str, data: dict) -> None:
+    line = json.dumps({"ts": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat(), "event": event, **data})
+    with (run_dir / "trace.jsonl").open("a") as f:
+        f.write(line + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="polymath-flow",
+        description="Deterministic flows-lite workflow runner.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent(
+            """\
+            commands:
+              validate <workflow.yaml>       validate schema
+              start <name> [--input k=v ...] create workflow run
+              next <run_id>                  print JSON for next runnable step
+              complete <run_id> <step> [--summary <file>]
+              fail <run_id> <step> [--summary <file>]
+              resume <run_id>                resume paused run
+              assert <run_id>                run mustPass checks
+              list [--status active|paused|completed]
+            """
+        ),
+    )
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    pv = sub.add_parser("validate")
+    pv.add_argument("workflow")
+    pv.set_defaults(func=cmd_validate)
+
+    ps = sub.add_parser("start")
+    ps.add_argument("name")
+    ps.add_argument("--input", action="append")
+    ps.set_defaults(func=cmd_start)
+
+    pn = sub.add_parser("next")
+    pn.add_argument("run_id")
+    pn.set_defaults(func=cmd_next)
+
+    pc = sub.add_parser("complete")
+    pc.add_argument("run_id")
+    pc.add_argument("step")
+    pc.add_argument("--summary")
+    pc.set_defaults(func=cmd_complete)
+
+    pf = sub.add_parser("fail")
+    pf.add_argument("run_id")
+    pf.add_argument("step")
+    pf.add_argument("--summary")
+    pf.set_defaults(func=cmd_fail)
+
+    pr = sub.add_parser("resume")
+    pr.add_argument("run_id")
+    pr.set_defaults(func=cmd_resume)
+
+    pa = sub.add_parser("assert")
+    pa.add_argument("run_id")
+    pa.set_defaults(func=cmd_assert)
+
+    pl = sub.add_parser("list")
+    pl.add_argument("--status", choices=["active", "paused", "completed"])
+    pl.set_defaults(func=cmd_list)
+
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
