@@ -1,0 +1,12 @@
+{
+  "name": "polymath-mobile",
+  "version": "0.1.0",
+  "description": "Mobile craft: mobile perf budgets + JS thread + cold start, push notifications, deep-link routing.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["mobile", "perf", "push", "deeplinks", "ios", "android"]
+}
