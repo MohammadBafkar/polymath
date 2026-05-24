@@ -50,7 +50,47 @@
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
       "version": "0.1.0",
       "category": "orchestration",
-      "tags": ["orchestration", "workflow", "shipFeature"]
+      "tags": ["orchestration", "workflow", "shipFeature", "reviewPR"]
+    },
+    {
+      "name": "polymath-thinking",
+      "source": "./plugins/polymath-thinking",
+      "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.",
+      "version": "0.1.0",
+      "category": "thinking",
+      "tags": ["thinking", "brainstorm", "5-whys", "pre-mortem", "red-team"]
+    },
+    {
+      "name": "polymath-planning",
+      "source": "./plugins/polymath-planning",
+      "description": "Planning craft: write-plan, work-breakdown, three-point estimate.",
+      "version": "0.1.0",
+      "category": "planning",
+      "tags": ["planning", "wbs", "estimate"]
+    },
+    {
+      "name": "polymath-writing",
+      "source": "./plugins/polymath-writing",
+      "description": "Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.",
+      "version": "0.1.0",
+      "category": "writing",
+      "tags": ["writing", "adr", "rfc", "runbook", "c4"]
+    },
+    {
+      "name": "polymath-qa",
+      "source": "./plugins/polymath-qa",
+      "description": "Quality craft: test strategy, coverage-gap analysis, unit-test authoring.",
+      "version": "0.1.0",
+      "category": "quality",
+      "tags": ["qa", "tests", "coverage"]
+    },
+    {
+      "name": "polymath-security",
+      "source": "./plugins/polymath-security",
+      "description": "Security craft: STRIDE threat modeling, OWASP Top 10 diff review.",
+      "version": "0.1.0",
+      "category": "security",
+      "tags": ["security", "stride", "owasp"]
     }
   ]
 }

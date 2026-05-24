@@ -1,0 +1,76 @@
+schemaVersion: 0.1
+name: reviewPR
+version: 0.1.0
+description: Review a PR diff with parallel critics (security, qa, simplification) and a synthesizer; produces a structured review report.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-qa
+    - polymath-security
+    - polymath-thinking
+inputs:
+  - name: pr
+    type: string
+    required: true
+    description: PR identifier or branch name; used only for the slug.
+  - name: diff_path
+    type: string
+    required: false
+    default: "."
+    description: Path or git ref the critics should review. Defaults to the current working tree.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: Orient in the changed area of ${inputs.diff_path}. Produce a short codebase map under docs/reviews/${workflow.slug}-orient.md.
+    artifacts:
+      - docs/reviews/${workflow.slug}-orient.md
+  - id: correctness
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff for correctness, simplification, and missing tests. Write findings to docs/reviews/${workflow.slug}-correctness.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-correctness.md
+  - id: coverage
+    invoke: polymath-qa:coverage-gap
+    prompt: Check the diff for missing test coverage. Write findings to docs/reviews/${workflow.slug}-coverage.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-coverage.md
+  - id: security
+    invoke: polymath-security:owasp-review
+    prompt: Run an OWASP Top 10 review of the diff. Write findings to docs/reviews/${workflow.slug}-security.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-security.md
+  - id: challenge
+    invoke: polymath-thinking:red-team
+    prompt: Red-team the diff and its surrounding plan/PRD. Write findings to docs/reviews/${workflow.slug}-challenge.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-challenge.md
+  - id: synthesize
+    invoke: polymath-engineering:code-review
+    prompt: Read the four critic reports (correctness, coverage, security, challenge), dedupe overlapping findings, classify by severity, and write the synthesized review to docs/reviews/${workflow.slug}.md.
+    needs: [correctness, coverage, security, challenge]
+    artifacts:
+      - docs/reviews/${workflow.slug}.md
+mustPass:
+  - id: review-exists
+    type: fileExists
+    path: docs/reviews/${workflow.slug}.md
+  - id: critics-all-ran
+    type: stepSummaryMatches
+    step: synthesize
+    pattern: "(correctness|coverage|security|challenge)"
+  - id: orient-exists
+    type: fileExists
+    path: docs/reviews/${workflow.slug}-orient.md

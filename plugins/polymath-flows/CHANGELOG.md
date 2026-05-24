@@ -8,3 +8,5 @@
 - `bin/polymath-flow` deterministic executable (validate, start, next, complete, fail, resume, assert, list).
 - `workflows/shipFeature.yaml` — PRD → acceptance → implement → review → verify → changelog → PR draft.
 - Embedded minimal YAML subset parser fallback when PyYAML is unavailable.
+- Phase 1.5: `topology: fanout` accepted on workflow steps; `artifactValid` mustPass check (PRD, ADR, Postmortem, ThreatModel).
+- Phase 1.5: `workflows/reviewPR.yaml` — orient (series) then four parallel critics declared with `topology: fanout` (correctness, coverage, security, challenge), reduced by a synthesize step. Depends on polymath-engineering, polymath-qa, polymath-security, polymath-thinking.
