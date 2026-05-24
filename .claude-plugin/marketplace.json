@@ -147,6 +147,54 @@
       "version": "0.1.0",
       "category": "ai",
       "tags": ["ai", "llm", "rag", "eval"]
+    },
+    {
+      "name": "polymath-platform",
+      "source": "./plugins/polymath-platform",
+      "description": "Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.",
+      "version": "0.1.0",
+      "category": "platform",
+      "tags": ["platform", "devex", "dora"]
+    },
+    {
+      "name": "polymath-devops",
+      "source": "./plugins/polymath-devops",
+      "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
+      "version": "0.1.0",
+      "category": "devops",
+      "tags": ["devops", "docker", "ci"]
+    },
+    {
+      "name": "polymath-infra-kubernetes",
+      "source": "./plugins/polymath-infra-kubernetes",
+      "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["kubernetes", "k8s", "rbac", "pss"]
+    },
+    {
+      "name": "polymath-sre",
+      "source": "./plugins/polymath-sre",
+      "description": "SRE craft: SLO design, error-budget policy, chaos experiment design.",
+      "version": "0.1.0",
+      "category": "sre",
+      "tags": ["sre", "slo", "chaos"]
+    },
+    {
+      "name": "polymath-observability",
+      "source": "./plugins/polymath-observability",
+      "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design.",
+      "version": "0.1.0",
+      "category": "observability",
+      "tags": ["observability", "tracing", "metrics", "otel"]
+    },
+    {
+      "name": "polymath-incident",
+      "source": "./plugins/polymath-incident",
+      "description": "Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.",
+      "version": "0.1.0",
+      "category": "incident",
+      "tags": ["incident", "postmortem", "comms"]
     }
   ]
 }
