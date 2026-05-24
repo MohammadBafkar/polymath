@@ -1,0 +1,11 @@
+{
+  "name": "polymath-core",
+  "version": "0.1.0",
+  "description": "Foundation: conventions, glossary, plugin-budget reporter, SessionStart hook.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "keywords": ["foundation", "core", "conventions"]
+}
