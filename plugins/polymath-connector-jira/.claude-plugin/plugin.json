@@ -1,0 +1,33 @@
+{
+  "name": "polymath-connector-jira",
+  "version": "0.1.0",
+  "description": "Jira connector: MCP server for issues + UserPromptSubmit hook that detects PROJ-123 keys and hints at issue fetch.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["connector", "jira", "atlassian", "mcp"],
+  "userConfig": {
+    "jiraUrl": {
+      "type": "string",
+      "title": "Jira base URL",
+      "description": "Your Jira Cloud base URL (e.g. https://example.atlassian.net).",
+      "required": true
+    },
+    "jiraEmail": {
+      "type": "string",
+      "title": "Atlassian email",
+      "description": "Email associated with the Atlassian account.",
+      "required": true
+    },
+    "jiraApiToken": {
+      "type": "string",
+      "title": "Atlassian API token",
+      "description": "API token from id.atlassian.com → Security → API tokens.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}
