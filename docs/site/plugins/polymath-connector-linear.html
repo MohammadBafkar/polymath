@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-linear · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-linear@polymath</code></pre>
+<h1>polymath-connector-linear</h1>
+
+<p>Linear connector for the Polymath marketplace. Alternative to <code>polymath-connector-jira</code> for teams on Linear.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>MCP server: Linear MCP server (default: <code>@linear/mcp-server</code>) via <code>npx</code>.</li>
+<li>Skills: <code>linear-triage</code>, <code>file-bug-from-incident</code>.</li>
+<li>Hooks: <code>UserPromptSubmit</code> — detects <code>linear.app/.../issue/TEAM-NN</code> URLs, and <code>TEAM-NN</code> keys when &quot;Linear&quot; is mentioned in the prompt (vendor-ID + Jira-key disambiguation).</li>
+<li>Reference: <a href="references/linear-tools.md"><code>references/linear-tools.md</code></a>.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-linear@polymath --config linearApiKey=&lt;key&gt;
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

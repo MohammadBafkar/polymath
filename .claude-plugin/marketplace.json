@@ -323,6 +323,30 @@
       "version": "0.1.0",
       "category": "mobile",
       "tags": ["mobile", "push", "deeplinks"]
+    },
+    {
+      "name": "polymath-connector-slack",
+      "source": "./plugins/polymath-connector-slack",
+      "description": "Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "slack", "comms"]
+    },
+    {
+      "name": "polymath-connector-sentry",
+      "source": "./plugins/polymath-connector-sentry",
+      "description": "Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "sentry", "errors"]
+    },
+    {
+      "name": "polymath-connector-linear",
+      "source": "./plugins/polymath-connector-linear",
+      "description": "Linear connector: MCP for issues/cycles + UserPromptSubmit detect + triage + file-bug-from-incident skills.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "linear", "issues"]
     }
   ]
 }

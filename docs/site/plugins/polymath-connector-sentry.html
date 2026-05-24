@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-sentry · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-sentry@polymath</code></pre>
+<h1>polymath-connector-sentry</h1>
+
+<p>Sentry connector for the Polymath marketplace.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>MCP server: Sentry MCP server (default: <code>@sentry/mcp-server</code>) via <code>npx</code>.</li>
+<li>Skills: <code>triage-error</code>.</li>
+<li>Hooks: <code>UserPromptSubmit</code> — detects Sentry issue URLs in the prompt; detects short-IDs only when &quot;Sentry&quot; is mentioned nearby (avoids Jira-key false positives).</li>
+<li>Reference: <a href="references/sentry-tools.md"><code>references/sentry-tools.md</code></a>.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-sentry@polymath \
+  --config sentryToken=&lt;token&gt; --config sentryOrg=&lt;slug&gt;
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>
