@@ -22,7 +22,7 @@ Quote a real user pain or workflow gap.
 
 ## Tier
 
-Which tier (0–9) does this fit? See PLAN.md § 6.
+Which tier (0–9) does this fit?
 
 ## Token budget
 

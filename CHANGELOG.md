@@ -9,6 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Phase 0 bootstrap: marketplace.json, LICENSE (Apache-2.0), shared templates (PRD, User-story-map, CHANGELOG-entry, PR-description, Workflow), workflow JSON schema, scaffolding tools, CI workflows (validate, token-budget, lint, link-check, golden-tests), authoring + workflow + contributing docs.
-- Phase 1 MVP plugins: polymath-core, polymath-product, polymath-engineering, polymath-release, polymath-flows.
+- Marketplace bootstrap: marketplace.json, LICENSE (Apache-2.0), shared templates (PRD, User-story-map, CHANGELOG-entry, PR-description, Workflow), workflow JSON schema, scaffolding tools, CI workflows (validate, token-budget, lint, link-check, golden-tests), authoring + workflow + contributing docs.
+- Core plugins: polymath-core, polymath-product, polymath-engineering, polymath-release, polymath-flows.
 - flows-lite executable (`polymath-flows/bin/polymath-flow`) and `shipFeature` workflow.

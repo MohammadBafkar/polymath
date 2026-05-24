@@ -11,7 +11,7 @@ description: Draft an incident communication update — plain language, status (
 
 - A sev1/sev2 needs an external update.
 - Stakeholders need an internal update during a long incident.
-- A workflow's comms step (Phase 4+ when connectors land) generates a draft.
+- A workflow's comms step generates a draft (e.g. `respondToIncident` paired with `polymath-connector-slack:post-incident-comms`).
 
 ## Procedure
 

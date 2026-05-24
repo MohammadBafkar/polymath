@@ -25,7 +25,7 @@ timeout_seconds: 900
 
 # Prompt
 
-> The shipFeature golden demo from PLAN.md sec 9.
+> The shipFeature golden demo — small-scope end-to-end.
 
 /polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small
 

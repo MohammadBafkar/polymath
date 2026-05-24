@@ -28,9 +28,12 @@
 <li>Postmortem frontmatter validates against the <code>Postmortem</code> artifact schema; workflows can gate with <code>mustPass: artifactValid</code>.</li>
 </ul>
 
-<h2>Why no workflow yet?</h2>
+<h2>Pairs with</h2>
 
-<p>Per PLAN.md § 10: incident workflows wait for at least one observability or pager connector to exist (Phase 4). The skills here are usable on their own and become the building blocks of <code>respondToIncident</code> once connectors land.</p>
+<ul>
+<li><code>polymath-flows</code>: <code>respondToIncident</code> (drives end-to-end response) and <code>incidentRetroToActions</code> (decomposes a postmortem into trackable actions).</li>
+<li><code>polymath-connector-pagerduty</code>, <code>polymath-connector-datadog</code>, <code>polymath-connector-jira</code> / <code>-linear</code>: connectors the workflows depend on.</li>
+</ul>
 
 <h2>Installation</h2>
 

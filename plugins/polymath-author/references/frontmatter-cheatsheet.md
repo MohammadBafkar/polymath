@@ -36,7 +36,7 @@ while writing.
 - `name` matches the parent directory.
 - `description` is present.
 - `userConfig.<key>.title` is present (added 2026-05; missing title was a real
-  Phase 4 gotcha).
+  connector gotcha that bit early adopters).
 
 ## 2. SKILL.md (every skill)
 

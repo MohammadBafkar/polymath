@@ -9,9 +9,10 @@ Incident craft for the Polymath marketplace.
 - Templates: `Postmortem.md`, `Comms-update.md`.
 - Postmortem frontmatter validates against the `Postmortem` artifact schema; workflows can gate with `mustPass: artifactValid`.
 
-## Why no workflow yet?
+## Pairs with
 
-Per PLAN.md § 10: incident workflows wait for at least one observability or pager connector to exist (Phase 4). The skills here are usable on their own and become the building blocks of `respondToIncident` once connectors land.
+- `polymath-flows`: `respondToIncident` (drives end-to-end response) and `incidentRetroToActions` (decomposes a postmortem into trackable actions).
+- `polymath-connector-pagerduty`, `polymath-connector-datadog`, `polymath-connector-jira` / `-linear`: connectors the workflows depend on.
 
 ## Installation
 
