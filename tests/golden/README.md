@@ -47,15 +47,31 @@ checks the structured `expect:` block above.
 - The Acceptance criteria mention at least one negative path.
 ```
 
-## How CI uses fixtures
+## How fixtures run
 
-1. Each fixture runs `claude -p "<prompt body>"` in a scratch repo seeded with the marketplace symlink.
-2. The transcript is grepped for `invoked` capability labels (skill/command names).
-3. The scratch filesystem is checked against `expect.artifacts`.
-4. CI fails if any expected invocation is missing or any expected artifact is absent.
+Both local and CI execution go through [`run-fixtures.sh`](run-fixtures.sh), which:
 
-If `ANTHROPIC_API_KEY` is not configured in CI, fixtures are
-**collected and parsed** (catches frontmatter rot) but not executed.
+1. Spawns a scratch git repo per fixture.
+2. Adds the local marketplace via `claude plugin marketplace add <repo>`.
+3. Installs the plugin (or the full MVP set, for workflow fixtures).
+4. Runs `claude -p "<prompt body>"` with the user's existing auth.
+5. Checks `expect.invoked`, `expect.artifacts`, `expect.output_matches`, and `expect.not_invoked` against the transcript and scratch filesystem.
+
+### Local
+
+If you can already run `claude` from your shell, you can run fixtures:
+
+```bash
+tests/golden/run-fixtures.sh                                                # all
+tests/golden/run-fixtures.sh tests/golden/polymath-core/plugin-budget-report.md  # one
+tests/golden/run-fixtures.sh --plugin polymath-product                      # by plugin
+```
+
+No `ANTHROPIC_API_KEY` is required — the runner shells out to the Claude Code CLI you've already set up (Pro / Max / API key — any of them work).
+
+### CI
+
+The `claude-cli-fixtures` job in [`.github/workflows/golden-tests.yml`](../../.github/workflows/golden-tests.yml) installs the CLI, picks `CLAUDE_CODE_OAUTH_TOKEN` if present (subscription) or `ANTHROPIC_API_KEY` as a fallback, and calls the same `run-fixtures.sh`. If neither secret is set, the job emits a warning and skips the live run — fixture **parsing** still runs in `fixtures-parse`, catching frontmatter rot without spending tokens.
 
 ## Writing a fixture
 

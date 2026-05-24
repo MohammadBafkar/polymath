@@ -43,11 +43,9 @@ jobs:
           run_json="$($PFLOW start shipFeature --input title='Rate-limit /login' --input scope=small)"
           run_id="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])' <<<"$run_json")"
 
-          # Verify the first step is prd
           first="$($PFLOW next "$run_id")"
           test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["step_id"])' <<<"$first")" = "prd"
 
-          # Pre-create artifacts that mustPass expects
           mkdir -p docs/prds docs/pr
           echo "# PRD" > docs/prds/rate-limit-login.md
           echo "## [Unreleased]" > CHANGELOG.md
@@ -58,11 +56,9 @@ jobs:
             $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md"
           done
 
-          # Verify step summary must mention test/verify
           echo "All tests verified, ran lint and typecheck" > verify.summary.md
           $PFLOW complete "$run_id" verify --summary verify.summary.md
 
-          # Final mustPass
           result="$($PFLOW assert "$run_id")"
           echo "$result"
           test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "completed"
@@ -110,15 +106,48 @@ jobs:
           sys.exit(fail)
           PY
 
-  claude-golden:
-    name: claude -p against fixtures (only when secret set)
+  claude-cli-fixtures:
+    name: claude CLI fixture run
     runs-on: ubuntu-latest
-    if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
-    env:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Note
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Detect Claude Code auth
+        id: auth
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          echo "::warning::claude -p fixtures are not yet executed by CI."
-          echo "::warning::This job exists so wiring the secret is a one-step change later."
+          if [[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
+            echo "method=oauth" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "method=apikey" >> "$GITHUB_OUTPUT"
+          else
+            echo "method=none" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skip when no auth is available
+        if: steps.auth.outputs.method == 'none'
+        run: |
+          echo "::warning::Neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY"
+          echo "::warning::is set in repo secrets. Skipping live fixture run."
+          echo "::warning::To enable: set CLAUDE_CODE_OAUTH_TOKEN from a"
+          echo "::warning::Claude.ai subscription (preferred) or ANTHROPIC_API_KEY."
+      - name: Install Claude Code CLI
+        if: steps.auth.outputs.method != 'none'
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash || true
+          # If the official installer isn't available in this environment,
+          # the npm path is the documented alternative:
+          if ! command -v claude >/dev/null 2>&1; then
+            npm install -g @anthropic-ai/claude-code
+          fi
+          claude --version
+      - name: Run fixtures via tests/golden/run-fixtures.sh
+        if: steps.auth.outputs.method != 'none'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash tests/golden/run-fixtures.sh
