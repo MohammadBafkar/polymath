@@ -195,6 +195,54 @@
       "version": "0.1.0",
       "category": "incident",
       "tags": ["incident", "postmortem", "comms"]
+    },
+    {
+      "name": "polymath-connector-github",
+      "source": "./plugins/polymath-connector-github",
+      "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "github", "mcp"]
+    },
+    {
+      "name": "polymath-connector-github-actions",
+      "source": "./plugins/polymath-connector-github-actions",
+      "description": "GitHub Actions companion: CI-failure diagnosis skill + Stop hook checking the latest run on the current branch.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "github-actions", "ci"]
+    },
+    {
+      "name": "polymath-connector-jira",
+      "source": "./plugins/polymath-connector-jira",
+      "description": "Jira connector: MCP for issues + UserPromptSubmit ticket-key detection (PROJ-123 / browse URLs).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "jira", "atlassian"]
+    },
+    {
+      "name": "polymath-connector-pagerduty",
+      "source": "./plugins/polymath-connector-pagerduty",
+      "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "pagerduty", "incident"]
+    },
+    {
+      "name": "polymath-connector-datadog",
+      "source": "./plugins/polymath-connector-datadog",
+      "description": "Datadog connector: MCP for metrics/logs/dashboards + monitor authoring and incident-time querying skills.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "datadog", "observability"]
+    },
+    {
+      "name": "polymath-connector-snyk",
+      "source": "./plugins/polymath-connector-snyk",
+      "description": "Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "snyk", "security"]
     }
   ]
 }

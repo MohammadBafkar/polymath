@@ -1,0 +1,67 @@
+schemaVersion: 0.1
+name: respondToIncident
+version: 0.1.0
+description: Drive incident response — context, triage, query, mitigation note, postmortem, follow-up tickets.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-incident
+    - polymath-connector-pagerduty
+    - polymath-connector-datadog
+    - polymath-connector-jira
+inputs:
+  - name: incidentId
+    type: string
+    required: true
+    description: PagerDuty incident ID (e.g. PT9X3HQ7) or full incident URL.
+  - name: sev
+    type: enum
+    values: [sev1, sev2, sev3]
+    default: sev2
+    description: Severity (mirrors polymath-incident:incident-triage scale).
+guards:
+  - id: postmortems-dir-writable
+    type: command
+    command: mkdir -p docs/postmortems && [ -w docs/postmortems ]
+steps:
+  - id: context
+    invoke: polymath-connector-pagerduty:page-context
+    prompt: Fetch the active PagerDuty incident ${inputs.incidentId} and front-load context for the responder.
+    artifacts:
+      - docs/postmortems/${workflow.slug}-context.md
+  - id: triage
+    invoke: polymath-incident:incident-triage
+    prompt: Triage incident ${inputs.incidentId} given the fetched context. Confirm severity (default ${inputs.sev}), name roles, decide mitigate-vs-diagnose with a timebox.
+    needs: [context]
+  - id: signals
+    invoke: polymath-connector-datadog:query-during-incident
+    prompt: Run focused Datadog queries to narrow root cause for incident ${inputs.incidentId}. Surface one most-likely cause + one fallback.
+    needs: [triage]
+    artifacts:
+      - docs/postmortems/${workflow.slug}-signals.md
+  - id: postmortem
+    invoke: polymath-incident:postmortem-blameless
+    prompt: After incident is resolved, draft the blameless postmortem at docs/postmortems/${workflow.slug}.md.
+    needs: [signals]
+    artifacts:
+      - docs/postmortems/${workflow.slug}.md
+  - id: tickets
+    invoke: polymath-connector-jira:file-bug-from-incident
+    prompt: File Jira tickets for each action item in the postmortem at docs/postmortems/${workflow.slug}.md. Update the postmortem with the resulting Jira keys.
+    needs: [postmortem]
+mustPass:
+  - id: postmortem-exists
+    type: fileExists
+    path: docs/postmortems/${workflow.slug}.md
+  - id: postmortem-valid
+    type: artifactValid
+    path: docs/postmortems/${workflow.slug}.md
+    artifact: Postmortem
+  - id: triage-named-roles
+    type: stepSummaryMatches
+    step: triage
+    pattern: "(Incident Commander|IC|incident commander)"
+  - id: tickets-filed
+    type: stepSummaryMatches
+    step: tickets
+    pattern: "(JIRA|PROJ|created|filed)"
