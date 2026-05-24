@@ -55,6 +55,7 @@
 | Beyond v0.1 — Workflow library wave (bugTriage, perfRegression, refactorWithSafety, securityFinding) | `[done]` 2026-05-24 | 4 new workflows + 4 golden fixtures + invoke-regex fix (skill names may now start with a digit; was rejecting `5-whys`). Commit `3efca09`. |
 | Beyond v0.1 — Missing tier-1 craft (decisions, research, design) | `[done]` 2026-05-24 | 3 new plugins (decisions: daci/tradeoff-matrix/cynefin-frame; research: interview-guide/persona/customer-journey; design: a11y-audit/ui-critique/design-system-conformance) + 5 new shared templates + 3 golden fixtures. Commits `b96f49a`, `53374a1`, `b0d48e7`, `0c4ff70`, `b2eb748`, `d077887`. |
 | Beyond v0.1 — Tier-1 craft completion (communication, leadership, learning, performance, content, mobile) | `[done]` 2026-05-24 | 6 new plugins (39 total) + 7 new shared templates (Exec-brief, Six-pager, 1-on-1, Perf-review, OKR, Sunset-notice, Advisory) + 6 golden fixtures. **Tier-1 layer of PLAN.md sec 6 is complete.** Commits `ce01f18`, `a91fc67`, `531885c`, `885c0cf`, `5273d28`, `5c12575`, `d4500f4`, `fd7469a`, `65575cd`. |
+| Beyond v0.1 — Workflow library wave 2 (bumpDependency, migrateLanguageVersion, sunsetCapability, featureFromIdea) | `[done]` 2026-05-24 | 4 new workflows + 4 golden fixtures. **11 workflows total.** Of PLAN.md sec 11's future-workflow list, only `experimentToGA` remains — deferred until a `run-experiment` skill lands in polymath-data. Commit `5e02a4c`. |
 
 Local gates green as of 2026-05-24 (post tier-1 completion batch):
 
@@ -64,18 +65,18 @@ Local gates green as of 2026-05-24 (post tier-1 completion batch):
 - `claude plugin details` authoritative measurement: 7,704 tokens across 39 plugins; 197/plugin average; max 345 (under the 400 cap).
 - `tools/conformance.sh --all` green (12-criterion schema).
 - `tools/build-catalog.py --check` reproducible (39 plugin pages + index + CSS).
-- `bin/polymath-flow validate` green on all 7 workflows.
+- `bin/polymath-flow validate` green on all 11 workflows.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass.
 - Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns`, `polymath-author:skill-author-critic`, `polymath-decisions:cynefin-frame`, `polymath-leadership:okr-setting` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook, and a Jira-key detect-vs-vendor-ID test.
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`, and `pages.yml` (publishes the GitHub Pages catalog from `docs/site/`). The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets. `release.yml` is a manual `workflow_dispatch` plugin-version tagger (dry-run by default).
 
-**Immediate next milestone:** Tier-1 craft layer of PLAN.md sec 6 is now **complete** (all 13 tier-1 plugins shipped). Remaining roadmap:
+**Immediate next milestone:** Tier-1 craft layer + the workflow library (10 of 11 future workflows from PLAN.md sec 11) are complete. Remaining roadmap:
 
 - Connector wave 3+ (slack, figma, sentry, notion, linear, asana, aws, gcp, azure, stripe, vercel, cloudflare, elastic, grafana, honeycomb, launchdarkly, statuspage, terraform).
 - Language wave 2 (go, rust, java, swift, kotlin, ruby, php).
 - Infra waves (aws, gcp, azure, terraform-stack, docker, postgres, redis).
-- More workflows: `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `bumpDependency`, `migrateLanguageVersion`.
+- One more workflow: `experimentToGA` (needs a new `run-experiment` skill in polymath-data first).
 - Live `claude -p` golden fixtures wired into CI once `CLAUDE_CODE_OAUTH_TOKEN` is in repo secrets.
 - Submit proven plugins to the community marketplace.
 
@@ -1404,7 +1405,7 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24, tier-1 craft complete — 39 plugins, 7 workflows):**
+**Status snapshot (2026-05-24, tier-1 + workflow library complete — 39 plugins, 11 workflows):**
 
 - `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 39 plugins.
 - `[done]` `tools/token-budget.sh` — heuristic 4,325 / 9,750 (target scales with plugin count).
@@ -1412,7 +1413,7 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 - `[done]` `tools/lint-skills.sh` — green.
 - `[done]` `tools/conformance.sh --all` — green (12-criterion schema).
 - `[done]` `tools/build-catalog.py --check` — reproducible (39 plugin pages + index + CSS).
-- `[done]` `bin/polymath-flow validate` — green on all 7 workflows.
+- `[done]` `bin/polymath-flow validate` — green on all 11 workflows (`shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`).
 - `[done]` Unit tests — 22/22 pass.
 - `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns`, `polymath-author:skill-author-critic`, `polymath-decisions:cynefin-frame`, `polymath-leadership:okr-setting` — all route + execute correctly. PreToolUse `kubectl-prod-confirm` hook smoke-tested. Jira detect-ticket-key hook verified to filter vendor IDs.
 - `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk + full 5-step `respondToIncident` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
