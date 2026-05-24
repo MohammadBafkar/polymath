@@ -90,7 +90,7 @@
           "invoke": {
             "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call.",
             "type": "string",
-            "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*$"
+            "pattern": "^[a-z0-9-]+:[a-zA-Z0-9][a-zA-Z0-9-]*$"
           },
           "prompt": {
             "description": "Instruction the executor presents when reaching this step. May reference ${inputs.*} and ${workflow.*} placeholders.",

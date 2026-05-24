@@ -1,0 +1,68 @@
+schemaVersion: 0.1
+name: refactorWithSafety
+version: 0.1.0
+description: Refactor with a safety net — orient, surface coverage gaps, pin current behavior with tests, refactor, verify, review.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-qa
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short refactor title (used in the slug).
+  - name: scope
+    type: string
+    required: true
+    description: The area being refactored (e.g. "api/refunds.py", "src/util/format.ts").
+guards:
+  - id: refactor-notes-dir
+    type: command
+    command: mkdir -p docs/refactors && [ -w docs/refactors ]
+  - id: git-worktree-clean-or-nearly
+    type: command
+    command: git status --short
+steps:
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: Orient in ${inputs.scope}. Produce a code map at docs/refactors/${workflow.slug}-orient.md naming entry points, likely change sites, and open questions.
+    artifacts:
+      - docs/refactors/${workflow.slug}-orient.md
+  - id: coverage-pre
+    invoke: polymath-qa:coverage-gap
+    prompt: Before any changes, identify coverage gaps in ${inputs.scope}. Output MISSING (unit/integration) + WEAK entries. We will close the gaps in the next step.
+    needs: [orient]
+    artifacts:
+      - docs/refactors/${workflow.slug}-coverage-pre.md
+  - id: pin-behavior
+    invoke: polymath-qa:unit-tests
+    prompt: Author tests pinning the CURRENT behavior of ${inputs.scope} for every MISSING (unit) item from the coverage pass. These tests must pass against the unmodified code. We are pinning behavior before refactoring.
+    needs: [coverage-pre]
+  - id: refactor
+    invoke: polymath-engineering:feature-dev
+    prompt: Refactor ${inputs.scope}. The contract is that every test from the previous step still passes; no behavior change. If any pinning test fails, you've introduced behavior change — fix the refactor, not the test.
+    needs: [pin-behavior]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run the full test suite plus lint + typecheck on the refactored area. Confirm every pinning test from step pin-behavior still passes. Summary must include "test" or "verified".
+    needs: [refactor]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Final review of the refactor for correctness + simplification. Treat any new behavior in the diff as a finding, not a feature.
+    needs: [verify]
+mustPass:
+  - id: orient-exists
+    type: fileExists
+    path: docs/refactors/${workflow.slug}-orient.md
+  - id: coverage-pre-exists
+    type: fileExists
+    path: docs/refactors/${workflow.slug}-coverage-pre.md
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: review-mentions-simplification
+    type: stepSummaryMatches
+    step: review
+    pattern: "(simpl|review|correctness)"

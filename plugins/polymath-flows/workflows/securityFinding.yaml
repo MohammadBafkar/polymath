@@ -1,0 +1,67 @@
+schemaVersion: 0.1
+name: securityFinding
+version: 0.1.0
+description: Address a security finding end-to-end — OWASP review of the implicated diff, STRIDE-model the system if scope warrants, implement, code review, verify.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-security
+    - polymath-engineering
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title of the finding (used in the slug).
+  - name: severity
+    type: enum
+    values: [high, medium, low]
+    default: medium
+    description: Severity. high triggers the full STRIDE step; low + medium can skip it.
+  - name: scope
+    type: string
+    required: true
+    description: The area implicated (file glob, service name, endpoint).
+guards:
+  - id: sec-notes-dir
+    type: command
+    command: mkdir -p docs/security && [ -w docs/security ]
+steps:
+  - id: owasp
+    invoke: polymath-security:owasp-review
+    prompt: Run the OWASP Top 10 review of ${inputs.scope}. Cite OWASP year used. Output findings keyed to file:line with severity + concrete fix. Save to docs/security/${workflow.slug}-owasp.md.
+    artifacts:
+      - docs/security/${workflow.slug}-owasp.md
+  - id: threat-model
+    invoke: polymath-security:stride-threat-model
+    prompt: STRIDE-model the system at ${inputs.scope}. Skip with a one-line justification ONLY if severity (${inputs.severity}) is low or medium AND the OWASP review found no Spoofing / Tampering / Elevation-of-Privilege findings. For high severity, this step is required.
+    needs: [owasp]
+    artifacts:
+      - docs/threat-models/${workflow.slug}.md
+  - id: implement
+    invoke: polymath-engineering:feature-dev
+    prompt: Implement the fix(es) for the findings in docs/security/${workflow.slug}-owasp.md. Cite each finding's ID in the commit body.
+    needs: [threat-model]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the security fix for correctness, simplification, missing tests. Pay extra attention to test coverage on the exploit path the finding described.
+    needs: [implement]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Verify the fix — every finding has a regression test that fails against the old code path. Summary must include "test" or "verified".
+    needs: [review]
+mustPass:
+  - id: owasp-exists
+    type: fileExists
+    path: docs/security/${workflow.slug}-owasp.md
+  - id: owasp-cites-file-line
+    type: fileMatches
+    path: docs/security/${workflow.slug}-owasp.md
+    pattern: ":[0-9]"
+  - id: implement-cites-finding
+    type: stepSummaryMatches
+    step: implement
+    pattern: "(finding|OWASP|A0[0-9]|severity)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"

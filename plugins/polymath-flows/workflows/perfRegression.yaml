@@ -1,0 +1,60 @@
+schemaVersion: 0.1
+name: perfRegression
+version: 0.1.0
+description: Diagnose a performance regression — Datadog signals, review the diff that landed, implement the fix, verify the metric recovered.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-connector-datadog
+    - polymath-engineering
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short regression title (used in the slug).
+  - name: metric
+    type: string
+    required: true
+    description: The metric or SLI that regressed (e.g. "refund p99 latency").
+  - name: suspectSha
+    type: string
+    required: false
+    description: Optional git SHA of the suspected change. If absent, the workflow reasons about the most-recent deploy.
+guards:
+  - id: perf-notes-dir
+    type: command
+    command: mkdir -p docs/perf && [ -w docs/perf ]
+steps:
+  - id: signals
+    invoke: polymath-connector-datadog:query-during-incident
+    prompt: Pull Datadog signals for ${inputs.metric}. Compare against the 24h-baseline-same-window per the skill's procedure. Surface the dominant cause + fallback to docs/perf/${workflow.slug}-signals.md.
+    artifacts:
+      - docs/perf/${workflow.slug}-signals.md
+  - id: review-diff
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff at ${inputs.suspectSha} (or the most recent deploy) for correctness, simplification, and missing tests, with extra attention to perf-sensitive paths (allocations, sync I/O in hot loops, query patterns).
+    needs: [signals]
+  - id: fix
+    invoke: polymath-engineering:feature-dev
+    prompt: Implement the smallest safe change addressing the regression. Cite the signals + diff findings.
+    needs: [review-diff]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Verify the fix at the unit/integration level. Then, after deploy, confirm the metric ${inputs.metric} returns within 1% of pre-regression baseline over a 30-minute window. Write a short verification summary including the words "test" or "verified".
+    needs: [fix]
+mustPass:
+  - id: signals-exist
+    type: fileExists
+    path: docs/perf/${workflow.slug}-signals.md
+  - id: signals-baseline-cited
+    type: fileMatches
+    path: docs/perf/${workflow.slug}-signals.md
+    pattern: "(baseline|24h|24 ?h)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(test|tests|verified|verification)"
+  - id: fix-summary-mentions-signals
+    type: stepSummaryMatches
+    step: fix
+    pattern: "(signal|finding|cause|metric)"

@@ -1,0 +1,64 @@
+schemaVersion: 0.1
+name: bugTriage
+version: 0.1.0
+description: Triage an inbound bug — clarify symptom, locate suspect code, review recent diff, decompose the fix.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-thinking
+    - polymath-engineering
+    - polymath-planning
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short bug title (used in the slug).
+  - name: severity
+    type: enum
+    values: [sev1, sev2, sev3, sev4]
+    default: sev3
+    description: Bug severity, mirroring the incident scale. sev1/sev2 should usually route to respondToIncident instead.
+guards:
+  - id: bug-notes-dir
+    type: command
+    command: mkdir -p docs/bugs && [ -w docs/bugs ]
+steps:
+  - id: clarify
+    invoke: polymath-thinking:5-whys
+    prompt: Apply 5-whys to the bug report for ${inputs.title}. Stop at a system-level cause; cite evidence (log lines, metrics, code paths). Save to docs/bugs/${workflow.slug}-whys.md.
+    artifacts:
+      - docs/bugs/${workflow.slug}-whys.md
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: Orient in the area of code the bug implicates. Produce a short code map under docs/bugs/${workflow.slug}-orient.md naming the likely change site + 2 alternatives.
+    needs: [clarify]
+    artifacts:
+      - docs/bugs/${workflow.slug}-orient.md
+  - id: review-diff
+    invoke: polymath-engineering:code-review
+    prompt: Review the most recent diff touching the suspect area for correctness regressions or missing tests. Skip if no recent diff is implicated and document why.
+    needs: [orient]
+  - id: decompose
+    invoke: polymath-planning:work-breakdown
+    prompt: Decompose the fix into independently shippable steps with the critical path named. Save to docs/bugs/${workflow.slug}-plan.md.
+    needs: [review-diff]
+    artifacts:
+      - docs/bugs/${workflow.slug}-plan.md
+mustPass:
+  - id: whys-exists
+    type: fileExists
+    path: docs/bugs/${workflow.slug}-whys.md
+  - id: orient-exists
+    type: fileExists
+    path: docs/bugs/${workflow.slug}-orient.md
+  - id: plan-exists
+    type: fileExists
+    path: docs/bugs/${workflow.slug}-plan.md
+  - id: whys-cites-evidence
+    type: fileMatches
+    path: docs/bugs/${workflow.slug}-whys.md
+    pattern: "(evidence|log|metric|line|trace)"
+  - id: plan-names-critical-path
+    type: fileMatches
+    path: docs/bugs/${workflow.slug}-plan.md
+    pattern: "[Cc]ritical path"

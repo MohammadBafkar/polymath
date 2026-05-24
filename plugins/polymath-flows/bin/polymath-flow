@@ -316,7 +316,7 @@ def _validate(workflow: dict) -> list[str]:
                 errs.append(f"step id must be kebab-case (got {sid!r})")
             if "invoke" not in step:
                 errs.append(f"step {sid!r} missing 'invoke'")
-            elif not re.match(r"^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*$", step["invoke"]):
+            elif not re.match(r"^[a-z0-9-]+:[a-zA-Z0-9][a-zA-Z0-9-]*$", step["invoke"]):
                 errs.append(f"step {sid!r} invoke must be '<plugin>:<capability>' (got {step['invoke']!r})")
             if "prompt" not in step or not isinstance(step["prompt"], str) or not step["prompt"].strip():
                 errs.append(f"step {sid!r} missing non-empty 'prompt'")
