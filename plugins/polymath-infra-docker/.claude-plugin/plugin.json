@@ -1,0 +1,9 @@
+{
+  "name": "polymath-infra-docker",
+  "version": "0.1.0",
+  "description": "Docker craft: Dockerfile audit (base-image hygiene, layer order, healthcheck) + compose audit (volumes, networks, secrets, depends_on).",
+  "license": "Apache-2.0",
+  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
+  "dependencies": ["polymath-core"],
+  "keywords": ["docker", "dockerfile", "compose", "containers"]
+}

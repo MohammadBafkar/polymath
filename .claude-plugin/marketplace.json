@@ -213,6 +213,30 @@
       "tags": ["platform", "devex", "dora"]
     },
     {
+      "name": "polymath-infra-docker",
+      "source": "./plugins/polymath-infra-docker",
+      "description": "Docker craft: Dockerfile audit (base-image, multi-stage, USER, HEALTHCHECK, secrets) + compose audit (pinning, networks, secrets, depends_on).",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["docker", "containers", "compose"]
+    },
+    {
+      "name": "polymath-infra-postgres",
+      "source": "./plugins/polymath-infra-postgres",
+      "description": "Postgres craft: review-migration (per-statement lock + multi-step NOT NULL rollout) + audit-pg-config (memory, connections, WAL, autovacuum).",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["postgres", "migrations", "database"]
+    },
+    {
+      "name": "polymath-infra-redis",
+      "source": "./plugins/polymath-infra-redis",
+      "description": "Redis craft: design-cache-layer (versioned keys, jittered TTL, NX-lock stampede) + audit-redis-config (maxmemory, persistence, ACL, TLS).",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": ["redis", "cache", "key-value"]
+    },
+    {
       "name": "polymath-devops",
       "source": "./plugins/polymath-devops",
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",

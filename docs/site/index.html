@@ -14,7 +14,7 @@
   <main>
 <h2>Install the marketplace</h2>
 <pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>
-<p class="plugin-meta">64 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
+<p class="plugin-meta">67 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
 <h2 id="cat-foundation">Foundation</h2>
 <div class="cards">
 <div class="card">
@@ -177,9 +177,24 @@
 <h2 id="cat-infra">Infra</h2>
 <div class="cards">
 <div class="card">
+<h3><a href="plugins/polymath-infra-docker.html">polymath-infra-docker</a></h3>
+<p>Docker craft: Dockerfile audit (base-image, multi-stage, USER, HEALTHCHECK, secrets) + compose audit (pinning, networks, secrets, depends_on).</p>
+<div class="tags"><span>docker</span><span>containers</span><span>compose</span></div>
+</div>
+<div class="card">
 <h3><a href="plugins/polymath-infra-kubernetes.html">polymath-infra-kubernetes</a></h3>
 <p>Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.</p>
 <div class="tags"><span>kubernetes</span><span>k8s</span><span>rbac</span><span>pss</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-infra-postgres.html">polymath-infra-postgres</a></h3>
+<p>Postgres craft: review-migration (per-statement lock + multi-step NOT NULL rollout) + audit-pg-config (memory, connections, WAL, autovacuum).</p>
+<div class="tags"><span>postgres</span><span>migrations</span><span>database</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-infra-redis.html">polymath-infra-redis</a></h3>
+<p>Redis craft: design-cache-layer (versioned keys, jittered TTL, NX-lock stampede) + audit-redis-config (maxmemory, persistence, ACL, TLS).</p>
+<div class="tags"><span>redis</span><span>cache</span><span>key-value</span></div>
 </div>
 </div>
 <h2 id="cat-sre">Sre</h2>
