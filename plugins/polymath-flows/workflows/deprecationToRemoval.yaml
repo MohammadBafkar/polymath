@@ -1,0 +1,154 @@
+schemaVersion: 0.1
+name: deprecationToRemoval
+version: 0.1.0
+description: Multi-quarter capability removal — announce, deprecate-in-code, midterm usage-decline check, then remove only when usage is below threshold and the removal date has arrived.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-content
+    - polymath-engineering
+    - polymath-observability
+    - polymath-release
+inputs:
+  - name: capability
+    type: string
+    required: true
+    description: Capability being removed in customer language (e.g. "POST /v1/refunds endpoint", "config flag legacy_pricing", "library API CustomerLookup.find()").
+  - name: announceDate
+    type: string
+    required: true
+    description: ISO date when deprecation warnings begin (this run, if stage=announce).
+  - name: removalDate
+    type: string
+    required: true
+    description: ISO date when the capability stops working. Must be ≥ 90 days after announceDate for a healthy rollout.
+  - name: replacement
+    type: string
+    required: true
+    description: The supported alternative customers should migrate to. Required even for kill-not-replace removals — in that case state "no direct replacement; see migration guide" + link.
+  - name: usageThreshold
+    type: string
+    required: false
+    description: Maximum acceptable residual usage at removal time, as a percentage string (e.g. "1%"). Default "1%". Blocks remove stage if exceeded.
+  - name: stage
+    type: enum
+    values: [announce, midterm, remove]
+    default: announce
+    description: announce = ship the notice + add deprecation warnings + record baseline. midterm = check usage telemetry against baseline. remove = perform the removal (gated by date + threshold).
+guards:
+  - id: deprecations-dir
+    type: command
+    command: mkdir -p docs/deprecations && [ -w docs/deprecations ]
+  - id: clean-worktree
+    type: command
+    command: git diff --quiet && git diff --cached --quiet
+
+steps:
+  - id: notice
+    invoke: polymath-content:write-sunset-notice
+    prompt: |
+      Author the deprecation notice for ${inputs.capability}. Sunset (announce) ${inputs.announceDate}, removal ${inputs.removalDate}, replacement ${inputs.replacement}. Save to docs/deprecations/${workflow.slug}.md.
+
+      The notice MUST include:
+      - announce_date, removal_date, replacement (frontmatter or named fields).
+      - A "Baseline usage" section reserved for the announce stage to fill in (RPS, daily users, top-3 caller services). It is OK to leave placeholders if stage != announce.
+      - A "Usage threshold for safe removal" line stating the threshold (default 1% of baseline).
+      - A "Stage history" log: when each stage of this workflow ran, with date + commit SHA.
+    artifacts:
+      - docs/deprecations/${workflow.slug}.md
+
+  - id: baseline-or-recheck
+    invoke: polymath-observability:metrics-design
+    prompt: |
+      If inputs.stage is "announce": measure CURRENT usage of ${inputs.capability} (RPS, daily callers, top-3 caller services). Write the result into the "Baseline usage" section of docs/deprecations/${workflow.slug}.md and record the measurement window.
+
+      If inputs.stage is "midterm" or "remove": measure CURRENT usage and append a row to a "Usage decline" table in docs/deprecations/${workflow.slug}.md showing: stage, date, current usage, % of baseline. Do not overwrite the baseline.
+
+      Use the project's metrics platform via whichever observability connector is installed (datadog, grafana, honeycomb, elastic). If none is configured, surface the exact query template the operator should run and append a placeholder row with "manual measurement pending".
+    needs: [notice]
+
+  - id: deprecate-in-code
+    invoke: polymath-engineering:feature-dev
+    prompt: |
+      Only act when inputs.stage is "announce". Add deprecation warnings to ${inputs.capability}:
+      - New usage: emit a structured warning log + deprecation HTTP header (Sunset + Deprecation per RFC 8594) or language-idiomatic deprecation annotation.
+      - Do NOT block calls or change semantics — that's the remove stage.
+      - Update the changelog as Deprecated (not Removed yet).
+
+      For other stages, this step is a no-op — output a one-line note: "stage=${inputs.stage}, skipping code change".
+    needs: [baseline-or-recheck]
+
+  - id: midterm-gate
+    invoke: polymath-engineering:read-code
+    prompt: |
+      Only act when inputs.stage is "midterm" or "remove". Read the "Usage decline" table in docs/deprecations/${workflow.slug}.md.
+
+      Compute current usage as % of baseline. Compare against ${inputs.usageThreshold} (default "1%").
+
+      If current usage ≤ threshold: write a one-line PASS summary including the percentage.
+      If current usage > threshold: write a FAIL summary including the percentage AND propose either (a) extending the removalDate by one quarter, or (b) targeted outreach to top callers — name the callers from the baseline.
+
+      The summary line MUST start with "midterm-gate: PASS" or "midterm-gate: FAIL".
+
+      For stage=announce, output "midterm-gate: skipped (stage=announce)".
+    needs: [deprecate-in-code]
+
+  - id: removal
+    invoke: polymath-engineering:feature-dev
+    prompt: |
+      Only act when ALL of:
+        - inputs.stage is "remove"
+        - today's date is on or after ${inputs.removalDate}
+        - the previous step's summary starts with "midterm-gate: PASS"
+
+      If all three hold: remove ${inputs.capability} from the codebase. Delete the implementation, remove the deprecation warning code, and update the changelog under Removed for the next release.
+
+      If any condition fails: do not modify code. Output a one-line note that names exactly which condition blocked the removal (e.g. "removal blocked: today 2026-05-24 < removalDate 2026-08-01" or "removal blocked: midterm-gate failed").
+    needs: [midterm-gate]
+
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: |
+      Verify the change for this stage:
+        - announce: tests cover the new deprecation warning path; existing callers still work; warning is observable in logs / headers.
+        - midterm: no code changed; verification is reading the docs/deprecations/${workflow.slug}.md update for shape only.
+        - remove: tests cover the removed-path error (calls return the expected gone/410 / language-idiomatic error); replacement path still passes its own tests.
+
+      Summary must say "test" or "verified".
+    needs: [removal]
+
+  - id: release-comms
+    invoke: polymath-release:release-notes
+    prompt: |
+      Add a release-notes entry for ${inputs.capability}:
+        - announce: under "Deprecated" with the removal date.
+        - midterm: only if the midterm-gate failed and removalDate was extended — note the schedule change. Otherwise no release-notes entry.
+        - remove: under "Removed" as a breaking change, with migration guidance pointing at ${inputs.replacement}.
+
+      Link back to docs/deprecations/${workflow.slug}.md in all cases.
+    needs: [verify]
+
+mustPass:
+  - id: notice-exists
+    type: fileExists
+    path: docs/deprecations/${workflow.slug}.md
+  - id: notice-has-both-dates
+    type: fileMatches
+    path: docs/deprecations/${workflow.slug}.md
+    pattern: "(?i)(announce_date|removal_date|sunset|removal)"
+  - id: notice-has-replacement
+    type: fileMatches
+    path: docs/deprecations/${workflow.slug}.md
+    pattern: "(?i)(replacement|replaces|migrate to|use)"
+  - id: notice-has-usage-section
+    type: fileMatches
+    path: docs/deprecations/${workflow.slug}.md
+    pattern: "(?i)(baseline usage|usage decline|usage threshold)"
+  - id: midterm-gate-emitted
+    type: stepSummaryMatches
+    step: midterm-gate
+    pattern: "midterm-gate:\\s+(PASS|FAIL|skipped)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(?i)(test|tests|verified|verification)"

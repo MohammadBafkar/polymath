@@ -1,0 +1,98 @@
+schemaVersion: 0.1
+name: incidentRetroToActions
+version: 0.1.0
+description: Decompose a written postmortem into trackable action items — owners, due dates, estimates, tickets filed, postmortem back-linked to the resulting tickets.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-incident
+    - polymath-planning
+    - polymath-connector-jira
+inputs:
+  - name: postmortemPath
+    type: string
+    required: true
+    description: Repo-relative path to the blameless postmortem (e.g. docs/postmortems/2026-09-refund-async.md). Must be a written artifact, not an open incident.
+  - name: tracker
+    type: enum
+    values: [jira, linear]
+    default: jira
+    description: Issue tracker to file action items into. Switching to linear requires also swapping the connector-jira dependency for connector-linear in a project override (.claude/polymath/workflows/).
+guards:
+  - id: postmortem-readable
+    type: command
+    command: test -f "${POLYMATH_INPUT_POSTMORTEMPATH}" && test -s "${POLYMATH_INPUT_POSTMORTEMPATH}"
+  - id: retros-dir
+    type: command
+    command: mkdir -p docs/retros && [ -w docs/retros ]
+steps:
+  - id: read-postmortem
+    invoke: polymath-engineering:read-code
+    prompt: Read ${inputs.postmortemPath} end-to-end. Extract the **Action items** section (or equivalent) into a structured list. For each: action text, raw owner string (may be "TBD"), and rough size hint. Save to docs/retros/${workflow.slug}-actions-raw.md.
+    artifacts:
+      - docs/retros/${workflow.slug}-actions-raw.md
+
+  - id: classify
+    invoke: polymath-incident:postmortem-blameless
+    prompt: For each action item in docs/retros/${workflow.slug}-actions-raw.md, classify it as one of {prevent, detect, mitigate, process}. Flag any action that is blame-shaped (names a person as the fix, "X should have known better") and rewrite it system-shaped (the missing guardrail / signal / runbook). Save to docs/retros/${workflow.slug}-actions-classified.md.
+    needs: [read-postmortem]
+    artifacts:
+      - docs/retros/${workflow.slug}-actions-classified.md
+
+  - id: breakdown
+    invoke: polymath-planning:work-breakdown
+    prompt: Decompose each classified action into the smallest unit that an engineer can land in one PR. An action like "improve refund retries" becomes 3-5 leaf tasks. Preserve the {prevent/detect/mitigate/process} category. Save to docs/retros/${workflow.slug}-breakdown.md.
+    needs: [classify]
+    artifacts:
+      - docs/retros/${workflow.slug}-breakdown.md
+
+  - id: estimate
+    invoke: polymath-planning:estimate
+    prompt: Estimate each leaf task in docs/retros/${workflow.slug}-breakdown.md in t-shirt sizes (XS/S/M/L). Flag anything > L as "needs further breakdown — do not file yet". Surface a total + the longest item. Save to docs/retros/${workflow.slug}-estimates.md.
+    needs: [breakdown]
+    artifacts:
+      - docs/retros/${workflow.slug}-estimates.md
+
+  - id: file-tickets
+    invoke: polymath-connector-jira:file-bug-from-incident
+    prompt: File a tracker ticket for every leaf in docs/retros/${workflow.slug}-breakdown.md that has an estimate ≤ L. Each ticket links back to ${inputs.postmortemPath}. Assignee comes from the action's owner string; if "TBD", file with the on-call rotation as assignee and add a comment "@owner please confirm ownership". Save the resulting ticket-key list to docs/retros/${workflow.slug}-tickets.md.
+    needs: [estimate]
+    artifacts:
+      - docs/retros/${workflow.slug}-tickets.md
+
+  - id: backlink
+    invoke: polymath-engineering:feature-dev
+    prompt: Update ${inputs.postmortemPath} so the Action items section now references the filed tickets from docs/retros/${workflow.slug}-tickets.md. Each line gets a ticket key prefix (e.g. "[ENG-1234]"). Do not modify any other section of the postmortem.
+    needs: [file-tickets]
+
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the postmortem update + the retro artifacts. Confirm every action item in ${inputs.postmortemPath} has a ticket key, every ticket back-links to the postmortem, and no blame-shaped wording remains. Summary must include the word "actions" and either "filed" or "tracked".
+    needs: [backlink]
+
+mustPass:
+  - id: actions-raw-exists
+    type: fileExists
+    path: docs/retros/${workflow.slug}-actions-raw.md
+  - id: breakdown-exists
+    type: fileExists
+    path: docs/retros/${workflow.slug}-breakdown.md
+  - id: estimates-exists
+    type: fileExists
+    path: docs/retros/${workflow.slug}-estimates.md
+  - id: tickets-exists
+    type: fileExists
+    path: docs/retros/${workflow.slug}-tickets.md
+  - id: classification-uses-categories
+    type: fileMatches
+    path: docs/retros/${workflow.slug}-actions-classified.md
+    pattern: "(?i)(prevent|detect|mitigate|process)"
+  - id: tickets-list-has-keys
+    type: fileMatches
+    path: docs/retros/${workflow.slug}-tickets.md
+    pattern: "([A-Z][A-Z0-9_]{1,9}-[0-9]+)"
+  - id: review-confirms-tracking
+    type: stepSummaryMatches
+    step: review
+    pattern: "(?i)(filed|tracked|actions)"

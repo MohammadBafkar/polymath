@@ -12,7 +12,7 @@ Curated, role-shaped extensions for Claude Code that real teams can install a-la
 
 ## 2. Status snapshot
 
-**71 plugins**, **12 workflows**, **all gates green**.
+**71 plugins**, **15 workflows**, **all gates green**.
 
 Tier coverage:
 
@@ -21,7 +21,7 @@ Tier coverage:
 - Languages — python, typescript, dotnet, go, rust, java, swift, kotlin, ruby, php.
 - Infra — docker, postgres, redis, kubernetes, aws, gcp, azure, terraform-stack.
 
-Workflows: `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`.
+Workflows: `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval`.
 
 Local gate measurements: 6,634 canonical listing tokens across 71 plugins (avg 93 / max < 400 cap). All `bin/polymath-flow` unit tests pass. `tools/conformance.sh --all` green. `tools/build-catalog.py --check` clean.
 
@@ -87,6 +87,13 @@ sunsetCapability       notice → deprecate-in-code → (remove at stage=remove)
 featureFromIdea        interview-guide → persona → PRD → acceptance → implement → review → verify → PR
 experimentToGA         plan (run-experiment, pre-registered) → rollout-plan (launchdarkly)
                        → launch-checklist → results-analysis → GA decision
+weeklyReleaseTrain     collect (commits since last tag) → changelog-audit
+                       → release-notes → verify → internal heads-up → tag PR (dryRun-gated)
+incidentRetroToActions read postmortem → classify (prevent/detect/mitigate/process,
+                       rewrite blame-shaped) → work-breakdown → estimate
+                       → file tickets → backlink postmortem → review
+deprecationToRemoval   multi-quarter: announce (notice + warnings + baseline usage)
+                       → midterm (usage-decline gate) → remove (date + PASS-gated)
 ```
 
 ### Repo layout
@@ -141,8 +148,6 @@ Local + CI:
 
 CI: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, `golden-tests.yml` (executable-unit + executable-e2e + fixtures-parse jobs), `pages.yml`, `release.yml`.
 
-Deferred: full multi-step `claude -p` runs of every workflow end-to-end. The `claude-cli-fixtures` job is wired and skips until `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
-
 ---
 
 ## 7. Remaining work
@@ -159,7 +164,6 @@ Deferred: full multi-step `claude -p` runs of every workflow end-to-end. The `cl
 - Connectors: Microsoft Teams, Discord, BigQuery, Snowflake, Redshift, OpenTelemetry Collector, Sentry source-map upload, Vault.
 - Languages: C++, Elixir, Scala, Clojure, Zig.
 - Infra: Kafka, MongoDB, Elasticsearch (cluster ops, not connector), nginx config audit.
-- Workflows: `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval` (multi-quarter).
 
 ### Long-tail polish
 

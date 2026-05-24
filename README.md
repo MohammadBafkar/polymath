@@ -4,7 +4,7 @@
 
 ## The marketplace
 
-**71 plugins** across foundation, mind & craft, product, engineering, languages, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **12 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`.
+**71 plugins** across foundation, mind & craft, product, engineering, languages, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **15 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens; the canonical CLI-measured total across all plugins is ~6.6 k — for users who install everything. Most teams install 5–10.
 

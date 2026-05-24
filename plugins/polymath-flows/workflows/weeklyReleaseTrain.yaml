@@ -1,0 +1,92 @@
+schemaVersion: 0.1
+name: weeklyReleaseTrain
+version: 0.1.0
+description: Bundle the week's merged changes into a release — CHANGELOG audit, release-notes draft, verify, internal heads-up, PR for the tag.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-release
+    - polymath-content
+inputs:
+  - name: version
+    type: string
+    required: true
+    description: Semver target for this train (e.g. "v1.4.0"). Used to name release-notes file + the PR.
+  - name: since
+    type: string
+    required: false
+    description: Git ref to compare against (commit SHA / tag / branch). Defaults to the last semver tag on main.
+  - name: dryRun
+    type: enum
+    values: [yes, no]
+    default: 'yes'
+    description: 'yes' (default) drafts artifacts without proposing the tag PR. 'no' produces the PR too.
+guards:
+  - id: clean-worktree
+    type: command
+    command: git diff --quiet && git diff --cached --quiet
+  - id: release-notes-dir
+    type: command
+    command: mkdir -p docs/release-notes && [ -w docs/release-notes ]
+steps:
+  - id: collect
+    invoke: polymath-engineering:read-code
+    prompt: Survey what landed since ${inputs.since} (default — last semver tag). Use `git log --no-merges <since>..HEAD --pretty='%h %s'` and group commits by Conventional-Commits type (feat / fix / chore / docs / refactor / perf / test). Save to docs/release-notes/${inputs.version}-survey.md. Include the exact compare ref used.
+    artifacts:
+      - docs/release-notes/${inputs.version}-survey.md
+
+  - id: changelog-audit
+    invoke: polymath-release:changelog
+    prompt: Audit CHANGELOG.md against the survey at docs/release-notes/${inputs.version}-survey.md. Every customer-affecting commit must have an [Unreleased] entry; flag any that don't and add them. Do not promote [Unreleased] to ${inputs.version} yet — that happens at the tag step.
+    needs: [collect]
+    artifacts:
+      - CHANGELOG.md
+
+  - id: release-notes
+    invoke: polymath-release:release-notes
+    prompt: Draft customer-facing release notes for ${inputs.version} from CHANGELOG [Unreleased] + the survey. Save to docs/release-notes/${inputs.version}.md. Lead with a one-sentence headline; surface breaking changes in their own section.
+    needs: [changelog-audit]
+    artifacts:
+      - docs/release-notes/${inputs.version}.md
+
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Verify the train candidate — run the repo's full test + lint + build suite against HEAD. Summary must say "test" or "verified" and name the runner used (vitest, pytest, dotnet test, etc.).
+    needs: [release-notes]
+
+  - id: internal-heads-up
+    invoke: polymath-content:write-advisory
+    prompt: Write a brief internal-only advisory for ${inputs.version} — what is shipping, who is impacted, monitoring + rollback. Save to docs/release-notes/${inputs.version}-internal.md. This is for the team channel, not customers.
+    needs: [verify]
+    artifacts:
+      - docs/release-notes/${inputs.version}-internal.md
+
+  - id: tag-pr
+    invoke: polymath-release:pr
+    prompt: If inputs.dryRun is "no", draft a PR that promotes CHANGELOG [Unreleased] to ${inputs.version}, bumps any version files, and points at docs/release-notes/${inputs.version}.md as the release narrative. Save the PR description to docs/pr/${inputs.version}.md. If dryRun is "yes", instead produce a one-line note explaining the skip and save it to docs/pr/${inputs.version}.md.
+    needs: [internal-heads-up]
+    artifacts:
+      - docs/pr/${inputs.version}.md
+
+mustPass:
+  - id: survey-exists
+    type: fileExists
+    path: docs/release-notes/${inputs.version}-survey.md
+  - id: release-notes-exists
+    type: fileExists
+    path: docs/release-notes/${inputs.version}.md
+  - id: release-notes-has-headline
+    type: fileMatches
+    path: docs/release-notes/${inputs.version}.md
+    pattern: "(?i)(headline|highlights?|what's new|whats new)"
+  - id: internal-advisory-exists
+    type: fileExists
+    path: docs/release-notes/${inputs.version}-internal.md
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    step: verify
+    pattern: "(?i)(test|tests|verified|verification)"
+  - id: tag-artifact-exists
+    type: fileExists
+    path: docs/pr/${inputs.version}.md
