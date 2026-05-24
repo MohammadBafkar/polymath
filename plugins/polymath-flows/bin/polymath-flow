@@ -273,6 +273,7 @@ ALLOWED_CHECK_TYPES = {
     "commandSucceeds",
     "stepSummaryMatches",
     "command",
+    "artifactValid",
 }
 
 
@@ -322,8 +323,8 @@ def _validate(workflow: dict) -> list[str]:
             unknown_keys = set(step.keys()) - ALLOWED_STEP_KEYS
             if unknown_keys:
                 errs.append(f"step {sid!r} has unknown keys: {sorted(unknown_keys)}")
-            if "topology" in step and step["topology"] != "series":
-                errs.append(f"step {sid!r} topology '{step['topology']}' not supported in v0.1 (only 'series')")
+            if "topology" in step and step["topology"] not in {"series", "fanout"}:
+                errs.append(f"step {sid!r} topology '{step['topology']}' not supported (allowed: series, fanout)")
 
     for section, items in (("guards", workflow.get("guards", [])), ("mustPass", workflow.get("mustPass", []))):
         if not isinstance(items, list):
@@ -473,6 +474,7 @@ def cmd_next(args: argparse.Namespace) -> int:
         return 0 if result == 0 else 2
 
     step = steps[idx]
+    topology = step.get("topology", "series")
     payload = {
         "run_id": state["run_id"],
         "step_id": step["id"],
@@ -482,8 +484,16 @@ def cmd_next(args: argparse.Namespace) -> int:
             _substitute(a, inputs=inputs, workflow_meta=workflow_meta)
             for a in step.get("artifacts", [])
         ],
+        "topology": topology,
         "remaining_steps": len(steps) - idx,
     }
+    # Surface a hint when a step declares fanout — the executor still runs
+    # serially in v0.1.5, but downstream tooling and humans need to know.
+    if topology == "fanout":
+        payload["note"] = (
+            "topology=fanout declared; executor runs serially in v0.1.5. "
+            "Treat sibling fanout steps as parallel intent for future runtimes."
+        )
     print(json.dumps(payload, indent=2))
     return 0
 
@@ -652,7 +662,161 @@ def _run_check(
             return False, f"step summary {step} not found"
         ok = bool(re.search(pattern, sp.read_text(errors="ignore")))
         return ok, f"step={step} pattern={pattern!r} match={ok}"
+    if t == "artifactValid":
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        artifact_name = check["artifact"]
+        ok, detail = _validate_artifact_frontmatter(path, artifact_name)
+        return ok, detail
     return False, f"unknown check type: {t}"
+
+
+# ---------------------------------------------------------------------------
+# Artifact frontmatter validator (minimal JSON-Schema subset)
+# ---------------------------------------------------------------------------
+
+# Schemas live alongside the workflow schema in the marketplace tree. They
+# are bundled with the plugin via the marketplace install path.
+_REPO_ROOT_CANDIDATES = [
+    PLUGIN_ROOT.parent.parent,  # plugins/polymath-flows -> repo root
+]
+
+
+def _find_artifact_schema(artifact: str) -> pathlib.Path | None:
+    for root in _REPO_ROOT_CANDIDATES:
+        cand = root / "shared" / "schemas" / "artifacts" / f"{artifact}.schema.json"
+        if cand.exists():
+            return cand
+        cand = root / "shared" / "schemas" / "artifacts" / f"{artifact.replace('-', '_')}.schema.json"
+        if cand.exists():
+            return cand
+        # Allow PascalCase artifact named with a hyphen on disk
+        if artifact == "ThreatModel":
+            cand = root / "shared" / "schemas" / "artifacts" / "Threat-model.schema.json"
+            if cand.exists():
+                return cand
+    return None
+
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_DATETIME_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:?\d{2}|Z)?$"
+)
+
+
+def _check_value(value: Any, prop_schema: dict) -> str | None:
+    """Return None on success or a short reason on failure. Only handles the
+    JSON-Schema subset used by artifact schemas (type, const, enum,
+    minLength, minimum, format date/date-time, anyOf, items).
+    """
+    if "const" in prop_schema and value != prop_schema["const"]:
+        return f"must equal {prop_schema['const']!r}, got {value!r}"
+    if "enum" in prop_schema and value not in prop_schema["enum"]:
+        return f"must be one of {prop_schema['enum']}, got {value!r}"
+    if "anyOf" in prop_schema:
+        for branch in prop_schema["anyOf"]:
+            if _check_value(value, branch) is None:
+                return None
+        return "did not match any anyOf branch"
+    expected = prop_schema.get("type")
+    if isinstance(expected, list):
+        types = expected
+    elif expected is None:
+        types = None
+    else:
+        types = [expected]
+    if types is not None:
+        py_ok = False
+        for t in types:
+            if t == "string" and isinstance(value, str):
+                py_ok = True
+            elif t == "integer" and isinstance(value, int) and not isinstance(value, bool):
+                py_ok = True
+            elif t == "number" and isinstance(value, (int, float)) and not isinstance(value, bool):
+                py_ok = True
+            elif t == "boolean" and isinstance(value, bool):
+                py_ok = True
+            elif t == "array" and isinstance(value, list):
+                py_ok = True
+            elif t == "object" and isinstance(value, dict):
+                py_ok = True
+            elif t == "null" and value is None:
+                py_ok = True
+        if not py_ok:
+            return f"expected type {types}, got {type(value).__name__}"
+    if isinstance(value, str):
+        ml = prop_schema.get("minLength")
+        if ml is not None and len(value) < ml:
+            return f"length {len(value)} < minLength {ml}"
+        fmt = prop_schema.get("format")
+        if fmt == "date" and not _DATE_RE.match(value):
+            return f"not a valid date (YYYY-MM-DD)"
+        if fmt == "date-time" and not _DATETIME_RE.match(value):
+            return f"not a valid ISO-8601 date-time"
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        mn = prop_schema.get("minimum")
+        if mn is not None and value < mn:
+            return f"{value} < minimum {mn}"
+    if isinstance(value, list):
+        mi = prop_schema.get("minItems")
+        if mi is not None and len(value) < mi:
+            return f"list has {len(value)} items, minItems={mi}"
+        if prop_schema.get("uniqueItems") and len(set(map(str, value))) != len(value):
+            return "list items must be unique"
+        item_schema = prop_schema.get("items")
+        if item_schema is not None:
+            for i, it in enumerate(value):
+                err = _check_value(it, item_schema)
+                if err is not None:
+                    return f"item[{i}]: {err}"
+    return None
+
+
+def _extract_frontmatter(path: pathlib.Path) -> tuple[dict, str] | tuple[None, str]:
+    text = path.read_text(errors="ignore")
+    m = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
+    if not m:
+        return None, "missing YAML frontmatter"
+    try:
+        fm = _load_yaml(m.group(1))
+    except Exception as e:
+        return None, f"frontmatter parse error: {e}"
+    if not isinstance(fm, dict):
+        return None, "frontmatter is not a mapping"
+    return fm, ""
+
+
+def _validate_artifact_frontmatter(
+    path_str: str, artifact_name: str
+) -> tuple[bool, str]:
+    path = pathlib.Path(path_str)
+    if not path.exists():
+        return False, f"path={path_str} not found"
+    schema_path = _find_artifact_schema(artifact_name)
+    if schema_path is None:
+        return False, f"no schema for artifact={artifact_name}"
+    try:
+        schema = json.loads(schema_path.read_text())
+    except Exception as e:
+        return False, f"schema load failed: {e}"
+    fm, parse_err = _extract_frontmatter(path)
+    if fm is None:
+        return False, f"path={path_str} {parse_err}"
+    errors: list[str] = []
+    for required in schema.get("required", []):
+        if required not in fm:
+            errors.append(f"missing required field: {required}")
+    properties = schema.get("properties", {})
+    for key, value in fm.items():
+        if key not in properties:
+            if schema.get("additionalProperties") is False:
+                errors.append(f"unexpected field: {key}")
+            continue
+        err = _check_value(value, properties[key])
+        if err is not None:
+            errors.append(f"{key}: {err}")
+    if errors:
+        return False, "; ".join(errors)
+    return True, f"artifact={artifact_name} valid"
 
 
 def _trace(run_dir: pathlib.Path, event: str, data: dict) -> None:

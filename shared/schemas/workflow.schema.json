@@ -110,9 +110,9 @@
             "uniqueItems": true
           },
           "topology": {
-            "description": "Reserved for Phase 1.5+ (§ 4.6). v0.1 treats absence as 'series'.",
+            "description": "Composition pattern for this step (§ 4.6). 'series' executes after the previous step (default if absent). 'fanout' is accepted by validation but executor still runs serially in v0.1.5 — actual parallel execution lands when the runtime supports it. Other patterns reserved.",
             "type": "string",
-            "enum": ["series"]
+            "enum": ["series", "fanout"]
           }
         }
       }
@@ -148,12 +148,17 @@
         "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
         "type": {
           "type": "string",
-          "enum": ["fileExists", "fileMatches", "commandSucceeds", "stepSummaryMatches", "command"]
+          "enum": ["fileExists", "fileMatches", "commandSucceeds", "stepSummaryMatches", "command", "artifactValid"]
         },
         "path": { "type": "string" },
         "pattern": { "type": "string" },
         "command": { "type": "string" },
-        "step": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+        "step": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "artifact": {
+          "description": "Artifact name (matches shared/schemas/artifacts/<name>.schema.json) for artifactValid checks.",
+          "type": "string",
+          "enum": ["PRD", "ADR", "Postmortem", "ThreatModel"]
+        }
       },
       "allOf": [
         {
@@ -175,6 +180,10 @@
         {
           "if": { "properties": { "type": { "const": "stepSummaryMatches" } }, "required": ["type"] },
           "then": { "required": ["step", "pattern"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "artifactValid" } }, "required": ["type"] },
+          "then": { "required": ["path", "artifact"] }
         }
       ]
     }

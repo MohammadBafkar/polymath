@@ -153,13 +153,26 @@ class SchemaValidationTests(unittest.TestCase):
         errs = self.mod._validate(data)
         self.assertTrue(any("unknown keys" in e for e in errs))
 
-    def test_topology_other_than_series_rejected(self) -> None:
+    def test_topology_series_and_fanout_accepted(self) -> None:
+        for topology in ("series", "fanout"):
+            data = {
+                "schemaVersion": 0.1,
+                "name": "foo",
+                "version": "0.1.0",
+                "steps": [
+                    {"id": "s1", "invoke": "p:c", "prompt": "p", "topology": topology},
+                ],
+            }
+            errs = self.mod._validate(data)
+            self.assertEqual(errs, [], f"topology={topology} unexpectedly rejected: {errs}")
+
+    def test_topology_unknown_value_rejected(self) -> None:
         data = {
             "schemaVersion": 0.1,
             "name": "foo",
             "version": "0.1.0",
             "steps": [
-                {"id": "s1", "invoke": "p:c", "prompt": "p", "topology": "fanout"},
+                {"id": "s1", "invoke": "p:c", "prompt": "p", "topology": "debate"},
             ],
         }
         errs = self.mod._validate(data)
@@ -303,6 +316,118 @@ class StateTransitionTests(unittest.TestCase):
         self.assertEqual(code, 2)
         ids = {f["id"] for f in json.loads(out)["failures"]}
         self.assertIn("tests-mentioned", ids)
+
+
+class ArtifactValidTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.mod = _import_flow()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = pathlib.Path(self._tmp.name)
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def _write(self, fm: str, body: str = "# body\n") -> pathlib.Path:
+        p = self.tmp / "Artifact.md"
+        p.write_text(f"---\n{fm}\n---\n{body}")
+        return p
+
+    def test_prd_valid_frontmatter(self) -> None:
+        path = self._write(
+            "artifact: PRD\n"
+            "schemaVersion: 0.1\n"
+            'title: "Rate-limit login"\n'
+            "status: draft\n"
+            "owner: pmteam\n"
+            'created: "2026-05-24"\n'
+        )
+        ok, detail = self.mod._validate_artifact_frontmatter(str(path), "PRD")
+        self.assertTrue(ok, detail)
+
+    def test_prd_missing_required_fields(self) -> None:
+        path = self._write(
+            "artifact: PRD\n"
+            'title: "x"\n'
+        )
+        ok, detail = self.mod._validate_artifact_frontmatter(str(path), "PRD")
+        self.assertFalse(ok)
+        self.assertIn("missing required field", detail)
+
+    def test_prd_wrong_status_enum(self) -> None:
+        path = self._write(
+            "artifact: PRD\n"
+            'title: "x"\n'
+            "status: bogus\n"
+            "owner: x\n"
+            'created: "2026-05-24"\n'
+        )
+        ok, detail = self.mod._validate_artifact_frontmatter(str(path), "PRD")
+        self.assertFalse(ok)
+        self.assertIn("status", detail)
+
+    def test_adr_accepts_array_or_string_deciders(self) -> None:
+        for deciders in ('"alice"', "[alice, bob]"):
+            path = self._write(
+                "artifact: ADR\n"
+                'title: "Use Postgres"\n'
+                "status: accepted\n"
+                f"deciders: {deciders}\n"
+                'date: "2026-05-24"\n'
+            )
+            ok, detail = self.mod._validate_artifact_frontmatter(str(path), "ADR")
+            self.assertTrue(ok, f"deciders={deciders!r}: {detail}")
+
+    def test_postmortem_requires_blameless_true(self) -> None:
+        path = self._write(
+            "artifact: Postmortem\n"
+            'incident_id: "IC-2026-09"\n'
+            "severity: sev1\n"
+            "status: draft\n"
+            'facilitator: "alice"\n'
+            'occurred: "2026-05-23T14:00:00Z"\n'
+            'resolved: "2026-05-23T16:00:00Z"\n'
+            "blameless: false\n"
+        )
+        ok, detail = self.mod._validate_artifact_frontmatter(str(path), "Postmortem")
+        self.assertFalse(ok)
+        self.assertIn("blameless", detail)
+
+    def test_threat_model_stride_enum(self) -> None:
+        path = self._write(
+            "artifact: ThreatModel\n"
+            'system: "Login"\n'
+            'scope: "Authentication"\n'
+            'owner: "secteam"\n'
+            'created: "2026-05-24"\n'
+            "stride_categories: [Spoofing, BogusCategory]\n"
+        )
+        ok, detail = self.mod._validate_artifact_frontmatter(str(path), "ThreatModel")
+        self.assertFalse(ok)
+        self.assertIn("stride_categories", detail)
+
+    def test_missing_frontmatter(self) -> None:
+        p = self.tmp / "no-fm.md"
+        p.write_text("# Just a heading\nno frontmatter here.\n")
+        ok, detail = self.mod._validate_artifact_frontmatter(str(p), "PRD")
+        self.assertFalse(ok)
+        self.assertIn("missing YAML frontmatter", detail)
+
+    def test_check_artifactvalid_via_runcheck(self) -> None:
+        path = self._write(
+            "artifact: PRD\n"
+            'title: "ok"\n'
+            "status: draft\n"
+            "owner: pm\n"
+            'created: "2026-05-24"\n'
+        )
+        check = {
+            "id": "prd-valid",
+            "type": "artifactValid",
+            "path": str(path),
+            "artifact": "PRD",
+        }
+        ok, _ = self.mod._run_check(check, self.tmp, {}, {"slug": "x"})
+        self.assertTrue(ok)
 
 
 if __name__ == "__main__":
