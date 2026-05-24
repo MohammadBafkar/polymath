@@ -1,0 +1,24 @@
+{
+  "name": "polymath-connector-asana",
+  "version": "0.1.0",
+  "description": "Asana connector: MCP for projects/tasks/sections + asana-task-update skill that moves a task across sections + sets custom fields by ID, not name.",
+  "license": "Apache-2.0",
+  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
+  "dependencies": ["polymath-core"],
+  "keywords": ["connector", "asana", "tasks"],
+  "userConfig": {
+    "asanaToken": {
+      "type": "string",
+      "title": "Asana personal access token",
+      "description": "From Asana → My Profile Settings → Apps → Developer apps. Service-account scope preferred over user.",
+      "sensitive": true,
+      "required": true
+    },
+    "asanaWorkspaceId": {
+      "type": "string",
+      "title": "Default Asana workspace GID",
+      "description": "Workspace GID for default project lookups (Asana's workspace API ID, not the URL slug).",
+      "required": true
+    }
+  }
+}

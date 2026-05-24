@@ -371,6 +371,30 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "terraform", "iac"]
+    },
+    {
+      "name": "polymath-connector-figma",
+      "source": "./plugins/polymath-connector-figma",
+      "description": "Figma connector: MCP for frame/component reads + design-spec-handoff skill (components, tokens, states, copy, a11y).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "figma", "design"]
+    },
+    {
+      "name": "polymath-connector-notion",
+      "source": "./plugins/polymath-connector-notion",
+      "description": "Notion connector: MCP for pages/databases + sync-doc-to-notion skill (Markdown→blocks, sync-key dedupe, drift detection).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "notion", "docs"]
+    },
+    {
+      "name": "polymath-connector-asana",
+      "source": "./plugins/polymath-connector-asana",
+      "description": "Asana connector: MCP for tasks/projects + asana-task-update skill (GID resolution for sections, custom fields, assignees).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "asana", "tasks"]
     }
   ]
 }

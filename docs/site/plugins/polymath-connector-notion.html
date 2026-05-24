@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-notion · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-notion@polymath</code></pre>
+<h1>polymath-connector-notion</h1>
+
+<p>Notion connector for the Polymath marketplace. Mirrors repo Markdown into Notion pages with drift detection.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>MCP server: Notion MCP server (default: <code>@notionhq/mcp-server</code>) via <code>npx</code>.</li>
+<li>Skills: <code>sync-doc-to-notion</code> — Markdown → Notion blocks, repo source-of-truth backlink, sync-key dedupe, drift detection before overwrite.</li>
+<li>Reference: <a href="references/notion-tools.md"><code>references/notion-tools.md</code></a>.</li>
+</ul>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-notion@polymath \
+  --config notionToken=&lt;secret&gt; \
+  --config notionRootPageId=&lt;page-id&gt;
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

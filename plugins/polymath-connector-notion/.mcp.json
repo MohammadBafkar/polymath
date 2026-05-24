@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "notion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/mcp-server"],
+      "env": {
+        "NOTION_TOKEN": "${POLYMATH_CONNECTOR_NOTION_NOTIONTOKEN}",
+        "NOTION_ROOT_PAGE_ID": "${POLYMATH_CONNECTOR_NOTION_NOTIONROOTPAGEID}"
+      }
+    }
+  }
+}

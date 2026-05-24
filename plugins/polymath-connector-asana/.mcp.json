@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "asana": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@asana/mcp-server"],
+      "env": {
+        "ASANA_ACCESS_TOKEN": "${POLYMATH_CONNECTOR_ASANA_ASANATOKEN}",
+        "ASANA_WORKSPACE_GID": "${POLYMATH_CONNECTOR_ASANA_ASANAWORKSPACEID}"
+      }
+    }
+  }
+}
