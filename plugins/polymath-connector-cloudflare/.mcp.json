@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "cloudflare": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server"],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${POLYMATH_CONNECTOR_CLOUDFLARE_CLOUDFLAREAPITOKEN}",
+        "CLOUDFLARE_ACCOUNT_ID": "${POLYMATH_CONNECTOR_CLOUDFLARE_CLOUDFLAREACCOUNTID}"
+      }
+    }
+  }
+}

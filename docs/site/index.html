@@ -14,7 +14,7 @@
   <main>
 <h2>Install the marketplace</h2>
 <pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>
-<p class="plugin-meta">51 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
+<p class="plugin-meta">54 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
 <h2 id="cat-foundation">Foundation</h2>
 <div class="cards">
 <div class="card">
@@ -205,6 +205,11 @@
 <div class="tags"><span>connector</span><span>azure</span><span>cloud</span></div>
 </div>
 <div class="card">
+<h3><a href="plugins/polymath-connector-cloudflare.html">polymath-connector-cloudflare</a></h3>
+<p>Cloudflare connector: MCP + edge-incident-triage skill (origin vs edge vs WAF vs DNS with CF-Ray sample for downstream filtering).</p>
+<div class="tags"><span>connector</span><span>cloudflare</span><span>edge</span></div>
+</div>
+<div class="card">
 <h3><a href="plugins/polymath-connector-datadog.html">polymath-connector-datadog</a></h3>
 <p>Datadog connector: MCP for metrics/logs/dashboards + monitor authoring and incident-time querying skills.</p>
 <div class="tags"><span>connector</span><span>datadog</span><span>observability</span></div>
@@ -275,9 +280,19 @@
 <div class="tags"><span>connector</span><span>statuspage</span><span>public-comms</span></div>
 </div>
 <div class="card">
+<h3><a href="plugins/polymath-connector-stripe.html">polymath-connector-stripe</a></h3>
+<p>Stripe connector: MCP + refund-or-dispute-triage skill (classify charge/refund/dispute, propose mutating action for operator approval).</p>
+<div class="tags"><span>connector</span><span>stripe</span><span>payments</span></div>
+</div>
+<div class="card">
 <h3><a href="plugins/polymath-connector-terraform.html">polymath-connector-terraform</a></h3>
 <p>Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.</p>
 <div class="tags"><span>connector</span><span>terraform</span><span>iac</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-connector-vercel.html">polymath-connector-vercel</a></h3>
+<p>Vercel connector: MCP + inspect-deployment skill (build + runtime + edge evidence; previous-READY-production rollback target).</p>
+<div class="tags"><span>connector</span><span>vercel</span><span>edge</span></div>
 </div>
 </div>
 <h2 id="cat-author">Author</h2>

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@stripe/mcp-server"],
+      "env": {
+        "STRIPE_API_KEY": "${POLYMATH_CONNECTOR_STRIPE_STRIPEAPIKEY}",
+        "STRIPE_MODE": "${POLYMATH_CONNECTOR_STRIPE_STRIPEMODE}"
+      }
+    }
+  }
+}

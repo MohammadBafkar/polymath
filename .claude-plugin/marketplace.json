@@ -419,6 +419,30 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "azure", "cloud"]
+    },
+    {
+      "name": "polymath-connector-stripe",
+      "source": "./plugins/polymath-connector-stripe",
+      "description": "Stripe connector: MCP + refund-or-dispute-triage skill (classify charge/refund/dispute, propose mutating action for operator approval).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "stripe", "payments"]
+    },
+    {
+      "name": "polymath-connector-vercel",
+      "source": "./plugins/polymath-connector-vercel",
+      "description": "Vercel connector: MCP + inspect-deployment skill (build + runtime + edge evidence; previous-READY-production rollback target).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "vercel", "edge"]
+    },
+    {
+      "name": "polymath-connector-cloudflare",
+      "source": "./plugins/polymath-connector-cloudflare",
+      "description": "Cloudflare connector: MCP + edge-incident-triage skill (origin vs edge vs WAF vs DNS with CF-Ray sample for downstream filtering).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "cloudflare", "edge"]
     }
   ]
 }
