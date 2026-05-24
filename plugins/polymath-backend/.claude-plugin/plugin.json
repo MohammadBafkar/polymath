@@ -1,0 +1,12 @@
+{
+  "name": "polymath-backend",
+  "version": "0.1.0",
+  "description": "Backend craft: REST API design, relational schema design, safe online migration planning.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core", "polymath-engineering"],
+  "keywords": ["backend", "api", "rest", "schema", "migration"]
+}
