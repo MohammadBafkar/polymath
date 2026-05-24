@@ -395,6 +395,30 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "asana", "tasks"]
+    },
+    {
+      "name": "polymath-connector-aws",
+      "source": "./plugins/polymath-connector-aws",
+      "description": "AWS connector (cli-only): inspect-aws-resource skill — ARN → describe + effective IAM + CloudTrail + 7d cost.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "aws", "cloud"]
+    },
+    {
+      "name": "polymath-connector-gcp",
+      "source": "./plugins/polymath-connector-gcp",
+      "description": "GCP connector (cli-only): inspect-gcp-resource skill — full path → describe + IAM + test-iam-permissions + audit log + cost ping.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "gcp", "cloud"]
+    },
+    {
+      "name": "polymath-connector-azure",
+      "source": "./plugins/polymath-connector-azure",
+      "description": "Azure connector (cli-only): inspect-azure-resource skill — ARM ID → describe + role-assignments + can-i probe + activity log + cost.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "azure", "cloud"]
     }
   ]
 }
