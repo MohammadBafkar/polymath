@@ -243,6 +243,14 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "snyk", "security"]
+    },
+    {
+      "name": "polymath-author",
+      "source": "./plugins/polymath-author",
+      "description": "Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.",
+      "version": "0.1.0",
+      "category": "author",
+      "tags": ["author", "governance", "conformance"]
     }
   ]
 }
