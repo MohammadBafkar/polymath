@@ -6,30 +6,119 @@ on:
     branches: [main]
 
 jobs:
-  golden:
+  executable-unit:
+    name: bin/polymath-flow unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install deps
-        run: pip install pyyaml jsonschema
-      - name: Run flows-lite executable smoke tests
+      - run: pip install pyyaml jsonschema
+      - name: Run python unit tests
+        run: python3 -m unittest discover -s plugins/polymath-flows/tests -v
+
+  executable-e2e:
+    name: shipFeature scratch-repo e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Walk shipFeature end-to-end against a scratch repo
         run: |
-          if [[ -x plugins/polymath-flows/bin/polymath-flow ]]; then
-            plugins/polymath-flows/bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml
-            echo "✓ shipFeature workflow validates"
-          else
-            echo "::warning::polymath-flows executable not present yet"
-          fi
-      - name: Claude golden fixtures
-        if: env.ANTHROPIC_API_KEY != ''
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          set -euxo pipefail
+          export PFLOW="$PWD/plugins/polymath-flows/bin/polymath-flow"
+          scratch="$(mktemp -d)"
+          export CLAUDE_PLUGIN_DATA="$scratch/.pdata"
+          cd "$scratch"
+          git init -q
+          git config user.email ci@polymath.test
+          git config user.name "CI"
+          touch README.md
+          git add . && git commit -q -m "init"
+
+          run_json="$($PFLOW start shipFeature --input title='Rate-limit /login' --input scope=small)"
+          run_id="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])' <<<"$run_json")"
+
+          # Verify the first step is prd
+          first="$($PFLOW next "$run_id")"
+          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["step_id"])' <<<"$first")" = "prd"
+
+          # Pre-create artifacts that mustPass expects
+          mkdir -p docs/prds docs/pr
+          echo "# PRD" > docs/prds/rate-limit-login.md
+          echo "## [Unreleased]" > CHANGELOG.md
+          echo "# PR" > docs/pr/rate-limit-login.md
+
+          for step in prd acceptance implement review changelog pr; do
+            echo "step done" > "${step}.summary.md"
+            $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md"
+          done
+
+          # Verify step summary must mention test/verify
+          echo "All tests verified, ran lint and typecheck" > verify.summary.md
+          $PFLOW complete "$run_id" verify --summary verify.summary.md
+
+          # Final mustPass
+          result="$($PFLOW assert "$run_id")"
+          echo "$result"
+          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "completed"
+          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["checks"])' <<<"$result")" = "4"
+
+  fixtures-parse:
+    name: tests/golden frontmatter parses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Parse every tests/golden fixture's frontmatter
         run: |
-          if [[ -d tests/golden ]]; then
-            echo "Golden fixtures will run here once claude -p is wired in CI"
-          else
-            echo "::warning::no tests/golden directory yet"
-          fi
+          python3 - <<'PY'
+          import pathlib, sys, yaml
+          fail = 0
+          for md in pathlib.Path("tests/golden").rglob("*.md"):
+              if md.name == "README.md":
+                  continue
+              text = md.read_text()
+              if not text.startswith("---"):
+                  print(f"::error file={md}::missing frontmatter")
+                  fail = 1
+                  continue
+              _, fm, _ = text.split("---", 2)
+              try:
+                  data = yaml.safe_load(fm)
+              except yaml.YAMLError as e:
+                  print(f"::error file={md}::invalid YAML: {e}")
+                  fail = 1
+                  continue
+              keys = {"plugin", "workflow"}
+              if not (data.keys() & keys):
+                  print(f"::error file={md}::frontmatter must declare plugin or workflow")
+                  fail = 1
+              if "scenario" not in data:
+                  print(f"::error file={md}::frontmatter missing scenario")
+                  fail = 1
+              if "expect" not in data:
+                  print(f"::error file={md}::frontmatter missing expect")
+                  fail = 1
+          sys.exit(fail)
+          PY
+
+  claude-golden:
+    name: claude -p against fixtures (only when secret set)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Note
+        run: |
+          echo "::warning::claude -p fixtures are not yet executed by CI."
+          echo "::warning::This job exists so wiring the secret is a one-step change later."
