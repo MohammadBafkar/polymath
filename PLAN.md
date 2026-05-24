@@ -48,24 +48,24 @@
 | Phase 1c — `polymath-flows` (flows-lite + shipFeature) | `[done]` 2026-05-23 | Commit `8b1ba21`. |
 | Phase 1d — hardening + golden demo | `[done]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. Live `claude` smoke verified end-to-end: marketplace add, install ×5, `claude plugin details` reports 1,007 / 1,500 tokens, `claude -p` invokes `/plugin-budget` and `/list-workflows` correctly, and `shipFeature` start persists state that a later session can see. Full 7-step Claude-driven shipFeature walk deferred (would consume significant tokens; orchestration substrate proven). |
 | Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[done]` 2026-05-24 | All three substrate items shipped (S1 topology label, S2 SessionStart queue, S3 artifact schemas + artifactValid). Five plugins shipped + `reviewPR` fanout workflow. Commits `9cdc38c`, `43b33cd`, `b3862ab`, `4c724c6`, `0bff86c`, `dacc1d5`, `d6543fd`, `492bf19`, `2262d7e`, `0f63772`. |
-| Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[pending]` | |
+| Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[done]` 2026-05-24 | 7 plugins (frontend, backend, lang-python, lang-typescript, lang-dotnet, data, ai) + 7 golden fixtures. Per-plugin live measurement; descriptions trimmed for lang plugins to stay under 400-tok cap. Commits `eab1655`, `d245fa7`, `e0efaea`, `e521370`, `ec3fb0e`, `98de18f`, `de0933e`, `87f315d`, `bb49a1d`. |
 | Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[pending]` | |
 | Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
 | Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
 
-Local gates green as of 2026-05-24 (post Phase 1.5):
+Local gates green as of 2026-05-24 (post Phase 2):
 
-- `claude plugin validate --strict` on all 10 plugins.
+- `claude plugin validate --strict` on all 17 plugins.
 - `tools/lint-skills.sh` green.
-- `tools/token-budget.sh` heuristic 1,163 / 1,500.
-- `claude plugin details` authoritative measurement: 2,015 tokens across 10 plugins; 200/plugin average; max 274 (well under the 400 cap).
+- `tools/token-budget.sh` heuristic now scales as `max(1500, 250 × plugin_count)`. Current 2,193 / 4,250.
+- `claude plugin details` authoritative measurement: 3,684 tokens across 17 plugins; 216/plugin average; max 345 (under the 400 cap).
 - `bin/polymath-flow validate` green on `shipFeature.yaml` and `reviewPR.yaml`.
-- `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass (was 13; added 9 for topology + artifactValid).
-- Live `claude -p` invocations: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys` all route + execute correctly.
+- `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass.
+- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest` — all route + execute correctly.
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
-**Immediate next milestone:** Phase 2 — stack specialization. Order: `polymath-frontend` + `polymath-backend` first (each must bring one concrete golden fixture and measured listing cost), then language wave 1 (`polymath-lang-python`, `polymath-lang-typescript`, `polymath-lang-dotnet`), then `polymath-data` + `polymath-ai`.
+**Immediate next milestone:** Phase 3 — operate. Order: `polymath-platform` + `polymath-devops` + `polymath-infra-kubernetes` first, then `polymath-sre` + `polymath-observability` + `polymath-incident`. Incident workflows wait for at least one observability or pager connector (Phase 4) to exist.
 
 ---
 
@@ -913,9 +913,19 @@ Phase 1.5 also landed three substrate additions deferred from v0.1:
 
 ### Phase 2 — Stack specialize
 
-**Status:** `[pending]` — not started.
+**Status:** `[done]` 2026-05-24 — 7 plugins shipped (frontend, backend, lang-python, lang-typescript, lang-dotnet, data, ai), each with one golden fixture and a CLI-measured listing cost. All under the 400-tok per-plugin cap.
 
-Add `polymath-frontend`, `polymath-backend`, first language plugins, `polymath-data`, and `polymath-ai`. Each must bring one concrete golden fixture and measured listing cost before merging.
+Shipped:
+
+- `polymath-frontend` — component-design, web-vitals-budget, bundle-analyze. 183 tok.
+- `polymath-backend` — api-design-rest, db-schema, migration-plan. 170 tok.
+- `polymath-lang-python` — write-pytest-test, lint-with-ruff, propose-type-annotations + `/pytest`, `/ruff`, `/types-py`. 292 tok.
+- `polymath-lang-typescript` — write-vitest-test, lint-with-biome, migrate-ts-version + `/vitest`, `/biome`, `/ts-migrate`. 312 tok.
+- `polymath-lang-dotnet` — write-xunit-test, audit-csproj-modernization, propose-nullable-references + `/xunit`, `/csproj-audit`, `/nullable`. 345 tok.
+- `polymath-data` — sql-write, sql-optimize, metrics-tree. 175 tok.
+- `polymath-ai` — prompt-engineer, rag-design, eval-plan. 192 tok.
+
+Plus 7 golden fixtures under `tests/golden/<plugin>/`. Plus a `tools/token-budget.sh` change so the total target scales with plugin count rather than the MVP-era hardcoded 1,500.
 
 ### Phase 3 — Operate
 
@@ -1355,15 +1365,15 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24, post Phase 1.5):**
+**Status snapshot (2026-05-24, post Phase 2):**
 
-- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 10 plugins.
-- `[done]` `tools/token-budget.sh` — heuristic 1,163 / 1,500.
-- `[done]` `claude plugin details` — authoritative 2,015 tokens across 10 plugins (200/plugin average; max 274; cap 400).
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 17 plugins.
+- `[done]` `tools/token-budget.sh` — heuristic 2,193 / 4,250 (target scales with plugin count).
+- `[done]` `claude plugin details` — authoritative 3,684 tokens across 17 plugins (216/plugin average; max 345; cap 400).
 - `[done]` `tools/lint-skills.sh` — green.
 - `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml` and `reviewPR.yaml`.
-- `[done]` Unit tests — 22/22 pass (covers YAML subset parser, schema validation including topology and artifact checks, full shipFeature walk, mustPass for PRD/ADR/Postmortem/ThreatModel frontmatter).
-- `[done]` Live `claude` smoke (5 invocations): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys` all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session.
+- `[done]` Unit tests — 22/22 pass.
+- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest` all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session.
 - `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
 
 End-to-end after Phase 1:
