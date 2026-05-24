@@ -1,0 +1,12 @@
+{
+  "name": "polymath-lang-python",
+  "version": "0.1.0",
+  "description": "Python craft: pytest authoring, ruff linting, type-annotation proposals.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core", "polymath-engineering"],
+  "keywords": ["python", "pytest", "ruff", "mypy", "pyright"]
+}
