@@ -1,0 +1,21 @@
+{
+  "name": "polymath-connector-linear",
+  "version": "0.1.0",
+  "description": "Linear connector: MCP for issues/cycles + UserPromptSubmit detect of TEAM-NNN keys + triage + file-bug-from-incident skills.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["connector", "linear", "issues", "mcp"],
+  "userConfig": {
+    "linearApiKey": {
+      "type": "string",
+      "title": "Linear API key",
+      "description": "Personal API key from Linear Settings → API. Personal keys act as the user; prefer a service-account where Linear supports it.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}
