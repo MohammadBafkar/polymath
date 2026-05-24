@@ -1,0 +1,9 @@
+{
+  "name": "polymath-lang-kotlin",
+  "version": "0.1.0",
+  "description": "Kotlin craft: JUnit 5 + Kotest + MockK + kotlinx.coroutines.test; build.gradle.kts plugin/dep pinning, multi-module hygiene.",
+  "license": "Apache-2.0",
+  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
+  "dependencies": ["polymath-core", "polymath-engineering"],
+  "keywords": ["kotlin", "junit5", "kotest", "mockk", "gradle"]
+}

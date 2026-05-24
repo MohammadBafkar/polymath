@@ -157,6 +157,38 @@
       "tags": ["java", "junit5", "assertj", "maven", "gradle"]
     },
     {
+      "name": "polymath-lang-swift",
+      "source": "./plugins/polymath-lang-swift",
+      "description": "Swift craft: XCTest or Swift Testing (async/await, @Test arguments); Package.swift tool/platform/pin discipline.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["swift", "xctest", "swift-testing", "spm"]
+    },
+    {
+      "name": "polymath-lang-kotlin",
+      "source": "./plugins/polymath-lang-kotlin",
+      "description": "Kotlin craft: JUnit 5 + MockK + runTest, Kotest when present; build.gradle.kts toolchain + BOM + multi-module hygiene.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["kotlin", "junit5", "kotest", "mockk", "gradle"]
+    },
+    {
+      "name": "polymath-lang-ruby",
+      "source": "./plugins/polymath-lang-ruby",
+      "description": "Ruby craft: RSpec idiom (describe/context/it, let/subject, instance_double, shared_examples); Gemfile + bundler-audit hygiene.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["ruby", "rspec", "bundler"]
+    },
+    {
+      "name": "polymath-lang-php",
+      "source": "./plugins/polymath-lang-php",
+      "description": "PHP craft: PHPUnit 10+ attributes + Pest patterns + Mockery + PSR-20 clock; composer.json pin discipline + Roave/SecurityAdvisories.",
+      "version": "0.1.0",
+      "category": "languages",
+      "tags": ["php", "phpunit", "pest", "composer"]
+    },
+    {
       "name": "polymath-data",
       "source": "./plugins/polymath-data",
       "description": "Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.",
