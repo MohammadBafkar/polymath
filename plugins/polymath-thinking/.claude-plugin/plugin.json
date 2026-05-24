@@ -1,0 +1,12 @@
+{
+  "name": "polymath-thinking",
+  "version": "0.1.0",
+  "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team challenges; lightweight skills for divergence, root cause, and challenge.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["thinking", "brainstorm", "5-whys", "pre-mortem", "red-team"]
+}
