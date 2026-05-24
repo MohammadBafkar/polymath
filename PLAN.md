@@ -49,23 +49,23 @@
 | Phase 1d — hardening + golden demo | `[done]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. Live `claude` smoke verified end-to-end: marketplace add, install ×5, `claude plugin details` reports 1,007 / 1,500 tokens, `claude -p` invokes `/plugin-budget` and `/list-workflows` correctly, and `shipFeature` start persists state that a later session can see. Full 7-step Claude-driven shipFeature walk deferred (would consume significant tokens; orchestration substrate proven). |
 | Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[done]` 2026-05-24 | All three substrate items shipped (S1 topology label, S2 SessionStart queue, S3 artifact schemas + artifactValid). Five plugins shipped + `reviewPR` fanout workflow. Commits `9cdc38c`, `43b33cd`, `b3862ab`, `4c724c6`, `0bff86c`, `dacc1d5`, `d6543fd`, `492bf19`, `2262d7e`, `0f63772`. |
 | Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[done]` 2026-05-24 | 7 plugins (frontend, backend, lang-python, lang-typescript, lang-dotnet, data, ai) + 7 golden fixtures. Per-plugin live measurement; descriptions trimmed for lang plugins to stay under 400-tok cap. Commits `eab1655`, `d245fa7`, `e0efaea`, `e521370`, `ec3fb0e`, `98de18f`, `de0933e`, `87f315d`, `bb49a1d`. |
-| Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[pending]` | |
+| Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[done]` 2026-05-24 | 6 plugins + 6 golden fixtures + Postmortem/Comms-update templates + kubectl-prod-confirm PreToolUse hook. No workflow (waits for Phase 4 connectors per PLAN.md sec 10). Commits `b2f71aa`, `ff11640`, `813c0c2`, `aefcefc`, `8a1fa54`, `08dceda`, `b4f4cc5`. |
 | Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
 | Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
 
-Local gates green as of 2026-05-24 (post Phase 2):
+Local gates green as of 2026-05-24 (post Phase 3):
 
-- `claude plugin validate --strict` on all 17 plugins.
+- `claude plugin validate --strict` on all 23 plugins.
 - `tools/lint-skills.sh` green.
-- `tools/token-budget.sh` heuristic now scales as `max(1500, 250 × plugin_count)`. Current 2,193 / 4,250.
-- `claude plugin details` authoritative measurement: 3,684 tokens across 17 plugins; 216/plugin average; max 345 (under the 400 cap).
+- `tools/token-budget.sh` heuristic 2,772 / 5,750 (target scales with plugin count).
+- `claude plugin details` authoritative measurement: 4,990 tokens across 23 plugins; 216/plugin average; max 345 (under the 400 cap).
 - `bin/polymath-flow validate` green on `shipFeature.yaml` and `reviewPR.yaml`.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass.
-- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest` — all route + execute correctly.
+- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook (blocked-then-allowed via `POLYMATH_ACK_PROD` token).
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
-**Immediate next milestone:** Phase 3 — operate. Order: `polymath-platform` + `polymath-devops` + `polymath-infra-kubernetes` first, then `polymath-sre` + `polymath-observability` + `polymath-incident`. Incident workflows wait for at least one observability or pager connector (Phase 4) to exist.
+**Immediate next milestone:** Phase 4 — connectors. Wave 1: `polymath-connector-github` + `polymath-connector-github-actions` + `polymath-connector-jira`. Wave 2: `polymath-connector-pagerduty` + `polymath-connector-datadog` + `polymath-connector-snyk`. Each connector ships an `.mcp.json` defining MCP tools, hook payloads for triggers, required credentials via `userConfig.sensitive: true`, and a smoke test. After at least one observability or pager connector lands, `respondToIncident` workflow becomes legitimate.
 
 ---
 
@@ -929,9 +929,18 @@ Plus 7 golden fixtures under `tests/golden/<plugin>/`. Plus a `tools/token-budge
 
 ### Phase 3 — Operate
 
-**Status:** `[pending]` — not started.
+**Status:** `[done]` 2026-05-24 — 6 plugins + 6 golden fixtures + 2 new shared templates + 1 PreToolUse hook. No workflow yet (waits for Phase 4 connectors per PLAN.md sec 10).
 
-Add platform, DevOps, Kubernetes, SRE, observability, and incident plugins. Do not ship incident workflows before at least one observability or pager connector exists.
+Shipped:
+
+- `polymath-platform` — devex-metrics (DORA + SPACE), golden-path, service-catalog-entry. 203 tok.
+- `polymath-devops` — dockerize, ci-pipeline-github, env-promotion. 201 tok.
+- `polymath-infra-kubernetes` — write-manifest, audit-rbac-grants, propose-pod-security-standards + `PreToolUse(Bash)` `kubectl-prod-confirm.sh` (blocks mutating kubectl on prod-named contexts; bypass via `POLYMATH_ACK_PROD` token, prod regex via `POLYMATH_K8S_PROD_PATTERN`). 233 tok.
+- `polymath-sre` — slo-design (28-day error-budget math + multi-window burn-rate alerts), error-budget-policy (Healthy/Eroding/Exhausted with named consequences), chaos-experiment. 180 tok.
+- `polymath-observability` — logging-strategy, tracing-strategy-otel, metrics-design (RED + USE + cardinality budget). 198 tok.
+- `polymath-incident` — incident-triage, postmortem-blameless, comms-update + `/incident-start`, `/postmortem` commands. Materializes Postmortem.md + Comms-update.md. Postmortem frontmatter passes the `Postmortem` artifact schema. 291 tok.
+
+Plus two new shared templates: `shared/templates/Postmortem.md` (schema-matching, blameless statement built-in) and `shared/templates/Comms-update.md`.
 
 ### Phase 4 — Connectors
 
@@ -1365,15 +1374,15 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24, post Phase 2):**
+**Status snapshot (2026-05-24, post Phase 3):**
 
-- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 17 plugins.
-- `[done]` `tools/token-budget.sh` — heuristic 2,193 / 4,250 (target scales with plugin count).
-- `[done]` `claude plugin details` — authoritative 3,684 tokens across 17 plugins (216/plugin average; max 345; cap 400).
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 23 plugins.
+- `[done]` `tools/token-budget.sh` — heuristic 2,772 / 5,750 (target scales with plugin count).
+- `[done]` `claude plugin details` — authoritative 4,990 tokens across 23 plugins (216/plugin average; max 345; cap 400).
 - `[done]` `tools/lint-skills.sh` — green.
 - `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml` and `reviewPR.yaml`.
 - `[done]` Unit tests — 22/22 pass.
-- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest` all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session.
+- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design` — all route + execute correctly. State persisted at `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json` and visible cross-session. PreToolUse `kubectl-prod-confirm` hook smoke-tested against a fake kubeconfig (blocks mutating verbs, allows with `POLYMATH_ACK_PROD` token).
 - `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
 
 End-to-end after Phase 1:
