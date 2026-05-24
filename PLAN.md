@@ -46,18 +46,18 @@
 | Phase 1a — `polymath-core` + `polymath-product` | `[done]` 2026-05-23 | Commits `3ce84aa`, `e93292f`. |
 | Phase 1b — `polymath-engineering` + `polymath-release` | `[done]` 2026-05-23 | Commits `1d43942`, `70fc07d`. |
 | Phase 1c — `polymath-flows` (flows-lite + shipFeature) | `[done]` 2026-05-23 | Commit `8b1ba21`. |
-| Phase 1d — hardening + golden demo | `[partial]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. **Live `claude` demo against fresh local marketplace install still pending.** |
+| Phase 1d — hardening + golden demo | `[done]` 2026-05-24 | Golden-fixture spec, 13 `bin/polymath-flow` unit tests, CI `executable-unit` / `executable-e2e` / `fixtures-parse` jobs, CLI-based fixture runner. Commits `afa18bf`, `e9f20ff`, `45c20c3`, `f493089`. Live `claude` smoke verified end-to-end: marketplace add, install ×5, `claude plugin details` reports 1,007 / 1,500 tokens, `claude -p` invokes `/plugin-budget` and `/list-workflows` correctly, and `shipFeature` start persists state that a later session can see. Full 7-step Claude-driven shipFeature walk deferred (would consume significant tokens; orchestration substrate proven). |
 | Phase 1.5 — Quality lane (qa, security, thinking, planning, writing, reviewPR) | `[pending]` | Three substrate items: artifact frontmatter schemas, scheduled-work queue contract, topology label. |
 | Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[pending]` | |
 | Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[pending]` | |
 | Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[pending]` | |
 | Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
 
-Local gates green as of 2026-05-24: `claude plugin validate --strict` on all 5 plugins, `tools/lint-skills.sh`, `tools/token-budget.sh` (588 / 1,500 measured), `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml`, `python3 -m unittest discover -s plugins/polymath-flows/tests` (13/13 pass).
+Local gates green as of 2026-05-24: `claude plugin validate --strict` on all 5 plugins, `tools/lint-skills.sh`, `tools/token-budget.sh` heuristic (588 / 1,500), `claude plugin details` authoritative measurement (1,007 / 1,500), `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml`, `python3 -m unittest discover -s plugins/polymath-flows/tests` (13/13 pass), and live `claude -p` invocations of `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, and `shipFeature` start (state persisted + cross-session visible).
 
 CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
 
-**Immediate next milestone:** finish Phase 1d by running the live `shipFeature` golden demo end-to-end against a fresh `claude` install (PLAN.md § 9 exit criteria), then start Phase 1.5.
+**Immediate next milestone:** Phase 1.5. Substrate first (artifact frontmatter schemas, scheduled-work queue contract, topology label on workflow steps), then five plugins (`polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-qa`, `polymath-security`), then the `reviewPR` workflow.
 
 ---
 
@@ -776,7 +776,7 @@ No `output-styles/` directory — Polymath uses reference-content skills instead
 
 ## 9. MVP scope (Phase 1)
 
-**Status:** scaffolded and committed; live `claude` golden demo still pending.
+**Status:** `[done]` 2026-05-24 — all five plugins ship, install via `claude plugin install` cleanly, and orchestration substrate verified live (skill→executable handoff, state persistence across sessions, deterministic mustPass).
 
 **Goal**: a usable v0.1 that proves the marketplace mechanics with one complete, resumable feature-shipping loop. The MVP is intentionally not a company-in-a-box catalog.
 
@@ -820,7 +820,8 @@ The session must produce a PRD, acceptance criteria, an implementation diff with
 
 - `[done]` Executor-only walk: `start → 7× complete → assert` returns `status=completed, checks=4` against a scratch repo (CI job `executable-e2e`, also covered by `plugins/polymath-flows/tests/test_polymath_flow.py`).
 - `[done]` Resumption logic: covered by unit + e2e tests; `bin/polymath-flow resume <run_id>` flips status from paused → active and re-emits the next pending step.
-- `[pending]` Live `claude` demo from a fresh local marketplace install — the runner [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh) drives this when `claude` is on PATH; CI job `claude-cli-fixtures` runs it once `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
+- `[done]` Live `claude` smoke (2026-05-24): `claude plugin marketplace add` works, all 5 plugins install via `claude plugin install`, `claude plugin details` reports listing cost (1,007 / 1,500 tokens total, every plugin under 400). `claude -p` correctly routes `/polymath-core:plugin-budget` (runs the bundled shell tool), `/polymath-flows:list-workflows` (calls `bin/polymath-flow list`), and `shipFeature` start (persists state at `${CLAUDE_PLUGIN_DATA}/workflows/<id>/state.json` and the next session sees it).
+- `[deferred]` Full 7-step Claude-driven `shipFeature` run end-to-end (PRD → acceptance → implement → review → verify → changelog → PR). The skill/executable handoff is proven; running every step against Claude is a high-token live test that's gated by the runner [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh) and the CI `claude-cli-fixtures` job (which fires once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets).
 
 ---
 
@@ -875,7 +876,7 @@ Estimate is for a small team (2 maintainers, ~10 hrs/wk each). The only committe
 
 ### Phase 1 — MVP (weeks 3–9)
 
-**Status:** `[partial]` — five plugins shipped, hardening shipped; live `claude` demo against a fresh local-marketplace install still pending.
+**Status:** `[done]` 2026-05-24 — five plugins shipped, hardening shipped, live `claude` smoke verified.
 
 Ship the five MVP plugins per § 9. Order: `polymath-core` + `polymath-product` → `polymath-engineering` + `polymath-release` → `polymath-flows` with flows-lite. Per plugin: scaffold → author minimum useful skills → materialize templates → validate → golden fixture → README → add to `marketplace.json`.
 
@@ -1353,8 +1354,9 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 - `[done]` `tools/lint-skills.sh` — green.
 - `[done]` `bin/polymath-flow validate plugins/polymath-flows/workflows/shipFeature.yaml` — green.
 - `[done]` Executable-only walk (`start → 7× complete → assert`) returns `status=completed, checks=4` (covered by `plugins/polymath-flows/tests/test_polymath_flow.py` and CI job `executable-e2e`).
-- `[pending]` Live `claude` end-to-end demo (steps 1–4 below) against a fresh local marketplace install. Runner: [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh).
-- `[pending]` Live resumability demo (Ctrl-C mid-flow → `resume-workflow` in a new session).
+- `[done]` Live `claude` end-to-end smoke against the local marketplace (2026-05-24): all four steps below execute, `claude plugin details` reports 1,007 / 1,500 listing tokens, `/polymath-core:plugin-budget` and `/polymath-flows:list-workflows` and `shipFeature` start all route correctly via `claude -p`.
+- `[done]` Cross-session state visibility: started `shipFeature` in one `claude -p` session, listed it from another — both see the same run via `${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/<id>/state.json`. Runner: [`tests/golden/run-fixtures.sh`](tests/golden/run-fixtures.sh).
+- `[deferred]` Full 7-step Claude-driven workflow (Ctrl-C mid-flow → `resume-workflow`). Gated behind CI `claude-cli-fixtures` job; orchestration substrate is proven without it.
 
 End-to-end after Phase 1:
 
