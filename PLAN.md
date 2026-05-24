@@ -51,21 +51,33 @@
 | Phase 2 — Stack specialize (frontend, backend, lang wave 1, data, ai) | `[done]` 2026-05-24 | 7 plugins (frontend, backend, lang-python, lang-typescript, lang-dotnet, data, ai) + 7 golden fixtures. Per-plugin live measurement; descriptions trimmed for lang plugins to stay under 400-tok cap. Commits `eab1655`, `d245fa7`, `e0efaea`, `e521370`, `ec3fb0e`, `98de18f`, `de0933e`, `87f315d`, `bb49a1d`. |
 | Phase 3 — Operate (platform, devops, k8s, sre, observability, incident) | `[done]` 2026-05-24 | 6 plugins + 6 golden fixtures + Postmortem/Comms-update templates + kubectl-prod-confirm PreToolUse hook. No workflow (waits for Phase 4 connectors per PLAN.md sec 10). Commits `b2f71aa`, `ff11640`, `813c0c2`, `aefcefc`, `8a1fa54`, `08dceda`, `b4f4cc5`. |
 | Phase 4 — Connectors (github + gh-actions + jira; pagerduty + datadog + snyk) | `[done]` 2026-05-24 | 6 connector plugins + 6 golden fixtures + `respondToIncident` workflow (the first multi-connector flow, now legitimate per PLAN.md sec 10). Commits `fb6936e`, `3cb144e`, `f0efc5a`, `78a8b63`, `62c52f4`, `c9d556b`, `2489203`. |
-| Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[pending]` | |
+| Phase 5 — Catalog hardening (Pages, signed releases, governance) | `[done]` 2026-05-24 | `polymath-author` plugin + `tools/new-connector.sh` + `tools/conformance.sh` (12-criterion schema) + `tools/build-catalog.py` (GitHub Pages generator) + 2 new CI workflows (pages, release) + `docs/PRIVACY.md` (no-telemetry policy + opt-in contract) + 6 backfilled golden fixtures. Commits `eff6abd`, `0fb0787`, `eedfd64`, `4dc8490`. |
 
-Local gates green as of 2026-05-24 (post Phase 4):
+Local gates green as of 2026-05-24 (post Phase 5):
 
-- `claude plugin validate --strict` on all 29 plugins.
+- `claude plugin validate --strict` on all 30 plugins.
 - `tools/lint-skills.sh` green.
-- `tools/token-budget.sh` heuristic 3,124 / 7,250 (target scales with plugin count).
-- `claude plugin details` authoritative measurement: 5,636 tokens across 29 plugins; 194/plugin average; max 345 (under the 400 cap).
+- `tools/token-budget.sh` heuristic 3,359 / 7,500 (target scales with plugin count).
+- `claude plugin details` authoritative measurement: 5,942 tokens across 30 plugins; 198/plugin average; max 345 (under the 400 cap).
+- `tools/conformance.sh --all` green (12-criterion schema; every plugin satisfies the 8 required criteria).
+- `tools/build-catalog.py --check` reproducible (30 plugin pages + index + CSS).
 - `bin/polymath-flow validate` green on `shipFeature.yaml`, `reviewPR.yaml`, and `respondToIncident.yaml`.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests`: 22/22 pass.
-- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook (blocked-then-allowed via `POLYMATH_ACK_PROD` token), and a Jira-key detect-vs-vendor-ID test (PROJ-123 matches, SNYK-JS-LODASH-1234567 / CVE-2024-1234 / GHSA-… correctly ignored).
+- Live `claude -p` invocations (across phases): `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns`, `polymath-author:skill-author-critic` — all route + execute correctly. Plus a fake-kubeconfig smoke of the `polymath-infra-kubernetes` PreToolUse hook, and a Jira-key detect-vs-vendor-ID test (vendor IDs correctly ignored).
 
-CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, and the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`. The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets.
+CI runs green for: `validate.yml`, `token-budget.yml`, `lint.yml`, `link-check.yml`, the `executable-unit` / `executable-e2e` / `fixtures-parse` jobs of `golden-tests.yml`, and `pages.yml` (publishes the GitHub Pages catalog from `docs/site/`). The `claude-cli-fixtures` job is wired but skipped until `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) is added to repo secrets. `release.yml` is a manual `workflow_dispatch` plugin-version tagger (dry-run by default).
 
-**Immediate next milestone:** Phase 5 — catalog hardening. Order: GitHub Pages catalog auto-generated from `marketplace.json` + plugin READMEs; demo media per stable plugin; signed git tags via `claude plugin tag --push`; `polymath-author` with governance components (`/new-plugin`, `/new-skill`, `/new-connector`, `/new-workflow`, `/conformance`, `/audit`, plus governance officers). Telemetry opt-in (`POLYMATH_TELEMETRY=1`) requires a privacy note + local-disable path before shipping. Submit only proven, low-surprise plugins to the community marketplace.
+**Immediate next milestone:** all five phases of the original PLAN are now `[done]`. Polymath v0.1 is feature-complete per its own design.
+
+Roadmap beyond v0.1 is the work surfaced in PLAN.md sec 3 that was explicitly deferred:
+
+- Connector wave 3+ (slack, figma, sentry, notion, linear, asana, aws, gcp, azure, stripe, vercel, cloudflare, elastic, grafana, honeycomb).
+- Language wave 2 (go, rust, java, swift, kotlin, ruby, php).
+- Infra waves (aws, gcp, azure, terraform-stack, docker, postgres, redis).
+- More workflows: `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `bumpDependency`, `migrateLanguageVersion`.
+- More tier-1 craft (`polymath-decisions`, `polymath-learning`, `polymath-research`, `polymath-design`, `polymath-mobile`, `polymath-performance`, `polymath-communication`, `polymath-leadership`, `polymath-content`).
+- Live `claude -p` golden fixtures wired into CI once `CLAUDE_CODE_OAUTH_TOKEN` is in repo secrets.
+- Submit proven plugins to the community marketplace.
 
 ---
 
@@ -961,14 +973,21 @@ Per PLAN.md sec 10's discipline: `respondToIncident.yaml` ships **now** that pag
 
 ### Phase 5 — Catalog hardening
 
-**Status:** `[pending]` — not started.
+**Status:** `[done]` 2026-05-24 — 30th plugin (`polymath-author`) + governance tooling + Pages catalog + release workflow + privacy policy + conformance schema.
 
-- GitHub Pages catalog (auto-generated from `marketplace.json` + plugin READMEs).
-- Demo media per stable plugin.
-- Opt-in telemetry (`POLYMATH_TELEMETRY=1`) only after a privacy note and local-disable path exist.
-- Signed git tags via `claude plugin tag --push`.
-- `polymath-author` with governance components.
-- Submit only proven, low-surprise plugins to the community marketplace.
+Shipped:
+
+- `polymath-author` — meta-plugin for contributors. Skills: `validate-plugin`, `token-budget-report`, `skill-author-critic` (file:line-cited SKILL.md review with ACCEPT/REVISE/REWRITE verdict). Commands: `/new-plugin`, `/new-skill`, `/new-connector`. References: `skill-style-guide.md`, `frontmatter-cheatsheet.md`. 306 tok.
+- `tools/new-connector.sh` — scaffolds the Phase-4 connector layout (plugin.json with `userConfig.apiKey` + `.mcp.json` stub + hooks/ + `references/<service>-tools.md`).
+- `tools/conformance.sh` — per-plugin or `--all` conformance check against `shared/schemas/plugin-conformance.json` (12 criteria, 8 required). Found and fixed 6 missing golden fixtures (planning, qa, security, thinking, writing, author).
+- `shared/schemas/plugin-conformance.schema.json` + `.../plugin-conformance.json` — the conformance criteria themselves, schema-validated.
+- `tools/build-catalog.py` — stdlib-only Python that generates `docs/site/` (30 plugin pages + index + minimal CSS). `--check` mode for CI reproducibility.
+- `.github/workflows/pages.yml` — regenerates `docs/site/` on changes to marketplace/READMEs/plugin.json, verifies reproducibility, deploys to GitHub Pages.
+- `.github/workflows/release.yml` — `workflow_dispatch` per-plugin version tagger (dry-run default). Verifies gates + conformance before tagging. Local equivalent: `claude plugin tag --push` from the plugin directory.
+- `docs/PRIVACY.md` — no-telemetry policy for v0.1 plus the opt-in contract (`POLYMATH_TELEMETRY=1`, local-disable, no content, no third-party SDKs, first-party endpoint only).
+- Six backfilled golden fixtures for Phase 1.5 plugins that had been missing them.
+
+Beyond v0.1: connector wave 3+, language wave 2, more workflows (`bugTriage`, `perfRegression`, …), more tier-1 craft (`polymath-decisions`, `polymath-learning`, …), live golden-fixture CI once a `CLAUDE_CODE_OAUTH_TOKEN` is added.
 
 ---
 
@@ -1385,15 +1404,17 @@ This bounds runtime cost *per workflow run*, complementing §13.1–13.4 which b
 
 ## 15. Verification
 
-**Status snapshot (2026-05-24, post Phase 4):**
+**Status snapshot (2026-05-24, post Phase 5 — all five phases of PLAN.md complete):**
 
-- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 29 plugins.
-- `[done]` `tools/token-budget.sh` — heuristic 3,124 / 7,250 (target scales with plugin count).
-- `[done]` `claude plugin details` — authoritative 5,636 tokens across 29 plugins (194/plugin average; max 345; cap 400).
+- `[done]` `tools/validate-all.sh` — `claude plugin validate --strict` passes for all 30 plugins.
+- `[done]` `tools/token-budget.sh` — heuristic 3,359 / 7,500 (target scales with plugin count).
+- `[done]` `claude plugin details` — authoritative 5,942 tokens across 30 plugins (198/plugin average; max 345; cap 400).
 - `[done]` `tools/lint-skills.sh` — green.
-- `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml`, `reviewPR.yaml`, and `respondToIncident.yaml`.
+- `[done]` `tools/conformance.sh --all` — green (12-criterion schema; every plugin satisfies the 8 required criteria including FIXTURE-1 after backfill).
+- `[done]` `tools/build-catalog.py --check` — reproducible (30 plugin pages + index + CSS).
+- `[done]` `bin/polymath-flow validate` — green on `shipFeature.yaml`, `reviewPR.yaml`, `respondToIncident.yaml`.
 - `[done]` Unit tests — 22/22 pass.
-- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns` — all route + execute correctly. PreToolUse `kubectl-prod-confirm` hook smoke-tested against a fake kubeconfig. Jira detect-ticket-key hook verified to filter vendor IDs (`SNYK-JS-LODASH-1234567`, `CVE-…`, `GHSA-…`).
+- `[done]` Live `claude` smoke: `/polymath-core:plugin-budget`, `/polymath-flows:list-workflows`, `shipFeature` start, `polymath-thinking:5-whys`, `polymath-backend:api-design-rest`, `polymath-sre:slo-design`, `polymath-connector-snyk:triage-vulns`, `polymath-author:skill-author-critic` — all route + execute correctly. PreToolUse `kubectl-prod-confirm` hook smoke-tested. Jira detect-ticket-key hook verified to filter vendor IDs.
 - `[deferred]` Full 7-step Claude-driven `shipFeature` walk + full 6-step `reviewPR` walk + full 5-step `respondToIncident` walk end-to-end. Token-expensive; gated behind CI `claude-cli-fixtures` job once `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` is in repo secrets.
 
 End-to-end after Phase 1:
