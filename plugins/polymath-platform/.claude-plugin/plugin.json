@@ -1,0 +1,12 @@
+{
+  "name": "polymath-platform",
+  "version": "0.1.0",
+  "description": "Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": ["polymath-core"],
+  "keywords": ["platform", "devex", "dora", "space", "golden-path"]
+}
