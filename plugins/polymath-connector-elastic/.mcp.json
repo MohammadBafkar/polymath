@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "elastic": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@elastic/mcp-server"],
+      "env": {
+        "ELASTIC_ENDPOINT": "${POLYMATH_CONNECTOR_ELASTIC_ELASTICENDPOINT}",
+        "ELASTIC_API_KEY": "${POLYMATH_CONNECTOR_ELASTIC_ELASTICAPIKEY}"
+      }
+    }
+  }
+}

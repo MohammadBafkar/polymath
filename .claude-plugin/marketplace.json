@@ -443,6 +443,30 @@
       "version": "0.1.0",
       "category": "connector",
       "tags": ["connector", "cloudflare", "edge"]
+    },
+    {
+      "name": "polymath-connector-elastic",
+      "source": "./plugins/polymath-connector-elastic",
+      "description": "Elasticsearch connector: MCP + log-search skill (refuses unbounded scans, capped count + buckets + 10-sample, PII redaction, cross-index trace.id hint).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "elastic", "logs"]
+    },
+    {
+      "name": "polymath-connector-grafana",
+      "source": "./plugins/polymath-connector-grafana",
+      "description": "Grafana connector: MCP + dashboard-snapshot skill (absolute time + required vars + finite TTL + saved deleteKey artifact).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "grafana", "observability"]
+    },
+    {
+      "name": "polymath-connector-honeycomb",
+      "source": "./plugins/polymath-connector-honeycomb",
+      "description": "Honeycomb connector: MCP + trace-investigate skill (span tree, ancestor-walk offending span, self-time latency, evidence-cited hypothesis).",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": ["connector", "honeycomb", "tracing"]
     }
   ]
 }

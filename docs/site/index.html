@@ -14,7 +14,7 @@
   <main>
 <h2>Install the marketplace</h2>
 <pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>
-<p class="plugin-meta">54 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
+<p class="plugin-meta">57 plugins · Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
 <h2 id="cat-foundation">Foundation</h2>
 <div class="cards">
 <div class="card">
@@ -215,6 +215,11 @@
 <div class="tags"><span>connector</span><span>datadog</span><span>observability</span></div>
 </div>
 <div class="card">
+<h3><a href="plugins/polymath-connector-elastic.html">polymath-connector-elastic</a></h3>
+<p>Elasticsearch connector: MCP + log-search skill (refuses unbounded scans, capped count + buckets + 10-sample, PII redaction, cross-index trace.id hint).</p>
+<div class="tags"><span>connector</span><span>elastic</span><span>logs</span></div>
+</div>
+<div class="card">
 <h3><a href="plugins/polymath-connector-figma.html">polymath-connector-figma</a></h3>
 <p>Figma connector: MCP for frame/component reads + design-spec-handoff skill (components, tokens, states, copy, a11y).</p>
 <div class="tags"><span>connector</span><span>figma</span><span>design</span></div>
@@ -233,6 +238,16 @@
 <h3><a href="plugins/polymath-connector-github-actions.html">polymath-connector-github-actions</a></h3>
 <p>GitHub Actions companion: CI-failure diagnosis skill + Stop hook checking the latest run on the current branch.</p>
 <div class="tags"><span>connector</span><span>github-actions</span><span>ci</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-connector-grafana.html">polymath-connector-grafana</a></h3>
+<p>Grafana connector: MCP + dashboard-snapshot skill (absolute time + required vars + finite TTL + saved deleteKey artifact).</p>
+<div class="tags"><span>connector</span><span>grafana</span><span>observability</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-connector-honeycomb.html">polymath-connector-honeycomb</a></h3>
+<p>Honeycomb connector: MCP + trace-investigate skill (span tree, ancestor-walk offending span, self-time latency, evidence-cited hypothesis).</p>
+<div class="tags"><span>connector</span><span>honeycomb</span><span>tracing</span></div>
 </div>
 <div class="card">
 <h3><a href="plugins/polymath-connector-jira.html">polymath-connector-jira</a></h3>

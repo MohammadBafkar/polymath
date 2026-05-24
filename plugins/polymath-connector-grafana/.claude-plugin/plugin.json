@@ -1,0 +1,24 @@
+{
+  "name": "polymath-connector-grafana",
+  "version": "0.1.0",
+  "description": "Grafana connector: MCP for dashboards/datasources + dashboard-snapshot skill that captures a permalinked snapshot for incident timelines and postmortem evidence.",
+  "license": "Apache-2.0",
+  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
+  "dependencies": ["polymath-core"],
+  "keywords": ["connector", "grafana", "observability"],
+  "userConfig": {
+    "grafanaUrl": {
+      "type": "string",
+      "title": "Grafana base URL",
+      "description": "Full URL to the Grafana instance (e.g. https://grafana.example.com).",
+      "required": true
+    },
+    "grafanaApiKey": {
+      "type": "string",
+      "title": "Grafana service account token",
+      "description": "Service account token with Viewer (or Editor for snapshots) role on the relevant org.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "honeycomb": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@honeycomb/mcp-server"],
+      "env": {
+        "HONEYCOMB_API_KEY": "${POLYMATH_CONNECTOR_HONEYCOMB_HONEYCOMBAPIKEY}",
+        "HONEYCOMB_DATASET": "${POLYMATH_CONNECTOR_HONEYCOMB_HONEYCOMBDATASET}"
+      }
+    }
+  }
+}
