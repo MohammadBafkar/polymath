@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
 # Estimate per-plugin always-on listing token cost.
 #
-# Uses a conservative byte-to-token estimate (chars / 4) for each component's
-# frontmatter `description` field plus its `name`. When `claude plugin details --json`
-# is available it is preferred (real measurement). Fails non-zero if any plugin
-# exceeds the 400-token-per-plugin ceiling.
+# Per-plugin cap (default 400) is the load-bearing gate: each plugin must stay
+# under it whether you install 5 or 50. The repo-wide total is informational:
+# the script reports it and compares against a *scaling* target of
+# (250 × plugin_count), with a floor of 1500 to keep the MVP signal alive.
+# Set POLYMATH_MVP_TOTAL_TARGET to override.
 
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 plugins_dir="$root/plugins"
 per_plugin_ceiling="${POLYMATH_PER_PLUGIN_CEILING:-400}"
-total_target="${POLYMATH_MVP_TOTAL_TARGET:-1500}"
+plugin_count="$(find "$plugins_dir" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+scaling_target=$(( plugin_count * 250 ))
+floor_target=1500
+if [[ "$scaling_target" -lt "$floor_target" ]]; then
+  scaling_target=$floor_target
+fi
+total_target="${POLYMATH_MVP_TOTAL_TARGET:-$scaling_target}"
 
 total=0
 fail=0
