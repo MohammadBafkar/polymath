@@ -275,6 +275,54 @@
       "version": "0.1.0",
       "category": "design",
       "tags": ["design", "a11y", "wcag", "ui"]
+    },
+    {
+      "name": "polymath-communication",
+      "source": "./plugins/polymath-communication",
+      "description": "Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.",
+      "version": "0.1.0",
+      "category": "communication",
+      "tags": ["communication", "exec-brief", "six-pager"]
+    },
+    {
+      "name": "polymath-leadership",
+      "source": "./plugins/polymath-leadership",
+      "description": "Leadership craft: 1:1 prep, performance review authoring, OKR setting.",
+      "version": "0.1.0",
+      "category": "leadership",
+      "tags": ["leadership", "1on1", "perf-review", "okr"]
+    },
+    {
+      "name": "polymath-learning",
+      "source": "./plugins/polymath-learning",
+      "description": "Learning craft: tiered explanations, code walkthroughs, Feynman-style self-test.",
+      "version": "0.1.0",
+      "category": "learning",
+      "tags": ["learning", "explain", "feynman"]
+    },
+    {
+      "name": "polymath-performance",
+      "source": "./plugins/polymath-performance",
+      "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.",
+      "version": "0.1.0",
+      "category": "performance",
+      "tags": ["performance", "latency", "caching"]
+    },
+    {
+      "name": "polymath-content",
+      "source": "./plugins/polymath-content",
+      "description": "Customer-facing content craft: release notes, sunset notice, security/breaking-change advisory.",
+      "version": "0.1.0",
+      "category": "content",
+      "tags": ["content", "release-notes", "sunset", "advisory"]
+    },
+    {
+      "name": "polymath-mobile",
+      "source": "./plugins/polymath-mobile",
+      "description": "Mobile craft: mobile perf budgets, push notification design, deep-link routing.",
+      "version": "0.1.0",
+      "category": "mobile",
+      "tags": ["mobile", "push", "deeplinks"]
     }
   ]
 }
