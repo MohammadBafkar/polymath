@@ -1,0 +1,23 @@
+# polymath-author
+
+Author craft for the Polymath marketplace. Tools, references, and skills for the people writing the plugins.
+
+## What it ships
+
+- Skills: `validate-plugin`, `token-budget-report`, `skill-author-critic`.
+- Commands: `/new-plugin`, `/new-skill`, `/new-connector`.
+- References: [`skill-style-guide.md`](references/skill-style-guide.md), [`frontmatter-cheatsheet.md`](references/frontmatter-cheatsheet.md).
+
+## Installation
+
+```bash
+claude plugin install polymath-author@polymath
+```
+
+## Dependencies
+
+- `polymath-core`
+
+## License
+
+Apache-2.0.
