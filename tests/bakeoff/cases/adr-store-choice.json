@@ -8,33 +8,48 @@
     "polymath-thinking",
     "polymath-decisions"
   ],
-  "baseline_prompt": "Write an ADR choosing a backing store for /login rate-limit counters. Consider Redis, Postgres, gateway-native rate limiting, and local token bucket fallback.",
-  "polymath_prompt": "Use Polymath ADR/tradeoff thinking. Write an ADR choosing a backing store for /login rate-limit counters, then challenge it with the architecture-critic agent.",
+  "baseline_prompt": "Write an ADR choosing a backing store for /login rate-limit counters. Consider Redis, Postgres, gateway-native rate limiting, and local token bucket fallback. Cover decision, context, alternatives considered, consequences, and how the decision will be validated before rollout.",
+  "polymath_prompt": "Write an ADR choosing a backing store for /login rate-limit counters. Consider Redis, Postgres, gateway-native rate limiting, and local token bucket fallback. Cover decision, context, alternatives considered, consequences, and how the decision will be validated before rollout. Use Polymath's ADR authoring skill and the structured decision-comparison skill in the decisions plugin, then have a forked-context reviewer challenge the result.",
   "rubric": [
     {
       "id": "decision",
       "weight": 2,
-      "pass_regex": ["decision|status|context", "Redis|Postgres|gateway|token bucket"]
+      "pass_regex": [
+        "decision|status|context",
+        "Redis|Postgres|gateway|token bucket"
+      ]
     },
     {
       "id": "alternatives",
       "weight": 2,
-      "pass_regex": ["alternative|considered", "gateway|token bucket|Postgres"]
+      "pass_regex": [
+        "alternative|considered|rejected",
+        "gateway|token bucket|Postgres"
+      ]
     },
     {
       "id": "consequences",
       "weight": 2,
-      "pass_regex": ["consequence|trade.?off", "latency|availability|operational"]
+      "pass_regex": [
+        "consequence|trade.?off|implication",
+        "latency|availability|operational"
+      ]
     },
     {
       "id": "critique",
       "weight": 2,
-      "pass_regex": ["assumption|fatal|patchable|critic", "partition|outage|fail"]
+      "pass_regex": [
+        "assumption|fatal|patchable|partition|outage",
+        "fail.?open|fail.?closed|fallback"
+      ]
     },
     {
       "id": "validation",
       "weight": 2,
-      "pass_regex": ["test|validate|experiment", "rollback|migration|reversible"]
+      "pass_regex": [
+        "validate|verify|prove|test",
+        "rollback|reversible|migration"
+      ]
     }
   ],
   "decision_threshold": {

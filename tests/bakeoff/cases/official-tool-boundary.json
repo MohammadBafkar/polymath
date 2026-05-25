@@ -8,33 +8,48 @@
     "polymath-thinking",
     "polymath-decisions"
   ],
-  "baseline_prompt": "Decide whether Polymath should keep polymath-lang-XX and polymath-connector-XX plugins or defer to official tools.",
-  "polymath_prompt": "Use the research-scout agent and Polymath decision framing. Decide whether Polymath should keep polymath-lang-XX and polymath-connector-XX plugins or defer to official tools.",
+  "baseline_prompt": "Decide whether Polymath should keep its polymath-lang-XX and polymath-connector-XX plugins or defer to official tools. Identify the source of truth for language facts and integrations (official docs, MCPs, LSPs, CLIs). Describe what unique value Polymath wrappers can add (workflow shape, critique, safety, artifact discipline). Inventory or map the existing connector and language plugins. Recommend a governance approach (stable / experimental tiers, evidence and fixture requirements, primary-source citations). Give a concrete action plan: which to remove, merge, keep, or defer, with the next validation test that decides pass or fail.",
+  "polymath_prompt": "Decide whether Polymath should keep its polymath-lang-XX and polymath-connector-XX plugins or defer to official tools. Identify the source of truth for language facts and integrations (official docs, MCPs, LSPs, CLIs). Describe what unique value Polymath wrappers can add (workflow shape, critique, safety, artifact discipline). Inventory or map the existing connector and language plugins. Recommend a governance approach (stable / experimental tiers, evidence and fixture requirements, primary-source citations). Give a concrete action plan: which to remove, merge, keep, or defer, with the next validation test that decides pass or fail. Use Polymath's research-scout forked-context agent and the decisions plugin's structured comparison.",
   "rubric": [
     {
       "id": "source-of-truth",
       "weight": 2,
-      "pass_regex": ["official|primary source|source of truth", "docs|MCP|LSP|CLI"]
+      "pass_regex": [
+        "official|primary source|source of truth",
+        "docs|MCP|LSP|CLI"
+      ]
     },
     {
       "id": "polymath-value",
       "weight": 2,
-      "pass_regex": ["workflow|critique|safety|artifact", "Polymath"]
+      "pass_regex": [
+        "workflow|critique|safety|artifact",
+        "Polymath"
+      ]
     },
     {
       "id": "inventory",
       "weight": 2,
-      "pass_regex": ["inventory|map|matrix", "connector|language"]
+      "pass_regex": [
+        "inventory|map|matrix",
+        "connector|language"
+      ]
     },
     {
       "id": "governance",
       "weight": 2,
-      "pass_regex": ["stable|experimental|promote|maturity", "evidence|fixture|primary"]
+      "pass_regex": [
+        "stable|experimental|promote|maturity",
+        "evidence|fixture|primary"
+      ]
     },
     {
       "id": "action",
       "weight": 2,
-      "pass_regex": ["remove|merge|keep|defer", "next test|validation|pass|fail"]
+      "pass_regex": [
+        "remove|merge|keep|defer",
+        "next test|validation|pass|fail"
+      ]
     }
   ],
   "decision_threshold": {

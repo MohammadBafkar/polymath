@@ -8,33 +8,48 @@
     "polymath-writing",
     "polymath-thinking"
   ],
-  "baseline_prompt": "Review this draft SKILL.md for a 'prompt-engineer' skill. Decide if it should be accepted, revised, or rewritten, and explain why. Draft: ---\nname: prompt-engineer\ndescription: Helps engineer prompts for LLMs.\n---\nThis skill helps you write better prompts. Use it when you need to write a prompt. Consider the audience, the task, and the constraints. Try a few variations and pick the best one.",
-  "polymath_prompt": "Use Polymath author + critique to review this draft SKILL.md. Apply the skill-author-critic procedure (frontmatter audit, procedure adequacy, anti-patterns) and produce an ACCEPT/REVISE/REWRITE verdict. Draft: ---\nname: prompt-engineer\ndescription: Helps engineer prompts for LLMs.\n---\nThis skill helps you write better prompts. Use it when you need to write a prompt. Consider the audience, the task, and the constraints. Try a few variations and pick the best one.",
+  "baseline_prompt": "Review this draft SKILL.md and produce a verdict (ACCEPT / REVISE / REWRITE) with specific findings. Audit the frontmatter (description must be specific and trigger-phrase-first), check whether the procedure is concrete, name any anti-patterns (vague advice, generic prose, hand-waving), and propose concrete replacement examples or fixture references.\nDraft:\n---\nname: prompt-engineer\ndescription: Helps engineer prompts for LLMs.\n---\nThis skill helps you write better prompts. Use it when you need to write a prompt. Consider the audience, the task, and the constraints. Try a few variations and pick the best one.",
+  "polymath_prompt": "Review this draft SKILL.md and produce a verdict (ACCEPT / REVISE / REWRITE) with specific findings. Audit the frontmatter (description must be specific and trigger-phrase-first), check whether the procedure is concrete, name any anti-patterns (vague advice, generic prose, hand-waving), and propose concrete replacement examples or fixture references.\nDraft:\n---\nname: prompt-engineer\ndescription: Helps engineer prompts for LLMs.\n---\nThis skill helps you write better prompts. Use it when you need to write a prompt. Consider the audience, the task, and the constraints. Try a few variations and pick the best one. Use Polymath's author skill-author-critic skill.",
   "rubric": [
     {
       "id": "frontmatter-audit",
       "weight": 2,
-      "pass_regex": ["frontmatter|description|trigger phrase", "vague|generic|specific"]
+      "pass_regex": [
+        "frontmatter|description|trigger phrase",
+        "vague|generic|specific"
+      ]
     },
     {
       "id": "procedure-gaps",
       "weight": 2,
-      "pass_regex": ["procedure|steps|how|when to use", "missing|absent|unclear"]
+      "pass_regex": [
+        "procedure|steps|how|when to use",
+        "missing|absent|unclear"
+      ]
     },
     {
       "id": "anti-patterns",
       "weight": 2,
-      "pass_regex": ["anti.?pattern|smell|red flag|telling", "advice|generic|hand.?wav"]
+      "pass_regex": [
+        "anti.?pattern|smell|red flag|telling",
+        "advice|generic|hand.?wav"
+      ]
     },
     {
       "id": "verdict",
       "weight": 2,
-      "pass_regex": ["ACCEPT|REVISE|REWRITE", "because|reason"]
+      "pass_regex": [
+        "ACCEPT|REVISE|REWRITE",
+        "because|reason"
+      ]
     },
     {
       "id": "concrete-fixes",
       "weight": 2,
-      "pass_regex": ["replace|rewrite|add|specific", "example|fixture|reference"]
+      "pass_regex": [
+        "replace|rewrite|add|specific",
+        "example|fixture|reference"
+      ]
     }
   ],
   "decision_threshold": {

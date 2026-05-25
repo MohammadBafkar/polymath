@@ -8,33 +8,48 @@
     "polymath-engineering",
     "polymath-thinking"
   ],
-  "baseline_prompt": "Review this Express handler for security issues:\n```\napp.get('/me', (req, res) => {\n  const token = req.headers.authorization?.split(' ')[1];\n  const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());\n  res.json({ user: payload.sub });\n});\n```",
-  "polymath_prompt": "Use Polymath security owasp-review on this Express handler. Cite OWASP year + category, give finding ID + severity, and propose a concrete fix:\n```\napp.get('/me', (req, res) => {\n  const token = req.headers.authorization?.split(' ')[1];\n  const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());\n  res.json({ user: payload.sub });\n});\n```",
+  "baseline_prompt": "Review this Express handler for security issues. Cite the OWASP year + category, give a finding ID + severity, and propose a concrete fix with a regression test.\n```\napp.get('/me', (req, res) => {\n  const token = req.headers.authorization?.split(' ')[1];\n  const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());\n  res.json({ user: payload.sub });\n});\n```",
+  "polymath_prompt": "Review this Express handler for security issues. Cite the OWASP year + category, give a finding ID + severity, and propose a concrete fix with a regression test.\n```\napp.get('/me', (req, res) => {\n  const token = req.headers.authorization?.split(' ')[1];\n  const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());\n  res.json({ user: payload.sub });\n});\n``` Use Polymath's security owasp-review skill.",
   "rubric": [
     {
       "id": "owasp-category",
       "weight": 3,
-      "pass_regex": ["A0[1-9]|broken authentication|identification|cryptographic", "OWASP|2021|2023"]
+      "pass_regex": [
+        "A0[1-9]|broken authentication|identification|cryptographic",
+        "OWASP|2021|2023"
+      ]
     },
     {
       "id": "signature-verification",
       "weight": 3,
-      "pass_regex": ["verify|signature|jwt.verify|trust", "secret|key|algorithm"]
+      "pass_regex": [
+        "verify|signature|jwt.verify|trust",
+        "secret|key|algorithm"
+      ]
     },
     {
       "id": "finding-id",
       "weight": 1,
-      "pass_regex": ["finding|ID|severity", "high|critical|medium"]
+      "pass_regex": [
+        "finding|ID|severity",
+        "high|critical|medium"
+      ]
     },
     {
       "id": "fix-proposal",
       "weight": 2,
-      "pass_regex": ["jwt.verify|jose|verifySignature|library", "RS256|HS256|algorithm"]
+      "pass_regex": [
+        "jwt.verify|jose|verifySignature|library",
+        "RS256|HS256|algorithm"
+      ]
     },
     {
       "id": "test",
       "weight": 1,
-      "pass_regex": ["test|regression", "forged|invalid|malicious"]
+      "pass_regex": [
+        "test|regression",
+        "forged|invalid|malicious"
+      ]
     }
   ],
   "decision_threshold": {

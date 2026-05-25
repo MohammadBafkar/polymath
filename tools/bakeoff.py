@@ -92,7 +92,75 @@ def validate_case(path: pathlib.Path, data: dict[str, Any]) -> list[str]:
                     errors.append(f"decision_threshold.{key} must be an integer")
     if "timeout_seconds" in data and not isinstance(data["timeout_seconds"], int):
         errors.append("timeout_seconds must be an integer")
+    if "effort" in data and data["effort"] not in {"low", "medium", "high", "xhigh", "max"}:
+        errors.append("effort must be one of: low, medium, high, xhigh, max")
+    if "disable_tools" in data and not isinstance(data["disable_tools"], bool):
+        errors.append("disable_tools must be a boolean")
+    errors.extend(_check_rubric_leakage(data))
     return [f"{path}: {e}" for e in errors]
+
+
+_REGEX_META = re.compile(r"[.?*+\\(){}\[\]^$]")
+
+
+def _rubric_alternatives(rubric: list[Any]) -> list[tuple[str, str]]:
+    """Yield (rubric_id, literal_token) pairs for every alternative in every
+    pass_regex. Regex metacharacters are stripped; tokens shorter than 3
+    characters are dropped to avoid noise from words like 'or'."""
+    out: list[tuple[str, str]] = []
+    for item in rubric:
+        if not isinstance(item, dict):
+            continue
+        rid = item.get("id", "?")
+        for pattern in item.get("pass_regex") or []:
+            for alt in pattern.split("|"):
+                token = _REGEX_META.sub("", alt).strip()
+                if len(token) >= 3:
+                    out.append((rid, token))
+    return out
+
+
+def _check_rubric_leakage(data: dict[str, Any]) -> list[str]:
+    """A bakeoff is gameable if the polymath_prompt contains rubric pass-tokens
+    that the baseline_prompt does not. The polymath side then earns points the
+    baseline cannot, regardless of model quality. The honest contract: both
+    prompts share the same domain context; the only difference is the
+    'Use Polymath <X>' hint. Rubric tokens may appear in BOTH prompts (they
+    are part of the shared input) or in NEITHER (the rubric tests output
+    quality); they may not appear in only one.
+
+    Reports asymmetric appearances. Polymath-only is an error (engineered
+    advantage). Baseline-only is also an error (biased against Polymath)."""
+    rubric = data.get("rubric") or []
+    bp = (data.get("baseline_prompt") or "").lower()
+    pp = (data.get("polymath_prompt") or "").lower()
+    if not bp or not pp:
+        return []
+    errors: list[str] = []
+    seen: set[tuple[str, str, str]] = set()
+    for rid, token in _rubric_alternatives(rubric):
+        tk = token.lower()
+        in_b = tk in bp
+        in_p = tk in pp
+        if in_p and not in_b:
+            key = (rid, tk, "polymath-only")
+            if key not in seen:
+                errors.append(
+                    f"rubric leak: pass-token {token!r} (rubric {rid!r}) appears "
+                    f"in polymath_prompt but not in baseline_prompt — engineered "
+                    f"advantage for Polymath"
+                )
+                seen.add(key)
+        elif in_b and not in_p:
+            key = (rid, tk, "baseline-only")
+            if key not in seen:
+                errors.append(
+                    f"rubric leak: pass-token {token!r} (rubric {rid!r}) appears "
+                    f"in baseline_prompt but not in polymath_prompt — biased "
+                    f"against Polymath"
+                )
+                seen.add(key)
+    return errors
 
 
 def check() -> int:
@@ -133,15 +201,22 @@ def score_output(case: dict[str, Any], output: str) -> dict[str, Any]:
 
 
 def run_cmd(args: list[str], cwd: pathlib.Path, timeout: int) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        args,
-        cwd=cwd,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        timeout=timeout,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            args,
+            cwd=cwd,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout or ""
+        if exc.stderr:
+            output += exc.stderr
+        output += f"\n[TIMEOUT after {timeout}s]\n"
+        return subprocess.CompletedProcess(args, 124, output, None)
 
 
 def init_scratch() -> pathlib.Path:
@@ -170,7 +245,18 @@ def run_variant(case: dict[str, Any], variant: str) -> dict[str, Any]:
                 install = run_cmd(["claude", "plugin", "install", f"{plugin}@polymath"], scratch, 60)
                 if install.returncode != 0:
                     raise CaseError(f"plugin install failed for {plugin}:\n{install.stdout}")
-        result = run_cmd(["claude", "-p", prompt], scratch, timeout)
+        args = [
+            "claude",
+            "-p",
+            "--permission-mode",
+            "dontAsk",
+            "--no-session-persistence",
+        ]
+        if case.get("disable_tools", True):
+            args.extend(["--tools", ""])
+        effort = case.get("effort", "low")
+        args.extend(["--effort", effort, prompt])
+        result = run_cmd(args, scratch, timeout)
         output = result.stdout
         scored = score_output(case, output)
         return {
@@ -199,7 +285,9 @@ def run(case_ids: list[str], out_dir: pathlib.Path) -> int:
             fail = 1
             continue
         _, case = cases[case_id]
+        print(f"{case_id}: running baseline", flush=True)
         baseline = run_variant(case, "baseline")
+        print(f"{case_id}: running polymath", flush=True)
         polymath = run_variant(case, "polymath")
         delta = polymath["score"] - baseline["score"]
         report = {
@@ -216,7 +304,12 @@ def run(case_ids: list[str], out_dir: pathlib.Path) -> int:
         threshold = case.get("decision_threshold", {})
         min_score = int(threshold.get("minimum_polymath_score", 0))
         min_delta = int(threshold.get("minimum_delta", 0))
-        passed = polymath["score"] >= min_score and delta >= min_delta
+        passed = (
+            baseline["returncode"] == 0
+            and polymath["returncode"] == 0
+            and polymath["score"] >= min_score
+            and delta >= min_delta
+        )
         print(
             f"{case_id}: baseline={baseline['score']} polymath={polymath['score']} "
             f"delta={delta} -> {'PASS' if passed else 'FAIL'}"

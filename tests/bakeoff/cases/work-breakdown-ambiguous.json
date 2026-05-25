@@ -8,33 +8,48 @@
     "polymath-thinking",
     "polymath-decisions"
   ],
-  "baseline_prompt": "Break down the initiative 'reduce checkout abandonment by 20% this quarter' into engineering work. List concrete tasks, dependencies, and the critical path.",
-  "polymath_prompt": "Use Polymath planning + thinking to decompose 'reduce checkout abandonment by 20% this quarter'. Apply work-breakdown, surface the critical path, name explicit out-of-scope items, and tag each leaf with a t-shirt estimate.",
+  "baseline_prompt": "Decompose the initiative 'reduce checkout abandonment by 20% this quarter' into engineering work. Produce PR-sized leaf tasks tagged with t-shirt estimates (XS / S / M / L). Identify the critical path and the first blocker that has to land before anything else can. Name explicit out-of-scope items so scope creep is visible. Assign owners (TBD where unclear) and surface the assumptions or metrics that need clarifying before work starts.",
+  "polymath_prompt": "Decompose the initiative 'reduce checkout abandonment by 20% this quarter' into engineering work. Produce PR-sized leaf tasks tagged with t-shirt estimates (XS / S / M / L). Identify the critical path and the first blocker that has to land before anything else can. Name explicit out-of-scope items so scope creep is visible. Assign owners (TBD where unclear) and surface the assumptions or metrics that need clarifying before work starts. Use Polymath's planning work-breakdown and decisions tradeoff-matrix skills.",
   "rubric": [
     {
       "id": "leaves-pr-sized",
       "weight": 2,
-      "pass_regex": ["PR|pull request|leaf|smallest|atomic", "size|estimate|XS|S|M|L"]
+      "pass_regex": [
+        "PR|pull request|leaf|smallest|atomic",
+        "size|estimate|XS|S|M|L"
+      ]
     },
     {
       "id": "critical-path",
       "weight": 2,
-      "pass_regex": ["critical path|sequential|blocker|dependency", "first|next|after"]
+      "pass_regex": [
+        "critical path|sequential|blocker|dependency",
+        "first|next|after"
+      ]
     },
     {
       "id": "out-of-scope",
       "weight": 2,
-      "pass_regex": ["out of scope|not in scope|deferred|won't", "scope creep|focus|cut"]
+      "pass_regex": [
+        "out of scope|not in scope|deferred|won't",
+        "scope creep|focus|cut"
+      ]
     },
     {
       "id": "owners",
       "weight": 2,
-      "pass_regex": ["owner|assignee|responsible", "TBD|team|engineer"]
+      "pass_regex": [
+        "owner|assignee|responsible",
+        "TBD|team|engineer"
+      ]
     },
     {
       "id": "ambiguity-resolution",
       "weight": 2,
-      "pass_regex": ["assumption|clarify|ambiguous|measure", "metric|baseline|hypothesis"]
+      "pass_regex": [
+        "assumption|clarify|ambiguous|measure",
+        "metric|baseline|hypothesis"
+      ]
     }
   ],
   "decision_threshold": {

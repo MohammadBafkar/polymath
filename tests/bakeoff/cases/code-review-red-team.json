@@ -8,33 +8,48 @@
     "polymath-thinking",
     "polymath-qa"
   ],
-  "baseline_prompt": "Review this diff. Find any bugs, missing tests, or design issues. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n```",
-  "polymath_prompt": "Use Polymath engineering code-review + red-team on this diff. Find correctness issues, missing tests, and adversarial scenarios. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n```",
+  "baseline_prompt": "Review this diff for correctness issues, missing tests, design problems, and adversarial scenarios. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n```",
+  "polymath_prompt": "Review this diff for correctness issues, missing tests, design problems, and adversarial scenarios. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n``` Use Polymath's code-review and red-team skills.",
   "rubric": [
     {
       "id": "race-condition",
       "weight": 3,
-      "pass_regex": ["race|concurrent|thread|atomic|lock", "fetch|cache|stampede"]
+      "pass_regex": [
+        "race|concurrent|thread|atomic",
+        "fetch|stampede|double.?fill"
+      ]
     },
     {
       "id": "missing-tests",
       "weight": 2,
-      "pass_regex": ["test|coverage|missing", "concurrent|edge|expired|negative"]
+      "pass_regex": [
+        "test|coverage",
+        "concurrent|edge|expired|negative"
+      ]
     },
     {
       "id": "fix-proposal",
       "weight": 2,
-      "pass_regex": ["lock|mutex|single.?flight|atomic|cache.?stampede", "guard|protect"]
+      "pass_regex": [
+        "lock|mutex|single.?flight|atomic|serialize",
+        "guard|protect|critical section"
+      ]
     },
     {
       "id": "adversarial",
       "weight": 2,
-      "pass_regex": ["adversarial|red.?team|attacker|abuse", "burst|hot|flood"]
+      "pass_regex": [
+        "attack|abuse|adversar|hostile",
+        "burst|hot key|flood|thundering"
+      ]
     },
     {
       "id": "trade-off",
       "weight": 1,
-      "pass_regex": ["trade.?off|latency|throughput|memory", "simple|complex"]
+      "pass_regex": [
+        "trade.?off|cost|implication",
+        "latency|throughput|memory|complexity"
+      ]
     }
   ],
   "decision_threshold": {

@@ -9,33 +9,48 @@
     "polymath-release",
     "polymath-flows"
   ],
-  "baseline_prompt": "We need to rate-limit /login. Draft the work needed to ship it safely, including requirements, implementation, tests, rollout, and PR summary.",
-  "polymath_prompt": "Use Polymath's shipFeature workflow for title='Rate-limit /login' scope=small. Produce the PRD, implementation plan, verification approach, rollout risks, and PR summary.",
+  "baseline_prompt": "We need to rate-limit /login. Produce the requirements document (with Given/When/Then acceptance criteria), the smallest safe implementation plan, the verification approach (including negative and boundary tests), rollout risks (feature flag, rollback, 429 behaviour, abuse considerations), and a PR summary with monitoring and observability notes.",
+  "polymath_prompt": "We need to rate-limit /login. Produce the requirements document (with Given/When/Then acceptance criteria), the smallest safe implementation plan, the verification approach (including negative and boundary tests), rollout risks (feature flag, rollback, 429 behaviour, abuse considerations), and a PR summary with monitoring and observability notes. Use Polymath's shipFeature workflow with title='Rate-limit /login' scope=small.",
   "rubric": [
     {
       "id": "requirements",
       "weight": 2,
-      "pass_regex": ["PRD|requirements|problem", "acceptance|Given|When|Then"]
+      "pass_regex": [
+        "PRD|requirements|problem",
+        "acceptance|Given|When|Then"
+      ]
     },
     {
       "id": "implementation",
       "weight": 2,
-      "pass_regex": ["implementation|change plan|code", "smallest|incremental|safe"]
+      "pass_regex": [
+        "implementation|change plan|code",
+        "smallest|incremental|safe"
+      ]
     },
     {
       "id": "verification",
       "weight": 2,
-      "pass_regex": ["test|tests|verified|verification", "negative|boundary|regression"]
+      "pass_regex": [
+        "test|tests|verified|verification",
+        "negative|boundary|regression"
+      ]
     },
     {
       "id": "risk",
       "weight": 2,
-      "pass_regex": ["risk|rollback|feature flag|rollout", "429|rate limit|abuse"]
+      "pass_regex": [
+        "risk|rollback|feature flag|rollout",
+        "429|rate limit|abuse"
+      ]
     },
     {
       "id": "release",
       "weight": 2,
-      "pass_regex": ["PR|pull request|changelog|release", "monitor|metric|observability"]
+      "pass_regex": [
+        "PR|pull request|changelog|release",
+        "monitor|metric|observability"
+      ]
     }
   ],
   "decision_threshold": {
