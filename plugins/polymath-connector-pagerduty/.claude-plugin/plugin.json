@@ -7,8 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "pagerduty", "incident", "oncall"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "pagerduty",
+    "incident",
+    "oncall"
+  ],
   "userConfig": {
     "pagerdutyApiKey": {
       "type": "string",

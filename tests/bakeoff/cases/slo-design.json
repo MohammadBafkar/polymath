@@ -1,0 +1,45 @@
+{
+  "id": "slo-design",
+  "title": "SRE: design an SLO for a checkout journey",
+  "task": "Pick the right SLI for the /checkout submit journey, set a 28-day error-budget-grounded target, and document the measurement.",
+  "plugins": [
+    "polymath-core",
+    "polymath-sre",
+    "polymath-observability",
+    "polymath-decisions"
+  ],
+  "baseline_prompt": "Design an SLO for the /checkout submit journey. What should we measure, what target, and how do we monitor it?",
+  "polymath_prompt": "Use Polymath SRE slo-design. Pick the right SLI for the /checkout submit critical user journey, set the threshold by 28-day error-budget arithmetic, and document the measurement.",
+  "rubric": [
+    {
+      "id": "user-journey",
+      "weight": 2,
+      "pass_regex": ["critical user journey|CUJ|user|journey", "checkout|submit|payment"]
+    },
+    {
+      "id": "sli-choice",
+      "weight": 2,
+      "pass_regex": ["availability|latency|success rate|error rate", "request|HTTP|status"]
+    },
+    {
+      "id": "error-budget",
+      "weight": 3,
+      "pass_regex": ["error budget|28.?day|99|target|threshold", "minute|hour|allow"]
+    },
+    {
+      "id": "measurement",
+      "weight": 2,
+      "pass_regex": ["measure|prometheus|datadog|opentelemetry|query", "metric|trace|log"]
+    },
+    {
+      "id": "trade-off",
+      "weight": 1,
+      "pass_regex": ["trade.?off|cost|alert fatigue|too strict|too loose", "burn rate|window"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

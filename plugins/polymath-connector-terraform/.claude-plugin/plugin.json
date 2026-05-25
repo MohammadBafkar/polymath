@@ -1,11 +1,22 @@
 {
   "name": "polymath-connector-terraform",
   "version": "0.1.0",
-  "description": "Terraform connector: skill that reviews a plan diff for destructive resource actions, drift, and missing-targets — pairs with polymath-infra-aws/gcp/azure.",
+  "description": "Terraform connector: skill that reviews a plan diff for destructive resource actions, drift, and missing-targets \u2014 pairs with polymath-infra-aws/gcp/azure.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "terraform", "infrastructure", "iac", "polymath-cli-only"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "terraform",
+    "infrastructure",
+    "iac",
+    "polymath-cli-only"
+  ],
   "userConfig": {
     "terraformBinary": {
       "type": "string",

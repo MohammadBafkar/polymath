@@ -5,6 +5,7 @@ Thinking craft for the Polymath marketplace. Divergence, root-cause, prospective
 ## What it ships
 
 - Skills: `brainstorm`, `5-whys`, `pre-mortem`, `red-team`.
+- Agents: `architecture-critic` for fresh-context ADR/design challenge.
 
 ## Installation
 

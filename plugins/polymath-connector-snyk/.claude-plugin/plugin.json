@@ -7,13 +7,21 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "snyk", "security", "vulnerabilities", "sca"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "snyk",
+    "security",
+    "vulnerabilities",
+    "sca"
+  ],
   "userConfig": {
     "snykToken": {
       "type": "string",
       "title": "Snyk API token",
-      "description": "Snyk auth token (Account settings → General → Auth Token).",
+      "description": "Snyk auth token (Account settings \u2192 General \u2192 Auth Token).",
       "sensitive": true,
       "required": true
     },

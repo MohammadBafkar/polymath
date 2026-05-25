@@ -3,14 +3,23 @@
   "version": "0.1.0",
   "description": "LaunchDarkly connector: MCP for flag list/get/update + Stop hook reminding flag-check at end of turn when the diff touches code behind a flag.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "launchdarkly", "feature-flags"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "launchdarkly",
+    "feature-flags"
+  ],
   "userConfig": {
     "launchdarklyApiKey": {
       "type": "string",
       "title": "LaunchDarkly API access token",
-      "description": "Service token from LaunchDarkly Account settings → Authorization. Read-only for triage; writer for flag updates.",
+      "description": "Service token from LaunchDarkly Account settings \u2192 Authorization. Read-only for triage; writer for flag updates.",
       "sensitive": true,
       "required": true
     },

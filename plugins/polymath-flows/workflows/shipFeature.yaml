@@ -57,16 +57,37 @@ steps:
     artifacts:
       - docs/pr/${workflow.slug}.md
 mustPass:
+  # Strong-deterministic gates — these are the load-bearing checks.
+  - id: prd-strict
+    type: artifactSchemaStrict
+    path: docs/prds/${workflow.slug}.md
+    artifact: PRD
+    minBodyChars: 200
+  - id: implement-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 200
+    linesChanged:
+      max: 5000
+    pathBlocklist:
+      - ".git/**"
+  # Weak gates — kept for human-readability of the run report but cannot pass
+  # the workflow on their own. Hollow stubs satisfy these; only the strong
+  # gates above guarantee real work.
   - id: prd-exists
     type: fileExists
     path: docs/prds/${workflow.slug}.md
-  - id: tests-mentioned
-    type: stepSummaryMatches
-    step: verify
-    pattern: "(test|tests|verified|verification)"
   - id: changelog-touched
     type: fileExists
     path: CHANGELOG.md
   - id: pr-draft-exists
     type: fileExists
     path: docs/pr/${workflow.slug}.md
+  # Advisory — informs the run report; does not block on its own. The verify
+  # step's claim that tests ran is double-checked by the diffConstraint above.
+  - id: tests-mentioned
+    type: stepSummaryMatches
+    severity: advisory
+    step: verify
+    pattern: "(test|tests|verified|verification)"

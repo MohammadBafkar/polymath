@@ -15,6 +15,12 @@
       "evidence": "JSON field presence check"
     },
     {
+      "id": "MANIFEST-3",
+      "level": "required",
+      "description": "Each plugin declares a marketplace maturity `status` in `.claude-plugin/marketplace.json`: stable, beta, experimental, or deprecated.",
+      "evidence": "marketplace.json status field check"
+    },
+    {
       "id": "BUDGET-1",
       "level": "required",
       "description": "Plugin's always-on listing cost ≤ 400 tokens per `claude plugin details`.",
@@ -55,6 +61,12 @@
       "level": "required",
       "description": "Plugin has at least one fixture under `tests/golden/<plugin>/<scenario>.md` with parseable YAML frontmatter declaring `plugin`, `scenario`, and `expect`.",
       "evidence": "tests/golden/<plugin>/*.md"
+    },
+    {
+      "id": "AGENT-1",
+      "level": "required",
+      "description": "Every plugin-shipped agent has frontmatter, no forbidden subagent fields, a no-agent baseline evidence record, and a matching golden fixture.",
+      "evidence": "tools/check-agent-evidence.py --plugin <plugin>"
     },
     {
       "id": "DESCRIPTION-1",

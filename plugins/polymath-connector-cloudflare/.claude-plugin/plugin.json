@@ -3,14 +3,24 @@
   "version": "0.1.0",
   "description": "Cloudflare connector: MCP for zones/DNS/Workers + edge-incident-triage skill that separates origin failure from edge failure from WAF rule.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "cloudflare", "edge", "cdn"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "cloudflare",
+    "edge",
+    "cdn"
+  ],
   "userConfig": {
     "cloudflareApiToken": {
       "type": "string",
       "title": "Cloudflare API token",
-      "description": "Scoped API token from Cloudflare → Profile → API Tokens. Avoid Global API Keys.",
+      "description": "Scoped API token from Cloudflare \u2192 Profile \u2192 API Tokens. Avoid Global API Keys.",
       "sensitive": true,
       "required": true
     },

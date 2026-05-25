@@ -7,6 +7,13 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["leadership", "1on1", "perf-review", "okr"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "leadership",
+    "1on1",
+    "perf-review",
+    "okr"
+  ]
 }

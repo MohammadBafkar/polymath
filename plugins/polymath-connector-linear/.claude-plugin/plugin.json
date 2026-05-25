@@ -7,13 +7,20 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "linear", "issues", "mcp"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "linear",
+    "issues",
+    "mcp"
+  ],
   "userConfig": {
     "linearApiKey": {
       "type": "string",
       "title": "Linear API key",
-      "description": "Personal API key from Linear Settings → API. Personal keys act as the user; prefer a service-account where Linear supports it.",
+      "description": "Personal API key from Linear Settings \u2192 API. Personal keys act as the user; prefer a service-account where Linear supports it.",
       "sensitive": true,
       "required": true
     }

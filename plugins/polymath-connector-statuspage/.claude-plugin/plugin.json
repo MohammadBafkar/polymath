@@ -3,14 +3,24 @@
   "version": "0.1.0",
   "description": "Statuspage connector: MCP for incident lifecycle (create/update/resolve) + skill that maps polymath-incident severity to public status, scoped components, and customer-readable copy.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "statuspage", "incident", "public-comms"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "statuspage",
+    "incident",
+    "public-comms"
+  ],
   "userConfig": {
     "statuspageApiKey": {
       "type": "string",
       "title": "Statuspage API key",
-      "description": "API key from Statuspage → User settings → API. Page-scoped; do not reuse personal keys across pages.",
+      "description": "API key from Statuspage \u2192 User settings \u2192 API. Page-scoped; do not reuse personal keys across pages.",
       "sensitive": true,
       "required": true
     },

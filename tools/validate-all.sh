@@ -77,6 +77,12 @@ for plugin in "$plugins_dir"/*/; do
     fi
   done < <(find "$plugin/commands" -maxdepth 1 -type f -name "*.md" -print0 2>/dev/null)
 
+  while IFS= read -r -d '' agent; do
+    if ! check_frontmatter_lines "$agent"; then
+      fail=1
+    fi
+  done < <(find "$plugin/agents" -maxdepth 1 -type f -name "*.md" -print0 2>/dev/null)
+
   echo "::endgroup::"
 done
 

@@ -7,6 +7,14 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["sre", "slo", "sli", "error-budget", "chaos"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "sre",
+    "slo",
+    "sli",
+    "error-budget",
+    "chaos"
+  ]
 }

@@ -7,6 +7,13 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["incident", "postmortem", "comms", "sev1"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "incident",
+    "postmortem",
+    "comms",
+    "sev1"
+  ]
 }

@@ -7,8 +7,16 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "github", "mcp", "pr", "issue"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "github",
+    "mcp",
+    "pr",
+    "issue"
+  ],
   "userConfig": {
     "githubToken": {
       "type": "string",

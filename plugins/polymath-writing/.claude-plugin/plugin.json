@@ -7,6 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["writing", "adr", "rfc", "runbook", "c4", "architecture"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "writing",
+    "adr",
+    "rfc",
+    "runbook",
+    "c4",
+    "architecture"
+  ]
 }

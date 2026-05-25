@@ -70,19 +70,37 @@ steps:
     artifacts:
       - docs/pr/${workflow.slug}.md
 mustPass:
+  # Strong-deterministic gates.
+  - id: prd-strict
+    type: artifactSchemaStrict
+    path: docs/prds/${workflow.slug}.md
+    artifact: PRD
+    minBodyChars: 200
+  - id: implement-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 200
+    linesChanged:
+      max: 5000
+    pathBlocklist:
+      - ".git/**"
+  # Weak gates — kept for human-readability of the run report.
   - id: interview-guide-exists
     type: fileExists
     path: docs/research/${workflow.slug}-guide.md
   - id: prd-exists
     type: fileExists
     path: docs/prds/${workflow.slug}.md
-  - id: tests-mentioned
-    type: stepSummaryMatches
-    step: verify
-    pattern: "(test|tests|verified|verification)"
   - id: changelog-touched
     type: fileExists
     path: CHANGELOG.md
   - id: pr-draft-exists
     type: fileExists
     path: docs/pr/${workflow.slug}.md
+  # Advisory — informs the run report; does not block on its own.
+  - id: tests-mentioned
+    type: stepSummaryMatches
+    severity: advisory
+    step: verify
+    pattern: "(test|tests|verified|verification)"

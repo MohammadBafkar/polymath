@@ -7,6 +7,14 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["ai", "llm", "prompt", "rag", "eval"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "prompt",
+    "rag",
+    "eval"
+  ]
 }

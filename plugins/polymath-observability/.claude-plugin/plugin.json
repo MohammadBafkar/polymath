@@ -7,6 +7,16 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["observability", "logging", "tracing", "otel", "metrics", "red", "use"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "observability",
+    "logging",
+    "tracing",
+    "otel",
+    "metrics",
+    "red",
+    "use"
+  ]
 }

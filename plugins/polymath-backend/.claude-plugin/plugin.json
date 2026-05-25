@@ -7,6 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core", "polymath-engineering"],
-  "keywords": ["backend", "api", "rest", "schema", "migration"]
+  "dependencies": [
+    "polymath-core",
+    "polymath-engineering"
+  ],
+  "keywords": [
+    "backend",
+    "api",
+    "rest",
+    "schema",
+    "migration"
+  ]
 }

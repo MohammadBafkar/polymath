@@ -1,0 +1,45 @@
+{
+  "id": "adr-store-choice",
+  "title": "ADR: choose a rate-limit counter store",
+  "task": "Choose between Redis, Postgres, gateway-native rate limiting, and local token bucket fallback for /login counters.",
+  "plugins": [
+    "polymath-core",
+    "polymath-writing",
+    "polymath-thinking",
+    "polymath-decisions"
+  ],
+  "baseline_prompt": "Write an ADR choosing a backing store for /login rate-limit counters. Consider Redis, Postgres, gateway-native rate limiting, and local token bucket fallback.",
+  "polymath_prompt": "Use Polymath ADR/tradeoff thinking. Write an ADR choosing a backing store for /login rate-limit counters, then challenge it with the architecture-critic agent.",
+  "rubric": [
+    {
+      "id": "decision",
+      "weight": 2,
+      "pass_regex": ["decision|status|context", "Redis|Postgres|gateway|token bucket"]
+    },
+    {
+      "id": "alternatives",
+      "weight": 2,
+      "pass_regex": ["alternative|considered", "gateway|token bucket|Postgres"]
+    },
+    {
+      "id": "consequences",
+      "weight": 2,
+      "pass_regex": ["consequence|trade.?off", "latency|availability|operational"]
+    },
+    {
+      "id": "critique",
+      "weight": 2,
+      "pass_regex": ["assumption|fatal|patchable|critic", "partition|outage|fail"]
+    },
+    {
+      "id": "validation",
+      "weight": 2,
+      "pass_regex": ["test|validate|experiment", "rollback|migration|reversible"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

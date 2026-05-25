@@ -4,6 +4,7 @@
 
 ### Added
 
+- mustPass v0.2 contract — `artifactSchemaStrict`, `diffConstraint`, and per-check `severity` (advisory / blocking). `stepSummaryMatches` is now advisory by default. `polymath-flow validate` warns when a workflow lacks any strong-deterministic blocking gate. `shipFeature.yaml` migrated to the new gates; the hollow-run falsifiability anchor (unit test + CI job) proves the gates are load-bearing. See the root `CHANGELOG.md` for the full description.
 - Initial v0.1 components: `run-workflow`, `resume-workflow`, `list-workflows` skills.
 - `bin/polymath-flow` deterministic executable (validate, start, next, complete, fail, resume, assert, list).
 - `workflows/shipFeature.yaml` — PRD → acceptance → implement → review → verify → changelog → PR draft.

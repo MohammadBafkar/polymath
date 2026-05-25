@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "description": "Elastic / Elasticsearch connector: MCP for index/search + log-search skill that builds time-bounded, field-typed queries and refuses unbounded scans.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "elastic", "elasticsearch", "logs"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "elastic",
+    "elasticsearch",
+    "logs"
+  ],
   "userConfig": {
     "elasticEndpoint": {
       "type": "string",

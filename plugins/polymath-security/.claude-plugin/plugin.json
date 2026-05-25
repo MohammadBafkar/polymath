@@ -7,6 +7,13 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["security", "stride", "owasp", "appsec"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "security",
+    "stride",
+    "owasp",
+    "appsec"
+  ]
 }

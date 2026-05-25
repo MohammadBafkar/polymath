@@ -14,7 +14,7 @@ inputs:
     type: string
     required: true
     description: PR identifier or branch name; used only for the slug.
-  - name: diff_path
+  - name: diffPath
     type: string
     required: false
     default: "."
@@ -26,7 +26,7 @@ guards:
 steps:
   - id: orient
     invoke: polymath-engineering:read-code
-    prompt: Orient in the changed area of ${inputs.diff_path}. Produce a short codebase map under docs/reviews/${workflow.slug}-orient.md.
+    prompt: Orient in the changed area of ${inputs.diffPath}. Produce a short codebase map under docs/reviews/${workflow.slug}-orient.md.
     artifacts:
       - docs/reviews/${workflow.slug}-orient.md
   - id: correctness
@@ -64,11 +64,22 @@ steps:
     artifacts:
       - docs/reviews/${workflow.slug}.md
 mustPass:
+  # Strong-deterministic gate: a PR review produces a synthesis report
+  # plus four critic reports. min:5 — orient + 4 critic docs + synthesis;
+  # the workflow is read-only outside docs/reviews/.
+  - id: review-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 5
+      max: 20
+    pathAllowlist:
+      - "docs/reviews/**"
   - id: review-exists
     type: fileExists
     path: docs/reviews/${workflow.slug}.md
   - id: critics-all-ran
     type: stepSummaryMatches
+    severity: advisory
     step: synthesize
     pattern: "(correctness|coverage|security|challenge)"
   - id: orient-exists

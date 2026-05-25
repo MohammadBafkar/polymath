@@ -1,0 +1,45 @@
+{
+  "id": "work-breakdown-ambiguous",
+  "title": "Plan: decompose an ambiguous initiative",
+  "task": "Break an ambiguous quarterly initiative ('reduce checkout abandonment') into PR-sized leaf tasks with explicit critical path, owners, and out-of-scope items.",
+  "plugins": [
+    "polymath-core",
+    "polymath-planning",
+    "polymath-thinking",
+    "polymath-decisions"
+  ],
+  "baseline_prompt": "Break down the initiative 'reduce checkout abandonment by 20% this quarter' into engineering work. List concrete tasks, dependencies, and the critical path.",
+  "polymath_prompt": "Use Polymath planning + thinking to decompose 'reduce checkout abandonment by 20% this quarter'. Apply work-breakdown, surface the critical path, name explicit out-of-scope items, and tag each leaf with a t-shirt estimate.",
+  "rubric": [
+    {
+      "id": "leaves-pr-sized",
+      "weight": 2,
+      "pass_regex": ["PR|pull request|leaf|smallest|atomic", "size|estimate|XS|S|M|L"]
+    },
+    {
+      "id": "critical-path",
+      "weight": 2,
+      "pass_regex": ["critical path|sequential|blocker|dependency", "first|next|after"]
+    },
+    {
+      "id": "out-of-scope",
+      "weight": 2,
+      "pass_regex": ["out of scope|not in scope|deferred|won't", "scope creep|focus|cut"]
+    },
+    {
+      "id": "owners",
+      "weight": 2,
+      "pass_regex": ["owner|assignee|responsible", "TBD|team|engineer"]
+    },
+    {
+      "id": "ambiguity-resolution",
+      "weight": 2,
+      "pass_regex": ["assumption|clarify|ambiguous|measure", "metric|baseline|hypothesis"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

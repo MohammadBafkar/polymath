@@ -18,7 +18,12 @@
       "description": "Foundation: conventions, glossary, tone references, plugin-budget reporter, SessionStart hook.",
       "version": "0.1.0",
       "category": "foundation",
-      "tags": ["foundation", "core", "conventions"]
+      "tags": [
+        "foundation",
+        "core",
+        "conventions"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-product",
@@ -26,7 +31,12 @@
       "description": "Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.",
       "version": "0.1.0",
       "category": "product",
-      "tags": ["product", "prd", "acceptance-criteria"]
+      "tags": [
+        "product",
+        "prd",
+        "acceptance-criteria"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-engineering",
@@ -34,7 +44,12 @@
       "description": "Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation.",
       "version": "0.1.0",
       "category": "engineering",
-      "tags": ["engineering", "tdd", "code-review"]
+      "tags": [
+        "engineering",
+        "tdd",
+        "code-review"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-release",
@@ -42,7 +57,12 @@
       "description": "Release craft: Conventional Commits, PR descriptions, CHANGELOG, release notes.",
       "version": "0.1.0",
       "category": "release",
-      "tags": ["release", "changelog", "conventional-commits"]
+      "tags": [
+        "release",
+        "changelog",
+        "conventional-commits"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-flows",
@@ -50,7 +70,13 @@
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
       "version": "0.1.0",
       "category": "orchestration",
-      "tags": ["orchestration", "workflow", "shipFeature", "reviewPR"]
+      "tags": [
+        "orchestration",
+        "workflow",
+        "shipFeature",
+        "reviewPR"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-thinking",
@@ -58,7 +84,14 @@
       "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.",
       "version": "0.1.0",
       "category": "thinking",
-      "tags": ["thinking", "brainstorm", "5-whys", "pre-mortem", "red-team"]
+      "tags": [
+        "thinking",
+        "brainstorm",
+        "5-whys",
+        "pre-mortem",
+        "red-team"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-planning",
@@ -66,7 +99,12 @@
       "description": "Planning craft: write-plan, work-breakdown, three-point estimate.",
       "version": "0.1.0",
       "category": "planning",
-      "tags": ["planning", "wbs", "estimate"]
+      "tags": [
+        "planning",
+        "wbs",
+        "estimate"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-writing",
@@ -74,7 +112,14 @@
       "description": "Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.",
       "version": "0.1.0",
       "category": "writing",
-      "tags": ["writing", "adr", "rfc", "runbook", "c4"]
+      "tags": [
+        "writing",
+        "adr",
+        "rfc",
+        "runbook",
+        "c4"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-qa",
@@ -82,7 +127,12 @@
       "description": "Quality craft: test strategy, coverage-gap analysis, unit-test authoring.",
       "version": "0.1.0",
       "category": "quality",
-      "tags": ["qa", "tests", "coverage"]
+      "tags": [
+        "qa",
+        "tests",
+        "coverage"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-security",
@@ -90,7 +140,12 @@
       "description": "Security craft: STRIDE threat modeling, OWASP Top 10 diff review.",
       "version": "0.1.0",
       "category": "security",
-      "tags": ["security", "stride", "owasp"]
+      "tags": [
+        "security",
+        "stride",
+        "owasp"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-frontend",
@@ -98,7 +153,12 @@
       "description": "Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.",
       "version": "0.1.0",
       "category": "engineering",
-      "tags": ["frontend", "web-vitals", "bundle"]
+      "tags": [
+        "frontend",
+        "web-vitals",
+        "bundle"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-backend",
@@ -106,7 +166,13 @@
       "description": "Backend craft: REST API design, relational schema design, safe online migrations.",
       "version": "0.1.0",
       "category": "engineering",
-      "tags": ["backend", "api", "rest", "migrations"]
+      "tags": [
+        "backend",
+        "api",
+        "rest",
+        "migrations"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-python",
@@ -114,7 +180,12 @@
       "description": "Python craft: pytest authoring, ruff linting, type annotations.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["python", "pytest", "ruff"]
+      "tags": [
+        "python",
+        "pytest",
+        "ruff"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-typescript",
@@ -122,7 +193,12 @@
       "description": "TypeScript craft: vitest authoring, biome linting, version migration.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["typescript", "vitest", "biome"]
+      "tags": [
+        "typescript",
+        "vitest",
+        "biome"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-dotnet",
@@ -130,7 +206,12 @@
       "description": ".NET craft: xUnit authoring, csproj modernization audit, nullable rollout.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["dotnet", "csharp", "xunit"]
+      "tags": [
+        "dotnet",
+        "csharp",
+        "xunit"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-go",
@@ -138,7 +219,13 @@
       "description": "Go craft: table-driven testing.T tests with t.Cleanup, go.mod modernization + govulncheck-reachable findings.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["go", "golang", "testing", "go-mod"]
+      "tags": [
+        "go",
+        "golang",
+        "testing",
+        "go-mod"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-rust",
@@ -146,7 +233,13 @@
       "description": "Rust craft: #[test]/#[tokio::test]/proptest! patterns; Cargo.toml edition + MSRV + workspace inheritance + cargo-audit/cargo-deny hygiene.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["rust", "cargo", "tokio", "proptest"]
+      "tags": [
+        "rust",
+        "cargo",
+        "tokio",
+        "proptest"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-java",
@@ -154,7 +247,14 @@
       "description": "Java craft: JUnit 5 + AssertJ + Mockito idiom (@ParameterizedTest, @Nested); Maven/Gradle pinning + BOM + reachable vulnerabilities.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["java", "junit5", "assertj", "maven", "gradle"]
+      "tags": [
+        "java",
+        "junit5",
+        "assertj",
+        "maven",
+        "gradle"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-swift",
@@ -162,7 +262,13 @@
       "description": "Swift craft: XCTest or Swift Testing (async/await, @Test arguments); Package.swift tool/platform/pin discipline.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["swift", "xctest", "swift-testing", "spm"]
+      "tags": [
+        "swift",
+        "xctest",
+        "swift-testing",
+        "spm"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-kotlin",
@@ -170,7 +276,14 @@
       "description": "Kotlin craft: JUnit 5 + MockK + runTest, Kotest when present; build.gradle.kts toolchain + BOM + multi-module hygiene.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["kotlin", "junit5", "kotest", "mockk", "gradle"]
+      "tags": [
+        "kotlin",
+        "junit5",
+        "kotest",
+        "mockk",
+        "gradle"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-ruby",
@@ -178,7 +291,12 @@
       "description": "Ruby craft: RSpec idiom (describe/context/it, let/subject, instance_double, shared_examples); Gemfile + bundler-audit hygiene.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["ruby", "rspec", "bundler"]
+      "tags": [
+        "ruby",
+        "rspec",
+        "bundler"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-lang-php",
@@ -186,7 +304,13 @@
       "description": "PHP craft: PHPUnit 10+ attributes + Pest patterns + Mockery + PSR-20 clock; composer.json pin discipline + Roave/SecurityAdvisories.",
       "version": "0.1.0",
       "category": "languages",
-      "tags": ["php", "phpunit", "pest", "composer"]
+      "tags": [
+        "php",
+        "phpunit",
+        "pest",
+        "composer"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-data",
@@ -194,7 +318,12 @@
       "description": "Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.",
       "version": "0.1.0",
       "category": "data",
-      "tags": ["sql", "metrics", "analytics"]
+      "tags": [
+        "sql",
+        "metrics",
+        "analytics"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-ai",
@@ -202,7 +331,13 @@
       "description": "AI craft: prompt engineering, RAG architecture, eval-plan design.",
       "version": "0.1.0",
       "category": "ai",
-      "tags": ["ai", "llm", "rag", "eval"]
+      "tags": [
+        "ai",
+        "llm",
+        "rag",
+        "eval"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-platform",
@@ -210,7 +345,12 @@
       "description": "Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.",
       "version": "0.1.0",
       "category": "platform",
-      "tags": ["platform", "devex", "dora"]
+      "tags": [
+        "platform",
+        "devex",
+        "dora"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-docker",
@@ -218,7 +358,12 @@
       "description": "Docker craft: Dockerfile audit (base-image, multi-stage, USER, HEALTHCHECK, secrets) + compose audit (pinning, networks, secrets, depends_on).",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["docker", "containers", "compose"]
+      "tags": [
+        "docker",
+        "containers",
+        "compose"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-postgres",
@@ -226,7 +371,12 @@
       "description": "Postgres craft: review-migration (per-statement lock + multi-step NOT NULL rollout) + audit-pg-config (memory, connections, WAL, autovacuum).",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["postgres", "migrations", "database"]
+      "tags": [
+        "postgres",
+        "migrations",
+        "database"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-redis",
@@ -234,7 +384,12 @@
       "description": "Redis craft: design-cache-layer (versioned keys, jittered TTL, NX-lock stampede) + audit-redis-config (maxmemory, persistence, ACL, TLS).",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["redis", "cache", "key-value"]
+      "tags": [
+        "redis",
+        "cache",
+        "key-value"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-aws",
@@ -242,7 +397,12 @@
       "description": "AWS write-side: design-aws-pattern (Lambda/ECS/EKS, S3/EFS, RDS/DynamoDB/Aurora) with cost driver + ops shape + quantitative flip conditions.",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["aws", "infrastructure", "iac"]
+      "tags": [
+        "aws",
+        "infrastructure",
+        "iac"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-gcp",
@@ -250,7 +410,12 @@
       "description": "GCP write-side: design-gcp-pattern (Cloud Run/GKE/Functions, Cloud SQL/Spanner/Firestore, BigQuery) with cost driver + flip conditions.",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["gcp", "google-cloud", "infrastructure"]
+      "tags": [
+        "gcp",
+        "google-cloud",
+        "infrastructure"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-azure",
@@ -258,15 +423,25 @@
       "description": "Azure write-side: design-azure-pattern (Functions/Container Apps/App Service/AKS, Azure SQL/Cosmos/Postgres Flex) with cost driver + flip conditions.",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["azure", "infrastructure", "iac"]
+      "tags": [
+        "azure",
+        "infrastructure",
+        "iac"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-terraform-stack",
       "source": "./plugins/polymath-infra-terraform-stack",
-      "description": "Terraform composition: design-stack-composition picks blast-radius-aligned states, foundational→platform→service plumbing, workspaces vs directories.",
+      "description": "Terraform composition: design-stack-composition picks blast-radius-aligned states, foundational\u2192platform\u2192service plumbing, workspaces vs directories.",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["terraform", "modules", "state"]
+      "tags": [
+        "terraform",
+        "modules",
+        "state"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-devops",
@@ -274,7 +449,12 @@
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
       "version": "0.1.0",
       "category": "devops",
-      "tags": ["devops", "docker", "ci"]
+      "tags": [
+        "devops",
+        "docker",
+        "ci"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-infra-kubernetes",
@@ -282,7 +462,13 @@
       "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.",
       "version": "0.1.0",
       "category": "infra",
-      "tags": ["kubernetes", "k8s", "rbac", "pss"]
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "rbac",
+        "pss"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-sre",
@@ -290,7 +476,12 @@
       "description": "SRE craft: SLO design, error-budget policy, chaos experiment design.",
       "version": "0.1.0",
       "category": "sre",
-      "tags": ["sre", "slo", "chaos"]
+      "tags": [
+        "sre",
+        "slo",
+        "chaos"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-observability",
@@ -298,7 +489,13 @@
       "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design.",
       "version": "0.1.0",
       "category": "observability",
-      "tags": ["observability", "tracing", "metrics", "otel"]
+      "tags": [
+        "observability",
+        "tracing",
+        "metrics",
+        "otel"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-incident",
@@ -306,7 +503,12 @@
       "description": "Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.",
       "version": "0.1.0",
       "category": "incident",
-      "tags": ["incident", "postmortem", "comms"]
+      "tags": [
+        "incident",
+        "postmortem",
+        "comms"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-github",
@@ -314,7 +516,12 @@
       "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "github", "mcp"]
+      "tags": [
+        "connector",
+        "github",
+        "mcp"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-github-actions",
@@ -322,7 +529,12 @@
       "description": "GitHub Actions companion: CI-failure diagnosis skill + Stop hook checking the latest run on the current branch.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "github-actions", "ci"]
+      "tags": [
+        "connector",
+        "github-actions",
+        "ci"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-jira",
@@ -330,7 +542,12 @@
       "description": "Jira connector: MCP for issues + UserPromptSubmit ticket-key detection (PROJ-123 / browse URLs).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "jira", "atlassian"]
+      "tags": [
+        "connector",
+        "jira",
+        "atlassian"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-pagerduty",
@@ -338,7 +555,12 @@
       "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "pagerduty", "incident"]
+      "tags": [
+        "connector",
+        "pagerduty",
+        "incident"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-datadog",
@@ -346,7 +568,12 @@
       "description": "Datadog connector: MCP for metrics/logs/dashboards + monitor authoring and incident-time querying skills.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "datadog", "observability"]
+      "tags": [
+        "connector",
+        "datadog",
+        "observability"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-snyk",
@@ -354,7 +581,12 @@
       "description": "Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "snyk", "security"]
+      "tags": [
+        "connector",
+        "snyk",
+        "security"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-author",
@@ -362,7 +594,12 @@
       "description": "Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.",
       "version": "0.1.0",
       "category": "author",
-      "tags": ["author", "governance", "conformance"]
+      "tags": [
+        "author",
+        "governance",
+        "conformance"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-decisions",
@@ -370,7 +607,13 @@
       "description": "Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.",
       "version": "0.1.0",
       "category": "decisions",
-      "tags": ["decisions", "daci", "tradeoff", "cynefin"]
+      "tags": [
+        "decisions",
+        "daci",
+        "tradeoff",
+        "cynefin"
+      ],
+      "status": "stable"
     },
     {
       "name": "polymath-research",
@@ -378,7 +621,13 @@
       "description": "Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.",
       "version": "0.1.0",
       "category": "research",
-      "tags": ["research", "interview", "persona", "journey"]
+      "tags": [
+        "research",
+        "interview",
+        "persona",
+        "journey"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-design",
@@ -386,7 +635,13 @@
       "description": "Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.",
       "version": "0.1.0",
       "category": "design",
-      "tags": ["design", "a11y", "wcag", "ui"]
+      "tags": [
+        "design",
+        "a11y",
+        "wcag",
+        "ui"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-communication",
@@ -394,7 +649,12 @@
       "description": "Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.",
       "version": "0.1.0",
       "category": "communication",
-      "tags": ["communication", "exec-brief", "six-pager"]
+      "tags": [
+        "communication",
+        "exec-brief",
+        "six-pager"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-leadership",
@@ -402,7 +662,13 @@
       "description": "Leadership craft: 1:1 prep, performance review authoring, OKR setting.",
       "version": "0.1.0",
       "category": "leadership",
-      "tags": ["leadership", "1on1", "perf-review", "okr"]
+      "tags": [
+        "leadership",
+        "1on1",
+        "perf-review",
+        "okr"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-learning",
@@ -410,7 +676,12 @@
       "description": "Learning craft: tiered explanations, code walkthroughs, Feynman-style self-test.",
       "version": "0.1.0",
       "category": "learning",
-      "tags": ["learning", "explain", "feynman"]
+      "tags": [
+        "learning",
+        "explain",
+        "feynman"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-performance",
@@ -418,7 +689,12 @@
       "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.",
       "version": "0.1.0",
       "category": "performance",
-      "tags": ["performance", "latency", "caching"]
+      "tags": [
+        "performance",
+        "latency",
+        "caching"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-content",
@@ -426,7 +702,13 @@
       "description": "Customer-facing content craft: release notes, sunset notice, security/breaking-change advisory.",
       "version": "0.1.0",
       "category": "content",
-      "tags": ["content", "release-notes", "sunset", "advisory"]
+      "tags": [
+        "content",
+        "release-notes",
+        "sunset",
+        "advisory"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-mobile",
@@ -434,7 +716,12 @@
       "description": "Mobile craft: mobile perf budgets, push notification design, deep-link routing.",
       "version": "0.1.0",
       "category": "mobile",
-      "tags": ["mobile", "push", "deeplinks"]
+      "tags": [
+        "mobile",
+        "push",
+        "deeplinks"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-slack",
@@ -442,7 +729,12 @@
       "description": "Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "slack", "comms"]
+      "tags": [
+        "connector",
+        "slack",
+        "comms"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-sentry",
@@ -450,7 +742,12 @@
       "description": "Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "sentry", "errors"]
+      "tags": [
+        "connector",
+        "sentry",
+        "errors"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-linear",
@@ -458,23 +755,38 @@
       "description": "Linear connector: MCP for issues/cycles + UserPromptSubmit detect + triage + file-bug-from-incident skills.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "linear", "issues"]
+      "tags": [
+        "connector",
+        "linear",
+        "issues"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-launchdarkly",
       "source": "./plugins/polymath-connector-launchdarkly",
-      "description": "LaunchDarkly connector: MCP for flag list/get/update + flag-rollout-plan skill (internal→beta→canary→ramp + retirement).",
+      "description": "LaunchDarkly connector: MCP for flag list/get/update + flag-rollout-plan skill (internal\u2192beta\u2192canary\u2192ramp + retirement).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "launchdarkly", "feature-flags"]
+      "tags": [
+        "connector",
+        "launchdarkly",
+        "feature-flags"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-statuspage",
       "source": "./plugins/polymath-connector-statuspage",
-      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity→impact + customer-safe body).",
+      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "statuspage", "public-comms"]
+      "tags": [
+        "connector",
+        "statuspage",
+        "public-comms"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-terraform",
@@ -482,7 +794,12 @@
       "description": "Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "terraform", "iac"]
+      "tags": [
+        "connector",
+        "terraform",
+        "iac"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-figma",
@@ -490,15 +807,25 @@
       "description": "Figma connector: MCP for frame/component reads + design-spec-handoff skill (components, tokens, states, copy, a11y).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "figma", "design"]
+      "tags": [
+        "connector",
+        "figma",
+        "design"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-notion",
       "source": "./plugins/polymath-connector-notion",
-      "description": "Notion connector: MCP for pages/databases + sync-doc-to-notion skill (Markdown→blocks, sync-key dedupe, drift detection).",
+      "description": "Notion connector: MCP for pages/databases + sync-doc-to-notion skill (Markdown\u2192blocks, sync-key dedupe, drift detection).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "notion", "docs"]
+      "tags": [
+        "connector",
+        "notion",
+        "docs"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-asana",
@@ -506,31 +833,51 @@
       "description": "Asana connector: MCP for tasks/projects + asana-task-update skill (GID resolution for sections, custom fields, assignees).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "asana", "tasks"]
+      "tags": [
+        "connector",
+        "asana",
+        "tasks"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-aws",
       "source": "./plugins/polymath-connector-aws",
-      "description": "AWS connector (cli-only): inspect-aws-resource skill — ARN → describe + effective IAM + CloudTrail + 7d cost.",
+      "description": "AWS connector (cli-only): inspect-aws-resource skill \u2014 ARN \u2192 describe + effective IAM + CloudTrail + 7d cost.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "aws", "cloud"]
+      "tags": [
+        "connector",
+        "aws",
+        "cloud"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-gcp",
       "source": "./plugins/polymath-connector-gcp",
-      "description": "GCP connector (cli-only): inspect-gcp-resource skill — full path → describe + IAM + test-iam-permissions + audit log + cost ping.",
+      "description": "GCP connector (cli-only): inspect-gcp-resource skill \u2014 full path \u2192 describe + IAM + test-iam-permissions + audit log + cost ping.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "gcp", "cloud"]
+      "tags": [
+        "connector",
+        "gcp",
+        "cloud"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-azure",
       "source": "./plugins/polymath-connector-azure",
-      "description": "Azure connector (cli-only): inspect-azure-resource skill — ARM ID → describe + role-assignments + can-i probe + activity log + cost.",
+      "description": "Azure connector (cli-only): inspect-azure-resource skill \u2014 ARM ID \u2192 describe + role-assignments + can-i probe + activity log + cost.",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "azure", "cloud"]
+      "tags": [
+        "connector",
+        "azure",
+        "cloud"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-stripe",
@@ -538,7 +885,12 @@
       "description": "Stripe connector: MCP + refund-or-dispute-triage skill (classify charge/refund/dispute, propose mutating action for operator approval).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "stripe", "payments"]
+      "tags": [
+        "connector",
+        "stripe",
+        "payments"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-vercel",
@@ -546,7 +898,12 @@
       "description": "Vercel connector: MCP + inspect-deployment skill (build + runtime + edge evidence; previous-READY-production rollback target).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "vercel", "edge"]
+      "tags": [
+        "connector",
+        "vercel",
+        "edge"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-cloudflare",
@@ -554,7 +911,12 @@
       "description": "Cloudflare connector: MCP + edge-incident-triage skill (origin vs edge vs WAF vs DNS with CF-Ray sample for downstream filtering).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "cloudflare", "edge"]
+      "tags": [
+        "connector",
+        "cloudflare",
+        "edge"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-elastic",
@@ -562,7 +924,12 @@
       "description": "Elasticsearch connector: MCP + log-search skill (refuses unbounded scans, capped count + buckets + 10-sample, PII redaction, cross-index trace.id hint).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "elastic", "logs"]
+      "tags": [
+        "connector",
+        "elastic",
+        "logs"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-grafana",
@@ -570,7 +937,12 @@
       "description": "Grafana connector: MCP + dashboard-snapshot skill (absolute time + required vars + finite TTL + saved deleteKey artifact).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "grafana", "observability"]
+      "tags": [
+        "connector",
+        "grafana",
+        "observability"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-connector-honeycomb",
@@ -578,7 +950,12 @@
       "description": "Honeycomb connector: MCP + trace-investigate skill (span tree, ancestor-walk offending span, self-time latency, evidence-cited hypothesis).",
       "version": "0.1.0",
       "category": "connector",
-      "tags": ["connector", "honeycomb", "tracing"]
+      "tags": [
+        "connector",
+        "honeycomb",
+        "tracing"
+      ],
+      "status": "experimental"
     }
   ]
 }

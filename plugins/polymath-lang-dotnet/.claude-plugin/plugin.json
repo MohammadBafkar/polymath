@@ -7,6 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core", "polymath-engineering"],
-  "keywords": ["dotnet", "csharp", "xunit", "csproj", "nullable"]
+  "dependencies": [
+    "polymath-core",
+    "polymath-engineering"
+  ],
+  "keywords": [
+    "dotnet",
+    "csharp",
+    "xunit",
+    "csproj",
+    "nullable"
+  ]
 }

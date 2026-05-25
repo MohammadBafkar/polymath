@@ -52,6 +52,18 @@ steps:
     prompt: Final review of the refactor for correctness + simplification. Treat any new behavior in the diff as a finding, not a feature.
     needs: [verify]
 mustPass:
+  # Strong-deterministic gate: a refactor must change code (otherwise the
+  # workflow ran but did nothing). filesChanged.max guards against an LLM
+  # rewriting half the codebase under the banner of "small refactor".
+  - id: refactor-produced-bounded-diff
+    type: diffConstraint
+    filesChanged:
+      min: 2
+      max: 100
+    linesChanged:
+      max: 3000
+    pathBlocklist:
+      - ".git/**"
   - id: orient-exists
     type: fileExists
     path: docs/refactors/${workflow.slug}-orient.md
@@ -60,9 +72,11 @@ mustPass:
     path: docs/refactors/${workflow.slug}-coverage-pre.md
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(test|tests|verified|verification)"
   - id: review-mentions-simplification
     type: stepSummaryMatches
+    severity: advisory
     step: review
     pattern: "(simpl|review|correctness)"

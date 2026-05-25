@@ -93,7 +93,54 @@ except ImportError:
     def _indent_of(line: str) -> int:
         return len(line) - len(line.lstrip(" "))
 
+    _BLOCK_SCALAR_RE = re.compile(r"^(\s*)([^:#]+):\s*([|>])([-+]?)\s*$")
+
+    def _fold_block_scalars(text: str) -> str:
+        """Inline-fold `key: |` and `key: >` block scalars so the simple
+        line-oriented parser below can handle them. We treat all block
+        scalars as folded (newlines → spaces) — the prompts that use them
+        are downstream LLM input where whitespace is not load-bearing."""
+        raw_lines = text.splitlines()
+        out: list[str] = []
+        i = 0
+        while i < len(raw_lines):
+            line = raw_lines[i]
+            m = _BLOCK_SCALAR_RE.match(line)
+            if m is None:
+                out.append(line)
+                i += 1
+                continue
+            key_indent = len(m.group(1))
+            prefix = m.group(1) + m.group(2) + ":"
+            block: list[str] = []
+            j = i + 1
+            while j < len(raw_lines):
+                nl = raw_lines[j]
+                if not nl.strip():
+                    block.append("")
+                    j += 1
+                    continue
+                nl_indent = len(nl) - len(nl.lstrip(" "))
+                if nl_indent <= key_indent:
+                    break
+                block.append(nl[key_indent + 2 :] if nl_indent >= key_indent + 2 else nl.lstrip())
+                j += 1
+            # Fold: paragraphs split on blank lines, newlines→space inside.
+            paragraphs: list[list[str]] = [[]]
+            for b in block:
+                if not b.strip():
+                    if paragraphs[-1]:
+                        paragraphs.append([])
+                else:
+                    paragraphs[-1].append(b.strip())
+            folded = " ".join(" ".join(p) for p in paragraphs if p)
+            escaped = folded.replace("\\", "\\\\").replace('"', '\\"')
+            out.append(f'{prefix} "{escaped}"')
+            i = j
+        return "\n".join(out)
+
     def _load_yaml(text: str) -> Any:  # noqa: C901 — small but branchy
+        text = _fold_block_scalars(text)
         lines: list[tuple[int, str]] = []
         for raw in text.splitlines():
             # strip trailing comments that are not inside quotes
@@ -274,7 +321,32 @@ ALLOWED_CHECK_TYPES = {
     "stepSummaryMatches",
     "command",
     "artifactValid",
+    "artifactSchemaStrict",
+    "diffConstraint",
 }
+# Checks that count as "strong deterministic" — they prove work happened by
+# running code, validating a structured artifact, or observing a real diff.
+# fileExists / fileMatches / stepSummaryMatches do not count, because a hollow
+# stub file or a regex-matching summary string can satisfy them without any
+# real work.
+STRONG_CHECK_TYPES = {
+    "commandSucceeds",
+    "command",
+    "artifactValid",
+    "artifactSchemaStrict",
+    "diffConstraint",
+}
+# Check types that default to advisory (run + report, but do not block on
+# failure unless severity is explicitly set to "blocking"). Everything else
+# defaults to blocking.
+ADVISORY_BY_DEFAULT = {"stepSummaryMatches"}
+
+
+def _check_severity(check: dict) -> str:
+    explicit = check.get("severity")
+    if explicit in {"advisory", "blocking"}:
+        return explicit
+    return "advisory" if check.get("type") in ADVISORY_BY_DEFAULT else "blocking"
 
 
 def _err(msg: str, *, code: int = 2) -> None:
@@ -339,7 +411,46 @@ def _validate(workflow: dict) -> list[str]:
                 errs.append(f"{section}[{i}] unknown check type: {t!r}")
             if not re.match(r"^[a-z][a-z0-9-]*$", str(check.get("id", ""))):
                 errs.append(f"{section}[{i}] missing or invalid id")
+            sev = check.get("severity")
+            if sev is not None and sev not in {"advisory", "blocking"}:
+                errs.append(f"{section}[{i}] invalid severity: {sev!r}")
+            if t == "artifactSchemaStrict":
+                if "path" not in check or "artifact" not in check:
+                    errs.append(f"{section}[{i}] artifactSchemaStrict requires path and artifact")
+            if t == "diffConstraint":
+                bounds = (
+                    "filesChanged" in check
+                    or "linesChanged" in check
+                    or "pathAllowlist" in check
+                    or "pathBlocklist" in check
+                )
+                if not bounds:
+                    errs.append(
+                        f"{section}[{i}] diffConstraint needs at least one of "
+                        f"filesChanged / linesChanged / pathAllowlist / pathBlocklist"
+                    )
     return errs
+
+
+def _strong_gate_warning(workflow: dict) -> str | None:
+    """Return a warning message if the workflow has no strong-deterministic
+    blocking mustPass check. Strong gates are commandSucceeds, command,
+    artifactValid, artifactSchemaStrict, diffConstraint. fileExists,
+    fileMatches, and stepSummaryMatches do not count — a hollow stub or a
+    regex-matching summary string can satisfy them without real work."""
+    checks = workflow.get("mustPass") or []
+    for c in checks:
+        if not isinstance(c, dict):
+            continue
+        if c.get("type") in STRONG_CHECK_TYPES and _check_severity(c) == "blocking":
+            return None
+    return (
+        "no strong-deterministic blocking mustPass check found "
+        "(commandSucceeds / artifactValid / artifactSchemaStrict / diffConstraint). "
+        "fileExists, fileMatches, and stepSummaryMatches alone are not enough to "
+        "guarantee work happened — a hollow stub or a matching summary string can "
+        "satisfy them. Consider adding a strong gate."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +495,9 @@ def cmd_validate(args: argparse.Namespace) -> int:
             print(f"  ✗ {e}")
         print(f"FAIL: {len(errs)} error(s)")
         return 2
+    warn = _strong_gate_warning(workflow)
+    if warn:
+        print(f"  ⚠ {warn}", file=sys.stderr)
     print(f"OK: {path}")
     return 0
 
@@ -611,25 +725,60 @@ def _assert(run_dir: pathlib.Path, workflow: dict, inputs: dict, workflow_meta: 
         print(json.dumps({"status": "completed", "checks": 0}, indent=2))
         return 0
 
-    failures: list[dict] = []
+    blocking_failures: list[dict] = []
+    advisory_failures: list[dict] = []
     for check in checks:
         ok, detail = _run_check(check, run_dir, inputs, workflow_meta)
-        if not ok:
-            failures.append({"id": check["id"], "type": check["type"], "detail": detail})
+        if ok:
+            continue
+        record = {
+            "id": check["id"],
+            "type": check["type"],
+            "severity": _check_severity(check),
+            "detail": detail,
+        }
+        if record["severity"] == "advisory":
+            advisory_failures.append(record)
+        else:
+            blocking_failures.append(record)
 
     state = json.loads((run_dir / "state.json").read_text())
-    if failures:
+    if blocking_failures:
         state["status"] = "paused"
-        state["pause_reason"] = f"{len(failures)} mustPass check(s) failed"
+        state["pause_reason"] = (
+            f"{len(blocking_failures)} blocking mustPass check(s) failed"
+        )
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-        _trace(run_dir, "assert-fail", {"failures": failures})
-        print(json.dumps({"status": "paused", "failures": failures}, indent=2))
+        _trace(
+            run_dir,
+            "assert-fail",
+            {"failures": blocking_failures, "advisories": advisory_failures},
+        )
+        print(
+            json.dumps(
+                {
+                    "status": "paused",
+                    "failures": blocking_failures,
+                    "advisories": advisory_failures,
+                },
+                indent=2,
+            )
+        )
         return 2
 
     state["status"] = "completed"
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-    _trace(run_dir, "complete", {"checks": len(checks)})
-    print(json.dumps({"status": "completed", "checks": len(checks)}, indent=2))
+    _trace(run_dir, "complete", {"checks": len(checks), "advisories": advisory_failures})
+    print(
+        json.dumps(
+            {
+                "status": "completed",
+                "checks": len(checks),
+                "advisories": advisory_failures,
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -667,7 +816,189 @@ def _run_check(
         artifact_name = check["artifact"]
         ok, detail = _validate_artifact_frontmatter(path, artifact_name)
         return ok, detail
+    if t == "artifactSchemaStrict":
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        artifact_name = check["artifact"]
+        min_body = int(check.get("minBodyChars", 200))
+        reject_extra = bool(check.get("rejectAdditionalProperties", True))
+        ok, detail = _validate_artifact_strict(
+            path, artifact_name, min_body_chars=min_body, reject_extra=reject_extra
+        )
+        return ok, detail
+    if t == "diffConstraint":
+        return _run_diff_constraint(check)
     return False, f"unknown check type: {t}"
+
+
+# ---------------------------------------------------------------------------
+# Strict artifact validator (catches hollow stubs)
+# ---------------------------------------------------------------------------
+
+
+def _strip_markdown_chrome(text: str) -> str:
+    """Return body with leading/trailing whitespace, ATX headings, and HTML
+    comments removed. Used by artifactSchemaStrict.minBodyChars so that a
+    stub like '# PRD\\n' is judged as having ~0 substantive characters."""
+    out = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            continue  # ATX heading
+        if line.startswith("<!--") and line.endswith("-->"):
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def _validate_artifact_strict(
+    path_str: str, artifact_name: str, *, min_body_chars: int, reject_extra: bool
+) -> tuple[bool, str]:
+    path = pathlib.Path(path_str)
+    if not path.exists():
+        return False, f"path={path_str} not found"
+    schema_path = _find_artifact_schema(artifact_name)
+    if schema_path is None:
+        return False, f"no schema for artifact={artifact_name}"
+    try:
+        schema = json.loads(schema_path.read_text())
+    except Exception as e:
+        return False, f"schema load failed: {e}"
+    fm, parse_err = _extract_frontmatter(path)
+    if fm is None:
+        return False, f"path={path_str} {parse_err}"
+    errors: list[str] = []
+    for required in schema.get("required", []):
+        if required not in fm:
+            errors.append(f"missing required field: {required}")
+    properties = schema.get("properties", {})
+    for key, value in fm.items():
+        if key not in properties:
+            if reject_extra:
+                errors.append(f"unexpected field: {key}")
+            continue
+        err = _check_value(value, properties[key])
+        if err is not None:
+            errors.append(f"{key}: {err}")
+    # Body must have substantive content beyond headings + whitespace.
+    text = path.read_text(errors="ignore")
+    body_match = re.match(r"^---\s*\n.*?\n---\s*\n(.*)$", text, re.DOTALL)
+    body = body_match.group(1) if body_match else text
+    substantive = _strip_markdown_chrome(body)
+    if len(substantive) < min_body_chars:
+        errors.append(
+            f"body has {len(substantive)} substantive chars, "
+            f"minBodyChars={min_body_chars}"
+        )
+    if errors:
+        return False, "; ".join(errors)
+    return True, f"artifact={artifact_name} strict-valid (body={len(substantive)} chars)"
+
+
+# ---------------------------------------------------------------------------
+# diffConstraint engine — observes the working tree (or a git ref diff)
+# ---------------------------------------------------------------------------
+
+
+def _fnmatch_any(path: str, patterns: list[str]) -> bool:
+    import fnmatch as _fn
+
+    for pat in patterns:
+        if _fn.fnmatch(path, pat):
+            return True
+        # support "**/foo" loosely by collapsing to *foo
+        if "**" in pat and _fn.fnmatch(path, pat.replace("**/", "*").replace("**", "*")):
+            return True
+    return False
+
+
+def _parse_numstat(text: str) -> list[tuple[int, int, str]]:
+    """Parse `git diff --numstat` output into (added, removed, path) tuples.
+    Binary files appear as `-\t-\tpath` and are treated as 0/0."""
+    out: list[tuple[int, int, str]] = []
+    for line in text.splitlines():
+        parts = line.split("\t")
+        if len(parts) < 3:
+            continue
+        added_s, removed_s, path = parts[0], parts[1], parts[2]
+        try:
+            added = int(added_s) if added_s != "-" else 0
+        except ValueError:
+            added = 0
+        try:
+            removed = int(removed_s) if removed_s != "-" else 0
+        except ValueError:
+            removed = 0
+        out.append((added, removed, path))
+    return out
+
+
+def _run_diff_constraint(check: dict) -> tuple[bool, str]:
+    since = check.get("since")
+    files: list[tuple[int, int, str]] = []
+    try:
+        if since:
+            # Ranged diff: compare a fixed ref to HEAD. git diff --numstat
+            # already enumerates every changed file with line counts.
+            cmd = ["git", "diff", "--numstat", f"{since}..HEAD"]
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+            if proc.returncode == 0:
+                files.extend(_parse_numstat(proc.stdout))
+        else:
+            # Working-tree changes: combine tracked diffs vs HEAD with
+            # untracked files (which git diff would miss entirely).
+            tracked = subprocess.run(
+                ["git", "diff", "--numstat", "HEAD"], capture_output=True, text=True
+            )
+            if tracked.returncode == 0:
+                files.extend(_parse_numstat(tracked.stdout))
+            untracked = subprocess.run(
+                ["git", "ls-files", "--others", "--exclude-standard"],
+                capture_output=True, text=True,
+            )
+            if untracked.returncode == 0:
+                for path in untracked.stdout.splitlines():
+                    path = path.strip()
+                    if not path:
+                        continue
+                    try:
+                        with pathlib.Path(path).open("rb") as fh:
+                            added = sum(1 for _ in fh)
+                    except OSError:
+                        added = 0
+                    files.append((added, 0, path))
+    except FileNotFoundError:
+        return False, "git not available"
+    n_files = len(files)
+    n_lines = sum(a + r for a, r, _ in files)
+
+    errors: list[str] = []
+    fc = check.get("filesChanged") or {}
+    if "min" in fc and n_files < int(fc["min"]):
+        errors.append(f"filesChanged={n_files} < min={fc['min']}")
+    if "max" in fc and n_files > int(fc["max"]):
+        errors.append(f"filesChanged={n_files} > max={fc['max']}")
+    lc = check.get("linesChanged") or {}
+    if "min" in lc and n_lines < int(lc["min"]):
+        errors.append(f"linesChanged={n_lines} < min={lc['min']}")
+    if "max" in lc and n_lines > int(lc["max"]):
+        errors.append(f"linesChanged={n_lines} > max={lc['max']}")
+    allow = check.get("pathAllowlist")
+    if allow:
+        for _, _, p in files:
+            if not _fnmatch_any(p, allow):
+                errors.append(f"path outside allowlist: {p}")
+                break
+    block = check.get("pathBlocklist")
+    if block:
+        for _, _, p in files:
+            if _fnmatch_any(p, block):
+                errors.append(f"path matches blocklist: {p}")
+                break
+    if errors:
+        return False, "; ".join(errors)
+    return True, f"diff: files={n_files} lines={n_lines}"
 
 
 # ---------------------------------------------------------------------------

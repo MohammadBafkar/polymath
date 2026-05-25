@@ -7,6 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core", "polymath-engineering"],
-  "keywords": ["python", "pytest", "ruff", "mypy", "pyright"]
+  "dependencies": [
+    "polymath-core",
+    "polymath-engineering"
+  ],
+  "keywords": [
+    "python",
+    "pytest",
+    "ruff",
+    "mypy",
+    "pyright"
+  ]
 }

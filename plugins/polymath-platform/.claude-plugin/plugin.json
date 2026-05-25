@@ -7,6 +7,14 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["platform", "devex", "dora", "space", "golden-path"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "platform",
+    "devex",
+    "dora",
+    "space",
+    "golden-path"
+  ]
 }

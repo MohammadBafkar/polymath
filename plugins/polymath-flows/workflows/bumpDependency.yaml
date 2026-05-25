@@ -43,14 +43,42 @@ steps:
     prompt: Run lint + typecheck + tests. Confirm the criticals from vuln-triage are closed (re-scan or check fixed-versions). Summary must include "test" or "verified".
     needs: [review]
 mustPass:
+  # Strong-deterministic gate: a dep bump must change something. Path
+  # allowlist scopes the change to dep manifests, lockfiles, and the
+  # bump-notes doc — preventing the workflow from drifting into source
+  # refactors. linesChanged.max guards against an LLM rewriting half the
+  # lockfile by hand instead of letting the package manager do it.
+  - id: bump-produced-scoped-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 20
+    pathAllowlist:
+      - "docs/dep-bumps/**"
+      - "package.json"
+      - "package-lock.json"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "uv.lock"
+      - "go.mod"
+      - "go.sum"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "**/*.csproj"
+      - "Directory.Packages.props"
   - id: vulns-doc-exists
     type: fileExists
     path: docs/dep-bumps/${workflow.slug}-vulns.md
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(test|tests|verified|verification)"
   - id: review-checks-scope
     type: stepSummaryMatches
+    severity: advisory
     step: review
     pattern: "(scope|refactor|simpl|missing)"

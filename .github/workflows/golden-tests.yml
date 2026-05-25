@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml jsonschema
-      - name: Walk shipFeature end-to-end against a scratch repo
+      - name: Walk shipFeature end-to-end against a scratch repo with real artifacts
         run: |
           set -euxo pipefail
           export PFLOW="$PWD/plugins/polymath-flows/bin/polymath-flow"
@@ -46,10 +46,37 @@ jobs:
           first="$($PFLOW next "$run_id")"
           test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["step_id"])' <<<"$first")" = "prd"
 
-          mkdir -p docs/prds docs/pr
-          echo "# PRD" > docs/prds/rate-limit-login.md
+          mkdir -p docs/prds docs/pr src
+          # Write a PRD with real frontmatter + substantive body (≥200 chars
+          # after stripping headings and whitespace) so artifactSchemaStrict
+          # passes. A bare "# PRD" stub is the falsifiability-anchor case
+          # tested separately and must fail.
+          cat > docs/prds/rate-limit-login.md <<'PRD'
+          ---
+          artifact: PRD
+          schemaVersion: 0.1
+          title: "Rate-limit /login"
+          status: draft
+          owner: pmteam
+          created: "2026-05-24"
+          ---
+          ## Problem
+          The login endpoint accepts unlimited attempts per IP per minute,
+          which lets credential-stuffing actors enumerate accounts faster
+          than downstream rate limits can catch.
+
+          ## Goal
+          Cap unauthenticated login attempts to ten per IP per minute,
+          returning HTTP 429 once exceeded. The cap must be observable in
+          metrics and reversible via feature flag within sixty seconds.
+          PRD
           echo "## [Unreleased]" > CHANGELOG.md
-          echo "# PR" > docs/pr/rate-limit-login.md
+          echo "# PR — Rate-limit /login" > docs/pr/rate-limit-login.md
+          # Implement step produces a real diff so diffConstraint passes.
+          cat > src/rate_limit.py <<'PY'
+          def is_rate_limited(ip: str, attempts: int) -> bool:
+              return attempts >= 10
+          PY
 
           for step in prd acceptance implement review changelog pr; do
             echo "step done" > "${step}.summary.md"
@@ -62,7 +89,68 @@ jobs:
           result="$($PFLOW assert "$run_id")"
           echo "$result"
           test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "completed"
-          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["checks"])' <<<"$result")" = "4"
+          # 5 blocking gates + 1 advisory = 6 total mustPass entries in the
+          # hardened shipFeature.
+          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["checks"])' <<<"$result")" = "6"
+
+  falsifiability-anchor:
+    name: hollow shipFeature run is blocked by strong gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Confirm a deliberately hollow run is BLOCKED (regression guard)
+        run: |
+          # This job exists to prove the gate hardening is load-bearing.
+          # The day this passes (i.e. the hollow run is NOT blocked) is the
+          # day a gate has regressed below the v0.2 bar.
+          set -euxo pipefail
+          export PFLOW="$PWD/plugins/polymath-flows/bin/polymath-flow"
+          scratch="$(mktemp -d)"
+          export CLAUDE_PLUGIN_DATA="$scratch/.pdata"
+          cd "$scratch"
+          git init -q
+          git config user.email ci@polymath.test
+          git config user.name "CI"
+          touch README.md
+          git add . && git commit -q -m "init"
+
+          run_json="$($PFLOW start shipFeature --input title='hollow' --input scope=small)"
+          run_id="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])' <<<"$run_json")"
+
+          # Hollow stubs only: filenames the WEAK fileExists checks demand,
+          # but no real PRD body, no source change, no acceptance criteria.
+          mkdir -p docs/prds docs/pr
+          echo "# PRD" > docs/prds/hollow.md
+          echo "## [Unreleased]" > CHANGELOG.md
+          echo "# PR" > docs/pr/hollow.md
+
+          for step in prd acceptance implement review verify changelog pr; do
+            echo "tests verified, all green" > "${step}.summary.md"
+            $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md" || true
+          done
+
+          set +e
+          result="$($PFLOW assert "$run_id")"
+          rc=$?
+          set -e
+          echo "$result"
+          # Exit code 2 = blocked. Exit code 0 = the gates regressed.
+          if [[ "$rc" -ne 2 ]]; then
+            echo "::error::Hollow shipFeature run was NOT blocked. Gate regression."
+            exit 1
+          fi
+          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "paused"
+          # The PRD strict check must be among the failures.
+          python3 - <<PY
+          import json, sys
+          r = json.loads("""$result""")
+          ids = {f["id"] for f in r["failures"]}
+          assert "prd-strict" in ids, f"prd-strict missing from failures: {ids}"
+          PY
 
   fixtures-parse:
     name: tests/golden frontmatter parses
@@ -106,6 +194,29 @@ jobs:
           sys.exit(fail)
           PY
 
+  agent-evidence-parse:
+    name: agent evidence records parse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Validate agent evidence records
+        run: python3 tools/check-agent-evidence.py
+
+  bakeoff-parse:
+    name: bakeoff cases parse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate baseline-vs-Polymath bakeoff cases
+        run: python3 tools/bakeoff.py check
+
   claude-cli-fixtures:
     name: claude CLI fixture run
     runs-on: ubuntu-latest
@@ -128,13 +239,20 @@ jobs:
           else
             echo "method=none" >> "$GITHUB_OUTPUT"
           fi
-      - name: Skip when no auth is available
-        if: steps.auth.outputs.method == 'none'
+      - name: Skip on PR with no auth (forks cannot read secrets)
+        if: steps.auth.outputs.method == 'none' && github.event_name == 'pull_request'
         run: |
           echo "::warning::Neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY"
-          echo "::warning::is set in repo secrets. Skipping live fixture run."
-          echo "::warning::To enable: set CLAUDE_CODE_OAUTH_TOKEN from a"
-          echo "::warning::Claude.ai subscription (preferred) or ANTHROPIC_API_KEY."
+          echo "::warning::is set on this PR (likely a fork). Skipping live fixtures."
+          echo "::warning::Main-branch pushes require the secret and will fail without it."
+      - name: Fail on main-branch push with no auth (hard gate)
+        if: steps.auth.outputs.method == 'none' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "::error::Main-branch push with no Claude auth available."
+          echo "::error::The 9+ quality bar requires live golden fixtures on every"
+          echo "::error::push to main. Set CLAUDE_CODE_OAUTH_TOKEN from a Claude.ai"
+          echo "::error::subscription (preferred) or ANTHROPIC_API_KEY in repo secrets."
+          exit 1
       - name: Install Claude Code CLI
         if: steps.auth.outputs.method != 'none'
         run: |

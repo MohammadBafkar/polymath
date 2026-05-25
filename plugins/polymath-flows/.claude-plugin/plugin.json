@@ -13,5 +13,9 @@
     "polymath-engineering",
     "polymath-release"
   ],
-  "keywords": ["orchestration", "workflow", "shipFeature"]
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "shipFeature"
+  ]
 }

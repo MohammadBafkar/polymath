@@ -58,6 +58,42 @@ plugins/polymath-<name>/
 }
 ```
 
+Do **not** add unknown top-level fields (including `status`). Claude Code's
+`plugin validate --strict` treats unknown fields as warnings, and conformance
+runs the validator with `--strict`. Plugin-level metadata that doesn't fit
+the official manifest schema lives in `.claude-plugin/marketplace.json` —
+see § 3.1.
+
+## 3.1. Maturity tier (`status`)
+
+Every plugin declares a maturity tier in `marketplace.json`. The tier is a
+contract with users about how much to trust the plugin.
+
+| Tier | Meaning |
+| --- | --- |
+| `stable` | Proven shape. Has skills + tests + a fixture, and the plugin's workflows (if any) have at least one strong-deterministic blocking gate. Breaking changes go through a deprecation cycle. |
+| `beta` | Structurally valid + has skills, but value not yet proven. Shape may shift; depend on it with caution. |
+| `experimental` | Scaffolded but unproven. May change shape, be renamed, be merged into another plugin, or be removed. Most `polymath-connector-*`, `polymath-lang-*`, and `polymath-infra-*` plugins live here until a real workflow + fixture proves the shape. |
+| `deprecated` | Scheduled for removal. The plugin's README must name the replacement and the removal date. |
+
+A plugin promotes to `stable` only when it has: (a) at least one strong-gated workflow that exercises its primary skill, (b) a golden fixture that runs against a live Claude model in CI, and (c) at least one external user beyond the maintainer. Promotion is a CHANGELOG entry, not just a status flip.
+
+Add the entry in `marketplace.json`:
+
+```jsonc
+{
+  "name": "polymath-thing",
+  "source": "./plugins/polymath-thing",
+  "description": "…",
+  "version": "0.1.0",
+  "category": "engineering",
+  "tags": ["tdd", "review"],
+  "status": "experimental"
+}
+```
+
+`tools/conformance.sh` rejects a plugin whose `marketplace.json` entry is missing `status` or sets it to an unknown value.
+
 ## 4. Skill frontmatter rules
 
 - `name`: bare kebab-case slug.
@@ -108,7 +144,27 @@ Three structural constraints (verify against current Claude Code docs before rel
 2. Subagents **cannot** spawn subagents.
 3. Subagent execution is synchronous from the caller's view.
 
-No custom agents in MVP unless a golden fixture proves they outperform a skill.
+A new agent must ship with a golden fixture showing it finds something a **no-agent baseline** misses. The baseline is the same input handed to the same Claude lead without any subagent — *not* a skill running in the parent context. The earlier "outperform a skill" framing made the comparison structurally rigged: a skill in the parent context can never lose on tokens, so an agent could not prove its worth even when it should. The actual question an agent has to answer is "does forking context (independent priors, fresh window, parallel critique) catch something the same lead misses without it?" The fixture trace + the no-agent trace are both checked in and reviewed together.
+
+Agent evidence lives under `tests/agent-evidence/<plugin>/<agent>.md` and is
+checked by `tools/check-agent-evidence.py` as part of conformance. Required
+frontmatter:
+
+```yaml
+plugin: polymath-thinking
+agent: architecture-critic
+scenario: adr-cache-store
+baseline_prompt: "Review this ADR without using a subagent."
+baseline_misses:
+  - "Failure mode the same-context lead often misses."
+agent_expected_findings:
+  - "Finding the forked-context agent must surface."
+decision_relevance: "Why the delta changes the decision."
+```
+
+`tools/check-agent-evidence.py` also rejects forbidden plugin-shipped subagent
+fields (`permissionMode`, `hooks`, `mcpServers`) and requires a matching golden
+fixture under `tests/golden/<plugin>/`.
 
 ## 7. Hooks
 

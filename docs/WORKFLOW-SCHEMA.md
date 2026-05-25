@@ -80,13 +80,22 @@ Override semantics:
 
 ## 4. `mustPass` check types
 
-| Type                  | Required fields                | Behavior                                                                       |
-| --------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| `fileExists`          | `path`                         | Pass if file exists on disk.                                                   |
-| `fileMatches`         | `path`, `pattern` (regex)      | Pass if the file exists and matches the pattern.                               |
-| `commandSucceeds`     | `command`                      | Pass if the shell command exits 0.                                             |
-| `stepSummaryMatches`  | `step`, `pattern` (regex)      | Pass if the named step's summary matches the pattern.                          |
-| `command` (in guards) | `command`                      | Used in `guards:` only. Pre-step precondition.                                 |
+| Type | Required fields | Default severity | Behavior |
+| --- | --- | --- | --- |
+| `fileExists` | `path` | blocking | Pass if file exists on disk. Weak — a stub file satisfies it. |
+| `fileMatches` | `path`, `pattern` (regex) | blocking | Pass if the file exists and matches the pattern. Weak — a regex match does not imply real content. |
+| `commandSucceeds` | `command` | blocking | **Strong.** Pass if the shell command exits 0. |
+| `stepSummaryMatches` | `step`, `pattern` (regex) | **advisory** | Pass if the named step's summary matches the pattern. Default-advisory because a summary is a freeform string the executor authored; matching it cannot prove the underlying work. |
+| `artifactValid` | `path`, `artifact` (PRD / ADR / Postmortem / ThreatModel) | blocking | **Strong.** Pass if frontmatter parses and satisfies the named artifact schema. |
+| `artifactSchemaStrict` | `path`, `artifact`, optional `minBodyChars`, `rejectAdditionalProperties` | blocking | **Strong.** Like `artifactValid` plus: requires `minBodyChars` (default 200) of substantive non-heading content, and (by default) rejects frontmatter fields not declared in the schema. Catches hollow stub artifacts. |
+| `diffConstraint` | at least one of `filesChanged`, `linesChanged`, `pathAllowlist`, `pathBlocklist`; optional `since` ref | blocking | **Strong.** Bounds the worktree (or ranged-diff) effect of the workflow. `filesChanged.min` proves *something* changed; `.max` and `pathAllowlist` prove the agent did not run away. Untracked files are counted. |
+| `command` (in guards) | `command` | blocking | Used in `guards:` only. Pre-step precondition. |
+
+### 4.1 Severity
+
+Every check accepts an optional `severity: advisory | blocking`. Blocking checks (the default for everything except `stepSummaryMatches`) pause the workflow on failure. Advisory checks run, report their failure in the `advisories` array of the run result, but do **not** pause.
+
+A workflow should have at least one strong-deterministic blocking gate — one of `commandSucceeds`, `artifactValid`, `artifactSchemaStrict`, or `diffConstraint`. `polymath-flow validate` emits a warning when this is missing, because a workflow whose only blockers are `fileExists` / `fileMatches` / advisory `stepSummaryMatches` can pass on a hollow run (stub files plus a regex-matching summary).
 
 ## 5. Placeholders
 

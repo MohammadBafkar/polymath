@@ -7,6 +7,12 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["product", "prd", "acceptance-criteria"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "product",
+    "prd",
+    "acceptance-criteria"
+  ]
 }

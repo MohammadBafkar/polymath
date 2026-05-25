@@ -7,6 +7,13 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["content", "release-notes", "sunset", "advisory"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "content",
+    "release-notes",
+    "sunset",
+    "advisory"
+  ]
 }

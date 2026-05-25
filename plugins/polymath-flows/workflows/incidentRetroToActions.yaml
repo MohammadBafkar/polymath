@@ -29,7 +29,7 @@ guards:
 steps:
   - id: read-postmortem
     invoke: polymath-engineering:read-code
-    prompt: Read ${inputs.postmortemPath} end-to-end. Extract the **Action items** section (or equivalent) into a structured list. For each: action text, raw owner string (may be "TBD"), and rough size hint. Save to docs/retros/${workflow.slug}-actions-raw.md.
+    prompt: Read ${inputs.postmortemPath} end-to-end. Extract the **Action items** section (or equivalent) into a structured list. For each item, capture action text, raw owner string (may be "TBD"), and a rough size hint. Save to docs/retros/${workflow.slug}-actions-raw.md.
     artifacts:
       - docs/retros/${workflow.slug}-actions-raw.md
 
@@ -72,6 +72,19 @@ steps:
     needs: [backlink]
 
 mustPass:
+  # Strong-deterministic gate: the retro produces 5 retro docs in
+  # docs/retros/ and also updates the original postmortem with ticket
+  # back-links. min:5 forces the workflow to have done the work; the
+  # pathAllowlist allows docs/retros/** plus docs/postmortems/** (the
+  # backlink step edits the input postmortem in place).
+  - id: retro-artifacts-produced
+    type: diffConstraint
+    filesChanged:
+      min: 5
+      max: 30
+    pathAllowlist:
+      - "docs/retros/**"
+      - "docs/postmortems/**"
   - id: actions-raw-exists
     type: fileExists
     path: docs/retros/${workflow.slug}-actions-raw.md
@@ -94,5 +107,6 @@ mustPass:
     pattern: "([A-Z][A-Z0-9_]{1,9}-[0-9]+)"
   - id: review-confirms-tracking
     type: stepSummaryMatches
+    severity: advisory
     step: review
     pattern: "(?i)(filed|tracked|actions)"

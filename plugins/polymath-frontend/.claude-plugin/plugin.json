@@ -7,6 +7,14 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core", "polymath-engineering"],
-  "keywords": ["frontend", "web-vitals", "bundle", "components"]
+  "dependencies": [
+    "polymath-core",
+    "polymath-engineering"
+  ],
+  "keywords": [
+    "frontend",
+    "web-vitals",
+    "bundle",
+    "components"
+  ]
 }

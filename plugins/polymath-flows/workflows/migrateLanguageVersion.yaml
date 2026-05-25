@@ -47,6 +47,18 @@ steps:
     prompt: Final review of the migration. Look for opportunistic refactors that crept in (should not have), missing tests, and any remaining ts-expect-error annotations.
     needs: [strict]
 mustPass:
+  # Strong-deterministic gate: migration must produce a real diff (plan
+  # doc + config + source changes). filesChanged.max is generous because
+  # a TS version bump can touch many .ts files.
+  - id: migration-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 2
+      max: 500
+    linesChanged:
+      max: 20000
+    pathBlocklist:
+      - ".git/**"
   - id: plan-exists
     type: fileExists
     path: docs/migrations/${workflow.slug}-plan.md
@@ -56,9 +68,11 @@ mustPass:
     pattern: "(breaking|strictness|inference|removal)"
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(test|tests|verified|verification)"
   - id: review-checks-residue
     type: stepSummaryMatches
+    severity: advisory
     step: review
     pattern: "(ts-expect-error|scope|refactor|missing)"

@@ -34,6 +34,24 @@ check_one() {
     python3 -c "import json,sys; d=json.load(open(sys.argv[1])); [d[k] for k in ['name','version','description','license']]" "$manifest" 2>/dev/null \
       && echo "  ✓ MANIFEST-2: required fields present" \
       || { echo "  ✗ MANIFEST-2: required field(s) missing"; fail=1; }
+    # MANIFEST-3: maturity tier (`status`) declared for this plugin in
+    # marketplace.json. Lives there rather than in plugin.json because
+    # Claude Code's `plugin validate --strict` rejects any unknown top-level
+    # field in plugin.json; marketplace.json is the catalog's own schema.
+    python3 -c "
+import json, sys, pathlib
+mp = json.load(open(pathlib.Path(sys.argv[2]).resolve()))
+name = json.load(open(sys.argv[1])).get('name')
+entry = next((p for p in mp.get('plugins', []) if p.get('name') == name), None)
+if entry is None:
+    raise SystemExit(f'plugin {name!r} not listed in marketplace.json')
+s = entry.get('status')
+allowed = {'stable', 'beta', 'experimental', 'deprecated'}
+if s not in allowed:
+    raise SystemExit(f'status missing or invalid in marketplace.json: {s!r} (allowed: {sorted(allowed)})')
+" "$manifest" "$root/.claude-plugin/marketplace.json" 2>&1 \
+      && echo "  ✓ MANIFEST-3: status declared in marketplace.json (stable / beta / experimental / deprecated)" \
+      || { echo "  ✗ MANIFEST-3: status missing or invalid in marketplace.json"; fail=1; }
   fi
   if command -v claude >/dev/null 2>&1; then
     if claude plugin validate --strict "$plugin_dir" >/dev/null 2>&1; then
@@ -98,6 +116,18 @@ check_one() {
     done < <(find "$plugin_dir/workflows" -type f -name "*.yaml" -print0)
   fi
 
+  # CONNECTOR-2: connector / lang / infra plugins must be audited in
+  # docs/CONNECTOR-POLICY.md so reviewers can see (a) whether an official
+  # MCP / LSP exists, (b) what Polymath adds, and (c) the sunset trigger.
+  if [[ "$name" == polymath-connector-* || "$name" == polymath-lang-* || "$name" == polymath-infra-* ]]; then
+    if grep -q "\`$name\`" "$root/docs/CONNECTOR-POLICY.md" 2>/dev/null; then
+      echo "  ✓ CONNECTOR-2: audited in docs/CONNECTOR-POLICY.md"
+    else
+      echo "  ✗ CONNECTOR-2: not audited in docs/CONNECTOR-POLICY.md"
+      fail=1
+    fi
+  fi
+
   # CONNECTOR-1
   if [[ "$name" == polymath-connector-* ]]; then
     # A connector may delegate to another connector for the MCP server
@@ -155,6 +185,20 @@ for k, v in uc.items():
   else
     echo "  ✗ FIXTURE-1: no tests/golden/$name/*.md"
     fail=1
+  fi
+
+  # AGENT-1: every plugin-shipped agent must have valid frontmatter, a
+  # no-agent baseline evidence record, and a matching golden fixture. Agents
+  # are intentionally rare; when present, they must prove that forked context
+  # is load-bearing instead of decorative.
+  if [[ -d "$plugin_dir/agents" ]] && ls "$plugin_dir/agents/"*.md >/dev/null 2>&1; then
+    if python3 "$root/tools/check-agent-evidence.py" --plugin "$name" >/dev/null 2>&1; then
+      echo "  ✓ AGENT-1: agents have evidence records and golden fixtures"
+    else
+      echo "  ✗ AGENT-1: agent evidence check failed"
+      python3 "$root/tools/check-agent-evidence.py" --plugin "$name" 2>&1 | sed 's/^/    /'
+      fail=1
+    fi
   fi
 
   echo

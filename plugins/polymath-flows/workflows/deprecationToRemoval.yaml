@@ -129,6 +129,18 @@ steps:
     needs: [verify]
 
 mustPass:
+  # Strong-deterministic gate: every stage must touch the notice (and
+  # often code for warnings/removal). filesChanged.min:1 is the minimum
+  # contract for "the workflow did something."
+  - id: deprecation-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 500
+    linesChanged:
+      max: 10000
+    pathBlocklist:
+      - ".git/**"
   - id: notice-exists
     type: fileExists
     path: docs/deprecations/${workflow.slug}.md
@@ -146,9 +158,11 @@ mustPass:
     pattern: "(?i)(baseline usage|usage decline|usage threshold)"
   - id: midterm-gate-emitted
     type: stepSummaryMatches
+    severity: advisory
     step: midterm-gate
     pattern: "midterm-gate:\\s+(PASS|FAIL|skipped)"
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(?i)(test|tests|verified|verification)"

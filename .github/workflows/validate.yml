@@ -60,3 +60,5 @@ jobs:
           PY
       - name: Run validate-all.sh
         run: bash tools/validate-all.sh
+      - name: Run conformance.sh
+        run: bash tools/conformance.sh --all

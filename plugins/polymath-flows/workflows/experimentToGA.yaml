@@ -58,6 +58,19 @@ steps:
       - docs/launches/${workflow.slug}-ga.md
 
 mustPass:
+  # Strong-deterministic gate: each experiment step produces a doc. min:3
+  # — plan, results, and GA decision are required; rollout/launch are
+  # optional but typical. pathAllowlist keeps the workflow scoped to its
+  # documentation lanes; it doesn't write code.
+  - id: experiment-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 3
+      max: 30
+    pathAllowlist:
+      - "docs/experiments/**"
+      - "docs/rollouts/**"
+      - "docs/launches/**"
   - id: plan-exists
     type: fileExists
     path: docs/experiments/${workflow.slug}.md

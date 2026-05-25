@@ -7,13 +7,20 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "sentry", "errors", "mcp"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "sentry",
+    "errors",
+    "mcp"
+  ],
   "userConfig": {
     "sentryToken": {
       "type": "string",
       "title": "Sentry API token",
-      "description": "Auth token from Sentry Settings → Auth Tokens. Scopes: event:read, project:read, org:read.",
+      "description": "Auth token from Sentry Settings \u2192 Auth Tokens. Scopes: event:read, project:read, org:read.",
       "sensitive": true,
       "required": true
     },

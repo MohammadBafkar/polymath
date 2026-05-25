@@ -19,6 +19,7 @@ tests/golden/
 ---
 plugin: polymath-product
 scenario: prd-from-rate-limit-request
+agent: optional-agent-name
 expect:
   invoked:
     - polymath-product:prd
@@ -54,8 +55,14 @@ Both local and CI execution go through [`run-fixtures.sh`](run-fixtures.sh), whi
 1. Spawns a scratch git repo per fixture.
 2. Adds the local marketplace via `claude plugin marketplace add <repo>`.
 3. Installs the plugin (or the full MVP set, for workflow fixtures).
-4. Runs `claude -p "<prompt body>"` with the user's existing auth.
+4. Runs `claude -p "<prompt body>"` with the user's existing auth. Fixtures
+   may declare `agent: <name>` to run an installed plugin agent directly.
 5. Checks `expect.invoked`, `expect.artifacts`, `expect.output_matches`, and `expect.not_invoked` against the transcript and scratch filesystem.
+
+Agent fixtures are paired with no-agent baseline evidence records under
+[`tests/agent-evidence`](../agent-evidence/). The evidence record names what
+the same-context baseline is expected to miss and what the forked-context agent
+must surface.
 
 ### Local
 
@@ -79,3 +86,13 @@ The `claude-cli-fixtures` job in [`.github/workflows/golden-tests.yml`](../../.g
 - Be explicit about the scenario in the title; "prd-from-rate-limit-request" is better than "scenario-1".
 - Prefer fixtures that exercise one component end-to-end over fixtures that exercise many shallowly.
 - Don't seed the scratch repo with code you also `expect:`; the fixture should produce the file.
+
+## Bakeoffs
+
+Golden fixtures prove component invocation. Bakeoffs prove outcome quality
+against a baseline. See [`tests/bakeoff`](../bakeoff/) and run:
+
+```bash
+python3 tools/bakeoff.py check
+python3 tools/bakeoff.py run
+```

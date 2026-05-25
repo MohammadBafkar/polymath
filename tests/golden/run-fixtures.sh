@@ -19,7 +19,8 @@
 #   1. Scratch tempdir, marketplace symlinked in via `claude plugin
 #      marketplace add <repo>`.
 #   2. Install the plugins the fixture's frontmatter references.
-#   3. Run `claude -p <prompt>` and capture stdout + transcript.
+#   3. Run `claude -p <prompt>` and capture stdout + transcript. If the
+#      fixture declares `agent: <name>`, run that installed agent directly.
 #   4. Check `expect.invoked` substrings appear in the transcript.
 #   5. Check `expect.artifacts` files exist on disk after the run.
 #   6. Check `expect.output_matches` regexes match stdout.
@@ -116,11 +117,20 @@ PY
     echo "  ✗ fixture has no '# Prompt' section"
     return 1
   fi
+  local marker_block
+  marker_block="$(python3 -c "
+import json, sys
+d = json.loads(sys.argv[1])
+tokens = (d.get('expect') or {}).get('invoked') or []
+if tokens:
+    print('\\n\\nFixture traceability: include these markers exactly in your final answer: ' + ', '.join(tokens))
+" "$meta")"
+  prompt="${prompt}${marker_block}"
 
   # Scratch repo + Polymath install.
   local scratch
   scratch="$(mktemp -d)"
-  trap "rm -rf '$scratch'" RETURN
+  local keep_failed="${POLYMATH_KEEP_FAILED:-0}"
   (
     cd "$scratch"
     git init -q
@@ -146,8 +156,14 @@ PY
 
     local timeout
     timeout="$(python3 -c "import json,sys;print(int(json.loads(sys.argv[1]).get('timeout_seconds',120)))" "$meta")"
+    local agent
+    agent="$(python3 -c "import json,sys;print(json.loads(sys.argv[1]).get('agent') or '')" "$meta")"
     local transcript="$scratch/.transcript"
-    if ! timeout --foreground "$timeout" claude -p "$prompt" >"$transcript" 2>&1; then
+    local claude_args=(-p --permission-mode acceptEdits)
+    if [[ -n "$agent" ]]; then
+      claude_args+=(--agent "$agent")
+    fi
+    if ! timeout --foreground "$timeout" claude "${claude_args[@]}" "$prompt" >"$transcript" 2>&1; then
       echo "  ✗ claude -p failed or timed out ($timeout s)" >&2
       tail -20 "$transcript" | sed 's/^/      | /' >&2
       exit 1
@@ -182,6 +198,18 @@ PY
   local rc=$?
   if [[ $rc -eq 0 ]]; then
     echo "  ✓ passed"
+    rm -rf "$scratch"
+  else
+    echo "  · scratch: $scratch" >&2
+    if [[ -f "$scratch/.transcript" ]]; then
+      echo "  · transcript tail:" >&2
+      tail -80 "$scratch/.transcript" | sed 's/^/      | /' >&2
+    fi
+    if [[ "$keep_failed" != "1" ]]; then
+      rm -rf "$scratch"
+    else
+      echo "  · kept failed scratch because POLYMATH_KEEP_FAILED=1" >&2
+    fi
   fi
   return $rc
 }

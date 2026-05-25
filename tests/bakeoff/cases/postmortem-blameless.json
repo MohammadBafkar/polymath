@@ -1,0 +1,45 @@
+{
+  "id": "postmortem-blameless",
+  "title": "Incident: write a blameless postmortem from notes",
+  "task": "Convert raw incident notes (with blame-shaped language) into a blameless postmortem with system-shaped action items.",
+  "plugins": [
+    "polymath-core",
+    "polymath-incident",
+    "polymath-thinking",
+    "polymath-writing"
+  ],
+  "baseline_prompt": "Write a postmortem from these incident notes:\n- Sev2: refund worker stuck for 38 minutes on 2026-04-18.\n- Carol pushed a hotfix without running migrations; that broke the queue.\n- Alice should have caught this in review but missed it.\n- On-call paged 12 minutes after customers complained on Slack.\n- We restarted the worker and queue drained. No data lost.\n- We need to make sure Carol doesn't do this again.",
+  "polymath_prompt": "Use Polymath incident postmortem-blameless on these notes. Rewrite any blame-shaped language as system-shaped. Produce explicit prevent/detect/mitigate/process action items.\n- Sev2: refund worker stuck for 38 minutes on 2026-04-18.\n- Carol pushed a hotfix without running migrations; that broke the queue.\n- Alice should have caught this in review but missed it.\n- On-call paged 12 minutes after customers complained on Slack.\n- We restarted the worker and queue drained. No data lost.\n- We need to make sure Carol doesn't do this again.",
+  "rubric": [
+    {
+      "id": "blameless-rewrite",
+      "weight": 3,
+      "pass_regex": ["system|process|missing|guardrail|signal", "instead of|not|rewrit"]
+    },
+    {
+      "id": "timeline",
+      "weight": 2,
+      "pass_regex": ["timeline|sequence|chronolog", "12 minutes|38 minutes|page|detect"]
+    },
+    {
+      "id": "action-categories",
+      "weight": 2,
+      "pass_regex": ["prevent|detect|mitigate|process", "category|class"]
+    },
+    {
+      "id": "detection-gap",
+      "weight": 2,
+      "pass_regex": ["detect|monitor|alert|signal", "12 minutes|customer|Slack|before"]
+    },
+    {
+      "id": "migration-guardrail",
+      "weight": 1,
+      "pass_regex": ["migration|deploy|preflight|gate", "automate|require|block"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

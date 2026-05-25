@@ -50,6 +50,16 @@ steps:
     prompt: Verify the fix — every finding has a regression test that fails against the old code path. Summary must include "test" or "verified".
     needs: [review]
 mustPass:
+  # Strong-deterministic gate: a security fix must actually change code.
+  - id: fix-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 200
+    linesChanged:
+      max: 5000
+    pathBlocklist:
+      - ".git/**"
   - id: owasp-exists
     type: fileExists
     path: docs/security/${workflow.slug}-owasp.md
@@ -57,11 +67,14 @@ mustPass:
     type: fileMatches
     path: docs/security/${workflow.slug}-owasp.md
     pattern: ":[0-9]"
+  # Advisories — useful narrative checks but cannot block on their own.
   - id: implement-cites-finding
     type: stepSummaryMatches
+    severity: advisory
     step: implement
     pattern: "(finding|OWASP|A0[0-9]|severity)"
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(test|tests|verified|verification)"

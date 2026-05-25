@@ -1,0 +1,46 @@
+{
+  "id": "feature-from-idea-rate-limit",
+  "title": "Feature from idea: /login rate limit",
+  "task": "Turn a raw feature idea into a PRD, implementation plan, verification approach, and PR summary.",
+  "plugins": [
+    "polymath-core",
+    "polymath-product",
+    "polymath-engineering",
+    "polymath-release",
+    "polymath-flows"
+  ],
+  "baseline_prompt": "We need to rate-limit /login. Draft the work needed to ship it safely, including requirements, implementation, tests, rollout, and PR summary.",
+  "polymath_prompt": "Use Polymath's shipFeature workflow for title='Rate-limit /login' scope=small. Produce the PRD, implementation plan, verification approach, rollout risks, and PR summary.",
+  "rubric": [
+    {
+      "id": "requirements",
+      "weight": 2,
+      "pass_regex": ["PRD|requirements|problem", "acceptance|Given|When|Then"]
+    },
+    {
+      "id": "implementation",
+      "weight": 2,
+      "pass_regex": ["implementation|change plan|code", "smallest|incremental|safe"]
+    },
+    {
+      "id": "verification",
+      "weight": 2,
+      "pass_regex": ["test|tests|verified|verification", "negative|boundary|regression"]
+    },
+    {
+      "id": "risk",
+      "weight": 2,
+      "pass_regex": ["risk|rollback|feature flag|rollout", "429|rate limit|abuse"]
+    },
+    {
+      "id": "release",
+      "weight": 2,
+      "pass_regex": ["PR|pull request|changelog|release", "monitor|metric|observability"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

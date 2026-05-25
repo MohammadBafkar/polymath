@@ -1,12 +1,17 @@
 # Polymath CODEOWNERS
+
 #
+
 # Each plugin is owned by the maintainer who introduced it. Marketplace-wide
-# infrastructure is owned by the marketplace maintainers.
+
+# infrastructure is owned by the marketplace maintainers
 
 # Default owners for everything not otherwise specified
+
 *                                       @MohammadBafkar
 
 # Marketplace plumbing
+
 /.claude-plugin/                        @MohammadBafkar
 /.github/                               @MohammadBafkar
 /tools/                                 @MohammadBafkar
@@ -14,6 +19,7 @@
 /docs/                                  @MohammadBafkar
 
 # MVP plugins
+
 /plugins/polymath-core/                 @MohammadBafkar
 /plugins/polymath-product/              @MohammadBafkar
 /plugins/polymath-engineering/          @MohammadBafkar

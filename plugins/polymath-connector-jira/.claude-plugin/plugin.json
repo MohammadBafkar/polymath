@@ -7,8 +7,15 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "jira", "atlassian", "mcp"],
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "jira",
+    "atlassian",
+    "mcp"
+  ],
   "userConfig": {
     "jiraUrl": {
       "type": "string",
@@ -25,7 +32,7 @@
     "jiraApiToken": {
       "type": "string",
       "title": "Atlassian API token",
-      "description": "API token from id.atlassian.com → Security → API tokens.",
+      "description": "API token from id.atlassian.com \u2192 Security \u2192 API tokens.",
       "sensitive": true,
       "required": true
     }

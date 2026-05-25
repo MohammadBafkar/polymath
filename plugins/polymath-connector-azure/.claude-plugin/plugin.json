@@ -1,11 +1,21 @@
 {
   "name": "polymath-connector-azure",
   "version": "0.1.0",
-  "description": "Azure connector: cli-only wrapper around `az` for resource inspection — describe, role-assignment + can-i check, activity-log writes, cost ping.",
+  "description": "Azure connector: cli-only wrapper around `az` for resource inspection \u2014 describe, role-assignment + can-i check, activity-log writes, cost ping.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "azure", "cloud", "polymath-cli-only"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "azure",
+    "cloud",
+    "polymath-cli-only"
+  ],
   "userConfig": {
     "azureSubscription": {
       "type": "string",

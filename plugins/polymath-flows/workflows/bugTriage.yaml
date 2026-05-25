@@ -45,6 +45,16 @@ steps:
     artifacts:
       - docs/bugs/${workflow.slug}-plan.md
 mustPass:
+  # Strong-deterministic gate: triage must actually write the bug docs.
+  # min:3 — whys, orient, plan are all required artifacts in the workflow.
+  # pathAllowlist limits collateral edits; triage doesn't touch source code.
+  - id: triage-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 3
+      max: 30
+    pathAllowlist:
+      - "docs/bugs/**"
   - id: whys-exists
     type: fileExists
     path: docs/bugs/${workflow.slug}-whys.md

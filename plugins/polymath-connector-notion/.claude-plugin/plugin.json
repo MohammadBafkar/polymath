@@ -3,14 +3,23 @@
   "version": "0.1.0",
   "description": "Notion connector: MCP for database/page reads + writes + sync-doc-to-notion skill that mirrors local Markdown artifacts into a Notion page tree.",
   "license": "Apache-2.0",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["connector", "notion", "docs"],
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "notion",
+    "docs"
+  ],
   "userConfig": {
     "notionToken": {
       "type": "string",
       "title": "Notion integration secret",
-      "description": "From Notion → Settings → Integrations. Issue an internal integration and share specific pages with it.",
+      "description": "From Notion \u2192 Settings \u2192 Integrations. Issue an internal integration and share specific pages with it.",
       "sensitive": true,
       "required": true
     },

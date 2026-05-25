@@ -43,6 +43,17 @@ steps:
     prompt: Verify the fix at the unit/integration level. Then, after deploy, confirm the metric ${inputs.metric} returns within 1% of pre-regression baseline over a 30-minute window. Write a short verification summary including the words "test" or "verified".
     needs: [fix]
 mustPass:
+  # Strong-deterministic gate: a perf-regression workflow must write the
+  # signals doc AND fix the regression in code. min:2 covers both.
+  - id: perf-fix-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 2
+      max: 100
+    linesChanged:
+      max: 3000
+    pathBlocklist:
+      - ".git/**"
   - id: signals-exist
     type: fileExists
     path: docs/perf/${workflow.slug}-signals.md
@@ -52,9 +63,11 @@ mustPass:
     pattern: "(baseline|24h|24 ?h)"
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(test|tests|verified|verification)"
   - id: fix-summary-mentions-signals
     type: stepSummaryMatches
+    severity: advisory
     step: fix
     pattern: "(signal|finding|cause|metric)"

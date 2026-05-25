@@ -1,0 +1,45 @@
+{
+  "id": "code-review-red-team",
+  "title": "Engineering: review a diff with red-team critique",
+  "task": "Review a small diff that introduces a subtle race condition in a token-cache, identify the bug, and propose the safest fix.",
+  "plugins": [
+    "polymath-core",
+    "polymath-engineering",
+    "polymath-thinking",
+    "polymath-qa"
+  ],
+  "baseline_prompt": "Review this diff. Find any bugs, missing tests, or design issues. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n```",
+  "polymath_prompt": "Use Polymath engineering code-review + red-team on this diff. Find correctness issues, missing tests, and adversarial scenarios. Diff:\n```\n class TokenCache:\n     def __init__(self):\n         self._cache = {}\n     def get(self, key):\n         if key not in self._cache or self._cache[key].expired():\n             self._cache[key] = fetch(key)\n         return self._cache[key]\n```",
+  "rubric": [
+    {
+      "id": "race-condition",
+      "weight": 3,
+      "pass_regex": ["race|concurrent|thread|atomic|lock", "fetch|cache|stampede"]
+    },
+    {
+      "id": "missing-tests",
+      "weight": 2,
+      "pass_regex": ["test|coverage|missing", "concurrent|edge|expired|negative"]
+    },
+    {
+      "id": "fix-proposal",
+      "weight": 2,
+      "pass_regex": ["lock|mutex|single.?flight|atomic|cache.?stampede", "guard|protect"]
+    },
+    {
+      "id": "adversarial",
+      "weight": 2,
+      "pass_regex": ["adversarial|red.?team|attacker|abuse", "burst|hot|flood"]
+    },
+    {
+      "id": "trade-off",
+      "weight": 1,
+      "pass_regex": ["trade.?off|latency|throughput|memory", "simple|complex"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

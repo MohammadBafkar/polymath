@@ -1,0 +1,45 @@
+{
+  "id": "official-tool-boundary",
+  "title": "Strategy: official tools vs Polymath wrappers",
+  "task": "Decide when Polymath should keep language/connector plugins and when it should defer to official tools.",
+  "plugins": [
+    "polymath-core",
+    "polymath-research",
+    "polymath-thinking",
+    "polymath-decisions"
+  ],
+  "baseline_prompt": "Decide whether Polymath should keep polymath-lang-XX and polymath-connector-XX plugins or defer to official tools.",
+  "polymath_prompt": "Use the research-scout agent and Polymath decision framing. Decide whether Polymath should keep polymath-lang-XX and polymath-connector-XX plugins or defer to official tools.",
+  "rubric": [
+    {
+      "id": "source-of-truth",
+      "weight": 2,
+      "pass_regex": ["official|primary source|source of truth", "docs|MCP|LSP|CLI"]
+    },
+    {
+      "id": "polymath-value",
+      "weight": 2,
+      "pass_regex": ["workflow|critique|safety|artifact", "Polymath"]
+    },
+    {
+      "id": "inventory",
+      "weight": 2,
+      "pass_regex": ["inventory|map|matrix", "connector|language"]
+    },
+    {
+      "id": "governance",
+      "weight": 2,
+      "pass_regex": ["stable|experimental|promote|maturity", "evidence|fixture|primary"]
+    },
+    {
+      "id": "action",
+      "weight": 2,
+      "pass_regex": ["remove|merge|keep|defer", "next test|validation|pass|fail"]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

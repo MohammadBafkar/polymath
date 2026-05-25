@@ -7,6 +7,14 @@
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
-  "dependencies": ["polymath-core"],
-  "keywords": ["devops", "docker", "ci", "github-actions", "env-promotion"]
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "devops",
+    "docker",
+    "ci",
+    "github-actions",
+    "env-promotion"
+  ]
 }

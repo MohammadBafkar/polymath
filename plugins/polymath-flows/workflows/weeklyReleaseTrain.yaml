@@ -19,9 +19,9 @@ inputs:
     description: Git ref to compare against (commit SHA / tag / branch). Defaults to the last semver tag on main.
   - name: dryRun
     type: enum
-    values: [yes, no]
-    default: 'yes'
-    description: 'yes' (default) drafts artifacts without proposing the tag PR. 'no' produces the PR too.
+    values: ["yes", "no"]
+    default: "yes"
+    description: When yes (default) only artifacts are drafted; when no the tag PR is also proposed.
 guards:
   - id: clean-worktree
     type: command
@@ -70,6 +70,19 @@ steps:
       - docs/pr/${inputs.version}.md
 
 mustPass:
+  # Strong-deterministic gate: a release train writes survey + customer
+  # notes + internal advisory + tag PR, plus CHANGELOG audit. min:5 covers
+  # all four release docs plus the CHANGELOG touch.
+  - id: release-train-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 5
+      max: 50
+    pathAllowlist:
+      - "docs/release-notes/**"
+      - "docs/pr/**"
+      - "CHANGELOG.md"
+      - "**/CHANGELOG.md"
   - id: survey-exists
     type: fileExists
     path: docs/release-notes/${inputs.version}-survey.md
@@ -85,6 +98,7 @@ mustPass:
     path: docs/release-notes/${inputs.version}-internal.md
   - id: verify-mentions-tests
     type: stepSummaryMatches
+    severity: advisory
     step: verify
     pattern: "(?i)(test|tests|verified|verification)"
   - id: tag-artifact-exists

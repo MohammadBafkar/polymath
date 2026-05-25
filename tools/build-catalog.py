@@ -225,6 +225,20 @@ pre {
 code { background: var(--code-bg); padding: .1em .35em; border-radius: 3px; }
 pre code { background: none; padding: 0; }
 .plugin-meta { color: var(--muted); font-size: .92rem; margin-top: -0.5rem; }
+.status {
+  font-size: .65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .1rem .4rem;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: .35rem;
+}
+.status-stable { background: #1f6f43; color: #fff; }
+.status-experimental { background: #d68427; color: #fff; }
+.status-beta { background: #4a6fa5; color: #fff; }
+.status-deprecated { background: #6b6b6b; color: #fff; }
 """
 
 
@@ -276,9 +290,13 @@ def build(check: bool) -> int:
         cards = ['<div class="cards">']
         for p in sorted(grouped[cat], key=lambda x: x["name"]):
             name = p["name"]
+            status = p.get("status", "experimental")
             cards.append('<div class="card">')
+            badge = (
+                f'<span class="status status-{html.escape(status)}">{html.escape(status)}</span>'
+            )
             cards.append(
-                f'<h3><a href="plugins/{html.escape(name)}.html">{html.escape(name)}</a></h3>'
+                f'<h3><a href="plugins/{html.escape(name)}.html">{html.escape(name)}</a> {badge}</h3>'
             )
             cards.append(f'<p>{html.escape(p.get("description",""))}</p>')
             tags = p.get("tags", [])
