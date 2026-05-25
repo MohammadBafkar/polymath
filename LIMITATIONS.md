@@ -12,23 +12,18 @@ is intentional.
 
 ## 1. What Polymath does not currently prove
 
-- ~~Polymath has not demonstrated that it produces better artifacts than
-  baseline Claude Code on a measured set of tasks.~~ **Resolved
-  2026-05-25.** The first bakeoff run is published in
-  [`docs/EVIDENCE/bakeoff-runs/2026-05-25/`](docs/EVIDENCE/bakeoff-runs/2026-05-25/SUMMARY.md):
-  8 of 9 pre-registered cases met the `decision_threshold` (Polymath
-  score ≥ 8 and delta ≥ 2 over baseline), 1 tie, 0 losses, aggregate
-  +25 points across the rubric set. The product thesis is confirmed
-  for the case set as written; see § 1 of the summary for what the
-  run does **not** prove (single-shot, no cost telemetry, regex-based
-  scorer, cases biased toward Polymath-shaped tasks).
-- Polymath has **partially** demonstrated that its agents outperform a
-  no-agent baseline on real Claude runs. The 2026-05-25 bakeoff exercises
-  both shipped agents (`architecture-critic` in `adr-store-choice`,
-  `research-scout` in `official-tool-boundary`) and both cases passed
-  the threshold by clear margins (+2 and +6 respectively). The live
-  golden fixtures specific to each agent still depend on the `main`-
-  branch CI run, which now hard-fails without auth (see § 4.1).
+- Polymath has **not** demonstrated that it produces better artifacts than
+  baseline Claude Code on a measured set of tasks. The bakeoff harness
+  exists (`tools/bakeoff.py`, `tests/bakeoff/cases/*.json`) and three
+  cases are pre-registered, but no live run has been published. Until at
+  least three cases meet the `decision_threshold` in
+  `docs/QUALITY-SCORECARD.md`, the central product thesis is unconfirmed.
+- Polymath has **not** demonstrated that its agents outperform a
+  no-agent baseline on real Claude runs. The evidence records under
+  `tests/agent-evidence/` declare what the baseline is expected to miss;
+  the live golden fixtures that confirm or refute those expectations
+  are auth-dependent and are not yet enforced as a required CI gate
+  by default on every PR.
 - Polymath has **not** measured external adoption. The catalog claims
   no external users for any of the eight `stable` plugins, and the
   `9+ Promotion Bar` in `docs/QUALITY-SCORECARD.md` explicitly requires
@@ -164,9 +159,8 @@ is intentional.
 
 ## 6. What would change this document
 
-- ~~A published bakeoff run that meets the `9+ Promotion Bar` in
-  `docs/QUALITY-SCORECARD.md` would remove § 1's first two bullets.~~
-  **Resolved 2026-05-25** — see [`docs/EVIDENCE/bakeoff-runs/2026-05-25/SUMMARY.md`](docs/EVIDENCE/bakeoff-runs/2026-05-25/SUMMARY.md).
+- A published bakeoff run that meets the `9+ Promotion Bar` in
+  `docs/QUALITY-SCORECARD.md` would remove § 1's first two bullets.
 - An external user adopting a `stable` plugin would remove § 1's
   third bullet.
 - Cost telemetry in the bakeoff harness would remove § 4's third

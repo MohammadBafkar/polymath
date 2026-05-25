@@ -100,7 +100,6 @@ The `claude-cli-fixtures` CI job runs `tests/golden/run-fixtures.sh` against the
 
 ## Quality
 
-- [`docs/EVIDENCE/bakeoff-runs/2026-05-25/`](docs/EVIDENCE/bakeoff-runs/2026-05-25/SUMMARY.md) — first published bakeoff: **8 of 9** pre-registered cases pass the 9+ threshold (Polymath ≥ 8/10 and Δ ≥ 2 over baseline), 1 tie, 0 losses, aggregate +25 rubric points.
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar to 9+ and the proof loop.
 - [`LIMITATIONS.md`](LIMITATIONS.md) — what Polymath doesn't yet prove, where official tools beat it, what would change this file. Read this before the catalog if you care about depth.
 - [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) — the per-plugin audit for every `polymath-connector-*`, `polymath-lang-*`, and `polymath-infra-*` plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
