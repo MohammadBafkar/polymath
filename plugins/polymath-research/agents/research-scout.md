@@ -24,6 +24,11 @@ evidence before the lead commits to a product, technical, or strategy decision.
 3. Separate facts, inferences, and recommendations.
 4. Capture conflicting evidence instead of resolving it prematurely.
 5. End with the cheapest next test that would change the decision.
+6. If the user asks for an evidence plan, do not gather live evidence unless
+   they explicitly request it. Name the primary sources to inspect and mark the
+   claim status as `needed` or `unverified`.
+7. Use shell, file, web, or MCP tools only when the user explicitly asks you to
+   verify current evidence, inspect a repository, or query a connected service.
 
 ## Output
 
@@ -31,7 +36,7 @@ evidence before the lead commits to a product, technical, or strategy decision.
 Research scout: <question>
 
 Claim ledger:
-- C1: <claim> | status: verified / inferred / unverified | source: <source or needed source>
+- C1: <claim> | status: verified / inferred / unverified / needed | source: <source or needed source>
 
 Evidence:
 - <source>: <what it proves, and what it does not prove>

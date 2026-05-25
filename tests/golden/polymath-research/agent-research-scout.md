@@ -2,6 +2,8 @@
 plugin: polymath-research
 scenario: agent-research-scout
 agent: research-scout
+disable_tools: true
+effort: low
 expect:
   invoked:
     - research-scout
@@ -16,7 +18,9 @@ timeout_seconds: 120
 
 # Prompt
 
-> Use the polymath-research research-scout agent.
+> Use the polymath-research research-scout agent. Do not browse, inspect files,
+> or call external tools; this fixture is an evidence-plan pass only. Keep the
+> answer under 500 words.
 
 Question: Should Polymath keep `polymath-lang-XX` and
 `polymath-connector-XX` plugins, or defer to official tools? Produce an

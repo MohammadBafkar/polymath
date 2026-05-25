@@ -163,6 +163,16 @@ if tokens:
     if [[ -n "$agent" ]]; then
       claude_args+=(--agent "$agent")
     fi
+    local disable_tools
+    disable_tools="$(python3 -c "import json,sys;print('1' if json.loads(sys.argv[1]).get('disable_tools') else '')" "$meta")"
+    if [[ -n "$disable_tools" ]]; then
+      claude_args+=(--tools "")
+    fi
+    local effort
+    effort="$(python3 -c "import json,sys;print(json.loads(sys.argv[1]).get('effort') or '')" "$meta")"
+    if [[ -n "$effort" ]]; then
+      claude_args+=(--effort "$effort")
+    fi
     if ! timeout --foreground "$timeout" claude "${claude_args[@]}" "$prompt" >"$transcript" 2>&1; then
       echo "  ✗ claude -p failed or timed out ($timeout s)" >&2
       tail -20 "$transcript" | sed 's/^/      | /' >&2

@@ -2,6 +2,8 @@
 plugin: polymath-thinking
 scenario: agent-architecture-critic
 agent: architecture-critic
+disable_tools: true
+effort: low
 expect:
   invoked:
     - architecture-critic

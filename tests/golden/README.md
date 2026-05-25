@@ -20,6 +20,8 @@ tests/golden/
 plugin: polymath-product
 scenario: prd-from-rate-limit-request
 agent: optional-agent-name
+disable_tools: false
+effort: low
 expect:
   invoked:
     - polymath-product:prd
@@ -56,7 +58,9 @@ Both local and CI execution go through [`run-fixtures.sh`](run-fixtures.sh), whi
 2. Adds the local marketplace via `claude plugin marketplace add <repo>`.
 3. Installs the plugin (or the full MVP set, for workflow fixtures).
 4. Runs `claude -p "<prompt body>"` with the user's existing auth. Fixtures
-   may declare `agent: <name>` to run an installed plugin agent directly.
+   may declare `agent: <name>` to run an installed plugin agent directly,
+   `disable_tools: true` for pure reasoning checks, and `effort: low|medium|high`
+   when the fixture needs bounded model effort.
 5. Checks `expect.invoked`, `expect.artifacts`, `expect.output_matches`, and `expect.not_invoked` against the transcript and scratch filesystem.
 
 Agent fixtures are paired with no-agent baseline evidence records under

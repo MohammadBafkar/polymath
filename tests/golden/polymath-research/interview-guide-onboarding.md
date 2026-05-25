@@ -19,9 +19,13 @@ timeout_seconds: 120
 
 > Write an interview guide for our onboarding research.
 
-Use polymath-research:interview-guide. Research question: "Why do new teams
-bounce in their first week?" Audience: engineering managers at 20–100-person
-startups who signed up in the last 90 days.
+Use polymath-research:interview-guide. Write the artifact exactly to
+`docs/research/why-do-new-teams-bounce-in-week-1-guide.md`.
+
+Research question: "Why do new teams bounce in their first week?" Audience:
+engineering managers at 20–100-person startups who signed up in the last 90
+days. In the final answer, explicitly say that the guide avoids hypothetical
+questions.
 
 # Acceptance
 
