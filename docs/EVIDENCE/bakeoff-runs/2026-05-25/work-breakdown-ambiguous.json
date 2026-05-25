@@ -1,0 +1,121 @@
+{
+  "case": "work-breakdown-ambiguous",
+  "title": "Plan: decompose an ambiguous initiative",
+  "baseline_score": 6,
+  "polymath_score": 8,
+  "delta": 2,
+  "threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-7cglu7k6",
+      "score": 6,
+      "rubric": [
+        {
+          "id": "leaves-pr-sized",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "PR|pull request|leaf|smallest|atomic",
+            "size|estimate|XS|S|M|L"
+          ]
+        },
+        {
+          "id": "critical-path",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "critical path|sequential|blocker|dependency",
+            "first|next|after"
+          ]
+        },
+        {
+          "id": "out-of-scope",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "out of scope|not in scope|deferred|won't",
+            "scope creep|focus|cut"
+          ]
+        },
+        {
+          "id": "owners",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "owner|assignee|responsible",
+            "TBD|team|engineer"
+          ]
+        },
+        {
+          "id": "ambiguity-resolution",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "assumption|clarify|ambiguous|measure",
+            "metric|baseline|hypothesis"
+          ]
+        }
+      ],
+      "output": "# Initiative: Reduce Checkout Abandonment by 20% (Q-end)\n\nSince I don't have access to your current checkout funnel data or stack, this is a generic breakdown. Tell me your platform (e.g., Shopify, custom React/Stripe, etc.) and I'll tailor it.\n\n## Phase 0 \u2014 Discovery (Week 1)\n- **T1. Funnel instrumentation audit** \u2014 verify events fire at every step (cart \u2192 address \u2192 shipping \u2192 payment \u2192 confirm). *No deps.*\n- **T2. Abandonment baseline + segmentation** \u2014 by device, payment method, geo, cart value. *Dep: T1.*\n- **T3. Session replay sampling** \u2014 review 50+ abandoned sessions to identify top friction. *Dep: T1.*\n- **T4. Hypothesis ranking doc** \u2014 rank fixes by expected impact \u00d7 effort. *Dep: T2, T3.*\n\n## Phase 1 \u2014 Quick Wins (Weeks 2\u20133)\n- **T5. Guest checkout** (if missing) or de-emphasize account creation.\n- **T6. Inline form validation** + autofill/address autocomplete (Google Places or similar).\n- **T7. Show total cost early** (shipping + tax estimate on cart).\n- **T8. Trust signals** \u2014 security badges, return policy, support contact near CTA.\n- **T9. Mobile-first CTA + sticky checkout button.**\n*All depend on T4; can ship in parallel.*\n\n## Phase 2 \u2014 Payment Friction (Weeks 3\u20135)\n- **T10. Add Apple Pay / Google Pay / PayPal** \u2014 biggest single lever on mobile. *Dep: T4.*\n- **T11. Card error UX** \u2014 actionable messages, retry without re-entering all fields. *Dep: payment provider SDK review.*\n- **T12. 3DS/SCA flow optimization** \u2014 minimize redirects, handle failures gracefully. *Dep: T10.*\n- **T13. Save payment method for returning users.** *Dep: T10.*\n\n## Phase 3 \u2014 Recovery (Weeks 4\u20136)\n- **T14. Abandoned cart email/SMS** \u2014 1h, 24h, 72h cadence. *Dep: T1 (event data).*\n- **T15. Persistent cart across devices** (logged-in users). *Dep: auth + cart service.*\n- **T16. Exit-intent offer** (discount or free shipping). *Dep: T7.*\n\n## Phase 4 \u2014 Measure & Iterate (Weeks 6\u201312)\n- **T17. A/B testing framework** (if not present) \u2014 required to attribute the 20%. *Should start in Phase 1 if possible.*\n- **T18. Per-change experiments**, statistical readouts, kill losers.\n- **T19. Weekly funnel review** with PM/design.\n\n## Critical Path\n**T1 \u2192 T2/T3 \u2192 T4 \u2192 T10 (Apple/Google Pay) \u2192 T12 (3DS) \u2192 T17/T18 (measure)**\n\nPayment methods are usually the highest-impact intervention (often 5\u201315% lift alone on mobile) and have the longest lead time (provider onboarding, compliance, 3DS edge cases). They gate hitting 20%.\n\n## Risks\n- No A/B framework \u2192 can't prove the 20%.\n- PCI/PSP contracts may delay T10.\n- \"20% reduction\" without baseline confidence intervals may be noise \u2014 confirm baseline in T2 before committing.\n\nWant me to expand any phase into tickets, or pull current best-practice docs for a specific payment SDK (Stripe, Adyen, Braintree)?\n"
+    },
+    "polymath": {
+      "variant": "polymath",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-7p39ssum",
+      "score": 8,
+      "rubric": [
+        {
+          "id": "leaves-pr-sized",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "PR|pull request|leaf|smallest|atomic",
+            "size|estimate|XS|S|M|L"
+          ]
+        },
+        {
+          "id": "critical-path",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "critical path|sequential|blocker|dependency",
+            "first|next|after"
+          ]
+        },
+        {
+          "id": "out-of-scope",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "out of scope|not in scope|deferred|won't",
+            "scope creep|focus|cut"
+          ]
+        },
+        {
+          "id": "owners",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "owner|assignee|responsible",
+            "TBD|team|engineer"
+          ]
+        },
+        {
+          "id": "ambiguity-resolution",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "assumption|clarify|ambiguous|measure",
+            "metric|baseline|hypothesis"
+          ]
+        }
+      ],
+      "output": "# Checkout Abandonment Reduction \u2014 20% This Quarter\n\n## Goal Frame\n- **Objective:** Reduce checkout abandonment rate by 20% (relative) by end of Q (\u224813 weeks from 2026-05-25 \u2192 ~2026-08-24).\n- **Success metric:** `abandonment_rate = 1 - (completed_checkouts / checkout_starts)`, measured weekly, 4-week trailing average.\n- **Guardrails:** No regression in conversion-to-start, AOV, refund rate, or fraud chargebacks.\n\n---\n\n## Work Breakdown\n\n### 1. Diagnose (Weeks 1\u20132) \u2014 *critical path*\n- 1.1 Funnel instrumentation audit \u2014 **S**\n- 1.2 Step-by-step drop-off analysis (cart \u2192 address \u2192 shipping \u2192 payment \u2192 review \u2192 confirm) \u2014 **M**\n- 1.3 Segment cuts: device, new vs returning, payment method, geo, cart value \u2014 **M**\n- 1.4 Session replay review (n\u226550 abandoned sessions) \u2014 **M**\n- 1.5 Exit-intent survey deploy + 1 week collection \u2014 **S**\n- 1.6 Hypothesis ranking (ICE scored) \u2014 **S**\n\n### 2. Quick Wins (Weeks 2\u20134) \u2014 parallel after 1.2\n- 2.1 Form field reduction / autofill / inline validation \u2014 **M**\n- 2.2 Guest checkout default \u2014 **S**\n- 2.3 Trust signals (security badges, return policy at payment step) \u2014 **S**\n- 2.4 Error message clarity pass \u2014 **S**\n- 2.5 Mobile keyboard / input-type fixes \u2014 **S**\n\n### 3. Payment & Trust (Weeks 3\u20137) \u2014 *likely critical path tail*\n- 3.1 Add Apple Pay / Google Pay / express wallets \u2014 **L**\n- 3.2 BNPL provider integration (Klarna/Affirm) \u2014 **L**\n- 3.3 Address autocomplete (Google/Loqate) \u2014 **M**\n- 3.4 Saved payment methods for returning users \u2014 **M**\n- 3.5 3DS friction tuning with PSP \u2014 **M**\n\n### 4. Recovery (Weeks 4\u20138)\n- 4.1 Abandoned cart email sequence (3 touches) \u2014 **M**\n- 4.2 SMS recovery for opted-in users \u2014 **S**\n- 4.3 Exit-intent modal with incentive logic \u2014 **S**\n\n### 5. Experimentation & Measurement (continuous)\n- 5.1 A/B framework readiness check + MDE calc \u2014 **S**\n- 5.2 Per-change experiment (sequential or mutually exclusive) \u2014 **M**\n- 5.3 Weekly readout + decision log \u2014 **S**\n\n### 6. Hardening (Weeks 9\u201312)\n- 6.1 Performance: checkout LCP <2.0s, eliminate layout shift \u2014 **M**\n- 6.2 Error/timeout rate reduction on payment submit \u2014 **M**\n- 6.3 Accessibility pass (WCAG AA on checkout) \u2014 **M**\n\n---\n\n## Critical Path\n`1.1 \u2192 1.2 \u2192 1.6 \u2192 3.1 (wallets) \u2192 3.2 (BNPL) \u2192 6.1 (perf)`\n\nWallets typically deliver the single largest lift (industry: 5\u201315% checkout conversion uplift) and have the longest lead time due to PSP + compliance work \u2014 start procurement in Week 2.\n\n## Out of Scope (explicit)\n- \u274c Full checkout redesign / re-platforming\n- \u274c Pricing, discount strategy, or promo engine changes\n- \u274c Upstream PDP/cart UX (only measured, not changed)\n- \u274c New currencies / new market launches\n- \u274c Loyalty program changes\n- \u274c Backend order management refactor\n- \u274c Native app checkout (web only this quarter)\n\n## Risks\n- Wallet/BNPL vendor contracting slips \u2192 mitigation: start week 1, have backup PSP-native wallet path.\n- Experiment traffic insufficient for MDE \u2192 run sequentially on highest-ICE only.\n- Holiday / seasonality confound \u2192 use YoY-normalized metric.\n\n## Estimate Roll-up\n- S (\u22642 days): 10 items\n- M (3\u20138 days): 10 items\n- L (2\u20134 weeks): 2 items\n\nFits in 13 weeks assuming 1 PM + 2 FE + 1 BE + 1 analyst + design partial.\n"
+    }
+  }
+}

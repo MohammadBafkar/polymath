@@ -1,0 +1,121 @@
+{
+  "case": "code-review-red-team",
+  "title": "Engineering: review a diff with red-team critique",
+  "baseline_score": 5,
+  "polymath_score": 10,
+  "delta": 5,
+  "threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-bpqvy3ok",
+      "score": 5,
+      "rubric": [
+        {
+          "id": "race-condition",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "race|concurrent|thread|atomic|lock",
+            "fetch|cache|stampede"
+          ]
+        },
+        {
+          "id": "missing-tests",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "test|coverage|missing",
+            "concurrent|edge|expired|negative"
+          ]
+        },
+        {
+          "id": "fix-proposal",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "lock|mutex|single.?flight|atomic|cache.?stampede",
+            "guard|protect"
+          ]
+        },
+        {
+          "id": "adversarial",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "adversarial|red.?team|attacker|abuse",
+            "burst|hot|flood"
+          ]
+        },
+        {
+          "id": "trade-off",
+          "weight": 1,
+          "passed": false,
+          "patterns": [
+            "trade.?off|latency|throughput|memory",
+            "simple|complex"
+          ]
+        }
+      ],
+      "output": "Reviewing the diff.\n\n### Bugs\n\n1. **Not thread-safe.** A cache is almost always accessed concurrently. Two callers can both see `expired()` and issue duplicate `fetch(key)` calls (thundering herd). Needs a lock \u2014 ideally a per-key lock so unrelated keys don't serialize.\n\n2. **`KeyError` risk on expiry check.** The `or` short-circuit saves you here, but the logic is fragile. If someone reorders the conditions or `expired()` raises, behavior is surprising. Prefer:\n   ```python\n   entry = self._cache.get(key)\n   if entry is None or entry.expired():\n       entry = fetch(key)\n       self._cache[key] = entry\n   return entry\n   ```\n   This also avoids a double dict lookup.\n\n3. **No handling of `fetch` failure.** If `fetch(key)` raises, the old (expired) entry is left in place \u2014 but a *partial* assignment isn't the issue; the issue is there's no fallback, no retry policy, and no negative caching. At minimum the behavior on failure should be documented/decided.\n\n4. **Expired entries are never evicted** except on access. Memory grows unbounded for keys that are written once and never read again. No max size, no TTL sweep.\n\n5. **`fetch` is a free global.** Untestable without monkeypatching. Should be injected via `__init__` (or be a method).\n\n### Missing tests\n\n- Cache hit returns cached value without calling `fetch`.\n- Expired entry triggers refetch and replaces the stored value.\n- Miss populates the cache.\n- Concurrent access to the same key only fetches once (once locking is added).\n- `fetch` raising propagates and does not corrupt the cache.\n- Different keys are independent.\n\n### Design issues\n\n- No `invalidate(key)` / `clear()` API.\n- No metrics/logging (hit, miss, refresh, fetch latency) \u2014 caches are useless to operate without these.\n- `TokenCache` named for tokens but the code is generic; either rename to `Cache` or constrain the value type and add token-specific concerns (e.g., refresh-ahead before expiry to avoid latency spikes on the request that happens to expire).\n- Consider refresh-ahead: refetch when within N seconds of expiry, served from a background task, so user requests never block on token refresh.\n- No type hints.\n\nThe single biggest issue is concurrency \u2014 for a token cache in any real service, that's a correctness bug, not a nit.\n"
+    },
+    "polymath": {
+      "variant": "polymath",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-rdt99bq5",
+      "score": 10,
+      "rubric": [
+        {
+          "id": "race-condition",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "race|concurrent|thread|atomic|lock",
+            "fetch|cache|stampede"
+          ]
+        },
+        {
+          "id": "missing-tests",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "test|coverage|missing",
+            "concurrent|edge|expired|negative"
+          ]
+        },
+        {
+          "id": "fix-proposal",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "lock|mutex|single.?flight|atomic|cache.?stampede",
+            "guard|protect"
+          ]
+        },
+        {
+          "id": "adversarial",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "adversarial|red.?team|attacker|abuse",
+            "burst|hot|flood"
+          ]
+        },
+        {
+          "id": "trade-off",
+          "weight": 1,
+          "passed": true,
+          "patterns": [
+            "trade.?off|latency|throughput|memory",
+            "simple|complex"
+          ]
+        }
+      ],
+      "output": "# Code Review + Red-Team: `TokenCache.get`\n\n## Correctness Issues\n\n1. **Not thread-safe (the headline bug).** Check-then-act on `self._cache` across threads: two callers can both see \"missing/expired\" and both call `fetch(key)`. Last writer wins; the other's token is orphaned but may already be in use by the caller that fetched it \u2192 wasted work, possible token-revocation races with the IdP, and rate-limit pressure.\n2. **Thundering herd / cache stampede.** On expiry of a hot key, *N* concurrent callers all stampede `fetch`. Worse if `fetch` is slow (network) \u2014 every request in the window pays full latency.\n3. **No negative-result handling.** If `fetch(key)` raises, nothing is cached and every subsequent caller retries immediately \u2014 a failing IdP becomes a tight retry loop. If `fetch` returns `None`/falsy, `.expired()` will `AttributeError` and the cache entry is never replaced cleanly.\n4. **No TTL skew / early refresh.** A token that expires in 50ms passes the `expired()` check, gets returned, and fails downstream. Needs a refresh-ahead window.\n5. **Unbounded growth.** `self._cache` never evicts. Long-running process + many keys = memory leak.\n6. **No clock-skew tolerance.** `expired()` presumably compares to local time; nothing here.\n7. **Key safety.** `key` is used as a dict key with no normalization \u2014 `\"User\"` vs `\"user\"` cache-miss, and any unhashable input throws.\n8. **`__init__` takes no lock/config** \u2014 no way to inject a clock, fetcher, or max size, which also makes it untestable (see below).\n\n## Missing Tests\n\n- Concurrent `get` on the same key fetches **once** (single-flight).\n- Concurrent `get` on different keys does **not** serialize unnecessarily.\n- Expired entry triggers exactly one refetch under contention.\n- `fetch` raises \u2192 exception propagates, cache unchanged, next call retries (no poisoned entry).\n- Token expiring mid-flight: refresh-ahead returns a still-valid token.\n- Eviction / max-size behavior (once added).\n- Property test: random interleavings of get/expire/fetch never return an expired token to a caller.\n\n## Adversarial Scenarios\n\n- **Stampede attack:** attacker triggers simultaneous requests for many keys whose tokens just expired \u2192 fan-out amplification at the IdP, possible self-DoS.\n- **Slow-fetch hold:** `fetch` hangs (no timeout shown). Every caller blocks forever; with a naive lock, the whole cache wedges.\n- **Key explosion:** attacker sends unique keys to fill `self._cache` \u2192 OOM.\n- **Time travel:** if `expired()` reads wall clock, NTP jump backward keeps stale tokens \"fresh\"; jump forward invalidates everything at once \u2192 stampede.\n- **Exception poisoning:** a transient `fetch` failure leaves `self._cache[key]` either missing or holding a half-constructed object depending on ordering.\n\n## Fix Proposal: Per-Key Single-Flight Guard\n\n```python\nimport threading\n\nclass TokenCache:\n    def __init__(self, fetcher=fetch, refresh_skew=5.0):\n        self._cache = {}\n        self._locks = {}                # key -> Lock (single-flight per key)\n        self._locks_guard = threading.Lock()\n        self._fetcher = fetcher\n        self._skew = refresh_skew       # seconds of refresh-ahead\n\n    def _key_lock(self, key):\n        with self._locks_guard:\n            lock = self._locks.get(key)\n            if lock is None:\n                lock = self._locks[key] = threading.Lock()\n            return lock\n\n    def get(self, key):\n        entry = self._cache.get(key)\n        if entry is not None and not entry.expired(skew=self._skew):\n            return entry                        # fast path, no lock\n\n        lock = self._key_lock(key)\n        with lock:                              # single-flight per key\n            entry = self._cache.get(key)        # double-check after acquiring\n            if entry is not None and not entry.expired(skew=self._skew):\n                return entry\n            new_entry = self._fetcher(key)      # may raise; cache untouched\n            self._cache[key] = new_entry\n            return new_entry\n```\n\nKey properties:\n- Fast path is lock-free for valid tokens (read of a dict ref is atomic under CPython's GIL; safe across threads for \"is there a non-expired entry\").\n- Per-key lock means a slow fetch for key A doesn't block key B.\n- Double-checked locking inside the critical section collapses the stampede to one `fetch` per key per expiry.\n- Exceptions in `_fetcher` leave the prior (possibly absent) state intact; no poisoning.\n- Refresh-ahead via `skew` avoids the \"valid for 50ms\" hand-off.\n\nStill TODO before production: bounded size (LRU), `_locks` cleanup on eviction, fetch timeout, async variant using `asyncio.Lock` + an in-flight `Future` map.\n\n## Trade-offs\n\n**Latency:** the fast path adds one extra dict lookup and a method call vs. the original \u2014 negligible. The slow path adds a lock acquire (uncontended: ~tens of ns) and a double-check; under contention, *N\u22121* callers wait on one `fetch` instead of each paying full network latency, so p99 improves dramatically even though the *first* caller's latency is unchanged. **Throughput:** strictly higher under concurrent load \u2014 collapsing *N* fetches to 1 reduces IdP RPS and removes rate-limit-induced retries; per-key locks keep unrelated keys parallel, so we don't bottleneck on a single global mutex. **Memory:** grows by one `Lock` object per distinct key (~few hundred bytes), plus the `_locks_guard`. Without eviction this is the same unbounded-growth risk as the cache itself; pairing locks with the cache's eviction policy is required. **Simple vs. complex:** the simplest correct fix is a single global `threading.Lock()` wrapping the whole method \u2014 three lines, obviously correct, but serializes all keys and ties slow fetches together. The per-key single-flight above is moderately more complex (two-level locking, double-checked read) but the complexity is localized and well-understood; an in-flight-`Future` map would be more efficient still (waiters share the same result without each re-acquiring the lock) at the cost of more state to reason about. For most workloads, per-key lock + double-check is the right point on the curve.\n"
+    }
+  }
+}

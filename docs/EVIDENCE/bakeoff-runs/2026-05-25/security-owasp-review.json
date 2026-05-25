@@ -1,0 +1,121 @@
+{
+  "case": "security-owasp-review",
+  "title": "Security: OWASP-shaped review of a small diff",
+  "baseline_score": 6,
+  "polymath_score": 9,
+  "delta": 3,
+  "threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-moi2vk0d",
+      "score": 6,
+      "rubric": [
+        {
+          "id": "owasp-category",
+          "weight": 3,
+          "passed": false,
+          "patterns": [
+            "A0[1-9]|broken authentication|identification|cryptographic",
+            "OWASP|2021|2023"
+          ]
+        },
+        {
+          "id": "signature-verification",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "verify|signature|jwt.verify|trust",
+            "secret|key|algorithm"
+          ]
+        },
+        {
+          "id": "finding-id",
+          "weight": 1,
+          "passed": true,
+          "patterns": [
+            "finding|ID|severity",
+            "high|critical|medium"
+          ]
+        },
+        {
+          "id": "fix-proposal",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "jwt.verify|jose|verifySignature|library",
+            "RS256|HS256|algorithm"
+          ]
+        },
+        {
+          "id": "test",
+          "weight": 1,
+          "passed": false,
+          "patterns": [
+            "test|regression",
+            "forged|invalid|malicious"
+          ]
+        }
+      ],
+      "output": "## Security Issues\n\n**1. No signature verification (critical)**\nThe code decodes the JWT payload but never verifies the signature. Any attacker can forge a token with arbitrary `sub` and the server will trust it. Use `jwt.verify(token, secret)` from `jsonwebtoken`, not manual base64 decoding.\n\n**2. Missing claim validation**\nEven with verification, you must check `exp` (expiry), `iat`, `iss`, and `aud`. Expired or foreign-issuer tokens would otherwise be accepted.\n\n**3. Unhandled crashes \u2192 DoS**\n- Missing `Authorization` header \u2192 `token` is `undefined` \u2192 `token.split` throws.\n- Malformed token (no `.`, non-base64, non-JSON) \u2192 throws inside the handler.\nEach throw becomes an unhandled error. Validate presence and wrap parsing, returning 401 on failure.\n\n**4. `alg: none` / algorithm confusion**\nManual decoding implicitly accepts any algorithm, including `none`. When switching to `jwt.verify`, pin algorithms explicitly: `{ algorithms: ['RS256'] }` (or whatever you issue).\n\n**5. Trusting `payload.sub` as identity**\nEven post-verification, `sub` should be looked up against your user store to confirm the account still exists and isn't disabled/revoked \u2014 don't echo token claims as ground truth.\n\n**6. Minor: information leakage**\nReturning raw token-derived fields can leak more than intended if the response later expands to `payload` directly. Whitelist fields explicitly.\n\n### Fixed version\n```js\nconst jwt = require('jsonwebtoken');\n\napp.get('/me', (req, res) => {\n  const auth = req.headers.authorization;\n  if (!auth?.startsWith('Bearer ')) return res.sendStatus(401);\n  try {\n    const payload = jwt.verify(auth.slice(7), process.env.JWT_PUBLIC_KEY, {\n      algorithms: ['RS256'],\n      issuer: 'your-issuer',\n      audience: 'your-aud',\n    });\n    res.json({ user: payload.sub });\n  } catch {\n    res.sendStatus(401);\n  }\n});\n```\n"
+    },
+    "polymath": {
+      "variant": "polymath",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-3acwd8ib",
+      "score": 9,
+      "rubric": [
+        {
+          "id": "owasp-category",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "A0[1-9]|broken authentication|identification|cryptographic",
+            "OWASP|2021|2023"
+          ]
+        },
+        {
+          "id": "signature-verification",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "verify|signature|jwt.verify|trust",
+            "secret|key|algorithm"
+          ]
+        },
+        {
+          "id": "finding-id",
+          "weight": 1,
+          "passed": true,
+          "patterns": [
+            "finding|ID|severity",
+            "high|critical|medium"
+          ]
+        },
+        {
+          "id": "fix-proposal",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "jwt.verify|jose|verifySignature|library",
+            "RS256|HS256|algorithm"
+          ]
+        },
+        {
+          "id": "test",
+          "weight": 1,
+          "passed": false,
+          "patterns": [
+            "test|regression",
+            "forged|invalid|malicious"
+          ]
+        }
+      ],
+      "output": "# OWASP Security Review \u2014 Express `/me` Handler\n\n**Standard:** OWASP API Security Top 10 \u2014 2023\n\n---\n\n## Finding POLY-API-001 \u2014 Critical \ud83d\udd34\n**Category:** API2:2023 \u2014 Broken Authentication\n**Issue:** JWT signature is never verified. The handler base64-decodes the payload segment and trusts `sub` verbatim. Any attacker can forge a token with arbitrary `sub` and impersonate any user.\n\n## Finding POLY-API-002 \u2014 High \ud83d\udfe0\n**Category:** API8:2023 \u2014 Security Misconfiguration (also overlaps API2)\n**Issue:** No `alg` check. Even if `jwt.verify` were added later, accepting `alg: none` or algorithm confusion (HS256 vs RS256) is trivial without an explicit algorithms allowlist.\n\n## Finding POLY-API-003 \u2014 Medium \ud83d\udfe1\n**Category:** API8:2023 \u2014 Security Misconfiguration\n**Issue:** Unsafe input handling \u2014 `token` may be `undefined` (missing/malformed `Authorization` header), causing `JSON.parse` / `split` to throw a 500 with a stack trace. Information disclosure + DoS via unhandled rejection.\n\n## Finding POLY-API-004 \u2014 Low \ud83d\udfe2\n**Category:** API3:2023 \u2014 Broken Object Property Level Authorization\n**Issue:** Returning the raw `sub` claim with no canonicalization; if the token schema later includes sensitive fields, a future `payload` spread would leak them. Defense-in-depth concern.\n\n---\n\n## Concrete Fix\n\n```js\nimport jwt from 'jsonwebtoken';\n\nconst JWT_SECRET = process.env.JWT_SECRET;\nconst JWT_ISSUER = process.env.JWT_ISSUER;\nconst JWT_AUDIENCE = process.env.JWT_AUDIENCE;\n\nfunction requireAuth(req, res, next) {\n  const header = req.headers.authorization;\n  if (!header?.startsWith('Bearer ')) {\n    return res.status(401).json({ error: 'missing_bearer_token' });\n  }\n  const token = header.slice(7).trim();\n\n  try {\n    req.auth = jwt.verify(token, JWT_SECRET, {\n      algorithms: ['HS256'],          // explicit allowlist \u2014 blocks 'none' & confusion\n      issuer: JWT_ISSUER,\n      audience: JWT_AUDIENCE,\n      clockTolerance: 5,\n    });\n  } catch {\n    return res.status(401).json({ error: 'invalid_token' });\n  }\n  next();\n}\n\napp.get('/me', requireAuth, (req, res) => {\n  res.json({ user: { id: req.auth.sub } });\n});\n```\n\n**Key controls applied:** signature verification, explicit `algorithms` allowlist, `iss`/`aud` validation, generic 401 errors (no stack leak), and field-scoped response.\n\n> Note: \"Polymath security owasp-review\" isn't a tool I have access to \u2014 this is a manual OWASP-aligned review. If you meant a specific scanner/plugin, let me know and I can adjust.\n"
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "case": "postmortem-blameless",
+  "title": "Incident: write a blameless postmortem from notes",
+  "baseline_score": 6,
+  "polymath_score": 8,
+  "delta": 2,
+  "threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-p2_e45re",
+      "score": 6,
+      "rubric": [
+        {
+          "id": "blameless-rewrite",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "system|process|missing|guardrail|signal",
+            "instead of|not|rewrit"
+          ]
+        },
+        {
+          "id": "timeline",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "timeline|sequence|chronolog",
+            "12 minutes|38 minutes|page|detect"
+          ]
+        },
+        {
+          "id": "action-categories",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "prevent|detect|mitigate|process",
+            "category|class"
+          ]
+        },
+        {
+          "id": "detection-gap",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "detect|monitor|alert|signal",
+            "12 minutes|customer|Slack|before"
+          ]
+        },
+        {
+          "id": "migration-guardrail",
+          "weight": 1,
+          "passed": true,
+          "patterns": [
+            "migration|deploy|preflight|gate",
+            "automate|require|block"
+          ]
+        }
+      ],
+      "output": "## Summary\n\n**Sev2 incident \u2014 refund worker (2026-04-18, 38 min)**\n- A hotfix was deployed without running migrations, which broke the refund queue.\n- Detection lagged: on-call was paged ~12 minutes after customers reported the issue in Slack.\n- Mitigation: worker restarted, queue drained cleanly, no data loss.\n\n## Suggested follow-up work\n\n1. **Prevent deploys without migrations** \u2014 add a CI/deploy gate that blocks releases when pending migrations aren't applied, so this can't depend on individual diligence.\n2. **Shorten detection time** \u2014 add queue-depth / worker-stall alerting so on-call is paged from monitoring, not from customer Slack messages. Target detection well under 12 minutes.\n3. **Hotfix process review** \u2014 document and enforce the hotfix checklist (migrations, review sign-off, rollback plan).\n4. **Blameless postmortem** \u2014 run the writeup focused on the system gaps (missing CI check, missing alert, review process) rather than on Carol or Alice individually. Repeated individual error usually points to a missing guardrail.\n5. **Review process tune-up** \u2014 discuss with the team what would make migration-related risks easier to spot in review (e.g., PR template checkbox, automated label when migrations are touched).\n\nA note on the last bullet in your notes: framing it as \"make sure Carol doesn't do this again\" is worth reconsidering \u2014 the durable fix is the CI gate and alerting, not personal accountability. Happy to help draft the postmortem doc or the CI check if useful.\n"
+    },
+    "polymath": {
+      "variant": "polymath",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-gso3l_5o",
+      "score": 8,
+      "rubric": [
+        {
+          "id": "blameless-rewrite",
+          "weight": 3,
+          "passed": true,
+          "patterns": [
+            "system|process|missing|guardrail|signal",
+            "instead of|not|rewrit"
+          ]
+        },
+        {
+          "id": "timeline",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "timeline|sequence|chronolog",
+            "12 minutes|38 minutes|page|detect"
+          ]
+        },
+        {
+          "id": "action-categories",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "prevent|detect|mitigate|process",
+            "category|class"
+          ]
+        },
+        {
+          "id": "detection-gap",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "detect|monitor|alert|signal",
+            "12 minutes|customer|Slack|before"
+          ]
+        },
+        {
+          "id": "migration-guardrail",
+          "weight": 1,
+          "passed": true,
+          "patterns": [
+            "migration|deploy|preflight|gate",
+            "automate|require|block"
+          ]
+        }
+      ],
+      "output": "# Incident Postmortem \u2014 Refund Worker Stall (Sev2)\n\n**Date:** 2026-04-18\n**Severity:** Sev2\n**Duration:** 38 minutes\n**Data loss:** None\n\n## Summary\n\nThe refund worker stalled for 38 minutes after a hotfix was deployed without the accompanying database migrations, leaving the queue unable to process jobs. Service was restored by restarting the worker, after which the queue drained normally.\n\n## Timeline\n\n| Time (relative) | Event |\n|---|---|\n| T+0 | Hotfix deployed to production; deployment process did not run the required migrations, leaving the queue in an inconsistent schema state. |\n| T+0 \u2192 T+~? | Refund worker begins failing to process jobs; queue depth grows. |\n| T+? | Customers report issues in Slack. |\n| +12 min after customer reports | On-call paged by monitoring. |\n| T+38 min | Worker restarted; queue drains; service restored. |\n\n## Detection Gap\n\nThere was a **12-minute gap** between customers reporting the issue in Slack and on-call being paged. Customer-visible symptoms preceded our internal alerting, indicating that monitoring did not detect the stalled worker or growing queue depth as a leading indicator.\n\n## Contributing Factors (system-shaped)\n\n- **Deployment tooling did not enforce migration execution.** The hotfix path allowed code to ship without the schema changes it depended on. The system permitted a deploy that the system itself could not safely run.\n- **Code review process lacked a migration-coupling check.** Reviewers had no automated or checklist-based signal that the change required migrations, so the dependency was easy to miss for any reviewer.\n- **Alerting lagged customer reports by 12 minutes.** Queue-depth and worker-health signals were not wired to page on-call ahead of user-visible impact.\n- **No pre-flight verification between deploy and queue health.** Nothing automatically validated that workers were healthy post-deploy.\n\n## Action Categories\n\n### Prevent\n- Block deploys when pending migrations exist for the deploying revision (CI/CD gate).\n- Add a \"requires migration\" label/check that fails review automatically when a PR touches models without a paired migration.\n- Require hotfixes to go through the same migration-aware deploy path as standard releases.\n\n### Detect\n- Add paging alerts on refund-worker queue depth and job-processing latency, tuned to fire before customer-visible impact.\n- Add a worker liveness/heartbeat alert that pages within 2 minutes of stall.\n- Create a Slack-to-incident bridge so customer-impact mentions in support channels trigger an on-call signal.\n\n### Mitigate\n- Add an automated post-deploy health check that rolls back or pages if workers are unhealthy within N minutes of a deploy.\n- Document and script the \"restart worker + drain queue\" recovery so any on-call can execute it without tribal knowledge.\n\n### Process\n- Adopt blameless postmortems as the default; review language in templates to focus on system gaps rather than individuals.\n- Add a migration checklist item to the PR template and the deploy runbook.\n- Schedule a follow-up review of alerting coverage for all background workers, not just refunds.\n\n## Notes on Framing\n\nThis postmortem is blameless: individuals acted in good faith within a system that allowed a code-only hotfix to ship without migrations and did not alert on the resulting queue stall ahead of customers. Remediation targets the deploy pipeline, review tooling, and alerting \u2014 not individual behavior.\n"
+    }
+  }
+}

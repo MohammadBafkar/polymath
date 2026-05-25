@@ -1,0 +1,121 @@
+{
+  "case": "adr-store-choice",
+  "title": "ADR: choose a rate-limit counter store",
+  "baseline_score": 8,
+  "polymath_score": 10,
+  "delta": 2,
+  "threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "results": {
+    "baseline": {
+      "variant": "baseline",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-5yuq4aev",
+      "score": 8,
+      "rubric": [
+        {
+          "id": "decision",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "decision|status|context",
+            "Redis|Postgres|gateway|token bucket"
+          ]
+        },
+        {
+          "id": "alternatives",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "alternative|considered",
+            "gateway|token bucket|Postgres"
+          ]
+        },
+        {
+          "id": "consequences",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "consequence|trade.?off",
+            "latency|availability|operational"
+          ]
+        },
+        {
+          "id": "critique",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "assumption|fatal|patchable|critic",
+            "partition|outage|fail"
+          ]
+        },
+        {
+          "id": "validation",
+          "weight": 2,
+          "passed": false,
+          "patterns": [
+            "test|validate|experiment",
+            "rollback|migration|reversible"
+          ]
+        }
+      ],
+      "output": "# ADR 0001: Backing Store for `/login` Rate-Limit Counters\n\n- **Status:** Accepted\n- **Date:** 2026-05-25\n- **Deciders:** Platform / Identity\n\n## Context\n\nThe `/login` endpoint needs per-identifier rate limiting (by IP, by username, and by `(IP, username)` tuple) to slow credential-stuffing and brute-force attacks. Counters must be:\n\n- **Shared across replicas** \u2014 an attacker rotating across pods must not get N\u00d7 the budget.\n- **Low-latency** \u2014 added latency on the auth hot path \u2264 ~2 ms p99.\n- **Durable enough** \u2014 counter loss on cold start is acceptable (windows are minutes to an hour), but must not silently reset for an active attacker.\n- **Operable** \u2014 a limiter failure must not take `/login` down; fail-open with a safety net.\n\n## Options considered\n\n### 1. Redis (managed, e.g. ElastiCache / Azure Cache for Redis)\nCounters via `INCR`+`EXPIRE` or a sliding-window/GCRA Lua script.\n- **Pros:** Sub-ms latency; atomic ops; TTLs match window semantics; well-known patterns; scales well past expected login QPS.\n- **Cons:** Another stateful dependency to run, patch, monitor, and pay for; failover gap of ~10\u201330 s must be handled.\n\n### 2. Postgres (existing OLTP primary)\nCounter rows with `UPSERT \u2026 RETURNING` or window tables.\n- **Pros:** No new infra; transactional with auth state; easy to query for forensics.\n- **Cons:** Every login attempt becomes a primary write \u2014 couples `/login` availability to OLTP write capacity, turning an auth flood into a whole-product flood. Hot-row contention on attacked usernames causes lock waits. p99 ~10\u201350 ms under load. Vacuum/bloat cost is real on high-churn counter rows.\n\n### 3. Gateway-native rate limiting (APIM / Envoy / NGINX / WAF)\n- **Pros:** Zero app latency; sheds load at the edge; cheap; built-in IP limits.\n- **Cons:** Limited key flexibility \u2014 most gateways cannot key on `username` extracted from a JSON body, nor on `(ip, username)` tuples, nor apply identity-aware rules (e.g. tighter limits for risky accounts). State is per-instance unless backed by an external store anyway, and decisions are invisible to app-level metrics and audit.\n\n### 4. Local in-process token bucket\n- **Pros:** Zero dependencies, zero added latency, trivially correct.\n- **Cons:** Budget multiplies by replica count; ineffective against any attacker with enough fan-out to hit multiple pods \u2014 the realistic case behind a load balancer.\n\n## Decision\n\n**Redis is the primary store, with the gateway as a coarse outer guard and a local token bucket as a fail-open safety net.** Three layers:\n\n1. **Gateway (outer ring):** Coarse IP-based limit on the auth path (e.g. 600 req/min/IP). Sheds obvious floods, no app cooperation needed.\n2. **Redis (primary):** Sliding-window counters per `(ip)`, `(username)`, and `(ip, username)`. Implemented as a single Lua script per check so increment + read + decision is atomic. Keys are short (`rl:l:ip:<ip>:1m`, etc.) with TTL = window.\n3. **Local token bucket (fallback):** Each replica keeps an in-process bucket sized to its share of legitimate load. When Redis is unreachable (timeout > 50 ms or circuit open), the limiter falls back to this bucket and emits `limiter_degraded`. This bounds the worst case during a Redis outage without taking `/login` down.\n\nPostgres is rejected because coupling `/login` availability and latency to the OLTP primary is the wrong failure-domain choice. Gateway-only is rejected because it cannot key on username, which is the dimension that matters most for credential stuffing. Local-only is rejected because per-replica budgets do not compose into a meaningful global limit.\n\n## Consequences\n\n- Redis becomes an auth-critical dependency: HA (multi-AZ, automatic failover) and monitored (latency, evictions, connected clients, replication lag) are required.\n- Limiter code treats Redis errors as \"degraded, fall back,\" not \"deny\" \u2014 failing closed on a Redis blip would lock every user out.\n- A natural seam exists for adaptive rules (risky-IP lists, per-tenant limits) since decisions live in app code with full request context.\n- Counters may drift slightly across a Redis failover; for short windows this is acceptable and preferable to OLTP contention.\n\n## Follow-ups\n\n- Security team owns the window/limit table; check it in as config, not code.\n- Add a chaos test that black-holes Redis and asserts `/login` stays available with the local bucket engaged.\n- Dashboard: limiter decisions by reason, time spent in degraded mode, top limited identifiers for abuse review.\n\n---\n\nNote: I couldn't write this to a file \u2014 the `Write` tool isn't enabled in this session. Paste this into e.g. `docs/adr/0001-login-rate-limit-store.md`, or enable file-write tools and I'll commit it.\n"
+    },
+    "polymath": {
+      "variant": "polymath",
+      "returncode": 0,
+      "scratch": "/var/folders/vn/q9r69vts46x26f86vjkqwzsr0000gn/T/polymath-bakeoff-6_fkwkeo",
+      "score": 10,
+      "rubric": [
+        {
+          "id": "decision",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "decision|status|context",
+            "Redis|Postgres|gateway|token bucket"
+          ]
+        },
+        {
+          "id": "alternatives",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "alternative|considered",
+            "gateway|token bucket|Postgres"
+          ]
+        },
+        {
+          "id": "consequences",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "consequence|trade.?off",
+            "latency|availability|operational"
+          ]
+        },
+        {
+          "id": "critique",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "assumption|fatal|patchable|critic",
+            "partition|outage|fail"
+          ]
+        },
+        {
+          "id": "validation",
+          "weight": 2,
+          "passed": true,
+          "patterns": [
+            "test|validate|experiment",
+            "rollback|migration|reversible"
+          ]
+        }
+      ],
+      "output": "# ADR-0007: Backing Store for `/login` Rate-Limit Counters\n\n- **Status:** Proposed\n- **Date:** 2026-05-25\n- **Owners:** Auth platform\n- **Context tag:** abuse-prevention, hot-path\n\n## Context\n\n`/login` is an unauthenticated, high-volume endpoint and the primary target for credential stuffing. We need per-identity counters (IP, username, IP+username tuple) with sliding/fixed windows of 10s\u20131h, evaluated on every request (~p99 < 5ms budget for the limiter step). Counters must be shared across all API pods in all regions where the endpoint is served, survive single-node failure, and degrade safely if the store is unreachable (fail-open vs. fail-closed is a policy knob, not a store concern).\n\nTraffic profile: ~8k RPS steady, ~40k RPS during attacks. Counters are ephemeral (\u22641h TTL), low cardinality per key (an integer + timestamp), but very high write rate.\n\n## Decision\n\n**Use Redis (managed, e.g., ElastiCache/MemoryStore) in a single primary-per-region topology with replica failover, accessed via a thin limiter library implementing the GCRA algorithm in a Lua script.**\n\nCounters are region-local (no cross-region replication of limiter state). A username-key bloom filter in the same Redis tracks \"suspicious\" identities and is replicated asynchronously across regions for coarse global signal.\n\n## Alternatives\n\n1. **In-process counters (per-pod memory).** Fastest, zero infra. Rejected: attacker rotates across pods; the limit becomes `N_pods \u00d7 threshold`.\n2. **Postgres (existing primary DB).** One fewer system. Rejected: write amplification on the hottest table on the auth path; vacuum pressure; couples auth availability to the limiter.\n3. **DynamoDB / Cosmos DB with atomic counters + TTL.** Managed, serverless, multi-region. Viable runner-up. Higher per-op latency (5\u201310ms p99 in-region), per-request cost adds up at attack volume, and conditional-update semantics force more round-trips than a Redis Lua script.\n4. **Memcached.** Fast, simple `incr`. Rejected: no scripting \u2192 can't do GCRA atomically; no persistence on failover; eviction under memory pressure silently resets counters (attacker-controllable).\n5. **Envoy/NGINX local rate-limit + global rate-limit service (Lyft ratelimit on Redis).** Essentially the chosen option packaged differently. Reconsider if we adopt a service mesh; today our edge is a managed ALB with no rate-limit hooks at the granularity we need.\n6. **Cloud-native edge limiter (Cloudflare/Azure Front Door rules).** Good first line, already enabled coarsely. Insufficient for username-keyed limits \u2014 edge doesn't parse the login body without extra work, and per-username thresholds are not natively supported at our tier.\n\n## Consequences\n\n**Positive**\n- Sub-millisecond p99 for limiter step in-region.\n- GCRA in Lua = single round-trip, atomic, no read-modify-write races.\n- TTL handles cleanup; no background sweepers.\n- Operational familiarity \u2014 we already run Redis for sessions.\n\n**Negative / costs**\n- New SPOF per region for the auth path. Failure mode must be defined (we propose fail-open with a circuit breaker + alert, since fail-closed during a Redis incident is a self-inflicted outage).\n- Region-local state means a distributed attacker spread across regions gets `N_regions \u00d7 threshold`. Mitigated by the async bloom filter and by edge-level coarse limits.\n- Lua script = a small piece of logic that lives outside our main repo's test surface. Needs its own contract tests.\n- Memory sizing: at 40k RPS with ~3 keys/req and 1h TTL, ~430M key-events/hour. With GCRA we only store one entry per key, so working set is bounded by *distinct identities*, not request rate \u2014 but this must be measured, not assumed.\n\n## Critique (architecture-critic pass)\n\nThe critic agent pushed back on four points; responses inline.\n\n1. **\"You're adding a stateful dependency to your most security-critical endpoint and calling fail-open 'safe'.\"**\n   Fair. Fail-open is a policy choice that trades availability for abuse resistance during a Redis outage. The mitigation is layered: edge has a coarse IP limit (1000 req/min/IP) that stays effective even if Redis is down. Fail-open applies only to the fine-grained username/tuple limits. This must be written into the runbook, not buried in code.\n\n2. **\"GCRA in Lua is clever but every team that touches this will be afraid of it.\"**\n   Valid. Mitigation: the Lua script is ~20 lines, version-pinned, loaded by SHA, and covered by a property-based test suite that compares its output to a reference Python GCRA implementation across randomized request streams. If the team can't maintain it, fall back to fixed-window `INCR` + `EXPIRE` (slightly less accurate, much simpler).\n\n3. **\"Region-local counters mean the limiter is the weakest globally, not the strongest.\"**\n   Accepted. The explicit position is: per-region limits are sufficient because attackers concentrated in one region trip that region's limit, and attackers spread across regions trip the edge IP limit *and* the async bloom-filter signal feeds the risk engine for step-up auth. If post-launch metrics show coordinated low-and-slow cross-region attacks evading both, escalate to DynamoDB Global Tables or a dedicated global limiter service.\n\n4. **\"Why not just buy this? Cloudflare/Auth0/Castle do credential-stuffing protection as a product.\"**\n   Considered. We already use a WAF for the coarse layer. Buying the full stack is a bigger decision than this ADR \u2014 it changes vendor posture, data residency, and the identity boundary. This ADR scopes to: *given that we keep the limiter in-house, what stores it?*\n\n## Validation experiment\n\n**Experiment:** Shadow-mode load test on staging, mirroring 1h of production `/login` traffic (replayed from anonymized access logs) plus a synthetic credential-stuffing burst (40k RPS for 10 min, 50k distinct usernames, 5k IPs).\n\n**Measurements:**\n- p50/p95/p99/p99.9 added latency from the limiter call.\n- Redis CPU, memory, and `INFO commandstats` for the Lua script.\n- Counter accuracy: compare Redis-reported decisions vs. an offline replay through the reference Python GCRA over the same trace; require \u22640.1% divergence.\n- Behavior under induced Redis primary failover (kill primary mid-test): measure time to replica promotion and number of requests that hit the fail-open path.\n\n**Pass criteria:** added p99 \u2264 2ms in-region; \u2264 5s of fail-open window during failover; zero counter-accuracy divergence beyond floating-point tolerance.\n\n**Owner & timing:** Auth platform, before any prod traffic is gated on counters (shadow-only until pass).\n\n## Reversibility / Rollback\n\nThe limiter sits behind a `LimiterClient` interface with three implementations: `RedisGCRA` (target), `InProcess` (degraded), and `Noop` (disabled). Selection is a runtime config key, hot-reloadable, scoped per region and per limit-rule.\n\n- **Rollback to no limiter:** flip config to `Noop`. Effective in <30s globally. No data migration; counters are ephemeral by design (\u22641h TTL) and need no draining.\n- **Rollback to a different store (e.g., DynamoDB):** swap the `LimiterClient` binding. Because counters are short-TTL, we don't migrate state \u2014 we run both stores in parallel for one TTL window (\u22641h) with decisions OR'd (\"limited if either says so\"), then cut over. Cost of being wrong is bounded to that window.\n- **Lua \u2192 fixed-window fallback:** the `RedisGCRA` impl has a `mode=fixed_window` flag using plain `INCR/EXPIRE`. Same store, simpler semantics, no migration.\n- **Blast radius of a bad change:** because the client is per-rule, we can disable only the username-tuple rule (keep IP rule on) without redeploying.\n\nThe combination of ephemeral state + interface seam + per-rule config means every step here is reversible within one TTL window without a deploy.\n"
+    }
+  }
+}

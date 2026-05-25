@@ -3,6 +3,15 @@
 Polymath reaches 9+ quality only when the repo proves the product thesis, not
 when it has a larger catalog.
 
+## Status
+
+**9+ threshold met (2026-05-25).** The first published bakeoff run is in
+[`docs/EVIDENCE/bakeoff-runs/2026-05-25/`](EVIDENCE/bakeoff-runs/2026-05-25/SUMMARY.md):
+8 of 9 pre-registered cases passed (Polymath score ≥ 8 and delta ≥ 2 over
+baseline), 1 tie, 0 losses. The promotion-bar criterion of "≥ 3 cases" is
+cleared by a factor of 2.67×. Reproduction commands at the bottom of this
+file.
+
 ## Current Gates
 
 - Structural conformance: `tools/conformance.sh --all` (includes `MANIFEST-3` maturity tier, `CONNECTOR-2` audit, `AGENT-1` evidence).
