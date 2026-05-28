@@ -4,9 +4,9 @@ Foundation plugin for the Polymath marketplace. Implicit dependency of everythin
 
 ## What it ships
 
-- Skills: `conventions`, `glossary`.
+- Skills: `conventions`, `glossary`, `project-context`.
 - Commands: `/plugin-budget`.
-- Hooks: `SessionStart` — surfaces paused workflows (quiet otherwise).
+- Hooks: `SessionStart` — loads `.polymath/project.yaml` (see [`docs/PROJECT-LOCALIZATION.md`](../../docs/PROJECT-LOCALIZATION.md)) into `$CLAUDE_PLUGIN_DATA/polymath-core/project-context.json`, then surfaces paused workflows (quiet otherwise).
 
 ## Installation
 

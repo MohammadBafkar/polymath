@@ -22,9 +22,9 @@
 <h2>What it ships</h2>
 
 <ul>
-<li>Skills: <code>conventions</code>, <code>glossary</code>.</li>
+<li>Skills: <code>conventions</code>, <code>glossary</code>, <code>project-context</code>.</li>
 <li>Commands: <code>/plugin-budget</code>.</li>
-<li>Hooks: <code>SessionStart</code> — surfaces paused workflows (quiet otherwise).</li>
+<li>Hooks: <code>SessionStart</code> — loads <code>.polymath/project.yaml</code> (see <a href="../../docs/PROJECT-LOCALIZATION.md"><code>docs/PROJECT-LOCALIZATION.md</code></a>) into <code>$CLAUDE_PLUGIN_DATA/polymath-core/project-context.json</code>, then surfaces paused workflows (quiet otherwise).</li>
 </ul>
 
 <h2>Installation</h2>

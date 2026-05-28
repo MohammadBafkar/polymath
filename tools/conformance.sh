@@ -215,6 +215,18 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # DOCS-2: every plugin README must mention every shipped first-class
+  # surface (skill / command / agent / bin executable) by name. Catches
+  # READMEs whose "What it ships" list lags the directory after a new
+  # skill / command / scaffolder is added.
+  echo
+  echo "── DOCS-2 cross-check (check-readme-inventory.py)"
+  if python3 "$root/tools/check-readme-inventory.py"; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

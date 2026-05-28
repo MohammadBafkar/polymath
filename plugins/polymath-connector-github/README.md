@@ -5,7 +5,7 @@ GitHub connector for the Polymath marketplace.
 ## What it ships
 
 - MCP server: `@modelcontextprotocol/server-github` (via `npx`).
-- Skills: `open-pr`, `triage-issue`.
+- Skills: `open-pr`, `triage-issue`, `diagnose-ci-failure`.
 - Hooks:
   - `UserPromptSubmit` — detects PR URLs in the prompt and hints the model to fetch via the MCP server.
   - `Stop` — quietly nudges to open a PR when the branch has unpushed commits.

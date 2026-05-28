@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`tools/check-readme-inventory.py` + `DOCS-2` conformance check.**
+  Asserts every plugin's `README.md` mentions every shipped
+  first-class surface (skill, command, agent, `bin/` executable) by
+  name. Catches the systemic drift where a `README` "What it ships"
+  list lags the directory after a new skill or command lands.
+  `tools/conformance.sh --all` now runs this check after the
+  per-plugin pass. Fixed 15 drifts across 6 plugins: `polymath-author`
+  (new `new-command`, `new-workflow`, five `bin/` scaffolders),
+  `polymath-connector-github` (added `diagnose-ci-failure`),
+  `polymath-core` (added `project-context` plus the SessionStart
+  project-yaml loading note), `polymath-devops` (added
+  `audit-compose`, `audit-dockerfile` skills and the matching
+  commands), `polymath-performance` (added `design-cache-layer`,
+  `audit-redis-config` skills and the matching commands),
+  `polymath-writing` (added `editorial-pass`).
 - **`tools/sync-connector-policy.py`** — generates the
   `connector-policy` disclosure block (`official_surface`,
   `polymath_value`, `sunset_trigger`, `status`) for every

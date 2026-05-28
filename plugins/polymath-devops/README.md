@@ -4,7 +4,8 @@ DevOps craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `dockerize`, `ci-pipeline-github`, `env-promotion`.
+- Skills: `dockerize`, `ci-pipeline-github`, `env-promotion`, `audit-dockerfile`, `audit-compose`.
+- Commands: `/audit-dockerfile`, `/audit-compose` (thin aliases over the matching audit skills).
 
 ## Installation
 
