@@ -58,11 +58,17 @@ jobs:
   # so the job skips cleanly there.
   live-bakeoff:
     name: live bakeoff + skill-triggering (opt-in)
-    # /evaluate comment OR scheduled OR manual dispatch.
+    # /evaluate comment from a trusted author OR scheduled OR manual dispatch.
+    # author_association gate is the hard prerequisite before exposing
+    # Claude secrets — drive-by PR comments from forks must not trigger
+    # secret-bearing steps.
     if: >-
       (github.event_name == 'issue_comment'
         && github.event.issue.pull_request
-        && contains(github.event.comment.body, '/evaluate'))
+        && contains(github.event.comment.body, '/evaluate')
+        && (github.event.comment.author_association == 'OWNER'
+            || github.event.comment.author_association == 'MEMBER'
+            || github.event.comment.author_association == 'COLLABORATOR'))
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -96,10 +102,7 @@ jobs:
       - name: Install Claude Code CLI
         if: steps.auth.outputs.method != 'none'
         run: |
-          curl -fsSL https://claude.ai/install.sh | bash || true
-          if ! command -v claude >/dev/null 2>&1; then
-            npm install -g @anthropic-ai/claude-code
-          fi
+          npm install -g @anthropic-ai/claude-code
           claude --version
       - name: Run bakeoff (regex score only; judge is opt-in)
         if: steps.auth.outputs.method != 'none'

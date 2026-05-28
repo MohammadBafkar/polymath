@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **`/evaluate` is gated by `author_association`.** The
+  `live-bakeoff` job in
+  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
+  now refuses to run on `issue_comment` events unless the commenter is
+  `OWNER`, `MEMBER`, or `COLLABORATOR`. Drive-by PR comments from forks
+  can no longer trigger secret-bearing steps.
+
 ### Changed
+
+- **GitHub Actions hygiene.** Added explicit `permissions:` (least
+  privilege, default `contents: read`) and `concurrency:` (cancel
+  in-progress on the same PR / ref) to `validate.yml`, `lint.yml`,
+  `link-check.yml`, `token-budget.yml`, `golden-tests.yml`.
+- **`token-budget` PR comment is now sticky.** Replaces the
+  spam-on-every-push behaviour with an upserted comment keyed by a
+  `<!-- polymath:token-budget -->` marker.
+- **Claude Code CLI install simplified.** `golden-tests.yml` and
+  `evaluation.yml` now install via `npm install -g @anthropic-ai/claude-code`
+  only — dropped the curl-installer fallback which was duplicative.
 
 - **Maturity tiers reconciled.** Tier definitions and promotion bars
   consolidated into a single source of truth at
