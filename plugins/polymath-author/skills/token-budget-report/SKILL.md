@@ -34,14 +34,14 @@ Per-plugin (canonical):
   polymath-core                  194
   polymath-product               187
   …
-  polymath-lang-dotnet           345  ← heaviest
+  polymath-infra-kubernetes      345  ← heaviest
   polymath-writing               274  ← second heaviest
 
 Plugins approaching cap (≥ 300 tok):
-  polymath-lang-dotnet  345
+  polymath-infra-kubernetes  345
     Heaviest description:
-      audit-csproj-modernization (skill)  ~80 tok
-    Suggested trim: remove "SDK-style" verbosity; aim ≤ 60 chars.
+      write-manifest (skill)  ~80 tok
+    Suggested trim: shorten the safe-defaults enumeration; aim ≤ 60 chars.
 
 Plugins over cap (> 400 tok):
   (none)

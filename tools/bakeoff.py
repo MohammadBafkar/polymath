@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -21,16 +22,37 @@ from typing import Any
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-CASES_DIR = ROOT / "tests" / "bakeoff" / "cases"
+BAKEOFF_ROOT = ROOT / "tests" / "bakeoff"
+LEGACY_CASES_DIR = BAKEOFF_ROOT / "cases"
 
 
 class CaseError(Exception):
     pass
 
 
+def _discover_case_paths() -> list[pathlib.Path]:
+    """Find every bakeoff case file under tests/bakeoff/.
+
+    The current layout is `tests/bakeoff/<plugin>/<scenario>/case.json`
+    (per-scenario eval files, vally-style). The legacy layout
+    `tests/bakeoff/cases/*.json` is also accepted so external case
+    repos do not break — paths there continue to load with no
+    plugin/scenario inference. Cases under a recognised plugin
+    directory have their plugin + scenario derived from the path.
+    """
+    paths: list[pathlib.Path] = []
+    if LEGACY_CASES_DIR.is_dir():
+        paths.extend(sorted(LEGACY_CASES_DIR.glob("*.json")))
+    for case in sorted(BAKEOFF_ROOT.rglob("case.json")):
+        if LEGACY_CASES_DIR in case.parents:
+            continue  # already collected by legacy glob
+        paths.append(case)
+    return paths
+
+
 def load_cases() -> dict[str, tuple[pathlib.Path, dict[str, Any]]]:
     cases: dict[str, tuple[pathlib.Path, dict[str, Any]]] = {}
-    for path in sorted(CASES_DIR.glob("*.json")):
+    for path in _discover_case_paths():
         data = json.loads(path.read_text())
         case_id = data.get("id")
         if not isinstance(case_id, str) or not case_id:
@@ -182,6 +204,14 @@ def check() -> int:
 
 
 def score_output(case: dict[str, Any], output: str) -> dict[str, Any]:
+    """Regex-based pre-filter — does the output engage with the task at all.
+
+    Kept alongside the LLM judge because it costs nothing, runs
+    deterministically, and catches the "model refused / output is empty"
+    case without an LLM round-trip. The LLM-judge in `score_with_judge` is
+    the source of truth for ranking quality; the regex score is a hard
+    floor: zero regex score = the run did not engage with the prompt.
+    """
     items = []
     score = 0
     for item in case["rubric"]:
@@ -198,6 +228,194 @@ def score_output(case: dict[str, Any], output: str) -> dict[str, Any]:
             }
         )
     return {"score": score, "items": items}
+
+
+# ---------------------------------------------------------------------------
+# LLM-judge scoring
+# ---------------------------------------------------------------------------
+
+JUDGE_MODEL = "claude-sonnet-4-6"
+JUDGE_PROMPT_FILE = ROOT / "tools" / "bakeoff" / "judge-prompt.md"
+CALIBRATION_DIR = ROOT / "tools" / "bakeoff" / "calibration"
+JUDGE_DRIFT_TOLERANCE = 1  # judge-vs-human delta > 1 ⇒ recalibrate
+
+
+def _judge_prompt_template() -> str:
+    if not JUDGE_PROMPT_FILE.exists():
+        raise CaseError(f"judge prompt not found: {JUDGE_PROMPT_FILE}")
+    return JUDGE_PROMPT_FILE.read_text()
+
+
+def _build_judge_input(case: dict[str, Any], output: str) -> str:
+    """Compose the user-message body for the judge call.
+
+    The judge sees the rubric (id + weight + advisory regex hints) plus the
+    output to score. The full judge contract lives in `judge-prompt.md`; we
+    stick that prompt verbatim in front of the task + rubric + output so the
+    grading rules are pinned across runs.
+    """
+    rubric_view = [
+        {
+            "id": item.get("id"),
+            "weight": item.get("weight"),
+            "hint_tokens": item.get("pass_regex", []),
+        }
+        for item in case.get("rubric") or []
+    ]
+    payload = {
+        "task": case.get("task", ""),
+        "rubric": rubric_view,
+        "output": output,
+    }
+    return (
+        _judge_prompt_template()
+        + "\n\n# Input\n\n"
+        + "```json\n"
+        + json.dumps(payload, indent=2)
+        + "\n```\n"
+    )
+
+
+def _parse_judge_response(text: str) -> dict[str, Any]:
+    """Extract the first JSON object from the judge response.
+
+    The judge contract requires a bare JSON object. Strict parsing first;
+    if that fails (the model wrapped it in a fence or prose), find the
+    outermost {...} substring and parse that. Returns a normalised dict
+    with score/per_item/summary fields and an `error` key when parsing
+    failed entirely.
+    """
+    text = text.strip()
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start < 0 or end <= start:
+            return {
+                "score": 0,
+                "per_item": [],
+                "summary": "judge output unparseable",
+                "error": "no JSON object found",
+                "raw": text,
+            }
+        try:
+            data = json.loads(text[start : end + 1])
+        except json.JSONDecodeError as e:
+            return {
+                "score": 0,
+                "per_item": [],
+                "summary": "judge output unparseable",
+                "error": f"JSONDecodeError: {e}",
+                "raw": text,
+            }
+    score = data.get("score")
+    if not isinstance(score, int) or not 0 <= score <= 10:
+        data["error"] = f"invalid score: {score!r}"
+        data["score"] = 0
+    if "per_item" not in data or not isinstance(data["per_item"], list):
+        data["per_item"] = []
+    if "summary" not in data or not isinstance(data["summary"], str):
+        data["summary"] = ""
+    return data
+
+
+def score_with_judge(
+    case: dict[str, Any], output: str, *, timeout: int = 120
+) -> dict[str, Any]:
+    """Run the LLM judge against an output. Returns the parsed response.
+
+    Skips the judge entirely (and returns a clearly-marked stub) when the
+    `claude` CLI is unavailable so the bakeoff is still runnable in a
+    no-CLI dev environment. The caller decides whether to fall back to the
+    regex score in that case.
+    """
+    if shutil.which("claude") is None:
+        return {
+            "score": None,
+            "per_item": [],
+            "summary": "judge skipped: claude CLI not on PATH",
+            "skipped": True,
+        }
+    judge_input = _build_judge_input(case, output)
+    args = [
+        "claude",
+        "-p",
+        "--permission-mode",
+        "dontAsk",
+        "--no-session-persistence",
+        "--tools",
+        "",  # judge needs no tools; bound the action space
+        "--model",
+        JUDGE_MODEL,
+        judge_input,
+    ]
+    result = run_cmd(args, ROOT, timeout)
+    parsed = _parse_judge_response(result.stdout or "")
+    parsed["returncode"] = result.returncode
+    if result.returncode != 0 and "error" not in parsed:
+        parsed["error"] = f"judge exited {result.returncode}"
+    return parsed
+
+
+def calibrate() -> int:
+    """Compare the judge against frozen human-blind gold scores.
+
+    A calibration record at `tools/bakeoff/calibration/<id>.json` is:
+
+        {
+          "case_id": "<existing case id>",
+          "scenario": "<short label>",
+          "output": "<frozen model output>",
+          "gold_score": <int 0-10>,
+          "gold_note": "<why this score is the gold>"
+        }
+
+    The command runs the judge against each record and prints the
+    judge score, the gold score, and the delta. Exits 1 when any
+    |delta| > JUDGE_DRIFT_TOLERANCE.
+    """
+    cases = load_cases()
+    if not CALIBRATION_DIR.is_dir():
+        print(
+            f"info: no calibration set at {CALIBRATION_DIR.relative_to(ROOT)} "
+            f"(create one to enable judge drift checks)"
+        )
+        return 0
+    drift = 0
+    seen = 0
+    for path in sorted(CALIBRATION_DIR.glob("*.json")):
+        record = json.loads(path.read_text())
+        case_id = record.get("case_id")
+        if not isinstance(case_id, str) or case_id not in cases:
+            print(f"::warning::{path.name}: unknown case_id {case_id!r}; skipping")
+            continue
+        gold = record.get("gold_score")
+        if not isinstance(gold, int) or not 0 <= gold <= 10:
+            print(f"::warning::{path.name}: invalid gold_score {gold!r}; skipping")
+            continue
+        _, case_data = cases[case_id]
+        judged = score_with_judge(case_data, record.get("output", ""))
+        seen += 1
+        if judged.get("skipped"):
+            print(f"{path.name}: judge skipped — {judged.get('summary')}")
+            continue
+        delta = (judged.get("score") or 0) - gold
+        marker = "OK" if abs(delta) <= JUDGE_DRIFT_TOLERANCE else "DRIFT"
+        if marker == "DRIFT":
+            drift += 1
+        print(
+            f"{path.name}: gold={gold} judge={judged.get('score')} "
+            f"delta={delta:+d} {marker}"
+        )
+    if seen == 0:
+        print("info: no calibration records found")
+        return 0
+    if drift:
+        print(f"calibrate: {drift} record(s) drifted > {JUDGE_DRIFT_TOLERANCE}")
+        return 1
+    print(f"calibrate: {seen} record(s) within tolerance ±{JUDGE_DRIFT_TOLERANCE}")
+    return 0
 
 
 def run_cmd(args: list[str], cwd: pathlib.Path, timeout: int) -> subprocess.CompletedProcess[str]:
@@ -230,7 +448,7 @@ def init_scratch() -> pathlib.Path:
     return scratch
 
 
-def run_variant(case: dict[str, Any], variant: str) -> dict[str, Any]:
+def run_variant(case: dict[str, Any], variant: str, *, use_judge: bool = False) -> dict[str, Any]:
     if shutil.which("claude") is None:
         raise CaseError("claude CLI not found on PATH")
     scratch = init_scratch()
@@ -259,7 +477,7 @@ def run_variant(case: dict[str, Any], variant: str) -> dict[str, Any]:
         result = run_cmd(args, scratch, timeout)
         output = result.stdout
         scored = score_output(case, output)
-        return {
+        record = {
             "variant": variant,
             "returncode": result.returncode,
             "scratch": str(scratch),
@@ -267,12 +485,15 @@ def run_variant(case: dict[str, Any], variant: str) -> dict[str, Any]:
             "rubric": scored["items"],
             "output": output,
         }
+        if use_judge:
+            record["judge"] = score_with_judge(case, output)
+        return record
     except Exception:
         shutil.rmtree(scratch, ignore_errors=True)
         raise
 
 
-def run(case_ids: list[str], out_dir: pathlib.Path) -> int:
+def run(case_ids: list[str], out_dir: pathlib.Path, *, use_judge: bool = False) -> int:
     if check() != 0:
         return 1
     cases = load_cases()
@@ -286,9 +507,9 @@ def run(case_ids: list[str], out_dir: pathlib.Path) -> int:
             continue
         _, case = cases[case_id]
         print(f"{case_id}: running baseline", flush=True)
-        baseline = run_variant(case, "baseline")
+        baseline = run_variant(case, "baseline", use_judge=use_judge)
         print(f"{case_id}: running polymath", flush=True)
-        polymath = run_variant(case, "polymath")
+        polymath = run_variant(case, "polymath", use_judge=use_judge)
         delta = polymath["score"] - baseline["score"]
         report = {
             "case": case_id,
@@ -299,6 +520,18 @@ def run(case_ids: list[str], out_dir: pathlib.Path) -> int:
             "threshold": case.get("decision_threshold", {}),
             "results": {"baseline": baseline, "polymath": polymath},
         }
+        if use_judge:
+            b_judge = (baseline.get("judge") or {}).get("score")
+            p_judge = (polymath.get("judge") or {}).get("score")
+            report["judge"] = {
+                "baseline_score": b_judge,
+                "polymath_score": p_judge,
+                "delta": (
+                    (p_judge - b_judge)
+                    if isinstance(b_judge, int) and isinstance(p_judge, int)
+                    else None
+                ),
+            }
         path = out_dir / f"{case_id}.json"
         path.write_text(json.dumps(report, indent=2))
         threshold = case.get("decision_threshold", {})
@@ -326,12 +559,24 @@ def main() -> int:
     run_p = sub.add_parser("run")
     run_p.add_argument("case", nargs="*", help="Case id(s); default: all")
     run_p.add_argument("--out-dir", default=".pdata/bakeoff", help="Where JSON reports are written")
+    run_p.add_argument(
+        "--judge",
+        action="store_true",
+        help="Also score each variant with the pinned LLM judge (see tools/bakeoff/judge-prompt.md).",
+    )
+    sub.add_parser(
+        "calibrate",
+        help="Re-run the judge against the frozen calibration set and report drift.",
+    )
     args = parser.parse_args()
 
     if args.command in {None, "check"}:
         return check()
     if args.command == "run":
-        return run(args.case, ROOT / args.out_dir)
+        use_judge = bool(args.judge) or os.environ.get("POLYMATH_BAKEOFF_JUDGE") == "1"
+        return run(args.case, ROOT / args.out_dir, use_judge=use_judge)
+    if args.command == "calibrate":
+        return calibrate()
     raise AssertionError(args.command)
 
 

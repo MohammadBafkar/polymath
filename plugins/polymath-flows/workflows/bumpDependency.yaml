@@ -1,12 +1,16 @@
 schemaVersion: 0.1
 name: bumpDependency
-version: 0.1.0
+version: 0.2.0
 description: Bump a dependency safely — vuln triage first, scoped read-code, smallest update, lint + tests, review.
 requires:
   plugins:
     - polymath-core
-    - polymath-connector-snyk
     - polymath-engineering
+  capabilities:
+    # Project picks the scanner in .polymath/capabilities.yaml (snyk |
+    # dependabot | github_advanced_security). v0.2 routes the triage step
+    # through whichever the project configured.
+    vulnerability_scanner: true
 inputs:
   - name: dependency
     type: string
@@ -22,8 +26,8 @@ guards:
     command: mkdir -p docs/dep-bumps && [ -w docs/dep-bumps ]
 steps:
   - id: vuln-triage
-    invoke: polymath-connector-snyk:triage-vulns
-    prompt: Triage Snyk findings on ${inputs.dependency}. If there are open critical findings, prefer a target version that closes them. Save findings classification to docs/dep-bumps/${workflow.slug}-vulns.md.
+    invoke: ${capabilities.vulnerability_scanner.plugin}:triage-vulns
+    prompt: Triage ${capabilities.vulnerability_scanner.provider} findings on ${inputs.dependency}. If there are open critical findings, prefer a target version that closes them. Save findings classification to docs/dep-bumps/${workflow.slug}-vulns.md.
     artifacts:
       - docs/dep-bumps/${workflow.slug}-vulns.md
   - id: orient

@@ -1,71 +1,99 @@
 # Quality scorecard
 
-Polymath reaches 9+ quality only when the repo proves the product thesis, not
-when it has a larger catalog.
+Polymath reaches stable quality only when the repo proves the product
+thesis — not when it has a larger catalog.
 
-## Current Gates
+## Required gates
 
-- Structural conformance: `tools/conformance.sh --all` (includes `MANIFEST-3` maturity tier, `CONNECTOR-2` audit, `AGENT-1` evidence).
-- Token budget: `tools/token-budget.sh`.
-- Catalog reproducibility: `tools/build-catalog.py --check`.
-- Workflow runner tests: `python3 -m unittest discover -s plugins/polymath-flows/tests`.
-- Agent evidence: `tools/check-agent-evidence.py`.
-- Bakeoff case validity: `tools/bakeoff.py check`. **9 cases** pre-registered across the stable bundle. The check enforces the symmetric-prompt contract (see § Bakeoff fairness below) so the run cannot be silently engineered.
-- Connector / lang / infra boundary: every in-scope plugin audited in [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md) (`CONNECTOR-2`).
-- Honest limitations: [`LIMITATIONS.md`](../LIMITATIONS.md) is updated alongside any change that resolves a documented limitation.
-- Live-model fixtures: required CI gate on `main` pushes. Setup at [`LIMITATIONS.md § 4.1`](../LIMITATIONS.md#41-how-to-provide-the-key).
+Every PR runs:
 
-## 9+ Promotion Bar
+- **Structural conformance** — `tools/conformance.sh --all`
+  (`MANIFEST-3` maturity tier, `CONNECTOR-2` audit, `SKILL-1`,
+  `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`).
+- **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
+  SKILL.md ≤ 500 lines).
+- **Token budget** — `tools/token-budget.sh` (≤ 400 tokens per plugin
+  always-on; total scales with plugin count).
+- **Catalog reproducibility** — `tools/build-catalog.py --check`.
+- **Workflow YAML schema** — `plugins/polymath-flows/bin/polymath-flow validate <path>`.
+- **Workflow runner tests** — `python3 -m unittest discover -s plugins/polymath-flows/tests`.
+- **Project-context loader tests** — `python3 -m unittest discover -s plugins/polymath-core/tests`.
+- **Bakeoff case validity** — `python3 tools/bakeoff.py check`. Nine
+  cases pre-registered across the catalog. The check enforces the
+  symmetric-prompt contract (see § Bakeoff fairness) so the run
+  cannot be silently engineered.
+- **Skill-triggering frontmatter** — `python3 tools/skill-triggering.py check`.
+- **Connector / infra boundary** — every in-scope plugin audited in
+  [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md).
+- **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
+  updated alongside any change that resolves a documented limitation.
+- **Live-model fixtures** — required CI gate on `main` pushes. Setup
+  at [`LIMITATIONS.md § 4.1`](../LIMITATIONS.md#41-providing-the-claude-code-auth-secret).
 
-1. Every advertised workflow has at least one strong deterministic blocking
-   gate: `commandSucceeds`, `artifactValid`, `artifactSchemaStrict`, or
-   `diffConstraint`.
-2. Every agent has a no-agent baseline evidence record and a live golden
-   fixture.
-3. The stable bundle beats baseline Claude Code on at least three bakeoff cases:
-   Polymath score >= 8/10 and delta >= 2 points per case.
-4. Connector and language plugins stay experimental unless primary-source
-   evidence shows Polymath adds workflow, critique, safety, or artifact value
-   beyond official docs, MCPs, LSPs, or CLIs.
-5. Stable promotion requires a CHANGELOG entry and at least one external user
-   beyond the maintainer.
+## Promotion bars
+
+Canonical definitions and per-tier requirements live in
+[`docs/MATURITY.md`](MATURITY.md). The short version:
+
+- `experimental` — default; structural + ≥ 1 golden fixture.
+- `beta` — on-disk evidence loop closed: skill bakeoff + triggering
+  tests, **or** a foundation-runner with ≥ 20 unit-test assertions
+  plus an end-to-end job in golden-tests.yml. Live LLM runs are not
+  required.
+- `stable` — live bakeoff ≥ 8 / delta ≥ 2 (both regex and LLM-judge
+  scorers agree under `--judge`), every advertised workflow has at
+  least one strong deterministic blocking gate
+  (`commandSucceeds` / `artifactValid` / `artifactSchemaStrict` /
+  `diffConstraint`), skill-triggering test passing on three trigger
+  phrasings, and at least one external user beyond the maintainer.
+  Connector / infra plugins stay `experimental` unless primary-source
+  evidence shows Polymath adds workflow / critique / safety / artifact
+  value beyond the upstream official surface (see
+  [CONNECTOR-POLICY.md](CONNECTOR-POLICY.md)).
+
+Promotion is a CHANGELOG entry with the supporting evidence link, not
+just a status flip.
 
 ## Bakeoff fairness
 
-The bakeoff only measures plugin value if both sides are given the same
+The bakeoff only measures plugin value if both sides receive the same
 problem. A case is **gameable** when the polymath prompt contains the
 rubric's pass-tokens but the baseline prompt does not — the polymath
 side earns points the baseline cannot, regardless of model quality.
 
 Symmetric-prompt contract, enforced by `tools/bakeoff.py check`:
 
-- `baseline_prompt` and `polymath_prompt` must contain the same problem
-  statement and the same input context (code, notes, draft, etc.).
+- `baseline_prompt` and `polymath_prompt` must contain the same
+  problem statement and the same input context (code, notes, draft,
+  etc.).
 - The only acceptable difference is a single sentence at the end of
-  `polymath_prompt` naming the Polymath skill / workflow / agent under
-  test (e.g. *"Use Polymath's incident postmortem-blameless skill."*).
+  `polymath_prompt` naming the Polymath skill / workflow / agent
+  under test (e.g. *"Use Polymath's incident postmortem-blameless
+  skill."*).
 - That hint sentence may not contain any rubric `pass_regex` token.
-- Rubric `pass_regex` items may match content in BOTH prompts (they are
-  part of the shared input) or in NEITHER (the rubric tests output
-  quality), but never in only one.
+- Rubric `pass_regex` items may match content in BOTH prompts (they
+  are part of the shared input) or in NEITHER (the rubric tests
+  output quality), but never in only one.
 
 Any case whose `baseline_prompt` and `polymath_prompt` are asymmetric
-on a rubric token fails `bakeoff check` with one of:
+on a rubric token fails `bakeoff check` with a `rubric leak` error
+naming the token and the offending side. This is the structural
+defence against rubric-aware prompt engineering.
 
-```text
-error: <case>: rubric leak: pass-token 'X' (rubric 'Y') appears in
-  polymath_prompt but not in baseline_prompt — engineered advantage
-  for Polymath
-error: <case>: rubric leak: pass-token 'X' (rubric 'Y') appears in
-  baseline_prompt but not in polymath_prompt — biased against Polymath
-```
+## LLM-judge
 
-This check is mandatory on every PR (`bakeoff-parse` job in
-`.github/workflows/golden-tests.yml`) and is the structural defence
-against the most common bakeoff failure mode: rubric-aware
-prompt-engineering.
+In addition to the regex scorer, the bakeoff can run an LLM-judge for
+holistic 0–10 scoring. The judge prompt is pinned at
+[`tools/bakeoff/judge-prompt.md`](../tools/bakeoff/judge-prompt.md);
+the judge model is `claude-sonnet-4-6`. Opt in with `--judge` or
+`POLYMATH_BAKEOFF_JUDGE=1`.
 
-## Running The Proof Loop
+The judge is calibrated against frozen human-blind gold scores at
+`tools/bakeoff/calibration/<id>.json` (the directory is empty by
+default; populate it to enable drift checks). Drift > 1 fails
+`python3 tools/bakeoff.py calibrate`.
+
+## Running the proof loop
 
 ```bash
 tools/conformance.sh --all
@@ -73,14 +101,16 @@ tools/lint-skills.sh
 tools/token-budget.sh
 tools/build-catalog.py --check
 python3 -m unittest discover -s plugins/polymath-flows/tests
-python3 tools/check-agent-evidence.py
+python3 -m unittest discover -s plugins/polymath-core/tests
 python3 tools/bakeoff.py check
+python3 tools/skill-triggering.py check
 ```
 
 With an authenticated Claude Code CLI:
 
 ```bash
 tests/golden/run-fixtures.sh --plugin polymath-thinking
-tests/golden/run-fixtures.sh --plugin polymath-research
-python3 tools/bakeoff.py run
+python3 tools/bakeoff.py run --judge
+python3 tools/skill-triggering.py run --timeout 180
+python3 tools/bakeoff.py calibrate
 ```

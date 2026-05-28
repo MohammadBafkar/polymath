@@ -2,8 +2,9 @@
 # polymath-core SessionStart hook
 #
 # Surfaces (quietly):
-#   1. Paused flows-lite workflow runs.
-#   2. "Due now" items from the scheduled-work queue
+#   1. Project context loaded from .polymath/project.yaml — one line.
+#   2. Paused flows-lite workflow runs.
+#   3. "Due now" items from the scheduled-work queue
 #      (${CLAUDE_PLUGIN_DATA}/polymath-core/queue.json — § 11.6).
 #
 # Polymath does not ship a scheduler. Whoever owns the schedule
@@ -15,6 +16,25 @@
 set -euo pipefail
 
 data_root="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}"
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+
+# --- project context ---
+# Refresh the project-context snapshot under
+# ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json from
+# .polymath/project.yaml (project → user → home). The loader script
+# prints a one-line summary on stdout when a project file exists; we
+# capture it and surface alongside the other notes below. A bad project
+# file fails the loader with exit 2 — surface the validation errors so
+# the user notices but continue the hook (other surfaces still run).
+project_summary=""
+if [[ -x "${script_dir}/load-project-context.py" ]]; then
+  if loader_out="$(python3 "${script_dir}/load-project-context.py" 2>&1)"; then
+    project_summary="$loader_out"
+  else
+    # Loader failed; pass through its stderr so the user sees why.
+    echo "$loader_out" >&2
+  fi
+fi
 
 # --- paused workflows ---
 flows_workflows_dir="${data_root}/polymath-flows/workflows"
@@ -68,7 +88,12 @@ PY
 
 # --- render ---
 emitted=0
+if [[ -n "$project_summary" ]]; then
+  echo "$project_summary"
+  emitted=1
+fi
 if [[ ${#paused[@]} -gt 0 ]]; then
+  [[ $emitted -eq 1 ]] && echo
   echo "Polymath: ${#paused[@]} paused workflow(s):"
   for w in "${paused[@]}"; do
     echo "  - $w  (resume with /polymath-flows:resume-workflow $w)"

@@ -1,6 +1,6 @@
 # Changelog — polymath-connector-terraform
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

@@ -1,0 +1,78 @@
+# .polymath/project.yaml — example for a .NET 8 ASP.NET Core service.
+#
+# Copy this file to `.polymath/project.yaml` at the repo root, edit the
+# values for your project, and Polymath's SessionStart hook will load it
+# automatically. Skills that adapt to the stack (code-review,
+# verify-change, PR drafting) will pick up the values from
+# ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json.
+
+schemaVersion: 1
+
+project:
+  name: refund-service
+  description: Payment refund workflow service. .NET 8 ASP.NET Core + Postgres.
+
+stack:
+  languages:
+    - lang: dotnet
+      version: "8"
+      framework: aspnet-core
+  testing:
+    - framework: xunit
+      mocking: nsubstitute
+      assertion: fluentassertions
+  build:
+    primary: dotnet
+    secondary: docker
+  runtime:
+    kind: kubernetes
+    namespace: payments
+    manifests: deploy/k8s/
+  database:
+    primary:
+      kind: postgres
+      version: "16"
+  package_manager:
+    kind: nuget
+    lock_file: packages.lock.json
+
+conventions:
+  code_review_checklist: docs/code-review-checklist.md
+  commit_style: conventional-commits
+  branch_strategy: trunk-based
+  api_style_guide: docs/api-style-guide.md
+  language_specific:
+    dotnet:
+      file: docs/dotnet-conventions.md
+
+external_skills:
+  - source: github.com/dotnet/skills
+    plugins: [dotnet, dotnet-aspnet, dotnet-test, dotnet-data, dotnet-msbuild]
+    install: marketplace
+
+capabilities:
+  inherit_from: .polymath/capabilities.yaml
+
+skill_overrides:
+  polymath-engineering:code-review:
+    additional_context:
+      - docs/code-review-checklist.md
+      - docs/dotnet-conventions.md
+    additional_axes:
+      - axis: csproj-modernization
+        prompt: |
+          Check that any new .csproj uses the SDK-style format with
+          ImplicitUsings + Nullable enabled, Directory.Packages.props
+          version pinning, and no transitive package references baked in.
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: dotnet
+        cmd: dotnet test --no-build -- --filter TestCategory!=Integration
+
+prompts:
+  pr_description_template: docs/pr-template.md
+  postmortem_template: docs/postmortem-template.md
+
+mcp_servers:
+  vcs: "@azure-devops/mcp-server"
+  ci: "@azure-devops/mcp-server"

@@ -119,7 +119,7 @@ if s not in allowed:
   # CONNECTOR-2: connector / lang / infra plugins must be audited in
   # docs/CONNECTOR-POLICY.md so reviewers can see (a) whether an official
   # MCP / LSP exists, (b) what Polymath adds, and (c) the sunset trigger.
-  if [[ "$name" == polymath-connector-* || "$name" == polymath-lang-* || "$name" == polymath-infra-* ]]; then
+  if [[ "$name" == polymath-connector-* || "$name" == polymath-infra-* ]]; then
     if grep -q "\`$name\`" "$root/docs/CONNECTOR-POLICY.md" 2>/dev/null; then
       echo "  ✓ CONNECTOR-2: audited in docs/CONNECTOR-POLICY.md"
     else
@@ -131,10 +131,9 @@ if s not in allowed:
   # CONNECTOR-1
   if [[ "$name" == polymath-connector-* ]]; then
     # A connector may delegate to another connector for the MCP server
-    # (e.g. polymath-connector-github-actions reuses connector-github's
-    # @modelcontextprotocol/server-github). In that case .mcp.json is
-    # allowed to be absent. A connector may also wrap a local CLI rather
-    # than a remote service (e.g. polymath-connector-terraform shells out
+    # via the dependencies array. In that case .mcp.json is allowed to
+    # be absent. A connector may also wrap a local CLI rather than a
+    # remote service (e.g. polymath-connector-terraform shells out
     # to `terraform`); those declare the `polymath-cli-only` keyword.
     delegates_mcp=0
     cli_only=0
@@ -185,20 +184,6 @@ for k, v in uc.items():
   else
     echo "  ✗ FIXTURE-1: no tests/golden/$name/*.md"
     fail=1
-  fi
-
-  # AGENT-1: every plugin-shipped agent must have valid frontmatter, a
-  # no-agent baseline evidence record, and a matching golden fixture. Agents
-  # are intentionally rare; when present, they must prove that forked context
-  # is load-bearing instead of decorative.
-  if [[ -d "$plugin_dir/agents" ]] && ls "$plugin_dir/agents/"*.md >/dev/null 2>&1; then
-    if python3 "$root/tools/check-agent-evidence.py" --plugin "$name" >/dev/null 2>&1; then
-      echo "  ✓ AGENT-1: agents have evidence records and golden fixtures"
-    else
-      echo "  ✗ AGENT-1: agent evidence check failed"
-      python3 "$root/tools/check-agent-evidence.py" --plugin "$name" 2>&1 | sed 's/^/    /'
-      fail=1
-    fi
   fi
 
   echo

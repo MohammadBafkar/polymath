@@ -1,6 +1,6 @@
 # Changelog — polymath-release
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

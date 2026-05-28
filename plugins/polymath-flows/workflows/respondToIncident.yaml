@@ -1,19 +1,24 @@
 schemaVersion: 0.1
 name: respondToIncident
-version: 0.1.0
+version: 0.2.0
 description: Drive incident response — context, triage, query, mitigation note, postmortem, follow-up tickets.
 requires:
   plugins:
     - polymath-core
     - polymath-incident
-    - polymath-connector-pagerduty
-    - polymath-connector-datadog
-    - polymath-connector-jira
+  capabilities:
+    # Three capabilities. v0.2 routes each through the project's
+    # .polymath/capabilities.yaml choice rather than hard-coding pagerduty +
+    # datadog + jira. Set the providers in that file and the workflow runs
+    # end-to-end against opsgenie + honeycomb + linear if that is the stack.
+    pager: true
+    observability: true
+    issue_tracker: true
 inputs:
   - name: incidentId
     type: string
     required: true
-    description: PagerDuty incident ID (e.g. PT9X3HQ7) or full incident URL.
+    description: Pager incident ID (e.g. PT9X3HQ7) or full incident URL.
   - name: sev
     type: enum
     values: [sev1, sev2, sev3]
@@ -25,8 +30,8 @@ guards:
     command: mkdir -p docs/postmortems && [ -w docs/postmortems ]
 steps:
   - id: context
-    invoke: polymath-connector-pagerduty:page-context
-    prompt: Fetch the active PagerDuty incident ${inputs.incidentId} and front-load context for the responder.
+    invoke: ${capabilities.pager.plugin}:page-context
+    prompt: Fetch the active ${capabilities.pager.provider} incident ${inputs.incidentId} and front-load context for the responder.
     artifacts:
       - docs/postmortems/${workflow.slug}-context.md
   - id: triage
@@ -34,8 +39,8 @@ steps:
     prompt: Triage incident ${inputs.incidentId} given the fetched context. Confirm severity (default ${inputs.sev}), name roles, decide mitigate-vs-diagnose with a timebox.
     needs: [context]
   - id: signals
-    invoke: polymath-connector-datadog:query-during-incident
-    prompt: Run focused Datadog queries to narrow root cause for incident ${inputs.incidentId}. Surface one most-likely cause + one fallback.
+    invoke: ${capabilities.observability.plugin}:query-during-incident
+    prompt: Run focused ${capabilities.observability.provider} queries to narrow root cause for incident ${inputs.incidentId}. Surface one most-likely cause + one fallback.
     needs: [triage]
     artifacts:
       - docs/postmortems/${workflow.slug}-signals.md
@@ -46,8 +51,8 @@ steps:
     artifacts:
       - docs/postmortems/${workflow.slug}.md
   - id: tickets
-    invoke: polymath-connector-jira:file-bug-from-incident
-    prompt: File Jira tickets for each action item in the postmortem at docs/postmortems/${workflow.slug}.md. Update the postmortem with the resulting Jira keys.
+    invoke: ${capabilities.issue_tracker.plugin}:file-bug-from-incident
+    prompt: File ${capabilities.issue_tracker.provider} tickets for each action item in the postmortem at docs/postmortems/${workflow.slug}.md. Update the postmortem with the resulting ticket keys.
     needs: [postmortem]
 mustPass:
   - id: postmortem-exists
@@ -64,4 +69,4 @@ mustPass:
   - id: tickets-filed
     type: stepSummaryMatches
     step: tickets
-    pattern: "(JIRA|PROJ|created|filed)"
+    pattern: "(JIRA|PROJ|created|filed|tracked|ticket)"

@@ -1,173 +1,158 @@
 # Limitations
 
-This document is the deliberate counterweight to `README.md`. It records,
-in writing, what Polymath is not good at, where official tools beat it,
-where claims outrun evidence, and what the maintainer would not yet trust
-the catalog with. Reviewers should read this before `README.md` if they
-care about depth more than breadth.
+The deliberate counterweight to [`README.md`](README.md). This file records
+what Polymath is *not* good at, where official tools beat it, and what
+the maintainer would not yet trust the catalog with. Read it before the
+catalog if you care about depth more than breadth.
 
-The honesty here is itself a feature: every line below is a falsifiable
-claim, and the absence of a counter-claim in `README.md` or the catalog
-is intentional.
+Every line below is a falsifiable claim; the absence of a counter-claim
+elsewhere is intentional.
 
-## 1. What Polymath does not currently prove
+## 1. What the catalog does not prove
 
-- Polymath has **not** demonstrated that it produces better artifacts than
+- The catalog **does not** prove it produces better artifacts than
   baseline Claude Code on a measured set of tasks. The bakeoff harness
-  exists (`tools/bakeoff.py`, `tests/bakeoff/cases/*.json`) and three
-  cases are pre-registered, but no live run has been published. Until at
-  least three cases meet the `decision_threshold` in
-  `docs/QUALITY-SCORECARD.md`, the central product thesis is unconfirmed.
-- Polymath has **not** demonstrated that its agents outperform a
-  no-agent baseline on real Claude runs. The evidence records under
-  `tests/agent-evidence/` declare what the baseline is expected to miss;
-  the live golden fixtures that confirm or refute those expectations
-  are auth-dependent and are not yet enforced as a required CI gate
-  by default on every PR.
-- Polymath has **not** measured external adoption. The catalog claims
-  no external users for any of the eight `stable` plugins, and the
-  `9+ Promotion Bar` in `docs/QUALITY-SCORECARD.md` explicitly requires
-  at least one external user before any new promotion to `stable`.
+  exists ([`tools/bakeoff.py`](tools/bakeoff.py), nine cases under
+  [`tests/bakeoff/<plugin>/<scenario>/case.json`](tests/bakeoff/)), the
+  LLM-judge in [`tools/bakeoff/judge-prompt.md`](tools/bakeoff/judge-prompt.md)
+  can run on demand, but no live run is published. The central
+  product thesis is unconfirmed.
+- The catalog **has no external users.** Until at least one stable
+  plugin has a recorded external adopter, the promotion bar in
+  [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) blocks
+  every catalog plugin from `stable`. As of today, no plugin in the
+  catalog is `stable`.
 
-## 2. Where official tools beat Polymath today
+## 2. Where official tools beat Polymath
 
-- **Language facts and APIs.** For any factual question about a language
-  feature, API signature, or LSP behaviour, the official docs and LSPs
-  beat any `polymath-lang-*` plugin. The lang plugins exist to encode
-  judgement (migration plans, test idioms, build audits), not facts.
-  If a question is "what does this API return?", reach for the official
-  surface, not Polymath.
+- **Language facts and APIs.** For any factual question about a
+  language feature, API signature, or LSP behaviour, the official
+  docs and LSPs beat any Polymath skill. Polymath defers to external
+  catalogs such as [dotnet/skills](https://github.com/dotnet/skills),
+  [Laravel Boost](https://laravel.com/docs/12.x/boost), and Python
+  skill collections listed at [agentskills.io](https://agentskills.io).
+  Projects declare which external catalogs they recommend in
+  `.polymath/project.yaml` (`external_skills:`).
 - **Service integrations with official MCPs.** Where an official MCP
-  exists (GitHub, Jira, Linear, Datadog, Sentry, etc.), the official
-  surface is the source of truth for tool calls. The Polymath connector
-  is justified only by the workflow shape, safety opinion, or critique
-  it adds, as recorded in `docs/CONNECTOR-POLICY.md`. Connectors that
-  fail that disclosure are flagged in the same document for demotion at
-  the next release.
-- **Cloud resource operations.** For one-off operations against AWS,
-  Azure, GCP, or Kubernetes, the official MCP families plus the vendor
-  CLI are faster and safer than any Polymath wrapper. `polymath-infra-*`
-  is justified only when a multi-environment workflow, RBAC audit, or
-  destructive-action checklist is the actual question.
+  exists (GitHub, Jira, Linear, Datadog, Sentry, PagerDuty, Snyk, …),
+  the official surface is the source of truth for tool calls. The
+  Polymath connector is justified only by the workflow shape, safety
+  opinion, or critique it adds, recorded per plugin in
+  [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md).
+- **Cloud resource operations.** For one-off operations against AWS /
+  GCP / Azure / Kubernetes, the official MCP families plus the vendor
+  CLI are faster and safer than any Polymath wrapper.
+  `polymath-infra-*` is justified only when a multi-environment
+  workflow, RBAC audit, or destructive-action checklist is the actual
+  question.
 
 ## 3. Where the catalog is intentionally thin
 
-- **`polymath-ai` is currently underbuilt** relative to the marketplace's
-  identity. It ships three skills (`rag-design`, `prompt-engineer`,
-  `eval-plan`) when an AI-craft showcase needs roughly twice that depth.
-  Promotion to `stable` is gated on the bakeoff demonstrating measurable
-  uplift on at least one AI-craft case.
-- **There are only two agents.** `architecture-critic` and
-  `research-scout` are the entire agent surface. The third reviewer in
-  the design conversation named seven; the catalog has chosen quality
-  over breadth and will add agents only when each ships with an
-  evidence record under the `no-agent baseline` rule (see
-  `docs/PLUGIN-AUTHORING.md` § 6).
-- **The "Polymath core" set is narrow on purpose.** Eight plugins claim
-  `stable` (`polymath-core`, `-thinking`, `-planning`, `-writing`,
-  `-decisions`, `-engineering`, `-flows`, `-author`). The remaining
-  63 are openly `experimental`. The catalog has chosen a small
-  defended surface over a large undefended one.
+- **`polymath-ai`** ships three skills (`rag-design`, `prompt-engineer`,
+  `eval-plan`). An AI-craft showcase deserves more depth, but the
+  catalog prefers to defer to specialised AI-tooling catalogs over
+  building shallow surfaces here. Promotion to `stable` is gated on a
+  passing bakeoff case for at least one of the three skills.
+- **Agents are intentionally rare.** Polymath only ships agents when
+  a no-agent baseline + a golden fixture demonstrates forked context
+  is load-bearing rather than decorative.
+- **Maturity is conservative.** All plugins start at `experimental`.
+  The canonical promotion bars live in [`docs/MATURITY.md`](docs/MATURITY.md):
+  `beta` is granted on closed on-disk evidence (bakeoff + triggering
+  fixtures, or a foundation-runner with unit + e2e coverage); `stable`
+  further requires a live bakeoff ≥ 8 / delta ≥ 2 **and** at least one
+  external user beyond the maintainer. No plugin in the catalog is
+  `stable` today.
 
 ## 4. Known operational gaps
 
-- **Live-model fixtures are auth-dependent.** Without a
+- **Live-model fixtures are auth-dependent.** Without
   `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets,
-  the `claude-cli-fixtures` and bakeoff jobs in `.github/workflows/`
-  cannot prove the agents' and workflows' real behaviour. The CI is
-  configured to fail the build when auth is missing on `main` pushes
-  (see § 5 below), but a fork without that secret cannot reproduce
-  the proof.
+  the `claude-cli-fixtures` job in
+  [`.github/workflows/golden-tests.yml`](.github/workflows/golden-tests.yml)
+  and the `live-bakeoff` job in
+  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
+  cannot prove real behaviour. CI fails the build when auth is missing
+  on a push to `main`. Fork PRs without secrets skip the live run.
+- **The fallback YAML parser in `polymath-flow` folds block scalars.**
+  `|` and `>` are both treated as folded — newlines collapse to
+  spaces. Workflows that depend on newline-preserving prompts must
+  rely on PyYAML being present.
+- **No per-case cost telemetry in the bakeoff.** The scorer reports a
+  numeric score and a delta, not token cost. Two runs that produce
+  equivalent scores at different costs look identical today.
+- **No skill-versioning.** Skills evolve in place. A workflow that
+  depends on a particular skill's behaviour cannot pin it.
+- **No multi-version workflow-schema migration tooling.** When the
+  workflow schema bumps from `0.1` to `0.2`, the migration will need
+  to be coordinated by hand.
 
-  ### 4.1 How to provide the key
+### 4.1 Providing the Claude Code auth secret
 
-  The maintainer enables the live CI gate once per repo. Two paths:
+The maintainer enables the live CI gate once per repo:
 
-  **Preferred — a Claude.ai subscription OAuth token.** This is the
-  same token Claude Code's `/login` flow stores locally and is the
-  cheapest option per call.
+**Preferred — Claude.ai subscription OAuth token.** Same token Claude
+Code's `/login` flow stores locally; the cheapest option per call.
 
-  ```bash
-  # On the maintainer's machine, after a fresh `claude /login`:
-  cat ~/.claude/oauth.json | jq -r .access_token
+```bash
+# On the maintainer's machine, after a fresh `claude /login`:
+cat ~/.claude/oauth.json | jq -r .access_token
 
-  # Then add it to the repo (requires `gh auth login` first):
-  gh secret set CLAUDE_CODE_OAUTH_TOKEN \
-    --repo MohammadBafkar/Polymath \
-    --body "$(cat ~/.claude/oauth.json | jq -r .access_token)"
-  ```
+# Add it to the repo (requires `gh auth login` first):
+gh secret set CLAUDE_CODE_OAUTH_TOKEN \
+  --repo MohammadBafkar/Polymath \
+  --body "$(cat ~/.claude/oauth.json | jq -r .access_token)"
+```
 
-  **Alternative — an Anthropic API key.** Falls back to per-token
-  billing instead of a subscription. Use this only if the maintainer
-  doesn't have a Claude.ai seat.
+**Alternative — Anthropic API key.** Per-token billing.
 
-  ```bash
-  gh secret set ANTHROPIC_API_KEY \
-    --repo MohammadBafkar/Polymath \
-    --body "sk-ant-..."
-  ```
+```bash
+gh secret set ANTHROPIC_API_KEY \
+  --repo MohammadBafkar/Polymath \
+  --body "sk-ant-..."
+```
 
-  **UI alternative.** GitHub → repo → Settings → Secrets and variables
-  → Actions → New repository secret → name `CLAUDE_CODE_OAUTH_TOKEN`
-  (or `ANTHROPIC_API_KEY`), paste the value, save.
+**UI alternative.** GitHub → repo → Settings → Secrets and variables
+→ Actions → New repository secret → name `CLAUDE_CODE_OAUTH_TOKEN`
+(or `ANTHROPIC_API_KEY`), paste the value, save.
 
-  **Verification.** Push a no-op commit to `main` and confirm the
-  `claude-cli-fixtures` job runs (rather than failing with the
-  "no Claude auth available" message). The first successful run is
-  the credential proof; thereafter every push to `main` exercises the
-  live fixtures.
+**Verification.** Push a no-op commit to `main`; confirm the
+`claude-cli-fixtures` job runs (rather than failing with the
+"no Claude auth available" message).
 
-  **Rotation.** OAuth tokens expire. When CI starts failing on the
-  install step, refresh with `claude /login` locally, re-extract the
-  token, and re-set the secret. Tokens cannot be displayed after
-  setting — only overwritten.
+**Rotation.** OAuth tokens expire. Refresh with `claude /login` and
+re-set the secret. Tokens cannot be displayed after setting — only
+overwritten.
 
-  **Forks.** Forks cannot read this secret (GitHub policy). The CI
-  workflow detects PRs without auth and emits a warning instead of
-  failing, so forks can still open PRs that pass non-live gates. The
-  hard gate fires only on `push` events to `refs/heads/main` in the
-  upstream repo.
-- **The fallback YAML parser in `polymath-flow` only folds block
-  scalars.** It does not preserve newlines (`|` and `>` are both
-  treated as folded). Workflows that depend on newline-preserving
-  prompts must rely on PyYAML being present.
-- **No cost telemetry.** The bakeoff scorer reports a numeric score
-  and a delta, but does not yet report token cost per case. Two
-  runs that produce equivalent scores at different costs look
-  identical to the harness today.
-- **No multi-version migration story.** When the workflow schema
-  bumps from 0.1 to 0.2, the catalog's existing workflows will need
-  a coordinated migration; the tooling for that is not built.
-- **No skill-versioning.** Skills evolve in place; there is no
-  per-skill semver, so a workflow that depends on a particular
-  skill's behaviour cannot pin it.
+**Forks.** Forks cannot read repo secrets (GitHub policy). The CI
+workflows detect PRs without auth and emit a warning instead of
+failing. The hard gate fires only on `push` events to
+`refs/heads/main` in the upstream repo.
 
-## 5. What we would refuse to do today
+## 5. What the maintainer refuses to do
 
-- We would refuse to claim a plugin is `stable` without a passing
-  bakeoff case that exercises its primary skill at score ≥ 8/10
-  with a delta of at least 2 points over baseline.
-- We would refuse to promote a connector to `stable` while its
-  `polymath_value` row in `docs/CONNECTOR-POLICY.md` is empty.
-- We would refuse to merge a new agent without a no-agent baseline
-  evidence record and a matching golden fixture (enforced by
-  `AGENT-1` in `tools/conformance.sh`).
-- We would refuse to publish customer-facing release notes claiming
-  the marketplace "produces better software work than baseline
-  Claude Code" until the bakeoff has been run and the artifacts are
-  checked in.
+- Refuses to claim a plugin is `stable` without a passing bakeoff
+  case at score ≥ 8/10 with delta ≥ 2 over baseline.
+- Refuses to promote a connector to `stable` while its `polymath_value`
+  row in [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) is
+  empty.
+- Refuses to ship a new agent without a no-agent baseline + a golden
+  fixture proving forked context is load-bearing.
+- Refuses to publish customer-facing release notes claiming the
+  marketplace "produces better software work than baseline Claude
+  Code" until at least three bakeoff cases meet the threshold.
 
 ## 6. What would change this document
 
-- A published bakeoff run that meets the `9+ Promotion Bar` in
-  `docs/QUALITY-SCORECARD.md` would remove § 1's first two bullets.
-- An external user adopting a `stable` plugin would remove § 1's
-  third bullet.
-- Cost telemetry in the bakeoff harness would remove § 4's third
-  bullet.
-- A coordinated workflow-schema migration would remove § 4's fourth
+- A published bakeoff run meeting the
+  [`QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) bar would
+  remove § 1's first bullet.
+- An external user of any plugin would remove § 1's second bullet.
+- Cost telemetry in the bakeoff harness would remove a § 4 bullet.
+- A coordinated workflow-schema migration would remove another § 4
   bullet.
 
-Reviewers who find a claim here that is no longer true should open a
-PR that updates this file and the relevant section of
-`docs/QUALITY-SCORECARD.md` in the same commit.
+If you find a claim here that is no longer true, open a PR updating
+this file and the relevant section of
+[`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) in the same
+commit.

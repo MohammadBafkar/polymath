@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-infra-cloud · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-infra-cloud@polymath</code></pre>
+<h1>polymath-infra-cloud</h1>
+
+<p>Cloud infrastructure design craft for the Polymath marketplace. One</p>
+<p>plugin with four sibling skills covering AWS, GCP, Azure, and</p>
+<p>Terraform stack composition.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li><strong>Skills:</strong></li>
+<li><code>design-aws-pattern</code> — pick the right AWS primitive (Lambda /</li>
+</ul>
+<p>ECS / EKS / EC2; S3 / EFS / FSx; RDS / Aurora / DynamoDB) with</p>
+<p>cost-driver + flip-condition framing.</p>
+<ul>
+<li><code>design-gcp-pattern</code> — Cloud Run / GKE / Cloud Functions; Cloud</li>
+</ul>
+<p>SQL / Spanner / Firestore; GCS — same decision-tree shape.</p>
+<ul>
+<li><code>design-azure-pattern</code> — App Service / Functions / Container</li>
+</ul>
+<p>Apps / AKS; Azure SQL / Cosmos / Postgres Flexible; Storage.</p>
+<ul>
+<li><code>design-stack-composition</code> — Terraform stack layout: blast-radius</li>
+</ul>
+<p>zones (foundational / platform / service), state backend choice,</p>
+<p>workspaces-vs-directories rule, per-apply RBAC.</p>
+<ul>
+<li><strong>Commands:</strong> <code>/design-aws</code>, <code>/design-gcp</code>, <code>/design-azure</code>,</li>
+</ul>
+<p><code>/design-terraform-stack</code> (thin aliases).</p>
+
+<h2>Pairs with</h2>
+
+<ul>
+<li><code>polymath-infra-kubernetes</code> for k8s manifests when the runtime</li>
+</ul>
+<p>choice is Kubernetes.</p>
+<ul>
+<li><code>polymath-infra-postgres</code> for migration safety on the DB choice.</li>
+<li><code>polymath-connector-terraform</code> for plan-review when the IaC</li>
+</ul>
+<p>changes land.</p>
+<ul>
+<li>Official cloud CLI / MCP for actual operations (<code>aws</code>, <code>gcloud</code>,</li>
+</ul>
+<p><code>az</code>). This plugin is design-tier; ops belongs in the official</p>
+<p>surfaces.</p>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-infra-cloud@polymath
+</code></pre>
+
+<h2>Shape</h2>
+
+<p>Single capability (cloud-pattern selection) with four provider-flavoured</p>
+<p>skills — <code>cloud-pattern-aws</code>, <code>cloud-pattern-gcp</code>, <code>cloud-pattern-azure</code>,</p>
+<p>and a Terraform-stack composition skill — under one plugin. Projects pick</p>
+<p>a cloud once via <code>.polymath/project.yaml</code>; the skills adapt rather than</p>
+<p>splitting the surface across multiple plugins.</p>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,54 @@
+# .polymath/project.yaml — example for a Java 21 Spring Boot service.
+
+schemaVersion: 1
+
+project:
+  name: ledger-service
+  description: Double-entry ledger service. Java 21 + Spring Boot + Postgres.
+
+stack:
+  languages:
+    - lang: java
+      version: "21"
+      framework: spring-boot
+  testing:
+    - framework: junit5
+      mocking: mockito
+      assertion: assertj
+  build:
+    primary: gradle
+    secondary: docker
+  runtime:
+    kind: kubernetes
+    namespace: ledger
+    manifests: deploy/k8s/
+  database:
+    primary:
+      kind: postgres
+      version: "16"
+  package_manager:
+    kind: gradle
+    lock_file: gradle.lockfile
+
+conventions:
+  code_review_checklist: docs/code-review-checklist.md
+  commit_style: conventional-commits
+  branch_strategy: gitflow
+  language_specific:
+    java:
+      file: docs/java-style.md
+
+skill_overrides:
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: java
+        cmd: ./gradlew test --no-daemon -q
+  polymath-engineering:code-review:
+    additional_context:
+      - docs/java-style.md
+    additional_axes:
+      - axis: spring-config
+        prompt: |
+          Check new beans use constructor injection (not field injection),
+          @ConfigurationProperties for env-driven config, and that no
+          @Component sits behind a transactional boundary it does not own.

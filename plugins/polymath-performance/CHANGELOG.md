@@ -1,6 +1,6 @@
 # Changelog — polymath-performance
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

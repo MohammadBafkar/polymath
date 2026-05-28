@@ -11,7 +11,7 @@ No MCP server: Terraform's CLI is the API, and this connector calls it locally (
 
 ## Pairs with
 
-- `polymath-infra-aws` / `polymath-infra-gcp` / `polymath-infra-azure` — those plugins ship the *write* side; this plugin reviews the *plan* side before apply.
+- `polymath-infra-cloud` — ships the *write* side (cloud-pattern selection for AWS / GCP / Azure / Terraform stack composition); this plugin reviews the *plan* side before apply.
 
 ## Installation
 

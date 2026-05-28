@@ -43,7 +43,7 @@ Fine-grained PAT recommended. For repo-only use:
 - `pull_requests: read+write`
 - `issues: read+write`
 - `metadata: read`
-- `workflows: read+write` (if you also want polymath-connector-github-actions to share this token)
+- `workflows: read+write` (required by this plugin's `diagnose-ci-failure` skill and `check-recent-ci.sh` Stop hook)
 
 For read-only triage workloads, drop the write scopes.
 

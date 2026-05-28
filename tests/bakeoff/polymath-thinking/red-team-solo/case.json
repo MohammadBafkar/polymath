@@ -1,0 +1,50 @@
+{
+  "id": "red-team-solo",
+  "title": "Thinking: red-team a plan in isolation",
+  "task": "Red-team a one-paragraph project plan. Produce specific objections with line citations and the strongest version of each (the one the proposer hasn't refuted).",
+  "plugins": [
+    "polymath-core",
+    "polymath-thinking"
+  ],
+  "baseline_prompt": "Read the following project plan and produce a critique. For each objection, quote the specific line you're objecting to and present the strongest version (the one the proposer hasn't refuted). Do not list generic concerns.\n\nPlan:\nWe will migrate our session store from in-memory to Redis next sprint to support multi-region. The work is small. We'll add Redis as a dependency, update the session middleware, and ship behind a flag. We'll roll out to 5% of traffic on Friday and 100% by Monday.",
+  "polymath_prompt": "Read the following project plan and produce a critique. For each objection, quote the specific line you're objecting to and present the strongest version (the one the proposer hasn't refuted). Do not list generic concerns. Use Polymath's red-team skill.\n\nPlan:\nWe will migrate our session store from in-memory to Redis next sprint to support multi-region. The work is small. We'll add Redis as a dependency, update the session middleware, and ship behind a flag. We'll roll out to 5% of traffic on Friday and 100% by Monday.",
+  "rubric": [
+    {
+      "id": "line-citations",
+      "weight": 3,
+      "pass_regex": [
+        "(quote|line|cite|citation|quoting)",
+        "(\\\"|\\bWe will\\b|\\bsession\\b|\\bRedis\\b|\\bmulti-region\\b)"
+      ]
+    },
+    {
+      "id": "specific-objections",
+      "weight": 3,
+      "pass_regex": [
+        "(rollback|failure mode|invalidation|consistency|latency|connection|durability|TTL|eviction|warm-up)",
+        "(weekend|Friday|Monday|on-call|alert)"
+      ]
+    },
+    {
+      "id": "strongest-form",
+      "weight": 2,
+      "pass_regex": [
+        "(strongest|steelman|strongest version|hardest)",
+        "(unrefuted|not refuted|hasn.t|missing)"
+      ]
+    },
+    {
+      "id": "no-generic-concerns",
+      "weight": 2,
+      "pass_regex": [
+        "(specific|concrete|targeted)",
+        "(plan|paragraph|line)"
+      ]
+    }
+  ],
+  "decision_threshold": {
+    "minimum_polymath_score": 8,
+    "minimum_delta": 2
+  },
+  "timeout_seconds": 240
+}

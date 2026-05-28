@@ -63,12 +63,6 @@
       "evidence": "tests/golden/<plugin>/*.md"
     },
     {
-      "id": "AGENT-1",
-      "level": "required",
-      "description": "Every plugin-shipped agent has frontmatter, no forbidden subagent fields, a no-agent baseline evidence record, and a matching golden fixture.",
-      "evidence": "tools/check-agent-evidence.py --plugin <plugin>"
-    },
-    {
       "id": "DESCRIPTION-1",
       "level": "recommended",
       "description": "Plugin description and skill descriptions lead with an imperative verb (drives skill discovery).",

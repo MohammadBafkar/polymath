@@ -1,6 +1,6 @@
 # Changelog — polymath-connector-slack
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

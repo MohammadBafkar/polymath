@@ -1,6 +1,6 @@
 schemaVersion: 0.1
 name: incidentRetroToActions
-version: 0.1.0
+version: 0.2.0
 description: Decompose a written postmortem into trackable action items — owners, due dates, estimates, tickets filed, postmortem back-linked to the resulting tickets.
 requires:
   plugins:
@@ -8,17 +8,17 @@ requires:
     - polymath-engineering
     - polymath-incident
     - polymath-planning
-    - polymath-connector-jira
+  capabilities:
+    # Project picks the issue tracker in .polymath/capabilities.yaml (jira |
+    # linear | github_issues | azure_devops). The file-tickets step is routed
+    # through whichever provider is configured; the prior `tracker` input is
+    # removed because the project — not the workflow caller — owns the choice.
+    issue_tracker: true
 inputs:
   - name: postmortemPath
     type: string
     required: true
     description: Repo-relative path to the blameless postmortem (e.g. docs/postmortems/2026-09-refund-async.md). Must be a written artifact, not an open incident.
-  - name: tracker
-    type: enum
-    values: [jira, linear]
-    default: jira
-    description: Issue tracker to file action items into. Switching to linear requires also swapping the connector-jira dependency for connector-linear in a project override (.claude/polymath/workflows/).
 guards:
   - id: postmortem-readable
     type: command
@@ -55,8 +55,8 @@ steps:
       - docs/retros/${workflow.slug}-estimates.md
 
   - id: file-tickets
-    invoke: polymath-connector-jira:file-bug-from-incident
-    prompt: File a tracker ticket for every leaf in docs/retros/${workflow.slug}-breakdown.md that has an estimate ≤ L. Each ticket links back to ${inputs.postmortemPath}. Assignee comes from the action's owner string; if "TBD", file with the on-call rotation as assignee and add a comment "@owner please confirm ownership". Save the resulting ticket-key list to docs/retros/${workflow.slug}-tickets.md.
+    invoke: ${capabilities.issue_tracker.plugin}:file-bug-from-incident
+    prompt: File a ${capabilities.issue_tracker.provider} ticket for every leaf in docs/retros/${workflow.slug}-breakdown.md that has an estimate ≤ L. Each ticket links back to ${inputs.postmortemPath}. Assignee comes from the action's owner string; if "TBD", file with the on-call rotation as assignee and add a comment "@owner please confirm ownership". Save the resulting ticket-key list to docs/retros/${workflow.slug}-tickets.md.
     needs: [estimate]
     artifacts:
       - docs/retros/${workflow.slug}-tickets.md

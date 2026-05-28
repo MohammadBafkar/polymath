@@ -1,0 +1,57 @@
+# .polymath/project.yaml — example for a TypeScript / React front-end.
+
+schemaVersion: 1
+
+project:
+  name: refund-portal
+  description: Customer-facing refund portal. React 19 + Vite + Tailwind.
+
+stack:
+  languages:
+    - lang: typescript
+      version: "5.6"
+      framework: react
+  testing:
+    - framework: vitest
+      mocking: vitest-mock
+      assertion: vitest-expect
+  build:
+    primary: vite
+    secondary: docker
+  runtime:
+    kind: cloud_run
+    manifests: deploy/
+  package_manager:
+    kind: pnpm
+    lock_file: pnpm-lock.yaml
+
+conventions:
+  code_review_checklist: docs/code-review-checklist.md
+  commit_style: conventional-commits
+  branch_strategy: github-flow
+  api_style_guide: docs/api-style-guide.md
+  language_specific:
+    typescript:
+      file: docs/ts-style.md
+
+external_skills:
+  - source: github.com/anthropics/claude-plugins-official
+    plugins: [react-best-practices, tailwind-best-practices]
+    install: marketplace
+
+skill_overrides:
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: typescript
+        cmd: pnpm test --run --reporter=basic
+  polymath-engineering:code-review:
+    additional_context:
+      - docs/ts-style.md
+    additional_axes:
+      - axis: accessibility
+        prompt: |
+          Check that any new interactive element has an accessible name
+          and visible focus state per WCAG 2.2 AA.
+
+prompts:
+  pr_description_template: docs/pr-template.md

@@ -63,11 +63,6 @@ Both local and CI execution go through [`run-fixtures.sh`](run-fixtures.sh), whi
    when the fixture needs bounded model effort.
 5. Checks `expect.invoked`, `expect.artifacts`, `expect.output_matches`, and `expect.not_invoked` against the transcript and scratch filesystem.
 
-Agent fixtures are paired with no-agent baseline evidence records under
-[`tests/agent-evidence`](../agent-evidence/). The evidence record names what
-the same-context baseline is expected to miss and what the forked-context agent
-must surface.
-
 ### Local
 
 If you can already run `claude` from your shell, you can run fixtures:

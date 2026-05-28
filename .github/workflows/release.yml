@@ -37,6 +37,7 @@ jobs:
           bash tools/lint-skills.sh
           bash tools/token-budget.sh
           python3 -m unittest discover -s plugins/polymath-flows/tests -v
+          python3 -m unittest discover -s plugins/polymath-core/tests -v
       - name: Verify conformance
         run: bash tools/conformance.sh --all
       - name: Plan plugin tags

@@ -1,12 +1,16 @@
 schemaVersion: 0.1
 name: perfRegression
-version: 0.1.0
-description: Diagnose a performance regression — Datadog signals, review the diff that landed, implement the fix, verify the metric recovered.
+version: 0.2.0
+description: Diagnose a performance regression — observability signals, review the diff that landed, implement the fix, verify the metric recovered.
 requires:
   plugins:
     - polymath-core
-    - polymath-connector-datadog
     - polymath-engineering
+  capabilities:
+    # Project picks the observability provider in .polymath/capabilities.yaml
+    # (datadog | honeycomb | grafana | elastic | sentry). The signals step is
+    # routed through whichever the project configured.
+    observability: true
 inputs:
   - name: title
     type: string
@@ -26,8 +30,8 @@ guards:
     command: mkdir -p docs/perf && [ -w docs/perf ]
 steps:
   - id: signals
-    invoke: polymath-connector-datadog:query-during-incident
-    prompt: Pull Datadog signals for ${inputs.metric}. Compare against the 24h-baseline-same-window per the skill's procedure. Surface the dominant cause + fallback to docs/perf/${workflow.slug}-signals.md.
+    invoke: ${capabilities.observability.plugin}:query-during-incident
+    prompt: Pull ${capabilities.observability.provider} signals for ${inputs.metric}. Compare against the 24h-baseline-same-window per the skill's procedure. Surface the dominant cause + fallback to docs/perf/${workflow.slug}-signals.md.
     artifacts:
       - docs/perf/${workflow.slug}-signals.md
   - id: review-diff

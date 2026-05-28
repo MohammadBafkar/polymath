@@ -1,8 +1,12 @@
 # Changelog — polymath-planning
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 
-- Initial v0.1 components: `write-plan`, `work-breakdown`, `estimate` skills.
-- Ships `Plan.md` template under `templates/`.
+- `write-plan`, `work-breakdown`, `estimate` skills.
+- `Plan.md` template under `templates/`.
+- Frontmatter on `Plan.md` validated by
+  [`shared/schemas/artifacts/Plan.schema.json`](../../shared/schemas/artifacts/Plan.schema.json);
+  workflows producing a Plan can `mustPass: artifactValid` or
+  `artifactSchemaStrict` against `docs/plans/<slug>.md`.

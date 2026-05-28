@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/shared/schemas/artifacts/DACIDecision.schema.json",
+  "title": "Polymath DACI Decision frontmatter",
+  "description": "Validates the YAML frontmatter of a docs/decisions/<slug>.md DACI artifact authored by polymath-decisions:daci. Encodes the DACI invariants the skill enforces in prose: exactly one Approver, Approver ≠ Driver, a real due date (no 'TBD'), status enum.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["artifact", "title", "status", "driver", "approver", "due", "created"],
+  "properties": {
+    "artifact": { "const": "DACIDecision" },
+    "schemaVersion": { "type": "number", "enum": [0.1] },
+    "title": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["open", "decided", "cancelled", "blocked"]
+    },
+    "driver": {
+      "description": "The single person responsible for moving the decision to closure.",
+      "type": "string",
+      "minLength": 1
+    },
+    "approver": {
+      "description": "The single person empowered to approve. Must differ from `driver`; the skill enforces this and validators MAY cross-check string equality.",
+      "type": "string",
+      "minLength": 1
+    },
+    "contributors": {
+      "description": "Optional list of contributors providing input.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "informed": {
+      "description": "Optional list of people informed after the decision.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "due": {
+      "description": "Concrete due date in ISO-8601. 'TBD' / 'soon' MUST be rejected — the DACI skill insists on a real date.",
+      "type": "string",
+      "format": "date"
+    },
+    "created": { "type": "string", "format": "date" },
+    "decided_at": {
+      "description": "ISO-8601 timestamp the decision was recorded. Required when status transitions to `decided`.",
+      "type": ["string", "null"]
+    },
+    "adr_link": {
+      "description": "Optional path / URL to an ADR that records the decision's architectural framing.",
+      "type": "string"
+    }
+  }
+}

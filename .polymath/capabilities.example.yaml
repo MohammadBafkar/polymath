@@ -1,0 +1,67 @@
+# .polymath/capabilities.yaml — example
+#
+# Project-level capability → provider mapping consumed by polymath-flow when a
+# workflow declares `requires.capabilities`. Copy this file to
+# `.polymath/capabilities.yaml` at the root of your project and edit it to
+# match the providers you use. Workflows declare WHAT they need (issue
+# tracker, observability); this file declares WHICH provider supplies it.
+#
+# Schema: shared/schemas/capabilities.schema.json (vocabulary lives in
+# shared/schemas/capabilities.json). Adding an in-house provider not in the
+# vocabulary requires a PR against the catalog vocabulary file.
+#
+# Resolution order at polymath-flow start time:
+#   1. ./.polymath/capabilities.yaml (project, repo-root)
+#   2. ${CLAUDE_CONFIG_DIR}/polymath/capabilities.yaml (user/team default)
+#   3. ~/.polymath/capabilities.yaml (last-resort user default)
+# The first existing file wins; the others are ignored. There is no merge.
+
+schemaVersion: 1
+
+capabilities:
+  # Issue tracker — invoked by incidentRetroToActions, respondToIncident.
+  issue_tracker:
+    provider: jira
+    # `plugin:` is optional. When omitted, polymath-flow looks up the default
+    # plugin for this provider from shared/schemas/capabilities.json. Set it
+    # to override (e.g. you fork the catalog adapter).
+    # plugin: polymath-connector-jira
+
+  # Observability — invoked by perfRegression, respondToIncident.
+  observability:
+    provider: datadog
+    # provider options: datadog | honeycomb | grafana | elastic | sentry
+
+  # Pager — invoked by respondToIncident.
+  pager:
+    provider: pagerduty
+    # provider options: pagerduty | opsgenie | splunk_oncall
+
+  # Vulnerability scanner — invoked by bumpDependency.
+  vulnerability_scanner:
+    provider: snyk
+    # provider options: snyk | dependabot | github_advanced_security
+
+  # The capabilities below are declared but unused by any shipped workflow
+  # today. They are listed so a project that adds custom workflows can
+  # reference them without further plumbing.
+
+  # incident_comms:
+  #   provider: slack
+  #   # provider options: slack | statuspage
+
+  # ci:
+  #   provider: github_actions
+  #   # provider options: github_actions | azure_devops_pipelines | gitlab_ci | buildkite
+
+  # cloud:
+  #   provider: aws
+  #   # provider options: aws | gcp | azure
+
+  # runtime:
+  #   provider: kubernetes
+  #   # provider options: kubernetes | ecs | cloud_run | aci | lambda | app_service
+
+  # vcs:
+  #   provider: github
+  #   # provider options: github | gitlab | azure_devops | bitbucket

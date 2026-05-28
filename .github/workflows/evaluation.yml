@@ -1,0 +1,159 @@
+name: evaluation
+
+on:
+  # Trigger on demand via `/evaluate` in a PR comment.
+  issue_comment:
+    types: [created]
+  # Daily regression baseline at 06:00 UTC.
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      include_judge:
+        description: "Run bakeoff with LLM-judge scoring (extra cost)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: evaluation-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # Lightweight commit-status job that posts pending/success based on
+  # whether skill files changed — mirrors dotnet/skills' pattern.
+  pr-status:
+    name: pr-status (skills-changed)
+    if: github.event_name == 'pull_request' || (github.event_name == 'issue_comment' && github.event.issue.pull_request)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect skill changes
+        id: detect
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.base_ref }}"
+          head="${{ github.event.pull_request.head.sha || github.head_ref }}"
+          if [[ -z "$base" || -z "$head" ]]; then
+            echo "skill_changes=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$base..$head" -- 'plugins/**/SKILL.md' || true)"
+          if [[ -n "$changed" ]]; then
+            echo "skill_changes=true" >> "$GITHUB_OUTPUT"
+            printf 'Changed skills:\n%s\n' "$changed"
+          else
+            echo "skill_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No SKILL.md changes."
+          fi
+
+  # Live bakeoff + skill-triggering, triggered by /evaluate on a PR comment
+  # or the daily schedule. Requires CLAUDE_CODE_OAUTH_TOKEN or
+  # ANTHROPIC_API_KEY to be set on the repo. Fork PRs cannot read secrets,
+  # so the job skips cleanly there.
+  live-bakeoff:
+    name: live bakeoff + skill-triggering (opt-in)
+    # /evaluate comment OR scheduled OR manual dispatch.
+    if: >-
+      (github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && contains(github.event.comment.body, '/evaluate'))
+      || github.event_name == 'schedule'
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Detect Claude auth
+        id: auth
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
+            echo "method=oauth" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "method=apikey" >> "$GITHUB_OUTPUT"
+          else
+            echo "method=none" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skip cleanly on missing auth (fork PR or unset secret)
+        if: steps.auth.outputs.method == 'none'
+        run: |
+          echo "::warning::No Claude auth available; skipping live evaluation."
+          echo "::warning::Set CLAUDE_CODE_OAUTH_TOKEN (preferred) or ANTHROPIC_API_KEY"
+          echo "::warning::to enable. Fork PRs cannot read secrets — that's expected."
+          exit 0
+      - name: Install Claude Code CLI
+        if: steps.auth.outputs.method != 'none'
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash || true
+          if ! command -v claude >/dev/null 2>&1; then
+            npm install -g @anthropic-ai/claude-code
+          fi
+          claude --version
+      - name: Run bakeoff (regex score only; judge is opt-in)
+        if: steps.auth.outputs.method != 'none'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          POLYMATH_BAKEOFF_JUDGE: ${{ github.event.inputs.include_judge == 'true' && '1' || '' }}
+        run: |
+          python3 tools/bakeoff.py run --out-dir .pdata/bakeoff
+      - name: Run skill-triggering tests (live)
+        if: steps.auth.outputs.method != 'none'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/skill-triggering.py run --timeout 180
+      - name: Calibrate judge (no-op if no calibration set)
+        if: steps.auth.outputs.method != 'none' && github.event.inputs.include_judge == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/bakeoff.py calibrate
+      - name: Upload report artifact
+        if: steps.auth.outputs.method != 'none'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-${{ github.run_id }}
+          path: .pdata/bakeoff
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Post results comment on the PR
+        if: >
+          steps.auth.outputs.method != 'none'
+          && github.event_name == 'issue_comment'
+          && github.event.issue.pull_request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "## Evaluation results"
+            echo
+            echo "Run: \`${{ github.run_id }}\` (see Actions tab for artifacts)."
+            echo
+            if [[ -d .pdata/bakeoff ]]; then
+              echo "### Bakeoff summary"
+              echo "| case | baseline | polymath | delta |"
+              echo "| ---- | -------: | -------: | ----: |"
+              python3 - <<'PY'
+              import json, pathlib
+              for f in sorted(pathlib.Path('.pdata/bakeoff').glob('*.json')):
+                  d = json.loads(f.read_text())
+                  print(f"| `{d['case']}` | {d['baseline_score']} | {d['polymath_score']} | {d['delta']:+d} |")
+              PY
+            fi
+          } > .pdata/comment.md
+          gh pr comment "${{ github.event.issue.number }}" --body-file .pdata/comment.md

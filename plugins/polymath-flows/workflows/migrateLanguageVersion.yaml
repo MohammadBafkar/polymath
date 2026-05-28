@@ -1,55 +1,84 @@
 schemaVersion: 0.1
 name: migrateLanguageVersion
-version: 0.1.0
-description: Migrate a TypeScript codebase to a new TS version in phases (pin → fix → strict) with explicit gates between phases.
+version: 0.2.0
+description: Migrate a codebase to a new language / runtime version in phases (pin → fix → strict) with explicit gates between phases. Language-agnostic; polymath-engineering's verify-change detects the project's language.
 requires:
   plugins:
     - polymath-core
-    - polymath-lang-typescript
     - polymath-engineering
 inputs:
+  - name: language
+    type: string
+    required: true
+    description: Project language token (e.g. "typescript", "dotnet", "python", "go", "java"). Used only to name the slug; polymath-engineering's verify-change detects the actual build/test commands.
   - name: targetVersion
     type: string
     required: true
-    description: Target TypeScript version (e.g. "5.6", "5.7").
+    description: Target version (e.g. "5.6" for TS, "8" for .NET, "3.12" for Python).
   - name: currentVersion
     type: string
     required: true
-    description: Current pinned version from package.json devDependencies.typescript.
+    description: Current pinned version (from the project's manifest — package.json / .csproj / pyproject.toml / go.mod / pom.xml).
 guards:
   - id: migration-notes-dir
     type: command
     command: mkdir -p docs/migrations && [ -w docs/migrations ]
 steps:
   - id: plan
-    invoke: polymath-lang-typescript:migrate-ts-version
-    prompt: Plan the TypeScript upgrade ${inputs.currentVersion} → ${inputs.targetVersion}. Output the phased plan (PIN → FIX → STRICT) to docs/migrations/${workflow.slug}-plan.md. Categorize breaking-changes notes; identify which apply to this codebase.
+    invoke: polymath-engineering:read-code
+    prompt: |
+      Orient in this codebase for a ${inputs.language} version migration
+      ${inputs.currentVersion} → ${inputs.targetVersion}. Use the
+      project's authoritative source for breaking-changes (the language
+      vendor's release notes; if the project has a
+      `.polymath/project.yaml` declaring external skill sources
+      such as dotnet/skills, defer to those for breaking-change
+      taxonomy). Output the phased plan (PIN → FIX → STRICT) to
+      docs/migrations/${workflow.slug}-plan.md. Categorize breaking
+      changes; identify which apply to this codebase.
     artifacts:
       - docs/migrations/${workflow.slug}-plan.md
   - id: pin
     invoke: polymath-engineering:feature-dev
-    prompt: Phase A (PIN). Bump devDependencies.typescript to ${inputs.targetVersion}. Temporarily relax any newly-strict tsconfig flag the migration plan flagged. Goal is a green build, not full strictness.
+    prompt: |
+      Phase A (PIN). Bump the project's pinned ${inputs.language} version
+      to ${inputs.targetVersion}. Temporarily relax any newly-strict
+      config flag the migration plan flagged. Goal is a green build,
+      not full strictness.
     needs: [plan]
   - id: fix
     invoke: polymath-engineering:feature-dev
-    prompt: Phase B (FIX). Address the error categories from the migration plan in small batches (per-package or per-folder). Don't bundle into one giant diff. Each batch is its own logical commit.
+    prompt: |
+      Phase B (FIX). Address the error categories from the migration
+      plan in small batches (per-package or per-folder). Don't bundle
+      into one giant diff. Each batch is its own logical commit.
     needs: [pin]
   - id: verify
     invoke: polymath-engineering:verify-change
-    prompt: Run tsc --noEmit + tests on the changed files after each batch and at the end. Confirm green. Summary must include "test" or "verified".
+    prompt: |
+      Run the project-appropriate build + test commands on the changed
+      files after each batch and at the end. Confirm green. Summary
+      must include "test" or "verified".
     needs: [fix]
   - id: strict
     invoke: polymath-engineering:feature-dev
-    prompt: Phase C (STRICT). Re-enable the tsconfig flag(s) relaxed in pin. Remove temporary @ts-expect-error annotations introduced during fix. Validate everything still passes.
+    prompt: |
+      Phase C (STRICT). Re-enable the config flag(s) relaxed in pin.
+      Remove temporary opt-out annotations introduced during fix
+      (e.g. `@ts-expect-error` for TS, `#pragma warning disable` for
+      .NET, `# type: ignore` for Python). Validate everything still passes.
     needs: [verify]
   - id: review
     invoke: polymath-engineering:code-review
-    prompt: Final review of the migration. Look for opportunistic refactors that crept in (should not have), missing tests, and any remaining ts-expect-error annotations.
+    prompt: |
+      Final review of the migration. Look for opportunistic refactors
+      that crept in (should not have), missing tests, and any
+      remaining opt-out annotations.
     needs: [strict]
 mustPass:
   # Strong-deterministic gate: migration must produce a real diff (plan
   # doc + config + source changes). filesChanged.max is generous because
-  # a TS version bump can touch many .ts files.
+  # a language version bump can touch many source files.
   - id: migration-produced-diff
     type: diffConstraint
     filesChanged:
@@ -65,7 +94,7 @@ mustPass:
   - id: plan-categorizes-changes
     type: fileMatches
     path: docs/migrations/${workflow.slug}-plan.md
-    pattern: "(breaking|strictness|inference|removal)"
+    pattern: "(breaking|strictness|inference|removal|deprecation)"
   - id: verify-mentions-tests
     type: stepSummaryMatches
     severity: advisory
@@ -75,4 +104,4 @@ mustPass:
     type: stepSummaryMatches
     severity: advisory
     step: review
-    pattern: "(ts-expect-error|scope|refactor|missing)"
+    pattern: "(annotation|scope|refactor|missing)"

@@ -9,21 +9,68 @@
   "metadata": {
     "version": "0.1.0",
     "license": "Apache-2.0",
-    "homepage": "https://github.com/MohammadBafkar/Polymath"
+    "homepage": "https://github.com/MohammadBafkar/Polymath",
+    "agentSkills": {
+      "version": "1.0",
+      "interop": [
+        "claude-code",
+        "claude-api",
+        "codex",
+        "cursor",
+        "gemini-cli",
+        "goose",
+        "jetbrains-junie"
+      ],
+      "notes": "Polymath declares conformance with the agentskills.io v1.0 open standard for SKILL.md format. All skills under this marketplace use the SKILL.md shape: frontmatter (name + description \u2264 200 chars) + body procedure. Skills are portable across any harness that implements the standard."
+    }
   },
   "plugins": [
     {
+      "name": "polymath-connector-monitoring",
+      "source": "./plugins/polymath-connector-monitoring",
+      "description": "Observability umbrella connector: Grafana dashboard snapshots + Honeycomb trace investigation + Elasticsearch log search.",
+      "version": "0.1.0",
+      "category": "connector",
+      "tags": [
+        "connector",
+        "monitoring",
+        "observability",
+        "grafana",
+        "honeycomb",
+        "elastic"
+      ],
+      "status": "experimental"
+    },
+    {
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
-      "description": "Foundation: conventions, glossary, tone references, plugin-budget reporter, SessionStart hook.",
-      "version": "0.1.0",
+      "description": "Foundation: conventions, glossary, tone references, plugin-budget reporter, project-context loader, SessionStart hook.",
+      "version": "0.2.0",
       "category": "foundation",
       "tags": [
         "foundation",
         "core",
         "conventions"
       ],
-      "status": "stable"
+      "status": "beta"
+    },
+    {
+      "name": "polymath-infra-cloud",
+      "source": "./plugins/polymath-infra-cloud",
+      "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": [
+        "infra",
+        "cloud",
+        "aws",
+        "gcp",
+        "azure",
+        "terraform",
+        "iac",
+        "patterns"
+      ],
+      "status": "experimental"
     },
     {
       "name": "polymath-product",
@@ -36,7 +83,7 @@
         "prd",
         "acceptance-criteria"
       ],
-      "status": "experimental"
+      "status": "beta"
     },
     {
       "name": "polymath-engineering",
@@ -49,7 +96,7 @@
         "tdd",
         "code-review"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-release",
@@ -76,7 +123,7 @@
         "shipFeature",
         "reviewPR"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-thinking",
@@ -91,7 +138,7 @@
         "pre-mortem",
         "red-team"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-planning",
@@ -104,7 +151,7 @@
         "wbs",
         "estimate"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-writing",
@@ -119,7 +166,7 @@
         "runbook",
         "c4"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-qa",
@@ -145,7 +192,7 @@
         "stride",
         "owasp"
       ],
-      "status": "experimental"
+      "status": "beta"
     },
     {
       "name": "polymath-frontend",
@@ -171,144 +218,6 @@
         "api",
         "rest",
         "migrations"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-python",
-      "source": "./plugins/polymath-lang-python",
-      "description": "Python craft: pytest authoring, ruff linting, type annotations.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "python",
-        "pytest",
-        "ruff"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-typescript",
-      "source": "./plugins/polymath-lang-typescript",
-      "description": "TypeScript craft: vitest authoring, biome linting, version migration.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "typescript",
-        "vitest",
-        "biome"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-dotnet",
-      "source": "./plugins/polymath-lang-dotnet",
-      "description": ".NET craft: xUnit authoring, csproj modernization audit, nullable rollout.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "dotnet",
-        "csharp",
-        "xunit"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-go",
-      "source": "./plugins/polymath-lang-go",
-      "description": "Go craft: table-driven testing.T tests with t.Cleanup, go.mod modernization + govulncheck-reachable findings.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "go",
-        "golang",
-        "testing",
-        "go-mod"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-rust",
-      "source": "./plugins/polymath-lang-rust",
-      "description": "Rust craft: #[test]/#[tokio::test]/proptest! patterns; Cargo.toml edition + MSRV + workspace inheritance + cargo-audit/cargo-deny hygiene.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "rust",
-        "cargo",
-        "tokio",
-        "proptest"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-java",
-      "source": "./plugins/polymath-lang-java",
-      "description": "Java craft: JUnit 5 + AssertJ + Mockito idiom (@ParameterizedTest, @Nested); Maven/Gradle pinning + BOM + reachable vulnerabilities.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "java",
-        "junit5",
-        "assertj",
-        "maven",
-        "gradle"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-swift",
-      "source": "./plugins/polymath-lang-swift",
-      "description": "Swift craft: XCTest or Swift Testing (async/await, @Test arguments); Package.swift tool/platform/pin discipline.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "swift",
-        "xctest",
-        "swift-testing",
-        "spm"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-kotlin",
-      "source": "./plugins/polymath-lang-kotlin",
-      "description": "Kotlin craft: JUnit 5 + MockK + runTest, Kotest when present; build.gradle.kts toolchain + BOM + multi-module hygiene.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "kotlin",
-        "junit5",
-        "kotest",
-        "mockk",
-        "gradle"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-ruby",
-      "source": "./plugins/polymath-lang-ruby",
-      "description": "Ruby craft: RSpec idiom (describe/context/it, let/subject, instance_double, shared_examples); Gemfile + bundler-audit hygiene.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "ruby",
-        "rspec",
-        "bundler"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-lang-php",
-      "source": "./plugins/polymath-lang-php",
-      "description": "PHP craft: PHPUnit 10+ attributes + Pest patterns + Mockery + PSR-20 clock; composer.json pin discipline + Roave/SecurityAdvisories.",
-      "version": "0.1.0",
-      "category": "languages",
-      "tags": [
-        "php",
-        "phpunit",
-        "pest",
-        "composer"
       ],
       "status": "experimental"
     },
@@ -353,19 +262,6 @@
       "status": "experimental"
     },
     {
-      "name": "polymath-infra-docker",
-      "source": "./plugins/polymath-infra-docker",
-      "description": "Docker craft: Dockerfile audit (base-image, multi-stage, USER, HEALTHCHECK, secrets) + compose audit (pinning, networks, secrets, depends_on).",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "docker",
-        "containers",
-        "compose"
-      ],
-      "status": "experimental"
-    },
-    {
       "name": "polymath-infra-postgres",
       "source": "./plugins/polymath-infra-postgres",
       "description": "Postgres craft: review-migration (per-statement lock + multi-step NOT NULL rollout) + audit-pg-config (memory, connections, WAL, autovacuum).",
@@ -375,71 +271,6 @@
         "postgres",
         "migrations",
         "database"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-infra-redis",
-      "source": "./plugins/polymath-infra-redis",
-      "description": "Redis craft: design-cache-layer (versioned keys, jittered TTL, NX-lock stampede) + audit-redis-config (maxmemory, persistence, ACL, TLS).",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "redis",
-        "cache",
-        "key-value"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-infra-aws",
-      "source": "./plugins/polymath-infra-aws",
-      "description": "AWS write-side: design-aws-pattern (Lambda/ECS/EKS, S3/EFS, RDS/DynamoDB/Aurora) with cost driver + ops shape + quantitative flip conditions.",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "aws",
-        "infrastructure",
-        "iac"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-infra-gcp",
-      "source": "./plugins/polymath-infra-gcp",
-      "description": "GCP write-side: design-gcp-pattern (Cloud Run/GKE/Functions, Cloud SQL/Spanner/Firestore, BigQuery) with cost driver + flip conditions.",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "gcp",
-        "google-cloud",
-        "infrastructure"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-infra-azure",
-      "source": "./plugins/polymath-infra-azure",
-      "description": "Azure write-side: design-azure-pattern (Functions/Container Apps/App Service/AKS, Azure SQL/Cosmos/Postgres Flex) with cost driver + flip conditions.",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "azure",
-        "infrastructure",
-        "iac"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-infra-terraform-stack",
-      "source": "./plugins/polymath-infra-terraform-stack",
-      "description": "Terraform composition: design-stack-composition picks blast-radius-aligned states, foundational\u2192platform\u2192service plumbing, workspaces vs directories.",
-      "version": "0.1.0",
-      "category": "infra",
-      "tags": [
-        "terraform",
-        "modules",
-        "state"
       ],
       "status": "experimental"
     },
@@ -481,7 +312,7 @@
         "slo",
         "chaos"
       ],
-      "status": "experimental"
+      "status": "beta"
     },
     {
       "name": "polymath-observability",
@@ -508,7 +339,7 @@
         "postmortem",
         "comms"
       ],
-      "status": "experimental"
+      "status": "beta"
     },
     {
       "name": "polymath-connector-github",
@@ -520,19 +351,6 @@
         "connector",
         "github",
         "mcp"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-github-actions",
-      "source": "./plugins/polymath-connector-github-actions",
-      "description": "GitHub Actions companion: CI-failure diagnosis skill + Stop hook checking the latest run on the current branch.",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "github-actions",
-        "ci"
       ],
       "status": "experimental"
     },
@@ -599,7 +417,7 @@
         "governance",
         "conformance"
       ],
-      "status": "stable"
+      "status": "beta"
     },
     {
       "name": "polymath-decisions",
@@ -613,7 +431,7 @@
         "tradeoff",
         "cynefin"
       ],
-      "status": "stable"
+      "status": "experimental"
     },
     {
       "name": "polymath-research",
@@ -763,19 +581,6 @@
       "status": "experimental"
     },
     {
-      "name": "polymath-connector-launchdarkly",
-      "source": "./plugins/polymath-connector-launchdarkly",
-      "description": "LaunchDarkly connector: MCP for flag list/get/update + flag-rollout-plan skill (internal\u2192beta\u2192canary\u2192ramp + retirement).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "launchdarkly",
-        "feature-flags"
-      ],
-      "status": "experimental"
-    },
-    {
       "name": "polymath-connector-statuspage",
       "source": "./plugins/polymath-connector-statuspage",
       "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
@@ -798,162 +603,6 @@
         "connector",
         "terraform",
         "iac"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-figma",
-      "source": "./plugins/polymath-connector-figma",
-      "description": "Figma connector: MCP for frame/component reads + design-spec-handoff skill (components, tokens, states, copy, a11y).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "figma",
-        "design"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-notion",
-      "source": "./plugins/polymath-connector-notion",
-      "description": "Notion connector: MCP for pages/databases + sync-doc-to-notion skill (Markdown\u2192blocks, sync-key dedupe, drift detection).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "notion",
-        "docs"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-asana",
-      "source": "./plugins/polymath-connector-asana",
-      "description": "Asana connector: MCP for tasks/projects + asana-task-update skill (GID resolution for sections, custom fields, assignees).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "asana",
-        "tasks"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-aws",
-      "source": "./plugins/polymath-connector-aws",
-      "description": "AWS connector (cli-only): inspect-aws-resource skill \u2014 ARN \u2192 describe + effective IAM + CloudTrail + 7d cost.",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "aws",
-        "cloud"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-gcp",
-      "source": "./plugins/polymath-connector-gcp",
-      "description": "GCP connector (cli-only): inspect-gcp-resource skill \u2014 full path \u2192 describe + IAM + test-iam-permissions + audit log + cost ping.",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "gcp",
-        "cloud"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-azure",
-      "source": "./plugins/polymath-connector-azure",
-      "description": "Azure connector (cli-only): inspect-azure-resource skill \u2014 ARM ID \u2192 describe + role-assignments + can-i probe + activity log + cost.",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "azure",
-        "cloud"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-stripe",
-      "source": "./plugins/polymath-connector-stripe",
-      "description": "Stripe connector: MCP + refund-or-dispute-triage skill (classify charge/refund/dispute, propose mutating action for operator approval).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "stripe",
-        "payments"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-vercel",
-      "source": "./plugins/polymath-connector-vercel",
-      "description": "Vercel connector: MCP + inspect-deployment skill (build + runtime + edge evidence; previous-READY-production rollback target).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "vercel",
-        "edge"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-cloudflare",
-      "source": "./plugins/polymath-connector-cloudflare",
-      "description": "Cloudflare connector: MCP + edge-incident-triage skill (origin vs edge vs WAF vs DNS with CF-Ray sample for downstream filtering).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "cloudflare",
-        "edge"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-elastic",
-      "source": "./plugins/polymath-connector-elastic",
-      "description": "Elasticsearch connector: MCP + log-search skill (refuses unbounded scans, capped count + buckets + 10-sample, PII redaction, cross-index trace.id hint).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "elastic",
-        "logs"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-grafana",
-      "source": "./plugins/polymath-connector-grafana",
-      "description": "Grafana connector: MCP + dashboard-snapshot skill (absolute time + required vars + finite TTL + saved deleteKey artifact).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "grafana",
-        "observability"
-      ],
-      "status": "experimental"
-    },
-    {
-      "name": "polymath-connector-honeycomb",
-      "source": "./plugins/polymath-connector-honeycomb",
-      "description": "Honeycomb connector: MCP + trace-investigate skill (span tree, ancestor-walk offending span, self-time latency, evidence-cited hypothesis).",
-      "version": "0.1.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "honeycomb",
-        "tracing"
       ],
       "status": "experimental"
     }

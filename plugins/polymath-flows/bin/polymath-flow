@@ -262,6 +262,163 @@ SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 PLUGIN_ROOT = SCRIPT_DIR.parent
 
 
+# ---------------------------------------------------------------------------
+# Capability vocabulary + project resolution
+# ---------------------------------------------------------------------------
+
+# The vocabulary lives at shared/schemas/capabilities.json in the marketplace
+# tree. We load it lazily so the script can still run in environments that
+# don't ship the schemas (e.g. a partial install). Callers must handle the
+# `None` case by treating the workflow as having no capability requirements.
+
+KNOWN_CAPABILITIES = {
+    "issue_tracker",
+    "observability",
+    "incident_comms",
+    "pager",
+    "ci",
+    "cloud",
+    "runtime",
+    "vcs",
+    "vulnerability_scanner",
+}
+
+
+def _load_capability_vocabulary() -> dict:
+    """Read shared/schemas/capabilities.json from the marketplace tree."""
+    # PLUGIN_ROOT is .../plugins/polymath-flows; repo root is two levels up.
+    cand = PLUGIN_ROOT.parent.parent / "shared" / "schemas" / "capabilities.json"
+    if cand.exists():
+        try:
+            return json.loads(cand.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def _load_project_capabilities() -> tuple[dict, pathlib.Path | None]:
+    """Read .polymath/capabilities.yaml from project → user → home."""
+    candidates: list[pathlib.Path] = []
+    candidates.append(pathlib.Path.cwd() / ".polymath" / "capabilities.yaml")
+    cfg = os.environ.get("CLAUDE_CONFIG_DIR")
+    if cfg:
+        candidates.append(pathlib.Path(cfg) / "polymath" / "capabilities.yaml")
+    candidates.append(pathlib.Path.home() / ".polymath" / "capabilities.yaml")
+    for p in candidates:
+        if p.exists():
+            try:
+                data = _load_yaml(p.read_text())
+                if isinstance(data, dict):
+                    return data, p
+            except Exception:
+                pass
+    return {}, None
+
+
+def _resolve_capability_requirements(
+    workflow: dict, *, project_caps: dict, vocabulary: dict
+) -> tuple[list[str], dict, list[str]]:
+    """Walk the workflow's `requires.capabilities` and produce:
+      - effective_plugins: the catalog plugin names the workflow needs after
+        capability resolution (additive over `requires.plugins`).
+      - resolved: { capability: { provider, plugin } } map for placeholder
+        substitution and persistence in state.json.
+      - errors: list of human-readable error strings; non-empty = validation
+        failure that callers should surface as exit code 2.
+    """
+    requires = workflow.get("requires") or {}
+    declared_caps = requires.get("capabilities") or {}
+    errors: list[str] = []
+    resolved: dict[str, dict] = {}
+    effective_plugins: list[str] = []
+
+    if not isinstance(declared_caps, dict):
+        errors.append("requires.capabilities must be a mapping")
+        return effective_plugins, resolved, errors
+
+    vocab_caps = (vocabulary.get("capabilities") or {}) if vocabulary else {}
+    project_map = (project_caps.get("capabilities") or {}) if project_caps else {}
+
+    for cap_name, constraint in declared_caps.items():
+        if cap_name not in KNOWN_CAPABILITIES:
+            errors.append(
+                f"unknown capability '{cap_name}' (allowed: "
+                f"{sorted(KNOWN_CAPABILITIES)})"
+            )
+            continue
+        # Constraint normalisation: True or { provider: ... }
+        wanted_provider: str | None = None
+        if constraint is True:
+            wanted_provider = None
+        elif isinstance(constraint, dict):
+            wanted_provider = constraint.get("provider")
+            if wanted_provider is not None and not re.match(
+                r"^[a-z][a-z0-9_]*$", wanted_provider
+            ):
+                errors.append(
+                    f"capability {cap_name}: provider must be lower_snake_case "
+                    f"(got {wanted_provider!r})"
+                )
+                continue
+        else:
+            errors.append(
+                f"capability {cap_name}: value must be `true` or "
+                f"`{{ provider: <name> }}` (got {type(constraint).__name__})"
+            )
+            continue
+
+        vocab_entry = vocab_caps.get(cap_name) or {}
+        allowed_providers = vocab_entry.get("providers") or []
+        provider_plugins = vocab_entry.get("providerPlugins") or {}
+
+        proj_entry = project_map.get(cap_name) or {}
+        if not isinstance(proj_entry, dict):
+            errors.append(
+                f"capability {cap_name}: project entry must be a mapping"
+            )
+            continue
+        proj_provider = proj_entry.get("provider")
+        proj_plugin = proj_entry.get("plugin")
+
+        if proj_provider is None:
+            errors.append(
+                f"capability {cap_name}: not configured in "
+                f".polymath/capabilities.yaml (workflow requires it; configure "
+                f"a provider or remove the requirement)"
+            )
+            continue
+        if allowed_providers and proj_provider not in allowed_providers:
+            errors.append(
+                f"capability {cap_name}: provider {proj_provider!r} not in "
+                f"vocabulary providers {allowed_providers}"
+            )
+            continue
+        if wanted_provider and wanted_provider != proj_provider:
+            errors.append(
+                f"capability {cap_name}: workflow pins provider "
+                f"{wanted_provider!r} but project is configured with "
+                f"{proj_provider!r}"
+            )
+            continue
+
+        # Resolve plugin: project override > vocabulary default
+        plugin = proj_plugin or provider_plugins.get(proj_provider)
+        if plugin is None:
+            errors.append(
+                f"capability {cap_name}: no plugin mapping for provider "
+                f"{proj_provider!r} (set `plugin:` in "
+                f".polymath/capabilities.yaml or add the provider to "
+                f"shared/schemas/capabilities.json)"
+            )
+            continue
+
+        resolved[cap_name] = {"provider": proj_provider, "plugin": plugin}
+        if plugin not in effective_plugins:
+            effective_plugins.append(plugin)
+
+    return effective_plugins, resolved, errors
+
+
 def _data_root() -> pathlib.Path:
     base = os.environ.get("CLAUDE_PLUGIN_DATA")
     if base:
@@ -361,6 +518,42 @@ def _validate(workflow: dict) -> list[str]:
         errs.append(
             f"unsupported schemaVersion: {schema_version} (this executor supports {sorted(SUPPORTED_SCHEMA_VERSIONS)})"
         )
+    # Capability vocabulary check — purely structural; provider configuration
+    # is asserted later at start time (see _resolve_capability_requirements).
+    requires = workflow.get("requires") or {}
+    declared_caps = requires.get("capabilities") if isinstance(requires, dict) else None
+    if declared_caps is not None:
+        if not isinstance(declared_caps, dict):
+            errs.append("requires.capabilities must be a mapping")
+        else:
+            for cap_name, constraint in declared_caps.items():
+                if cap_name not in KNOWN_CAPABILITIES:
+                    errs.append(
+                        f"requires.capabilities: unknown capability {cap_name!r} "
+                        f"(allowed: {sorted(KNOWN_CAPABILITIES)})"
+                    )
+                    continue
+                if constraint is True:
+                    continue
+                if isinstance(constraint, dict):
+                    extras = set(constraint.keys()) - {"provider"}
+                    if extras:
+                        errs.append(
+                            f"requires.capabilities.{cap_name}: unknown keys "
+                            f"{sorted(extras)}"
+                        )
+                    if "provider" in constraint and not re.match(
+                        r"^[a-z][a-z0-9_]*$", str(constraint["provider"])
+                    ):
+                        errs.append(
+                            f"requires.capabilities.{cap_name}: provider must be "
+                            f"lower_snake_case (got {constraint['provider']!r})"
+                        )
+                    continue
+                errs.append(
+                    f"requires.capabilities.{cap_name}: value must be `true` or "
+                    f"`{{ provider: <name> }}`"
+                )
     name = workflow.get("name")
     if not isinstance(name, str) or not re.match(r"^[a-z][a-zA-Z0-9]*$", name):
         errs.append(f"name must be camelCase (got {name!r})")
@@ -388,8 +581,16 @@ def _validate(workflow: dict) -> list[str]:
                 errs.append(f"step id must be kebab-case (got {sid!r})")
             if "invoke" not in step:
                 errs.append(f"step {sid!r} missing 'invoke'")
-            elif not re.match(r"^[a-z0-9-]+:[a-zA-Z0-9][a-zA-Z0-9-]*$", step["invoke"]):
-                errs.append(f"step {sid!r} invoke must be '<plugin>:<capability>' (got {step['invoke']!r})")
+            else:
+                # Allow `${capabilities.*.plugin}` and `${capabilities.*.provider}`
+                # placeholders in invoke so workflows can be provider-agnostic.
+                # Strip placeholders before validating the static shape.
+                stripped = re.sub(r"\$\{[^}]+\}", "_p_", step["invoke"])
+                if not re.match(r"^[a-z0-9_-]+:[a-zA-Z0-9_][a-zA-Z0-9_-]*$", stripped):
+                    errs.append(
+                        f"step {sid!r} invoke must be '<plugin>:<capability>' or contain "
+                        f"only `${{capabilities.*}}` placeholders (got {step['invoke']!r})"
+                    )
             if "prompt" not in step or not isinstance(step["prompt"], str) or not step["prompt"].strip():
                 errs.append(f"step {sid!r} missing non-empty 'prompt'")
             unknown_keys = set(step.keys()) - ALLOWED_STEP_KEYS
@@ -464,7 +665,20 @@ def _slugify(text: str) -> str:
     return text or "untitled"
 
 
-def _substitute(text: str, *, inputs: dict, workflow_meta: dict) -> str:
+def _substitute(
+    text: str,
+    *,
+    inputs: dict,
+    workflow_meta: dict,
+    capabilities: dict | None = None,
+) -> str:
+    """Substitute `${inputs.x}`, `${workflow.x}`, and (when capability
+    resolution has run) `${capabilities.<cap>.<field>}` placeholders. Unknown
+    expressions are left intact so a typo surfaces as a literal in the prompt
+    rather than silently expanding to empty."""
+
+    caps = capabilities or {}
+
     def repl(match: re.Match[str]) -> str:
         expr = match.group(1).strip()
         if expr.startswith("inputs."):
@@ -473,6 +687,15 @@ def _substitute(text: str, *, inputs: dict, workflow_meta: dict) -> str:
         if expr.startswith("workflow."):
             key = expr[len("workflow.") :]
             return str(workflow_meta.get(key, ""))
+        if expr.startswith("capabilities."):
+            # capabilities.<cap>.<field>
+            rest = expr[len("capabilities.") :]
+            parts = rest.split(".", 1)
+            if len(parts) != 2:
+                return match.group(0)
+            cap_name, field = parts
+            entry = caps.get(cap_name) or {}
+            return str(entry.get(field, ""))
         return match.group(0)
 
     return re.sub(r"\$\{([^}]+)\}", repl, text)
@@ -524,6 +747,29 @@ def cmd_start(args: argparse.Namespace) -> int:
         if n not in inputs and "default" in declared:
             inputs[n] = declared["default"]
 
+    # Capability resolution — fail fast if any required capability is
+    # unconfigured. This runs before run_dir is created so a misconfigured
+    # project doesn't litter the state directory with stillborn runs.
+    requires = workflow.get("requires") or {}
+    if isinstance(requires, dict) and requires.get("capabilities"):
+        vocab = _load_capability_vocabulary()
+        project_caps, project_path = _load_project_capabilities()
+        effective_plugins, resolved_caps, cap_errs = _resolve_capability_requirements(
+            workflow, project_caps=project_caps, vocabulary=vocab
+        )
+        if cap_errs:
+            for e in cap_errs:
+                print(f"  ✗ {e}", file=sys.stderr)
+            print(
+                "polymath-flow: capability resolution failed "
+                f"(project config: {project_path or '(none found)'})",
+                file=sys.stderr,
+            )
+            return 2
+    else:
+        effective_plugins = []
+        resolved_caps = {}
+
     title = inputs.get("title", workflow["name"])
     slug = _slugify(str(title))
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%dT%H-%M")
@@ -547,6 +793,8 @@ def cmd_start(args: argparse.Namespace) -> int:
         "steps": [
             {"id": s["id"], "invoke": s["invoke"], "status": "pending"} for s in steps
         ],
+        "capabilities": resolved_caps,
+        "effective_plugins": effective_plugins,
     }
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
     (run_dir / "budget.json").write_text(json.dumps({
@@ -569,6 +817,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     state = json.loads((run_dir / "state.json").read_text())
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     inputs = json.loads((run_dir / "inputs.json").read_text())
+    capabilities = state.get("capabilities") or {}
     title = inputs.get("title", state["workflow"])
     workflow_meta = {
         "id": state["run_id"],
@@ -584,7 +833,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     steps = workflow.get("steps", []) or []
     if idx >= len(steps):
         # All steps complete; assert mustPass
-        result = _assert(run_dir, workflow, inputs, workflow_meta)
+        result = _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities)
         return 0 if result == 0 else 2
 
     step = steps[idx]
@@ -592,10 +841,10 @@ def cmd_next(args: argparse.Namespace) -> int:
     payload = {
         "run_id": state["run_id"],
         "step_id": step["id"],
-        "invoke": step["invoke"],
-        "prompt": _substitute(step["prompt"], inputs=inputs, workflow_meta=workflow_meta),
+        "invoke": _substitute(step["invoke"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities),
+        "prompt": _substitute(step["prompt"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities),
         "artifacts": [
-            _substitute(a, inputs=inputs, workflow_meta=workflow_meta)
+            _substitute(a, inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
             for a in step.get("artifacts", [])
         ],
         "topology": topology,
@@ -686,12 +935,13 @@ def cmd_assert(args: argparse.Namespace) -> int:
     state = json.loads((run_dir / "state.json").read_text())
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     inputs = json.loads((run_dir / "inputs.json").read_text())
+    capabilities = state.get("capabilities") or {}
     workflow_meta = {
         "id": state["run_id"],
         "slug": _slugify(str(inputs.get("title", state["workflow"]))),
         "name": state["workflow"],
     }
-    return _assert(run_dir, workflow, inputs, workflow_meta)
+    return _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities)
 
 
 def cmd_list(args: argparse.Namespace) -> int:
@@ -716,7 +966,14 @@ def cmd_list(args: argparse.Namespace) -> int:
 # mustPass check engine
 # ---------------------------------------------------------------------------
 
-def _assert(run_dir: pathlib.Path, workflow: dict, inputs: dict, workflow_meta: dict) -> int:
+def _assert(
+    run_dir: pathlib.Path,
+    workflow: dict,
+    inputs: dict,
+    workflow_meta: dict,
+    *,
+    capabilities: dict | None = None,
+) -> int:
     checks = workflow.get("mustPass", []) or []
     if not checks:
         state = json.loads((run_dir / "state.json").read_text())
@@ -728,7 +985,7 @@ def _assert(run_dir: pathlib.Path, workflow: dict, inputs: dict, workflow_meta: 
     blocking_failures: list[dict] = []
     advisory_failures: list[dict] = []
     for check in checks:
-        ok, detail = _run_check(check, run_dir, inputs, workflow_meta)
+        ok, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities)
         if ok:
             continue
         record = {
@@ -783,15 +1040,20 @@ def _assert(run_dir: pathlib.Path, workflow: dict, inputs: dict, workflow_meta: 
 
 
 def _run_check(
-    check: dict, run_dir: pathlib.Path, inputs: dict, workflow_meta: dict
+    check: dict,
+    run_dir: pathlib.Path,
+    inputs: dict,
+    workflow_meta: dict,
+    *,
+    capabilities: dict | None = None,
 ) -> tuple[bool, str]:
     t = check["type"]
     if t == "fileExists":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
         ok = pathlib.Path(path).exists()
         return ok, f"path={path} exists={ok}"
     if t == "fileMatches":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
         p = pathlib.Path(path)
         if not p.exists():
             return False, f"path={path} not found"
@@ -799,7 +1061,7 @@ def _run_check(
         ok = bool(re.search(pattern, p.read_text(errors="ignore")))
         return ok, f"path={path} pattern={pattern!r} match={ok}"
     if t in {"commandSucceeds", "command"}:
-        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta)
+        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         ok = proc.returncode == 0
         return ok, f"exit={proc.returncode}"
@@ -812,12 +1074,12 @@ def _run_check(
         ok = bool(re.search(pattern, sp.read_text(errors="ignore")))
         return ok, f"step={step} pattern={pattern!r} match={ok}"
     if t == "artifactValid":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
         artifact_name = check["artifact"]
         ok, detail = _validate_artifact_frontmatter(path, artifact_name)
         return ok, detail
     if t == "artifactSchemaStrict":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
         artifact_name = check["artifact"]
         min_body = int(check.get("minBodyChars", 200))
         reject_extra = bool(check.get("rejectAdditionalProperties", True))

@@ -1,0 +1,23 @@
+{
+  "name": "polymath-infra-cloud",
+  "version": "0.1.0",
+  "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure, plus Terraform stack composition. Decision trees + named cost drivers + quantitative flip conditions per primitive.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "infra",
+    "cloud",
+    "aws",
+    "gcp",
+    "azure",
+    "terraform",
+    "iac",
+    "patterns"
+  ]
+}

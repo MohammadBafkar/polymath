@@ -1,0 +1,55 @@
+# .polymath/project.yaml — example for a Python 3.12 FastAPI service.
+
+schemaVersion: 1
+
+project:
+  name: ingest-api
+  description: Telemetry ingest API. Python 3.12 + FastAPI + Postgres.
+
+stack:
+  languages:
+    - lang: python
+      version: "3.12"
+      framework: fastapi
+  testing:
+    - framework: pytest
+      mocking: unittest.mock
+      assertion: pytest-asserts
+  build:
+    primary: uv
+    secondary: docker
+  runtime:
+    kind: cloud_run
+    manifests: deploy/
+  database:
+    primary:
+      kind: postgres
+      version: "16"
+  package_manager:
+    kind: uv
+    lock_file: uv.lock
+
+conventions:
+  code_review_checklist: docs/code-review-checklist.md
+  commit_style: conventional-commits
+  branch_strategy: trunk-based
+  language_specific:
+    python:
+      file: docs/python-style.md
+
+external_skills:
+  - source: github.com/anthropics/claude-plugins-official
+    plugins: [python-best-practices]
+    install: marketplace
+
+skill_overrides:
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: python
+        cmd: uv run pytest -x -q --tb=short
+  polymath-engineering:code-review:
+    additional_context:
+      - docs/python-style.md
+
+prompts:
+  pr_description_template: docs/pr-template.md

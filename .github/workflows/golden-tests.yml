@@ -7,7 +7,7 @@ on:
 
 jobs:
   executable-unit:
-    name: bin/polymath-flow unit tests
+    name: bin/polymath-flow + polymath-core unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,8 +15,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml jsonschema
-      - name: Run python unit tests
+      - name: Run polymath-flows unit tests
         run: python3 -m unittest discover -s plugins/polymath-flows/tests -v
+      - name: Run polymath-core unit tests
+        run: python3 -m unittest discover -s plugins/polymath-core/tests -v
 
   executable-e2e:
     name: shipFeature scratch-repo e2e
@@ -194,8 +196,8 @@ jobs:
           sys.exit(fail)
           PY
 
-  agent-evidence-parse:
-    name: agent evidence records parse
+  skill-triggering-check:
+    name: skill-triggering test frontmatter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -203,8 +205,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - name: Validate agent evidence records
-        run: python3 tools/check-agent-evidence.py
+      - name: Validate every skill-triggering test's frontmatter
+        run: python3 tools/skill-triggering.py check
 
   bakeoff-parse:
     name: bakeoff cases parse

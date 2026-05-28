@@ -1,6 +1,6 @@
 # Changelog — polymath-observability
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

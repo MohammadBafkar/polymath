@@ -30,8 +30,16 @@ steps:
       - docs/experiments/${workflow.slug}.md
 
   - id: rollout-plan
-    invoke: polymath-connector-launchdarkly:flag-rollout-plan
-    prompt: Author the LaunchDarkly rollout plan for ${inputs.title}, gated by the experiment plan in docs/experiments/${workflow.slug}.md. Save to docs/rollouts/${workflow.slug}.md. If polymath-connector-launchdarkly is not installed, describe the rollout stages inline in docs/experiments/${workflow.slug}.md and create an empty docs/rollouts/${workflow.slug}.md as a placeholder.
+    invoke: polymath-product:acceptance-criteria
+    prompt: |
+      Author a feature-flag rollout plan for ${inputs.title}, gated by
+      the experiment plan in docs/experiments/${workflow.slug}.md.
+      Save to docs/rollouts/${workflow.slug}.md. Describe the rollout
+      stages (internal → 1% → 5% → 25% → 50% → 100%) with stop
+      conditions per stage. The project's feature-flag provider
+      (LaunchDarkly, Unleash, etc.) is configured in
+      `.polymath/project.yaml`; use the official MCP for that provider
+      to set up the actual flag.
     needs: [plan]
     artifacts:
       - docs/rollouts/${workflow.slug}.md

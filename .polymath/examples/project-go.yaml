@@ -1,0 +1,56 @@
+# .polymath/project.yaml — example for a Go 1.22 service.
+
+schemaVersion: 1
+
+project:
+  name: gateway
+  description: API gateway. Go 1.22 stdlib + chi router + Postgres.
+
+stack:
+  languages:
+    - lang: go
+      version: "1.22"
+      framework: chi
+  testing:
+    - framework: testing
+      assertion: testify
+  build:
+    primary: go
+    secondary: docker
+  runtime:
+    kind: kubernetes
+    namespace: edge
+    manifests: deploy/k8s/
+  database:
+    primary:
+      kind: postgres
+      version: "16"
+  package_manager:
+    kind: go-modules
+    lock_file: go.sum
+
+conventions:
+  code_review_checklist: docs/code-review-checklist.md
+  commit_style: conventional-commits
+  branch_strategy: trunk-based
+  language_specific:
+    go:
+      file: docs/go-style.md
+
+skill_overrides:
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: go
+        cmd: go test ./... -race -count=1 -short
+  polymath-engineering:code-review:
+    additional_context:
+      - docs/go-style.md
+    additional_axes:
+      - axis: context-propagation
+        prompt: |
+          Check every new function on the request path takes ctx as its
+          first arg and propagates cancellation. Flag any goroutine
+          launched without a derived context.
+
+prompts:
+  pr_description_template: docs/pr-template.md

@@ -1,9 +1,13 @@
-# Workflow YAML schema (v0.1 — flows-lite)
+# Workflow YAML schema
 
 Canonical schema: [`shared/schemas/workflow.schema.json`](../shared/schemas/workflow.schema.json).
-Scaffolder template: [`tools/scaffolder-templates/Workflow.yaml`](../tools/scaffolder-templates/Workflow.yaml) (used by `tools/new-workflow.sh`).
+Scaffolder template:
+[`plugins/polymath-author/templates/Workflow.yaml`](../plugins/polymath-author/templates/Workflow.yaml)
+(used by `polymath-author:new-workflow`).
 
-flows-lite v0.1 is **serial only**. Parallel steps, agent panels, connector events, and `wait-for-event` are out of scope.
+flows-lite is serial today. Parallel steps, agent panels, connector
+events, and `wait-for-event` are reserved for future schema versions
+and not yet supported by the runner.
 
 ## 1. Anatomy
 
@@ -14,6 +18,10 @@ version: 0.1.0
 description: Ship a small feature from PRD to PR draft.
 requires:
   plugins: [polymath-core, polymath-product, polymath-engineering, polymath-release]
+  capabilities:
+    # Optional. Each capability resolves at start time against
+    # .polymath/capabilities.yaml. See docs/CAPABILITIES.md.
+    issue_tracker: true
 inputs:
   - name: title
     type: string
@@ -47,7 +55,8 @@ mustPass:
 A workflow by `name` resolves in this order (highest priority first):
 
 1. Project: `.claude/polymath/workflows/<name>.yaml`
-2. User: `${CLAUDE_CONFIG_DIR}/polymath/workflows/<name>.yaml` (fallback `~/.claude/polymath/workflows/`)
+2. User: `${CLAUDE_CONFIG_DIR}/polymath/workflows/<name>.yaml`
+   (fallback `~/.claude/polymath/workflows/`)
 3. Marketplace: installed `polymath-flows/workflows/<name>.yaml`
 
 ## 3. Inheritance
@@ -86,31 +95,57 @@ Override semantics:
 | `fileMatches` | `path`, `pattern` (regex) | blocking | Pass if the file exists and matches the pattern. Weak — a regex match does not imply real content. |
 | `commandSucceeds` | `command` | blocking | **Strong.** Pass if the shell command exits 0. |
 | `stepSummaryMatches` | `step`, `pattern` (regex) | **advisory** | Pass if the named step's summary matches the pattern. Default-advisory because a summary is a freeform string the executor authored; matching it cannot prove the underlying work. |
-| `artifactValid` | `path`, `artifact` (PRD / ADR / Postmortem / ThreatModel) | blocking | **Strong.** Pass if frontmatter parses and satisfies the named artifact schema. |
-| `artifactSchemaStrict` | `path`, `artifact`, optional `minBodyChars`, `rejectAdditionalProperties` | blocking | **Strong.** Like `artifactValid` plus: requires `minBodyChars` (default 200) of substantive non-heading content, and (by default) rejects frontmatter fields not declared in the schema. Catches hollow stub artifacts. |
+| `artifactValid` | `path`, `artifact` | blocking | **Strong.** Pass if frontmatter parses and satisfies the named artifact schema. |
+| `artifactSchemaStrict` | `path`, `artifact`, optional `minBodyChars`, `rejectAdditionalProperties` | blocking | **Strong.** Like `artifactValid` plus: requires `minBodyChars` (default 200) of substantive non-heading content and (by default) rejects frontmatter fields not declared in the schema. Catches hollow stub artifacts. |
 | `diffConstraint` | at least one of `filesChanged`, `linesChanged`, `pathAllowlist`, `pathBlocklist`; optional `since` ref | blocking | **Strong.** Bounds the worktree (or ranged-diff) effect of the workflow. `filesChanged.min` proves *something* changed; `.max` and `pathAllowlist` prove the agent did not run away. Untracked files are counted. |
 | `command` (in guards) | `command` | blocking | Used in `guards:` only. Pre-step precondition. |
 
+Recognised artifact names for `artifactValid` / `artifactSchemaStrict`:
+
+`PRD`, `ADR`, `Plan`, `RFC`, `Runbook`, `ArchitectureDoc`,
+`DACIDecision`, `TradeoffMatrix`, `Postmortem`, `ThreatModel`,
+`PRDescription`. Each is backed by a JSON schema under
+[`shared/schemas/artifacts/`](../shared/schemas/artifacts/).
+
 ### 4.1 Severity
 
-Every check accepts an optional `severity: advisory | blocking`. Blocking checks (the default for everything except `stepSummaryMatches`) pause the workflow on failure. Advisory checks run, report their failure in the `advisories` array of the run result, but do **not** pause.
+Every check accepts an optional `severity: advisory | blocking`.
+Blocking checks (the default for everything except
+`stepSummaryMatches`) pause the workflow on failure. Advisory checks
+run, report their failure in the `advisories` array of the run
+result, but do **not** pause.
 
-A workflow should have at least one strong-deterministic blocking gate — one of `commandSucceeds`, `artifactValid`, `artifactSchemaStrict`, or `diffConstraint`. `polymath-flow validate` emits a warning when this is missing, because a workflow whose only blockers are `fileExists` / `fileMatches` / advisory `stepSummaryMatches` can pass on a hollow run (stub files plus a regex-matching summary).
+A workflow should have at least one strong-deterministic blocking
+gate — one of `commandSucceeds`, `artifactValid`,
+`artifactSchemaStrict`, or `diffConstraint`. `polymath-flow validate`
+emits a warning when this is missing, because a workflow whose only
+blockers are `fileExists` / `fileMatches` / advisory
+`stepSummaryMatches` can pass on a hollow run (stub files plus a
+regex-matching summary).
 
 ## 5. Placeholders
 
 - `${inputs.<name>}` — user-supplied input.
 - `${workflow.slug}` — auto-derived kebab-case slug from `${inputs.title}`.
 - `${workflow.id}` — full workflow run ID (timestamp + slug).
+- `${capabilities.<cap>.provider}` — provider token resolved from
+  `.polymath/capabilities.yaml` (e.g. `datadog`).
+- `${capabilities.<cap>.plugin}` — adapter plugin name resolved from
+  the same file (e.g. `polymath-connector-datadog`).
 
-Future: `${steps.<id>.summary}` will be exposed when richer summaries land.
+The `invoke` field of a step accepts placeholders as well, so a
+workflow can be provider-agnostic by writing
+`${capabilities.observability.plugin}:query-during-incident` instead
+of a hard-coded connector plugin name. See
+[`docs/CAPABILITIES.md`](CAPABILITIES.md).
 
 ## 6. State
 
-Each run gets a directory under `${CLAUDE_PLUGIN_DATA}/workflows/`:
+Each run gets a directory under
+`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/`:
 
 ```text
-${CLAUDE_PLUGIN_DATA}/workflows/2026-05-23T14-22-shipFeature-rate-limit/
+${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/2026-05-23T14-22-shipFeature-rate-limit/
   ├── state.json
   ├── inputs.json
   ├── trace.jsonl
@@ -118,15 +153,21 @@ ${CLAUDE_PLUGIN_DATA}/workflows/2026-05-23T14-22-shipFeature-rate-limit/
   └── artifacts/
 ```
 
-State transitions are owned by `polymath-flows/bin/polymath-flow`. The skills (`run-workflow`, `resume-workflow`, `list-workflows`) call this executable.
+`state.json` also persists the resolved `capabilities` map and the
+`effective_plugins` list when the workflow declares
+`requires.capabilities`, so the run is stable against mid-flight
+changes to `.polymath/capabilities.yaml`.
 
-## 7. Out of scope (v0.1)
+State transitions are owned by
+`plugins/polymath-flows/bin/polymath-flow`. The skills (`run-workflow`,
+`resume-workflow`, `list-workflows`) call this executable.
+
+## 7. Out of scope
 
 - Parallel steps.
 - Agent panels.
 - Connector events (`wait-for-event`).
 - Shell steps that mutate infrastructure.
 - AI-based cross-artifact alignment as a blocking gate.
-- Real PR creation through GitHub.
-
-These all land after the serial runner has proven installation, state, resumption, and deterministic checks.
+- Real PR creation through GitHub (the `pr` skill drafts only;
+  `polymath-connector-github:open-pr` opens the PR through the MCP).

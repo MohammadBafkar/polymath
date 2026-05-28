@@ -1,6 +1,6 @@
 # Changelog — polymath-infra-postgres
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

@@ -33,7 +33,7 @@
       "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*@\\d+\\.\\d+$"
     },
     "requires": {
-      "description": "Hard dependencies. Workflow validation fails if any required plugin is not installed.",
+      "description": "Hard dependencies. Workflow validation fails if any required plugin is not installed, or if a required capability has no provider configured in `.polymath/capabilities.yaml`. Either or both of `plugins` and `capabilities` may be declared; capabilities are the recommended shape for cross-provider work (issue tracker, observability, pager, etc.) and capability resolution adds the resolved adapter plugins to the effective plugin set transparently.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -41,6 +41,35 @@
           "type": "array",
           "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
           "uniqueItems": true
+        },
+        "capabilities": {
+          "description": "Map of capability name (from shared/schemas/capabilities.schema.json) to either `true` (any provider OK) or a constraint object pinning a specific provider. The capability vocabulary is closed; declaring an unknown capability fails validation. Resolution looks up the configured provider in the project's `.polymath/capabilities.yaml`.",
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "boolean", "const": true },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "provider": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+                }
+              }
+            ]
+          },
+          "propertyNames": {
+            "enum": [
+              "issue_tracker",
+              "observability",
+              "incident_comms",
+              "pager",
+              "ci",
+              "cloud",
+              "runtime",
+              "vcs",
+              "vulnerability_scanner"
+            ]
+          }
         }
       }
     },
@@ -88,9 +117,9 @@
             "pattern": "^[a-z][a-z0-9-]*$"
           },
           "invoke": {
-            "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call.",
+            "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call. May contain `${capabilities.<cap>.plugin}` or `${capabilities.<cap>.provider}` placeholders so workflows can be provider-agnostic; placeholders are resolved at run time from the project's `.polymath/capabilities.yaml`.",
             "type": "string",
-            "pattern": "^[a-z0-9-]+:[a-zA-Z0-9][a-zA-Z0-9-]*$"
+            "pattern": "^(?:[a-z0-9_-]+|\\$\\{[^}]+\\})+:(?:[a-zA-Z0-9_-]+|\\$\\{[^}]+\\})+$"
           },
           "prompt": {
             "description": "Instruction the executor presents when reaching this step. May reference ${inputs.*} and ${workflow.*} placeholders.",
@@ -171,7 +200,7 @@
         "artifact": {
           "description": "Artifact name (matches shared/schemas/artifacts/<name>.schema.json) for artifactValid / artifactSchemaStrict checks.",
           "type": "string",
-          "enum": ["PRD", "ADR", "Postmortem", "ThreatModel"]
+          "enum": ["PRD", "ADR", "Postmortem", "ThreatModel", "PRDescription", "Plan", "DACIDecision", "TradeoffMatrix", "RFC", "Runbook", "ArchitectureDoc"]
         },
         "minBodyChars": {
           "description": "For artifactSchemaStrict: minimum non-whitespace, non-heading characters in the body (after frontmatter). Catches hollow stub artifacts (e.g. '# PRD\\n').",

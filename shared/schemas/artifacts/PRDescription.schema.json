@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://polymath.dev/schemas/artifacts/PRDescription.schema.json",
+  "title": "PRDescription",
+  "description": "Validates the frontmatter of a PR description produced by polymath-release:pr.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact", "schemaVersion", "title", "type"],
+  "properties": {
+    "artifact": {
+      "type": "string",
+      "const": "PRDescription"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Short title for the PR, matches the commit headline."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["feat", "fix", "refactor", "perf", "docs", "test", "chore", "style", "build", "ci", "revert"],
+      "description": "Conventional Commits type."
+    },
+    "scope": {
+      "type": "string",
+      "description": "Single Conventional Commits scope; one scope per PR."
+    },
+    "linked_prd": {
+      "type": "string",
+      "description": "Path to docs/prds/<slug>.md if the PR is PRD-driven, or empty string."
+    },
+    "related_links": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "ADRs / issues / experiments / threat models linked by the PR."
+    },
+    "base": {
+      "type": "string",
+      "default": "main"
+    },
+    "reviewers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "rollback_plan": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Even \"revert this PR\" is a valid plan; emptiness is not."
+    },
+    "feature_flag": {
+      "type": "string",
+      "description": "Feature-flag key gating the rollout, if any."
+    }
+  }
+}
