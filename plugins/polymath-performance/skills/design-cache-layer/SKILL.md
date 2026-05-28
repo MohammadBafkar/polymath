@@ -13,6 +13,16 @@ description: Design a Redis cache layer — key schema, TTLs, eviction policy, s
 - An existing cache is causing incidents (stampedes, hot keys, memory pressure).
 - A PRD says "use Redis" with no further detail.
 
+## Related skills
+
+- [`polymath-performance:caching-tradeoffs`](../caching-tradeoffs/SKILL.md)
+  — vendor-agnostic decision: *what* to cache, *where* to cache,
+  staleness tolerance, failure modes. Run that first to decide the
+  shape; use this skill to ship the Redis layer.
+- [`polymath-performance:audit-redis-config`](../audit-redis-config/SKILL.md)
+  — once the cache layer is running, review `maxmemory`, eviction,
+  persistence, replication.
+
 ## Procedure
 
 1. **Identify the value.** Caching is for *expensive-to-compute, frequently-read, eventually-consistent* values. If the data is cheap to compute or strongly consistent, do not cache.

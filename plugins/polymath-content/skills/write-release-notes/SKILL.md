@@ -12,6 +12,17 @@ description: Author customer-facing release notes — headline, user-benefit fra
 - A release is being prepared and you want notes the customer-facing site / email blast can use.
 - The internal CHANGELOG exists; this skill repackages it for users.
 
+## Related skills
+
+- [`polymath-release:release-notes`](../../../polymath-release/skills/release-notes/SKILL.md)
+  — engineer-facing release notes drafted directly from
+  `CHANGELOG.md` `[Unreleased]`. Run that first for the version-bump
+  notes; this skill repackages them for customers (announcement +
+  benefit framing, no internal-jargon component names).
+- [`polymath-release:changelog`](../../../polymath-release/skills/changelog/SKILL.md)
+  — append the canonical `[Unreleased]` entry that both this skill
+  and `polymath-release:release-notes` consume.
+
 ## Inputs
 
 - The version being released + date.

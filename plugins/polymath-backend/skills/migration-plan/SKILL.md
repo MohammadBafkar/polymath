@@ -13,6 +13,17 @@ description: Plan a safe online database migration in expand-migrate-contract ph
 - A migration could lock a hot table for too long.
 - The user says "is this migration safe?".
 
+## Related skills
+
+- [`polymath-infra-postgres:review-migration`](../../../polymath-infra-postgres/skills/review-migration/SKILL.md)
+  — Postgres-specific statement-level review: per-statement lock
+  taxonomy (`ACCESS EXCLUSIVE` vs `SHARE UPDATE EXCLUSIVE`), the safe
+  `NOT NULL` multi-step pattern, big-table hazards. Use *this* skill
+  to plan the expand-migrate-contract phases; use `review-migration`
+  to audit each SQL statement before it ships on Postgres.
+- [`polymath-data:sql-write`](../../../polymath-data/skills/sql-write/SKILL.md)
+  — for backfill query authoring inside the migrate phase.
+
 ## Procedure
 
 Plan in three phases. The app keeps running on the **old** shape during expand,

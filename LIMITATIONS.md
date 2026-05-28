@@ -53,6 +53,16 @@ elsewhere is intentional.
   catalog prefers to defer to specialised AI-tooling catalogs over
   building shallow surfaces here. Promotion to `stable` is gated on a
   passing bakeoff case for at least one of the three skills.
+- **`polymath-data`** is deliberately narrow: SQL authoring + plan
+  reading, metric trees, experiment design. Schema migrations
+  cross-link to [`polymath-backend:migration-plan`](plugins/polymath-backend/skills/migration-plan/SKILL.md)
+  and [`polymath-infra-postgres:review-migration`](plugins/polymath-infra-postgres/skills/review-migration/SKILL.md).
+  Data pipelines / ETL / orchestration and data-science / model
+  evaluation are deferred to external catalogs (dbt, Airflow / Dagster
+  community docs, ML / AI skill collections) until a Polymath workflow
+  shape is load-bearing. See
+  [`plugins/polymath-data/README.md`](plugins/polymath-data/README.md)
+  for the scope statement.
 - **Agents are intentionally rare.** Polymath only ships agents when
   a no-agent baseline + a golden fixture demonstrates forked context
   is load-bearing rather than decorative.

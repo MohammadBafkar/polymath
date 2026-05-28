@@ -7,27 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Security
-
-- **`/evaluate` is gated by `author_association`.** The
-  `live-bakeoff` job in
-  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
-  now refuses to run on `issue_comment` events unless the commenter is
-  `OWNER`, `MEMBER`, or `COLLABORATOR`. Drive-by PR comments from forks
-  can no longer trigger secret-bearing steps.
-
 ### Changed
-
-- **GitHub Actions hygiene.** Added explicit `permissions:` (least
-  privilege, default `contents: read`) and `concurrency:` (cancel
-  in-progress on the same PR / ref) to `validate.yml`, `lint.yml`,
-  `link-check.yml`, `token-budget.yml`, `golden-tests.yml`.
-- **`token-budget` PR comment is now sticky.** Replaces the
-  spam-on-every-push behaviour with an upserted comment keyed by a
-  `<!-- polymath:token-budget -->` marker.
-- **Claude Code CLI install simplified.** `golden-tests.yml` and
-  `evaluation.yml` now install via `npm install -g @anthropic-ai/claude-code`
-  only — dropped the curl-installer fallback which was duplicative.
 
 - **Maturity tiers reconciled.** Tier definitions and promotion bars
   consolidated into a single source of truth at
@@ -48,6 +28,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `polymath-security` → `beta` (bakeoff: `owasp-review`; triggering: `stride-threat-model`).
   - `polymath-sre` → `beta` (bakeoff: `slo-design`; triggering: `slo-design`).
   - `polymath-decisions` → `experimental` (golden fixture only; lacks bakeoff + triggering — to be re-promoted once fixtures land).
+- **`polymath-data` scope clarified and narrowed.** README now lists
+  all four skills (was: omitted `run-experiment`), declares the
+  intentional narrow scope (SQL + metrics + experiments), and points
+  to `polymath-backend` / `polymath-infra-postgres` for schema /
+  migration work and to `polymath-ai` for evaluation. `LIMITATIONS.md`
+  § 3 records the deferral of data-engineering and data-science
+  surfaces.
+- **`sql-optimize` deepened to multi-dialect EXPLAIN reading.** New
+  per-dialect cheat sheet for Postgres, MySQL ≥ 8, SQLite, BigQuery,
+  Snowflake, Redshift, DuckDB; clarifies the read-direction rule
+  (Postgres bottom-up, MySQL / BigQuery / Snowflake top-down) and adds
+  the "fix storage layout before SQL on warehouse engines" anti-pattern.
+- **Cross-links added to duplicate-feeling skill pairs.** Pairs are
+  kept separate (different layer or audience) and cross-link instead
+  of merging — per Codex critique of the original review plan:
+  - `polymath-performance:caching-tradeoffs` ↔ `:design-cache-layer`
+    (strategy ↔ Redis implementation), with both linking
+    `:audit-redis-config`.
+  - `polymath-release:release-notes` ↔ `polymath-content:write-release-notes`
+    (engineer ↔ customer audience), both linking `polymath-release:changelog`.
+  - `polymath-backend:migration-plan` ↔ `polymath-infra-postgres:review-migration`
+    (vendor-agnostic phasing ↔ Postgres statement review).
+- **GitHub Actions hygiene.** Added explicit `permissions:` (least
+  privilege, default `contents: read`) and `concurrency:` (cancel
+  in-progress on the same PR / ref) to `validate.yml`, `lint.yml`,
+  `link-check.yml`, `token-budget.yml`, `golden-tests.yml`.
+- **`token-budget` PR comment is now sticky.** Replaces the
+  spam-on-every-push behaviour with an upserted comment keyed by a
+  `<!-- polymath:token-budget -->` marker.
+- **Claude Code CLI install simplified.** `golden-tests.yml` and
+  `evaluation.yml` now install via `npm install -g @anthropic-ai/claude-code`
+  only — dropped the curl-installer fallback which was duplicative.
+
+### Security
+
+- **`/evaluate` is gated by `author_association`.** The
+  `live-bakeoff` job in
+  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
+  now refuses to run on `issue_comment` events unless the commenter is
+  `OWNER`, `MEMBER`, or `COLLABORATOR`. Drive-by PR comments from forks
+  can no longer trigger secret-bearing steps.
 
 ## [0.1.0]
 

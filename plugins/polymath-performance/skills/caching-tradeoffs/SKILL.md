@@ -13,6 +13,17 @@ description: Design a cache — what's cached, where (local / regional / shared)
 - An existing cache misbehaves (high miss rate, stampedes, stale UI).
 - A perf budget needs cache help and you want to scope it correctly.
 
+## Related skills
+
+- [`polymath-performance:design-cache-layer`](../design-cache-layer/SKILL.md)
+  — Redis-specific implementation: key schema, eviction policy,
+  persistence, replication. Use `caching-tradeoffs` first to decide
+  the cache *shape*; then `design-cache-layer` to ship the Redis
+  layer.
+- [`polymath-performance:audit-redis-config`](../audit-redis-config/SKILL.md)
+  — review an existing Redis configuration once a cache layer is
+  running.
+
 ## The five hard questions
 
 A cache design that doesn't have an answer to each of these is a bug nursery.

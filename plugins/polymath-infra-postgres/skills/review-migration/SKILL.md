@@ -13,6 +13,16 @@ description: Review a Postgres migration for lock surface, online/offline safety
 - A long-lived table needs a structural change and someone has drafted SQL.
 - A previous migration timed out and you're trying to figure out why.
 
+## Related skills
+
+- [`polymath-backend:migration-plan`](../../../polymath-backend/skills/migration-plan/SKILL.md)
+  — vendor-agnostic expand-migrate-contract phasing for online
+  migrations. Plan the phases there; review each Postgres-specific
+  statement here.
+- [`polymath-infra-postgres:audit-pg-config`](../audit-pg-config/SKILL.md)
+  — review the Postgres server configuration the migration will run
+  against.
+
 ## Procedure
 
 1. **Parse statements.** For each statement, identify the locks acquired and held:
