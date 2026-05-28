@@ -120,9 +120,8 @@ policy and must be demoted to `experimental` at the next release.
   aesthetics. Those are linted separately by
   [`tools/lint-skills.sh`](../tools/lint-skills.sh).
 - Tier says nothing about portability to non-Claude-Code harnesses.
-  See the `metadata.agentSkills` block in
-  [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json)
-  for the agentskills.io v1.0 conformance declaration.
+  See [`docs/PORTABILITY.md`](PORTABILITY.md) for the agentskills.io
+  v1.0 export path and the surfaces that do not port.
 
 ## See also
 

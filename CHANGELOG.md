@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Portability adapter to agentskills.io v1.0 harnesses.**
+  `tools/export-agents-skills.py` materializes Polymath's 124 skills
+  into `dist/agents-skills/<plugin>-<skill>/SKILL.md` with namespaced
+  frontmatter `name:` (resolves the one collision in the catalog —
+  `file-bug-from-incident` is shipped by both `polymath-connector-jira`
+  and `-linear`), copies referenced templates, rewrites
+  `../../templates/X.md` links, and emits a `manifest.json` mapping
+  back to source `<plugin>:<skill>`. New `docs/PORTABILITY.md`
+  documents the per-harness drop directory (Codex CLI, Cursor,
+  GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie) and
+  is explicit about what does NOT port (commands, hooks, MCP config,
+  workflows, agents, artifact schemas, project-localization). The
+  `dist/` output is gitignored.
 - **`tools/check-readme-inventory.py` + `DOCS-2` conformance check.**
   Asserts every plugin's `README.md` mentions every shipped
   first-class surface (skill, command, agent, `bin/` executable) by

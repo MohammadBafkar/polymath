@@ -115,6 +115,17 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [polymath-author](plugins/polymath-author/) — the meta-plugin that scaffolds new plugins, validates them against every gate, reviews `SKILL.md` quality, and measures the listing-token cost.
 
+## Use outside Claude Code
+
+Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the 124 skills to a portable bundle and drop them into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
+
+```bash
+python3 tools/export-agents-skills.py --clean
+# → dist/agents-skills/<plugin>-<skill>/SKILL.md + manifest.json
+```
+
+See [docs/PORTABILITY.md](docs/PORTABILITY.md) for the drop-location per harness and the honest list of surfaces that do **not** port (commands, hooks, MCP config, workflows, agents).
+
 ## License
 
 [Apache-2.0](LICENSE).
