@@ -24,6 +24,19 @@ claude plugin install polymath-connector-statuspage@polymath \
 
 - `polymath-core`
 
+<!-- connector-policy:start -->
+## Connector policy disclosure
+
+Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
+by `tools/sync-connector-policy.py`. Do not edit by hand —
+edit the policy table and re-run the script.
+
+- **Official surface:** No official MCP yet (Atlassian Statuspage REST API)
+- **Polymath value:** Incident-comms drafting tied to severity ladder
+- **Sunset trigger:** Demote when Statuspage ships an official MCP and our wrapper has no delta.
+- **Status:** `experimental`
+<!-- connector-policy:end -->
+
 ## License
 
 Apache-2.0.

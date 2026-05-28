@@ -20,6 +20,19 @@ claude plugin install polymath-connector-snyk@polymath
 
 - `polymath-core`
 
+<!-- connector-policy:start -->
+## Connector policy disclosure
+
+Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
+by `tools/sync-connector-policy.py`. Do not edit by hand —
+edit the policy table and re-run the script.
+
+- **Official surface:** Wraps official Snyk MCP
+- **Polymath value:** `triage-vulns` classification (exploitable / reachable / dev-only); Stop hook warns on critical findings
+- **Sunset trigger:** Demote when Snyk MCP ships classification + open-criticals surfacing.
+- **Status:** `experimental`
+<!-- connector-policy:end -->
+
 ## License
 
 Apache-2.0.

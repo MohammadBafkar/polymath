@@ -79,6 +79,21 @@ claude plugin install polymath-connector-monitoring@polymath
 <p>Projects select the provider in <code>.polymath/capabilities.yaml</code>; skills</p>
 <p>route to the configured adapter rather than the plugin namespace.</p>
 
+<p>&lt;!-- connector-policy:start --&gt;</p>
+<h2>Connector policy disclosure</h2>
+
+<p>Auto-generated from <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code></a></p>
+<p>by <code>tools/sync-connector-policy.py</code>. Do not edit by hand —</p>
+<p>edit the policy table and re-run the script.</p>
+
+<ul>
+<li><strong>Official surface:</strong> Wraps Grafana + Honeycomb + Elasticsearch MCPs under one observability capability</li>
+<li><strong>Polymath value:</strong> Snapshot + trace-walk + bounded-scan disciplines; single capability mapping for all three</li>
+<li><strong>Sunset trigger:</strong> Demote when each upstream MCP ships postmortem-evidence + investigative templates.</li>
+<li><strong>Status:</strong> <code>experimental</code></li>
+</ul>
+<p>&lt;!-- connector-policy:end --&gt;</p>
+
 <h2>License</h2>
 
 <p>Apache-2.0.</p>

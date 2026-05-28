@@ -46,6 +46,19 @@ share one umbrella plugin under the `observability` capability.
 Projects select the provider in `.polymath/capabilities.yaml`; skills
 route to the configured adapter rather than the plugin namespace.
 
+<!-- connector-policy:start -->
+## Connector policy disclosure
+
+Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
+by `tools/sync-connector-policy.py`. Do not edit by hand —
+edit the policy table and re-run the script.
+
+- **Official surface:** Wraps Grafana + Honeycomb + Elasticsearch MCPs under one observability capability
+- **Polymath value:** Snapshot + trace-walk + bounded-scan disciplines; single capability mapping for all three
+- **Sunset trigger:** Demote when each upstream MCP ships postmortem-evidence + investigative templates.
+- **Status:** `experimental`
+<!-- connector-policy:end -->
+
 ## License
 
 Apache-2.0.

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`tools/sync-connector-policy.py`** — generates the
+  `connector-policy` disclosure block (`official_surface`,
+  `polymath_value`, `sunset_trigger`, `status`) for every
+  `polymath-connector-*` and `polymath-infra-*` README from a single
+  source: the tables in [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md)
+  § 3.1–3.2 + `marketplace.json` status. Two modes: `--update`
+  (write/rewrite blocks) and `--check` (CI: fail if any README's
+  block diverges from the policy table).
+- **`tools/conformance.sh CONNECTOR-2` strengthened.** Per-plugin now
+  asserts the policy disclosure block is present in each in-scope
+  README; the `--all` mode runs the cross-check via
+  `tools/sync-connector-policy.py --check` so a policy-table edit
+  that's not propagated fails the gate. Resolves the
+  `docs/CONNECTOR-POLICY.md § 1` contract drift where 14/14 in-scope
+  READMEs previously violated the disclosure mandate.
+
 ### Changed
 
 - **Maturity tiers reconciled.** Tier definitions and promotion bars

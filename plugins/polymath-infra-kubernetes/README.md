@@ -17,6 +17,19 @@ claude plugin install polymath-infra-kubernetes@polymath
 
 - `polymath-core`
 
+<!-- connector-policy:start -->
+## Connector policy disclosure
+
+Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
+by `tools/sync-connector-policy.py`. Do not edit by hand —
+edit the policy table and re-run the script.
+
+- **Official surface:** kube docs + several community kube MCPs
+- **Polymath value:** RBAC grant audit, Pod Security Standards proposals
+- **Sunset trigger:** Demote when an official k8s MCP ships an opinionated RBAC + PSS workflow.
+- **Status:** `experimental`
+<!-- connector-policy:end -->
+
 ## License
 
 Apache-2.0.

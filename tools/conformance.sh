@@ -117,13 +117,22 @@ if s not in allowed:
   fi
 
   # CONNECTOR-2: connector / lang / infra plugins must be audited in
-  # docs/CONNECTOR-POLICY.md so reviewers can see (a) whether an official
-  # MCP / LSP exists, (b) what Polymath adds, and (c) the sunset trigger.
+  # docs/CONNECTOR-POLICY.md AND must carry the auto-generated
+  # disclosure block (official_surface / polymath_value /
+  # sunset_trigger / status) in their README, kept in sync via
+  # tools/sync-connector-policy.py.
   if [[ "$name" == polymath-connector-* || "$name" == polymath-infra-* ]]; then
     if grep -q "\`$name\`" "$root/docs/CONNECTOR-POLICY.md" 2>/dev/null; then
       echo "  ✓ CONNECTOR-2: audited in docs/CONNECTOR-POLICY.md"
     else
       echo "  ✗ CONNECTOR-2: not audited in docs/CONNECTOR-POLICY.md"
+      fail=1
+    fi
+    if grep -q '<!-- connector-policy:start -->' "$plugin_dir/README.md" 2>/dev/null \
+       && grep -q '<!-- connector-policy:end -->' "$plugin_dir/README.md" 2>/dev/null; then
+      echo "  ✓ CONNECTOR-2: README carries the policy disclosure block"
+    else
+      echo "  ✗ CONNECTOR-2: README missing the policy disclosure block (run: python3 tools/sync-connector-policy.py --update)"
       fail=1
     fi
   fi
@@ -196,6 +205,16 @@ if [[ "$mode" == "--all" ]]; then
   for plugin in "$root/plugins"/*/; do
     if ! check_one "${plugin%/}"; then overall=1; fi
   done
+  # Cross-plugin: every in-scope README's connector-policy block must
+  # match the policy table verbatim. Local block presence is checked
+  # per-plugin above; this catches divergence after a policy-table edit.
+  echo
+  echo "── CONNECTOR-2 cross-check (sync-connector-policy.py)"
+  if python3 "$root/tools/sync-connector-policy.py" --check; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else
