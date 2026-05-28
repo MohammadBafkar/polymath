@@ -96,7 +96,7 @@ The `requires.capabilities` block in a workflow is resolved against `.polymath/c
 
 A project can customize skill behavior by creating `.polymath/project.yaml` (resolution order: project → user `$CLAUDE_CONFIG_DIR/polymath/project.yaml` → `~/.polymath/project.yaml`). The `polymath-core` SessionStart hook parses it and writes a resolved snapshot to `$CLAUDE_PLUGIN_DATA/polymath-core/project-context.json`. Skills read that snapshot to apply per-project overrides (stack, test commands, PR templates, commit style).
 
-See [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) for the full schema and resolution rules, and [.polymath/examples/](/.polymath/examples/) for starter files.
+See [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) for the full schema and resolution rules, and [.polymath/examples/](.polymath/examples/) for starter files.
 
 ## Marketplace registration
 

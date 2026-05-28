@@ -21,16 +21,26 @@ jobs:
         run: |
           python3 - <<'PY'
           import re, pathlib, sys
+          # Strip fenced code blocks (``` … ```) and inline code (`…`)
+          # so example links and template placeholders don't trigger
+          # false positives.
+          fenced = re.compile(r"```.*?```", re.DOTALL)
+          inline = re.compile(r"`[^`]*`")
+          link = re.compile(r"\]\(([^)]+)\)")
           fail = 0
           for md in pathlib.Path(".").rglob("*.md"):
               if any(part.startswith(".") for part in md.parts):
                   continue
-              text = md.read_text(errors="ignore")
-              for m in re.finditer(r"\]\(([^)]+)\)", text):
+              raw = md.read_text(errors="ignore")
+              stripped = inline.sub("", fenced.sub("", raw))
+              for m in link.finditer(stripped):
                   target = m.group(1).split("#", 1)[0]
                   if target.startswith("http") or target.startswith("mailto:"):
                       continue
                   if not target:
+                      continue
+                  # Skip template-variable placeholders ({{x}}, {x}, $VAR).
+                  if "{{" in target or "${" in target:
                       continue
                   resolved = (md.parent / target).resolve()
                   if not resolved.exists():
