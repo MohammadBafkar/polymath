@@ -173,7 +173,7 @@ workflows, and MCP connector config are Claude Code surfaces today.
 > Export the skills with `tools/export-agents-skills.py` and create
 > `.polymath/project.yaml` by hand from the schema.
 
-See [PORTABILITY.md](../PORTABILITY.md) for current drop locations and limitations.
+See [PORTABILITY.md](PORTABILITY.md) for current drop locations and limitations.
 
 ---
 

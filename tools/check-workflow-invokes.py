@@ -30,6 +30,8 @@ PROMPT_RETEACH_CHARS = 700  # advisory only
 
 _INVOKE = re.compile(r"^\s*invoke:\s*(.+?)\s*$", re.MULTILINE)
 _PLUGIN_SKILL = re.compile(r"^([a-z0-9-]+):([a-z0-9-]+)$")
+_DESCRIPTION = re.compile(r"^\s*description:\s*(.+?)\s*$", re.MULTILINE)
+DESC_MAX = 200  # workflow.schema.json maxLength on description (workflow + inputs)
 
 
 def _skill_exists(plugin: str, skill: str) -> bool:
@@ -42,6 +44,13 @@ def check_workflow(path: pathlib.Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     rel = path.relative_to(REPO)
+
+    # Mirror the schema's maxLength:200 on every description (workflow + inputs)
+    # so local tooling catches what CI's strict jsonschema would reject.
+    for dm in _DESCRIPTION.finditer(text):
+        desc = dm.group(1).strip().strip("'\"")
+        if len(desc) > DESC_MAX:
+            errors.append(f"{rel}: a description is {len(desc)} chars > {DESC_MAX} (workflow.schema.json maxLength)")
 
     for m in _INVOKE.finditer(text):
         raw = m.group(1).strip().strip("'\"")

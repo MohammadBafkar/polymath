@@ -1,7 +1,7 @@
 schemaVersion: 0.1
 name: migrateLanguageVersion
 version: 0.2.0
-description: Migrate a codebase to a new language / runtime version in phases (pin → fix → strict) with explicit gates between phases. Language-agnostic; polymath-engineering's verify-change detects the project's language.
+description: Migrate a codebase to a new language / runtime version in phases (pin → fix → strict) with explicit gates between phases; language-agnostic.
 requires:
   plugins:
     - polymath-core
