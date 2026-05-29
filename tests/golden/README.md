@@ -77,7 +77,7 @@ No `ANTHROPIC_API_KEY` is required — the runner shells out to the Claude Code 
 
 ### CI
 
-The `claude-cli-fixtures` job in [`.github/workflows/golden-tests.yml`](../../.github/workflows/golden-tests.yml) installs the CLI, picks `CLAUDE_CODE_OAUTH_TOKEN` if present (subscription) or `ANTHROPIC_API_KEY` as a fallback, and calls the same `run-fixtures.sh`. If neither secret is set, the job emits a warning and skips the live run — fixture **parsing** still runs in `fixtures-parse`, catching frontmatter rot without spending tokens.
+The `claude-cli-fixtures` job in [`.github/workflows/golden-tests.yml`](../../.github/workflows/golden-tests.yml.disabled) installs the CLI, picks `CLAUDE_CODE_OAUTH_TOKEN` if present (subscription) or `ANTHROPIC_API_KEY` as a fallback, and calls the same `run-fixtures.sh`. If neither secret is set, the job emits a warning and skips the live run — fixture **parsing** still runs in `fixtures-parse`, catching frontmatter rot without spending tokens. **This workflow is currently disabled** (renamed to `golden-tests.yml.disabled`) to avoid Claude API cost; rename it back to re-enable CI fixtures.
 
 ## Writing a fixture
 

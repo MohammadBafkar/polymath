@@ -81,10 +81,14 @@ when the evidence is published.
 ## How `/evaluate` works
 
 In a PR comment, type `/evaluate`. The workflow at
-[`.github/workflows/evaluation.yml`](../.github/workflows/evaluation.yml)
+[`.github/workflows/evaluation.yml`](../.github/workflows/evaluation.yml.disabled)
 triggers a live bakeoff + skill-triggering run, uploads the JSON
 reports as an artifact, and posts a summary table back as a PR
 comment.
+
+> **Note:** this workflow is currently **disabled** (renamed to
+> `evaluation.yml.disabled`) to avoid Claude API cost. `/evaluate` will
+> not trigger until it is renamed back to `evaluation.yml`.
 
 The job opts in to the LLM judge when the workflow's `include_judge`
 input is `true` (manual dispatch) — the regex scorer runs by default.

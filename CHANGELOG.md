@@ -183,7 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   runs.
 - **`/evaluate` is gated by `author_association`.** The
   `live-bakeoff` job in
-  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
+  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml.disabled)
   now refuses to run on `issue_comment` events unless the commenter is
   `OWNER`, `MEMBER`, or `COLLABORATOR`. Drive-by PR comments from forks
   can no longer trigger secret-bearing steps.

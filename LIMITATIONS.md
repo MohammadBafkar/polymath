@@ -85,14 +85,15 @@ elsewhere is intentional.
 
 ## 4. Known operational gaps
 
-- **Live-model fixtures are auth-dependent.** Without
-  `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets,
-  the `claude-cli-fixtures` job in
-  [`.github/workflows/golden-tests.yml`](.github/workflows/golden-tests.yml)
+- **Live-model fixtures are currently disabled.** The
+  `claude-cli-fixtures` job in
+  [`.github/workflows/golden-tests.yml`](.github/workflows/golden-tests.yml.disabled)
   and the `live-bakeoff` job in
-  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)
-  cannot prove real behaviour. CI fails the build when auth is missing
-  on a push to `main`. Fork PRs without secrets skip the live run.
+  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml.disabled)
+  were disabled (renamed to `*.yml.disabled`) to avoid spending Claude
+  API budget on every push. While disabled, CI no longer proves real
+  model behaviour. To re-enable: rename the files back and set
+  `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets.
 - **The fallback YAML parser in `polymath-flow` folds block scalars.**
   `|` and `>` are both treated as folded — newlines collapse to
   spaces. Workflows that depend on newline-preserving prompts must
