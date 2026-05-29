@@ -1,0 +1,139 @@
+schemaVersion: 1
+
+project:
+  name: polymath
+  description: Open-source Claude Code marketplace of SDLC-shaped plugins, portable agentskills, and deterministic workflows.
+
+stack:
+  languages:
+    - lang: python
+      version: "3"
+      framework: cli-tooling
+    - lang: bash
+    - lang: yaml
+    - lang: markdown
+  testing:
+    - framework: unittest
+      assertion: stdlib
+    - framework: golden-fixtures
+      assertion: claude-cli-transcript
+  build:
+    primary: shell
+    secondary: claude-plugin-validate
+  runtime:
+    kind: local-cli
+
+conventions:
+  commit_style: conventional-commits
+  branch_strategy: github-flow
+  code_review_checklist: docs/QUALITY-SCORECARD.md
+  language_specific:
+    python:
+      file: docs/CONTRIBUTING.md
+    markdown:
+      file: .markdownlint.json
+
+capabilities:
+  inherit_from: .polymath/capabilities.yaml
+
+setup:
+  context_sources:
+    - AGENTS.md
+    - CLAUDE.md
+    - README.md
+    - docs/PLUGIN-AUTHORING.md
+    - docs/PROJECT-LOCALIZATION.md
+    - docs/CAPABILITIES.md
+    - docs/WORKFLOW-SCHEMA.md
+    - docs/PORTABILITY.md
+  required_tools:
+    - name: bash
+      check: bash --version
+      required: true
+    - name: python3
+      check: python3 --version
+      required: true
+    - name: jq
+      check: jq --version
+      required: true
+    - name: claude
+      check: claude --version
+      required: false
+  environment:
+    - name: CLAUDE_CODE_OAUTH_TOKEN
+      purpose: Live Claude CLI golden fixtures in CI.
+      required: false
+      sensitive: true
+    - name: ANTHROPIC_API_KEY
+      purpose: Fallback auth for live Claude CLI fixtures.
+      required: false
+      sensitive: true
+    - name: GITHUB_TOKEN
+      purpose: GitHub release, PR, and Pages automation when publishing the marketplace.
+      required: false
+      sensitive: true
+  first_steps:
+    - Run tools/validate-all.sh before opening a PR.
+    - Run tools/lint-skills.sh after editing skills or commands.
+    - Run tools/conformance.sh --all before changing plugin structure, workflows, connectors, templates, or catalog metadata.
+    - Run tools/bakeoff.py check and tools/skill-triggering.py check after changing evaluation or triggering fixtures.
+
+polymath:
+  recommended_plugins:
+    - name: polymath-core
+      reason: Loads this project context and exposes shared conventions.
+      required: true
+    - name: polymath-author
+      reason: Scaffolds and reviews plugins, skills, commands, connectors, and workflows.
+      required: true
+    - name: polymath-flows
+      reason: Validates and exercises deterministic workflow YAML.
+      required: true
+    - name: polymath-thinking
+      reason: Supports brainstorm, deliberate, pre-mortem, and red-team passes for marketplace design.
+      required: false
+    - name: polymath-planning
+      reason: Writes bounded implementation plans for non-trivial marketplace changes.
+      required: false
+    - name: polymath-decisions
+      reason: Captures trade-off matrices and DACI decisions for plugin architecture changes.
+      required: false
+    - name: polymath-writing
+      reason: Authors ADRs, RFCs, architecture docs, and runbooks.
+      required: false
+    - name: polymath-engineering
+      reason: Reads code, reviews changes, and verifies repository-appropriate checks.
+      required: false
+    - name: polymath-release
+      reason: Maintains changelogs and PR descriptions.
+      required: false
+  recommended_workflows:
+    - activateProject
+    - deliberationLoop
+    - shipFeature
+    - reviewPR
+    - weeklyReleaseTrain
+  compatible_agents:
+    - claude-code
+    - codex
+    - cursor
+    - goose
+    - gemini-cli
+    - jetbrains-junie
+
+skill_overrides:
+  polymath-engineering:code-review:
+    additional_context:
+      - AGENTS.md
+      - docs/QUALITY-SCORECARD.md
+      - docs/PLUGIN-AUTHORING.md
+      - docs/WORKFLOW-SCHEMA.md
+    additional_axes:
+      - axis: marketplace-conformance
+        prompt: Check that plugin, skill, command, workflow, catalog, fixture, and README inventory changes satisfy the documented conformance rules.
+  polymath-engineering:verify-change:
+    test_commands:
+      - language: python
+        cmd: python3 -m unittest discover -s plugins/polymath-core/tests && python3 -m unittest discover -s plugins/polymath-flows/tests
+      - language: shell
+        cmd: tools/validate-all.sh && tools/lint-skills.sh && tools/token-budget.sh && tools/conformance.sh --all && tools/bakeoff.py check && tools/skill-triggering.py check

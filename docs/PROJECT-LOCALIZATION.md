@@ -24,6 +24,11 @@ language it had no way to know about.
   review axes, and test commands.
 - **Prompts** — pointers to project-owned PR / postmortem / PRD / ADR
   templates skills should prefer over their built-in versions.
+- **Setup** — context sources, required local tools, environment
+  variable names, and first steps for a new contributor or coding
+  agent. Secret values never belong here.
+- **Polymath activation** — recommended Polymath plugins, useful
+  workflows, and compatible agent surfaces for this repo.
 - **MCP servers** — capability → MCP server overrides.
 - **Capabilities** — pointer to `.polymath/capabilities.yaml`
   (separate file, separate schema; see
@@ -36,8 +41,10 @@ that snapshot and adapt.
 
 ## Quick start
 
-1. Pick the closest example from [`.polymath/examples/`](../.polymath/examples/).
-2. Copy it to `.polymath/project.yaml` at the root of your repo.
+1. Run `/polymath-core:init-project` in the target repo, or pick the
+   closest example from [`.polymath/examples/`](../.polymath/examples/).
+2. If using an example, copy it to `.polymath/project.yaml` at the root
+   of your repo.
 3. Edit values for your project — `project.name`, stack details,
    conventions paths.
 4. Start a new Claude Code session; the SessionStart hook emits a
@@ -113,6 +120,40 @@ external_skills:
 capabilities:
   inherit_from: .polymath/capabilities.yaml
 
+setup:
+  context_sources:
+    - README.md
+    - AGENTS.md
+    - docs/CONTRIBUTING.md
+  required_tools:
+    - name: dotnet
+      version: "8"
+      check: dotnet --version
+      required: true
+  environment:
+    - name: ANTHROPIC_API_KEY
+      purpose: Optional live LLM evaluation.
+      required: false
+      sensitive: true
+  first_steps:
+    - Restore dependencies.
+    - Run the default test command.
+
+polymath:
+  recommended_plugins:
+    - name: polymath-core
+      reason: Loads project context and SessionStart hints.
+      required: true
+    - name: polymath-engineering
+      reason: Reads code, reviews changes, and verifies diffs.
+      required: false
+  recommended_workflows:
+    - activateProject
+    - shipFeature
+  compatible_agents:
+    - claude-code
+    - codex
+
 skill_overrides:
   polymath-engineering:code-review:
     additional_context:
@@ -165,6 +206,9 @@ start:
   release-branch}`.
 - `external_skills[*]` must declare `source`. `install`, when
   present, must be one of `{marketplace, manual, submodule}`.
+- `setup.required_tools[*]` and `setup.environment[*]`, when present,
+  must declare `name`.
+- `polymath.recommended_plugins[*]`, when present, must declare `name`.
 
 A bad file exits the loader with code 2 and surfaces the violations
 on stderr — the existing snapshot is left untouched so the previous
@@ -173,6 +217,18 @@ surfaces (paused workflows, scheduled work) still render.
 
 The full JSON schema is the source of truth for CI; the in-loader
 validator has the same shape, trimmed for the runtime check.
+
+## Versioning & refresh
+
+`schemaVersion` is currently `1`, and the loader accepts only `1`. There is no
+automatic migration: if a future Polymath release bumps the schema, an old
+file keeps working as long as it still validates against the version the loader
+accepts. **The supported refresh path is to re-run `/polymath-core:init-project`**
+— it re-inspects the repo and rewrites `.polymath/project.yaml` at the current
+schema version, preserving your explicit intent where it can. When the schema
+version advances, that release's CHANGELOG names what changed and whether a
+re-run is required; the loader's exit-2 validation errors tell you which fields
+to fix if you would rather edit by hand.
 
 ## How skills consume the context
 
@@ -223,6 +279,25 @@ Polymath — follow the external catalog's own instructions.
 The framing is **delegation**: Polymath does not compete with
 `dotnet/skills` on .NET depth. The project says "for .NET use
 `dotnet/skills`; Polymath provides the SDLC workflow on top of that."
+
+## Project activation
+
+Use `polymath-core:initialize-project` or
+`/polymath-flows:run-workflow activateProject` to create the first
+project file for an existing repo. The initializer reads local
+instructions, docs, CI, package manifests, and deployment files, then
+writes:
+
+- `.polymath/project.yaml` with stack, conventions, setup, Polymath
+  recommendations, and skill overrides.
+- `.polymath/capabilities.yaml` when providers can be inferred with
+  confidence.
+- `docs/polymath-onboarding.md` with required tools, environment
+  variable names, recommended plugin install sets, useful workflows,
+  portability notes, and open questions.
+
+The initializer must not store secret values and must not guess unknown
+capability providers.
 
 ## Capability mapping (sibling file)
 

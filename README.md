@@ -4,7 +4,7 @@
 
 ## The marketplace
 
-**43 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **15 workflows** that compose those plugins into proven SDLC scenarios — `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval`.
+**43 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **17 workflows** that compose those plugins into proven SDLC scenarios — `activateProject`, `deliberationLoop`, `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
 
@@ -24,11 +24,18 @@ claude
 > /polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small
 ```
 
+For a new target repository, run `/polymath-core:init-project` or
+`/polymath-flows:run-workflow activateProject` first. It creates
+`.polymath/project.yaml`, maps known capability providers, and writes
+`docs/polymath-onboarding.md` so agents know the stack, conventions,
+required tools, environment variables, recommended plugins, and first
+steps. See [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md).
+
 The full catalog is published as the marketplace's GitHub Pages site under `docs/site/`.
 
 ## Catalog by tier
 
-- **Foundation** — `polymath-core` (conventions, glossary, project-context loader, plugin-budget, SessionStart hook).
+- **Foundation** — `polymath-core` (conventions, glossary, project initialization, project-context loader, plugin-budget, SessionStart hook).
 - **Mind & craft** — `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-decisions`, `polymath-learning`.
 - **Product & discovery** — `polymath-product`, `polymath-research`, `polymath-design`.
 - **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
@@ -93,10 +100,10 @@ See [docs/PLUGIN-AUTHORING.md](docs/PLUGIN-AUTHORING.md) and [docs/WORKFLOW-SCHE
 
 Every change runs locally and in CI:
 
-- `tools/validate-all.sh` — `claude plugin validate --strict` per plugin.
+- `tools/validate-all.sh` — `claude plugin validate --strict` at marketplace root + per plugin; catches version drift between a marketplace entry and its `plugin.json`.
 - `tools/lint-skills.sh` — description ≤ 200 chars, SKILL.md ≤ 500 lines.
 - `tools/token-budget.sh` — per-plugin cap of 400 tokens; total target scales with plugin count.
-- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `marketplace.json`), `CONNECTOR-2` (connector / infra plugins audited in `docs/CONNECTOR-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`.
+- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `shared/polymath-catalog.json`), `CONNECTOR-2` (connector / infra plugins audited in `docs/CONNECTOR-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `shared/polymath-catalog.json`.
 - `tools/build-catalog.py --check` — verifies the GitHub Pages catalog regenerates reproducibly.
 - `plugins/polymath-flows/bin/polymath-flow validate` — every workflow YAML against the schema.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests` and `-s plugins/polymath-core/tests` — executable unit tests.
@@ -110,6 +117,7 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar and the proof loop.
 - [`docs/QUALITY-DASHBOARD.md`](docs/QUALITY-DASHBOARD.md) — what gets measured, where the artifacts land.
 - [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) — per-plugin audit for every `polymath-connector-*` and `polymath-infra-*` plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
+- [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 
 ## Contributing
 
@@ -117,7 +125,7 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [polymath-author](plugins/p
 
 ## Use outside Claude Code
 
-Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the 124 skills to a portable bundle and drop them into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
+Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the 126 skills to a portable bundle and drop them into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
 
 ```bash
 python3 tools/export-agents-skills.py --clean

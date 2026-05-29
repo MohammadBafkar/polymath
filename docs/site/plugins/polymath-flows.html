@@ -17,14 +17,14 @@
 <pre><code>claude plugin install polymath-flows@polymath</code></pre>
 <h1>polymath-flows</h1>
 
-<p>flows-lite: a deterministic serial workflow runner for the Polymath marketplace. v0.1 ships the <code>shipFeature</code> workflow end-to-end.</p>
+<p>flows-lite: a deterministic serial workflow runner for the Polymath marketplace. v0.1 ships SDLC workflows such as <code>shipFeature</code>, <code>activateProject</code>, and <code>deliberationLoop</code>.</p>
 
 <h2>What it ships</h2>
 
 <ul>
 <li>Skills: <code>run-workflow</code>, <code>resume-workflow</code>, <code>list-workflows</code>.</li>
 <li>Executable: <code>bin/polymath-flow</code> — owns YAML validation, state, mustPass checks.</li>
-<li>Workflows: <code>workflows/shipFeature.yaml</code>.</li>
+<li>Workflows: YAML files under <code>workflows/</code>, including <code>activateProject</code>, <code>deliberationLoop</code>, and <code>shipFeature</code>.</li>
 </ul>
 
 <h2>Why two layers (skill + executable)?</h2>
@@ -70,6 +70,8 @@ claude plugin install polymath-flows@polymath
 
 <pre><code>
 claude
+&gt; /polymath-flows:run-workflow activateProject
+&gt; /polymath-flows:run-workflow deliberationLoop subject=&quot;Project onboarding for Polymath&quot; mode=plan
 &gt; /polymath-flows:run-workflow shipFeature title=&quot;Rate-limit /login&quot; scope=small
 </code></pre>
 

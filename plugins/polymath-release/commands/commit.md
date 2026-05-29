@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Stage and craft a Conventional Commits message for the current diff; never commits without showing the user the staged changes and the message first.
+description: Slash entry point at commit time — shows the staged diff and proposed message before anything lands.
 ---
 
 # /commit

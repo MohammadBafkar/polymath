@@ -14,6 +14,20 @@ if [[ ! -d "$plugins_dir" ]]; then
   exit 1
 fi
 
+# Marketplace-level strict validation. Catches version drift between a
+# plugin entry and its plugin.json, plus any non-Claude fields that
+# would warn under --strict. Skipped silently if the CLI is absent.
+if command -v claude >/dev/null 2>&1; then
+  echo "::group::marketplace --strict"
+  if claude plugin validate --strict "$root" 2>&1; then
+    echo "  ✓ claude plugin validate --strict (marketplace root)"
+  else
+    echo "  ✗ claude plugin validate --strict (marketplace root) failed"
+    fail=1
+  fi
+  echo "::endgroup::"
+fi
+
 check_json() {
   local file="$1"
   if ! python3 -c "import json,sys;json.load(open(sys.argv[1]))" "$file" >/dev/null 2>&1; then

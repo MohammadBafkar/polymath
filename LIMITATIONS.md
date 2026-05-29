@@ -38,13 +38,19 @@ elsewhere is intentional.
   the official surface is the source of truth for tool calls. The
   Polymath connector is justified only by the workflow shape, safety
   opinion, or critique it adds, recorded per plugin in
-  [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md).
+  [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md). Connectors
+  are now **eligible for `beta` and `stable`** — but only after
+  primary-source distinct-value proof is published in
+  [`shared/stability-evidence.json`](shared/stability-evidence.json)
+  as `distinct_value_url`. The previous "stay experimental" default
+  has been replaced by an evidence gate.
 - **Cloud resource operations.** For one-off operations against AWS /
   GCP / Azure / Kubernetes, the official MCP families plus the vendor
   CLI are faster and safer than any Polymath wrapper.
   `polymath-infra-*` is justified only when a multi-environment
   workflow, RBAC audit, or destructive-action checklist is the actual
-  question.
+  question. Infra plugins follow the same `distinct_value_url`
+  evidence gate as connectors before promoting above experimental.
 
 ## 3. Where the catalog is intentionally thin
 
@@ -71,8 +77,11 @@ elsewhere is intentional.
   `beta` is granted on closed on-disk evidence (bakeoff + triggering
   fixtures, or a foundation-runner with unit + e2e coverage); `stable`
   further requires a live bakeoff ≥ 8 / delta ≥ 2 **and** at least one
-  external user beyond the maintainer. No plugin in the catalog is
-  `stable` today.
+  external user beyond the maintainer. Every status claim is backed by
+  the evidence ledger at
+  [`shared/stability-evidence.json`](shared/stability-evidence.json)
+  (enforced by `tools/check-stability-evidence.py`, rule `STABILITY-1`).
+  No plugin in the catalog is `stable` today.
 
 ## 4. Known operational gaps
 

@@ -12,12 +12,36 @@ on:
 
 jobs:
   claude:
+    # @claude mentions only trigger paid Claude runs when the author is
+    # already trusted on this repo. Drive-by comments from arbitrary
+    # GitHub users (including fork-PR authors) must not be able to
+    # consume budget tied to CLAUDE_CODE_OAUTH_TOKEN. The
+    # author_association field is set by GitHub on each event payload —
+    # OWNER / MEMBER / COLLABORATOR are repo-affiliated; everything
+    # else (CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, NONE) is rejected.
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment'
+        && contains(github.event.comment.body, '@claude')
+        && (github.event.comment.author_association == 'OWNER'
+            || github.event.comment.author_association == 'MEMBER'
+            || github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review_comment'
+        && contains(github.event.comment.body, '@claude')
+        && (github.event.comment.author_association == 'OWNER'
+            || github.event.comment.author_association == 'MEMBER'
+            || github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review'
+        && contains(github.event.review.body, '@claude')
+        && (github.event.review.author_association == 'OWNER'
+            || github.event.review.author_association == 'MEMBER'
+            || github.event.review.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'issues'
+        && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))
+        && (github.event.issue.author_association == 'OWNER'
+            || github.event.issue.author_association == 'MEMBER'
+            || github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read

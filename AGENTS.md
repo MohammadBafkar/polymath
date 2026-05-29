@@ -58,13 +58,15 @@ README.md, CHANGELOG.md        # Both required (DOCS-1 conformance check)
 
 The token-budget script measures only the `name` + `description` frontmatter fields from every SKILL.md, command, and agent in the plugin. Long procedure bodies don't count against the cap, but they still must stay ≤500 lines.
 
+Default to **skill-only**: a skill earns a command only when it is a frequent direct user entry point, and a workflow only when ≥2 skills chain with data dependencies or gates. Because command descriptions count against the per-plugin budget, a thin shim is not free. See [docs/PLUGIN-AUTHORING.md § 5.1](docs/PLUGIN-AUTHORING.md) for the promotion policy; `tools/check-command-overlap.py` and `tools/check-workflow-invokes.py` enforce it.
+
 ## Conformance criteria enforced by CI
 
 | ID | Rule |
 | --- | --- |
 | MANIFEST-1 | `claude plugin validate --strict` passes |
 | MANIFEST-2 | plugin.json has `name`, `version`, `description`, `license` |
-| MANIFEST-3 | Plugin has a `status` in marketplace.json (`stable` / `beta` / `experimental` / `deprecated`) |
+| MANIFEST-3 | Plugin has a `status` in `shared/polymath-catalog.json` (`stable` / `beta` / `experimental` / `deprecated`) |
 | SKILL-1 | SKILL.md description ≤200 chars, body ≤500 lines |
 | TEMPLATE-1 | Templates whose name matches `shared/schemas/artifacts/*.schema.json` must have frontmatter |
 | WORKFLOW-1 | Workflow YAML validates against `shared/schemas/workflow.schema.json` |
@@ -100,7 +102,7 @@ See [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) for the full sc
 
 ## Marketplace registration
 
-Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) with a `status` field. Update this file when adding or renaming a plugin. The `status` field is the only place maturity tier is tracked — `plugin.json` itself does not carry it (Claude Code's `--strict` validator rejects unknown top-level fields there).
+Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) (Claude's catalog manifest) AND in [shared/polymath-catalog.json](shared/polymath-catalog.json) (Polymath's own catalog, where `status` lives). Update both when adding or renaming a plugin. `status` cannot live in `marketplace.json` or `plugin.json` — Claude Code's `--strict` validator rejects unknown fields in both, and `MANIFEST-3` enforces presence in the Polymath catalog. `tools/check-catalog.py` rejects divergent plugin sets between the two files.
 
 ## Commit and PR conventions
 

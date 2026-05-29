@@ -1,5 +1,12 @@
 # Changelog — polymath-thinking
 
+## [Unreleased]
+
+### Added
+
+- `deliberate` skill and `/deliberate` command for an iterative
+  observe-frame-options-tradeoffs-risks-revise loop.
+
 ## [0.1.0]
 
 ### Added

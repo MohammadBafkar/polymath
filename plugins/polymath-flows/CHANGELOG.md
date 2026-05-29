@@ -1,5 +1,14 @@
 # Changelog — polymath-flows
 
+## [Unreleased]
+
+### Added
+
+- `activateProject` workflow to generate `.polymath/project.yaml`,
+  capability mappings, and onboarding notes for a repository.
+- `deliberationLoop` workflow to observe, frame, compare options,
+  red-team the recommendation, and write a revised plan.
+
 ## [0.1.0]
 
 ### Added

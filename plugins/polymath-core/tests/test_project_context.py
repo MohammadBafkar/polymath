@@ -4,7 +4,7 @@ Covers:
   - YAML subset parser fallback (PyYAML present or absent — both should work)
   - Validation rejects: missing/wrong schemaVersion, unknown top-level keys,
     bad commit_style/branch_strategy enums, malformed stack.languages,
-    external_skills missing source.
+    external_skills missing source, malformed setup / polymath activation keys.
   - Resolution order: project → CLAUDE_CONFIG_DIR → home (first hit wins).
   - Snapshot is written with `_meta` and matches the input.
   - Stale snapshot is cleared when no project file exists.
@@ -102,6 +102,18 @@ class ValidationTests(unittest.TestCase):
         )
         self.assertTrue(any("install" in e and "magic" in e for e in errs))
 
+    def test_setup_required_tools_require_name(self) -> None:
+        errs = self.mod._validate(
+            {"schemaVersion": 1, "setup": {"required_tools": [{"check": "x --version"}]}}
+        )
+        self.assertTrue(any("setup.required_tools[0]" in e for e in errs))
+
+    def test_polymath_recommended_plugins_require_name(self) -> None:
+        errs = self.mod._validate(
+            {"schemaVersion": 1, "polymath": {"recommended_plugins": [{"required": True}]}}
+        )
+        self.assertTrue(any("polymath.recommended_plugins[0]" in e for e in errs))
+
     def test_happy_path_returns_no_errors(self) -> None:
         errs = self.mod._validate(
             {
@@ -115,6 +127,17 @@ class ValidationTests(unittest.TestCase):
                 "external_skills": [
                     {"source": "github.com/x/y", "install": "marketplace"}
                 ],
+                "setup": {
+                    "context_sources": ["README.md", "AGENTS.md"],
+                    "required_tools": [{"name": "python3", "check": "python3 --version"}],
+                    "environment": [{"name": "ANTHROPIC_API_KEY", "sensitive": True}],
+                    "first_steps": ["Run validation"],
+                },
+                "polymath": {
+                    "recommended_plugins": [{"name": "polymath-core", "required": True}],
+                    "recommended_workflows": ["activateProject"],
+                    "compatible_agents": ["claude-code", "codex"],
+                },
             }
         )
         self.assertEqual(errs, [])
@@ -171,6 +194,24 @@ class SummaryTests(unittest.TestCase):
         )
         self.assertIn("External skills: github.com/foo/bar", line)
 
+    def test_setup_and_recommended_plugins_listed(self) -> None:
+        line = self.mod._summary_line(
+            {
+                "setup": {
+                    "required_tools": [{"name": "python3"}],
+                    "environment": [{"name": "ANTHROPIC_API_KEY"}],
+                },
+                "polymath": {
+                    "recommended_plugins": [
+                        {"name": "polymath-core"},
+                        {"name": "polymath-flows"},
+                    ]
+                },
+            }
+        )
+        self.assertIn("Setup: 1 tool(s), 1 env var(s)", line)
+        self.assertIn("Recommended plugins: polymath-core, polymath-flows", line)
+
 
 class LoaderEndToEndTests(unittest.TestCase):
     """Exercise the script as a subprocess against a temp workspace."""
@@ -221,16 +262,30 @@ class LoaderEndToEndTests(unittest.TestCase):
             "    - framework: pytest\n"
             "conventions:\n"
             "  commit_style: conventional-commits\n"
+            "setup:\n"
+            "  required_tools:\n"
+            "    - name: python3\n"
+            "      check: python3 --version\n"
+            "  environment:\n"
+            "    - name: ANTHROPIC_API_KEY\n"
+            "      sensitive: true\n"
+            "polymath:\n"
+            "  recommended_plugins:\n"
+            "    - name: polymath-core\n"
+            "      required: true\n"
         )
         cp = self._run()
         self.assertEqual(cp.returncode, 0, msg=cp.stderr)
         self.assertIn("Polymath: project context loaded", cp.stdout)
         self.assertIn("python 3.12 (fastapi)", cp.stdout)
+        self.assertIn("Setup: 1 tool(s), 1 env var(s)", cp.stdout)
+        self.assertIn("Recommended plugins: polymath-core", cp.stdout)
         out = json.loads(
             (self.data / "polymath-core" / "project-context.json").read_text()
         )
         self.assertEqual(out["project"]["name"], "demo")
         self.assertEqual(out["stack"]["languages"][0]["lang"], "python")
+        self.assertEqual(out["setup"]["required_tools"][0]["name"], "python3")
         self.assertIn("_meta", out)
         self.assertEqual(out["_meta"]["schemaVersion"], 1)
         self.assertTrue(out["_meta"]["source"].endswith("project.yaml"))

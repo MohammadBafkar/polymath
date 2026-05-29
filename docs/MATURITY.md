@@ -1,17 +1,23 @@
 # Maturity tiers — single source of truth
 
 Every plugin declares a maturity tier in
-[`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json) via
+[`shared/polymath-catalog.json`](../shared/polymath-catalog.json) via
 the `status` field. The tier is a contract with users about how much to
 trust the plugin. This file is the canonical definition; other docs
 link here.
+
+The status field used to live in `.claude-plugin/marketplace.json`,
+but Claude Code's `plugin validate --strict` rejects unknown fields
+there. The catalog file is Polymath's own schema; the validator does
+not see it.
 
 The tier is **not** a quality label — it is a statement about how the
 plugin's value has been *verified on disk*. A polished `experimental`
 plugin is fine; a `beta` plugin with no fixtures is not.
 
-`tools/conformance.sh` rejects any plugin whose marketplace.json entry
-is missing `status` or sets it to an unknown value (rule `MANIFEST-3`).
+`tools/conformance.sh` rejects any plugin whose
+`shared/polymath-catalog.json` entry is missing `status` or sets it
+to an unknown value (rule `MANIFEST-3`).
 
 ## Tiers
 
@@ -78,9 +84,15 @@ following hold:
    both the regex and the LLM-judge scorers must agree.
 4. At least one skill-triggering test passes on three different
    trigger phrasings (live run, not just parseable).
-5. Connector and infra plugins stay `experimental` unless primary-source
-   evidence shows Polymath adds workflow, critique, safety, or
-   artifact value beyond official docs, MCPs, LSPs, or CLIs. See
+5. Connector and infra plugins are **eligible for `stable` only after
+   distinct-value proof plus the normal stable gates.** Eligibility
+   requires primary-source evidence — a bakeoff case, side-by-side
+   artifact, or documented workflow-shape gap — that Polymath adds
+   workflow, critique, safety, or artifact value beyond official docs,
+   MCPs, LSPs, or CLIs. The evidence URL is recorded in
+   [`shared/stability-evidence.json`](../shared/stability-evidence.json)
+   as `distinct_value_url`. Connector/infra plugins also need this
+   field populated before promoting to `beta`. See
    [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md).
 6. A CHANGELOG entry records the promotion and the supporting
    evidence link (PR or artifact run id).
@@ -88,6 +100,21 @@ following hold:
    issue, fork, or PR citing the plugin's files).
 
 Promotion to `stable` is a CHANGELOG entry, not just a status flip.
+
+### Stability evidence ledger
+
+The receipts that back every status claim live in
+[`shared/stability-evidence.json`](../shared/stability-evidence.json) —
+one entry per catalog plugin, with `target_status`, `evidence_state`,
+`live_bakeoff_run`, `live_trigger_run`, `external_user_url`,
+`promotion_pr`, `changelog_entry`, and (for connector/infra) the
+required `distinct_value_url`. The ledger is enforced by
+[`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
+as the `STABILITY-1` conformance gate: the catalog cannot claim
+`stable` for a plugin unless the ledger has populated every required
+field, and connector/infra plugins cannot reach `beta` without the
+distinct-value URL. The human-facing view of the ledger lives at
+[`docs/STABILITY-ROADMAP.md`](STABILITY-ROADMAP.md).
 
 ### deprecated
 

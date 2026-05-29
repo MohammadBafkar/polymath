@@ -1,7 +1,7 @@
 {
   "name": "polymath-flows",
   "version": "0.1.0",
-  "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks. Ships shipFeature workflow.",
+  "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
   "license": "Apache-2.0",
   "author": {
     "name": "Mohammad Bafkar",
@@ -16,6 +16,8 @@
   "keywords": [
     "orchestration",
     "workflow",
+    "activateProject",
+    "deliberationLoop",
     "shipFeature"
   ]
 }

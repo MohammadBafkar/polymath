@@ -12,6 +12,7 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 - A skill is about to produce generic guidance (a code-review checklist, a test command, a PR template) and there might be a project-specific override the project owner has declared.
 - A workflow step needs to call a language-specific command but the workflow itself is language-agnostic.
 - An agent needs to surface a one-paragraph project summary to the user (onboarding, status updates, "what am I looking at?").
+- A skill needs setup expectations: required tools, environment variable names, recommended Polymath plugins, or agent compatibility.
 
 ## How it works
 
@@ -51,6 +52,8 @@ The file mirrors `.polymath/project.yaml` with the original keys preserved plus 
   "conventions": { "commit_style": "conventional-commits", ... },
   "external_skills": [{ "source": "github.com/dotnet/skills", ... }],
   "capabilities": { "inherit_from": ".polymath/capabilities.yaml" },
+  "setup": { "required_tools": [...], "environment": [...], "first_steps": [...] },
+  "polymath": { "recommended_plugins": [...], "recommended_workflows": [...] },
   "skill_overrides": { "polymath-engineering:code-review": { ... } },
   "prompts": { "pr_description_template": "docs/pr-template.md" },
   "mcp_servers": { "vcs": "@azure-devops/mcp-server" },
@@ -71,3 +74,4 @@ If no project file exists, the snapshot is absent and skills fall back to their 
 - [`shared/schemas/project.schema.json`](../../../../shared/schemas/project.schema.json) — schema.
 - [`docs/PROJECT-LOCALIZATION.md`](../../../../docs/PROJECT-LOCALIZATION.md) — full reference.
 - [`docs/CAPABILITIES.md`](../../../../docs/CAPABILITIES.md) — capability mapping (sibling file).
+- [`polymath-core:initialize-project`](../initialize-project/SKILL.md) — creates the first project context package.

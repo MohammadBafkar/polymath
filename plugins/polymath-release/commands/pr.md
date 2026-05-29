@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Draft a PR description for the current branch following the canonical PR template; saves the draft to docs/pr/<slug>.md without opening a real PR.
+description: Slash entry point after committing — writes a PR body to docs/pr/<slug>.md; opens no real PR.
 ---
 
 # /pr

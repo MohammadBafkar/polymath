@@ -1,7 +1,7 @@
 {
   "name": "polymath-thinking",
   "version": "0.1.0",
-  "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team, and architecture-critic agent for divergence and challenge.",
+  "description": "Thinking craft: brainstorm, deliberate, 5-whys, pre-mortem, red-team, and architecture-critic agent.",
   "license": "Apache-2.0",
   "author": {
     "name": "Mohammad Bafkar",
@@ -13,6 +13,7 @@
   "keywords": [
     "thinking",
     "brainstorm",
+    "deliberate",
     "5-whys",
     "pre-mortem",
     "red-team",

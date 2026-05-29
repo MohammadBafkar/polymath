@@ -9,8 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Project activation path.** Added `polymath-core:initialize-project`
+  and `/polymath-core:init-project` to generate
+  `.polymath/project.yaml`, `.polymath/capabilities.yaml` when provider
+  mappings are known, and `docs/polymath-onboarding.md` from an
+  existing repository's README, agent instructions, docs, CI, package
+  manifests, and deployment files. Added `activateProject` workflow as
+  the flow-runner entry point for the same setup.
+- **Iterative deliberation loop.** Added `polymath-thinking:deliberate`,
+  `/polymath-thinking:deliberate`, and the `deliberationLoop` workflow
+  for observe -> frame -> options -> tradeoffs -> risk critique ->
+  revised plan work on plans, designs, documents, implementations, and
+  ambiguous problems.
+- **Project-context activation metadata.** Extended
+  `shared/schemas/project.schema.json` and the SessionStart loader with
+  `setup:` and `polymath:` sections for required tools, environment
+  variable names, first steps, recommended plugins, recommended
+  workflows, and compatible agent surfaces. The Polymath repo now
+  dogfoods `.polymath/project.yaml` and `.polymath/capabilities.yaml`.
+- **`shared/schemas/polymath-catalog.schema.json`** — JSON Schema
+  2020-12 definition for `shared/polymath-catalog.json`, the new
+  Polymath-only catalog file. Enforces required fields (`name`,
+  `plugins`), allowed status values (`stable` / `beta` /
+  `experimental` / `deprecated`), the `polymath-…` plugin-name
+  pattern, and rejects unknown extras. Validated in CI via
+  `tools/check-catalog.py` when `jsonschema` is on PATH.
+- **`tools/check-catalog.py` + `MANIFEST-3` cross-check.** Verifies
+  that `.claude-plugin/marketplace.json`, every plugin's `plugin.json`,
+  and `shared/polymath-catalog.json` agree on the plugin set and on
+  per-plugin versions, independent of whether the Claude CLI is on
+  PATH. Catches the same version-drift class of bug that
+  `claude plugin validate --strict` catches, plus catalog-set
+  divergence (plugin added to marketplace but not catalog, or vice
+  versa). Wired into `tools/conformance.sh --all`.
 - **Portability adapter to agentskills.io v1.0 harnesses.**
-  `tools/export-agents-skills.py` materializes Polymath's 124 skills
+  `tools/export-agents-skills.py` materializes Polymath's 126 skills
   into `dist/agents-skills/<plugin>-<skill>/SKILL.md` with namespaced
   frontmatter `name:` (resolves the one collision in the catalog —
   `file-bug-from-incident` is shipped by both `polymath-connector-jira`
@@ -107,8 +140,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `evaluation.yml` now install via `npm install -g @anthropic-ai/claude-code`
   only — dropped the curl-installer fallback which was duplicative.
 
+### Fixed
+
+- **`claude plugin validate --strict .` now passes at the marketplace
+  root.** Two real problems were silently in place: (a) a version drift
+  between `.claude-plugin/marketplace.json` (declared `0.1.0`) and
+  `plugins/polymath-connector-github/.claude-plugin/plugin.json`
+  (declared `0.2.0`) — at install time Claude takes the plugin.json
+  version and silently ignores the marketplace entry, so the catalog
+  was advertising a stale version; (b) 46 strict-mode warnings from
+  Polymath-only fields Claude's schema does not recognize
+  (`plugins[N].status`, `metadata.agentSkills`, `metadata.homepage`,
+  `metadata.license`). Marketplace entry bumped to `0.2.0` to match
+  plugin.json. Polymath-only metadata relocated to a new
+  `shared/polymath-catalog.json` (the catalog's own schema, not
+  governed by Claude's); `tools/conformance.sh` (MANIFEST-3),
+  `tools/build-catalog.py` (status badges on the generated site), and
+  `tools/sync-connector-policy.py` (README disclosure block) all read
+  status from there. `tools/validate-all.sh` now invokes
+  `claude plugin validate --strict` at the marketplace root and fails
+  on non-zero exit, so any future drift is caught in CI before merge.
+  `README.md`, `AGENTS.md`, `docs/PLUGIN-AUTHORING.md`, and
+  `docs/MATURITY.md` updated to point at the new catalog location.
+- **`tools/export-agents-skills.py` no longer crashes when `--out`
+  points outside the repository.** The success-message line was
+  unconditionally calling `Path.relative_to(REPO)`, which raised
+  `ValueError` for absolute paths like `/tmp/skills` even though the
+  export itself had already completed. Now falls back to printing the
+  absolute path when the output directory is outside the repo.
+
 ### Security
 
+- **`.github/workflows/claude.yml` `@claude` mentions now require a
+  trusted author.** The job's `if:` condition was previously
+  `contains(comment.body, '@claude')` alone — any GitHub user
+  commenting on any issue or PR could trigger a paid Claude run
+  backed by `secrets.CLAUDE_CODE_OAUTH_TOKEN`. Added an
+  `author_association` gate to each branch (issue_comment,
+  pull_request_review_comment, pull_request_review, issues), matching
+  the pattern already in `evaluation.yml`: OWNER, MEMBER, or
+  COLLABORATOR only. Also added `timeout-minutes: 30` to bound runaway
+  runs.
 - **`/evaluate` is gated by `author_association`.** The
   `live-bakeoff` job in
   [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml)

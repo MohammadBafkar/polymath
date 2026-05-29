@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: Draft customer-facing release notes from CHANGELOG [Unreleased] entries; emphasizes user benefit over implementation detail.
+description: Slash entry point when cutting a version — produces docs/release-notes/<version>.md.
 ---
 
 # /release-notes

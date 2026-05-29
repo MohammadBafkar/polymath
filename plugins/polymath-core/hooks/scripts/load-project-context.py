@@ -222,6 +222,8 @@ KNOWN_TOP_KEYS = {
     "conventions",
     "external_skills",
     "capabilities",
+    "setup",
+    "polymath",
     "skill_overrides",
     "prompts",
     "mcp_servers",
@@ -283,6 +285,33 @@ def _validate(data: Any) -> list[str]:
                     errs.append(
                         f"external_skills[{i}].install {kind!r} not in {sorted(INSTALL_KINDS)}"
                     )
+    setup = data.get("setup")
+    if setup is not None:
+        if not isinstance(setup, dict):
+            errs.append("setup must be a mapping")
+        else:
+            for key in ("context_sources", "required_tools", "environment", "first_steps"):
+                value = setup.get(key)
+                if value is not None and not isinstance(value, list):
+                    errs.append(f"setup.{key} must be a list")
+            for i, tool in enumerate(setup.get("required_tools") or []):
+                if not isinstance(tool, dict) or not tool.get("name"):
+                    errs.append(f"setup.required_tools[{i}] missing `name`")
+            for i, var in enumerate(setup.get("environment") or []):
+                if not isinstance(var, dict) or not var.get("name"):
+                    errs.append(f"setup.environment[{i}] missing `name`")
+    poly = data.get("polymath")
+    if poly is not None:
+        if not isinstance(poly, dict):
+            errs.append("polymath must be a mapping")
+        else:
+            for key in ("recommended_plugins", "recommended_workflows", "compatible_agents"):
+                value = poly.get(key)
+                if value is not None and not isinstance(value, list):
+                    errs.append(f"polymath.{key} must be a list")
+            for i, plugin in enumerate(poly.get("recommended_plugins") or []):
+                if not isinstance(plugin, dict) or not plugin.get("name"):
+                    errs.append(f"polymath.recommended_plugins[{i}] missing `name`")
     return errs
 
 
@@ -315,6 +344,11 @@ def _summary_line(ctx: dict) -> str:
             test_part = " + ".join(bits)
     ext = ctx.get("external_skills") or []
     runtime = (stack.get("runtime") or {}).get("kind")
+    setup = ctx.get("setup") or {}
+    tools = setup.get("required_tools") or []
+    env_vars = setup.get("environment") or []
+    poly = ctx.get("polymath") or {}
+    recommended_plugins = poly.get("recommended_plugins") or []
 
     parts: list[str] = []
     if lang_parts:
@@ -327,6 +361,22 @@ def _summary_line(ctx: dict) -> str:
         sources = [e.get("source") for e in ext if isinstance(e, dict) and e.get("source")]
         if sources:
             parts.append(f"External skills: {', '.join(sources)}")
+    if tools or env_vars:
+        setup_bits: list[str] = []
+        if tools:
+            setup_bits.append(f"{len(tools)} tool(s)")
+        if env_vars:
+            setup_bits.append(f"{len(env_vars)} env var(s)")
+        parts.append("Setup: " + ", ".join(setup_bits))
+    plugin_names = [
+        p.get("name")
+        for p in recommended_plugins
+        if isinstance(p, dict) and p.get("name")
+    ]
+    if plugin_names:
+        visible = plugin_names[:5]
+        suffix = "" if len(plugin_names) <= 5 else f" +{len(plugin_names) - 5} more"
+        parts.append(f"Recommended plugins: {', '.join(visible)}{suffix}")
     if not parts:
         return ""
     return "Polymath: project context loaded. " + " · ".join(parts)

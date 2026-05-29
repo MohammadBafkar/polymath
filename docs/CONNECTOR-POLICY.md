@@ -54,9 +54,17 @@ release.
 | Wraps an official skill / LSP  | `experimental` | Same bar as the MCP-wrap case.                                                             |
 | Pure workflow / artifact shape | `beta`         | When at least one external user beyond the maintainer has adopted it.                      |
 
-No plugin in scope promotes to `stable` until the bakeoff
-(see [`docs/QUALITY-SCORECARD.md`](QUALITY-SCORECARD.md)) shows
-Polymath beats baseline Claude Code on a case exercising the plugin.
+Connector and infra plugins are **eligible for `beta` or `stable`
+only after distinct-value proof plus the normal promotion gates** —
+they do not "stay experimental" by policy, but the bar above
+experimental is higher than for a pure skill plugin. The distinct-value
+URL — primary-source evidence (a bakeoff case, side-by-side artifact,
+or documented workflow-shape gap) showing Polymath adds workflow,
+critique, safety, or artifact value beyond the official surface — is
+recorded in
+[`shared/stability-evidence.json`](../shared/stability-evidence.json)
+as `distinct_value_url` and enforced by `tools/check-stability-evidence.py`
+(rule `STABILITY-1`). Without it the ledger blocks the promotion.
 
 ## 3. Per-plugin audit
 

@@ -1,0 +1,115 @@
+schemaVersion: 0.1
+name: decideUnderAmbiguity
+version: 0.1.0
+description: Frame the context, ledger the unknowns, compare options, red-team, govern with DACI, and record an ADR.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-decisions
+    - polymath-thinking
+    - polymath-writing
+inputs:
+  - name: decision
+    type: string
+    required: true
+    description: The decision question in one sentence (used to derive the slug).
+  - name: options
+    type: string
+    required: false
+    description: Candidate options to compare. If omitted, the compare step surfaces them, including a do-nothing option.
+  - name: reversibility
+    type: enum
+    values: [one-way, two-way, unknown]
+    default: unknown
+    description: Hint whether to favor decide-and-revise (two-way) or wait-for-evidence (one-way). The evidence step resolves it.
+guards:
+  - id: decision-dirs
+    type: command
+    command: mkdir -p docs/decisions docs/adrs && [ -w docs/decisions ]
+steps:
+  - id: frame
+    invoke: polymath-decisions:cynefin-frame
+    prompt: |
+      Classify the context for "${inputs.decision}" (Clear / Complicated / Complex / Chaotic).
+      If Clear, recommend short-circuiting to a one-line ADR; if Chaotic, recommend respondToIncident and stop.
+      Save docs/decisions/${workflow.slug}-cynefin.md.
+    artifacts:
+      - docs/decisions/${workflow.slug}-cynefin.md
+  - id: evidence
+    invoke: polymath-decisions:evidence-ledger
+    prompt: |
+      Build the evidence ledger for "${inputs.decision}": facts, assumptions, and unknowns.
+      Resolve reversibility (input hint: ${inputs.reversibility}). Save docs/decisions/${workflow.slug}-evidence.md.
+    needs: [frame]
+    artifacts:
+      - docs/decisions/${workflow.slug}-evidence.md
+  - id: compare
+    invoke: polymath-decisions:tradeoff-matrix
+    prompt: |
+      Compare the options for "${inputs.decision}" (${inputs.options}) against weighted criteria.
+      Import the unknowns from the evidence ledger as a "What would change the answer" section and flag any
+      criterion whose score rests on an unresolved unknown. Save docs/decisions/${workflow.slug}-tradeoff.md.
+    needs: [evidence]
+    artifacts:
+      - docs/decisions/${workflow.slug}-tradeoff.md
+  - id: challenge
+    invoke: polymath-thinking:red-team
+    prompt: |
+      Red-team the leading option and the load-bearing assumptions in the ledger. State which objections, if
+      unaddressed, should block the decision versus be accepted as residual risk. Cite the line each objection targets.
+    needs: [compare]
+  - id: govern
+    invoke: polymath-decisions:daci
+    prompt: |
+      Assign one Driver, one Approver (different person), Contributors, Informed, and a real deadline for
+      "${inputs.decision}". Carry forward the top unresolved unknowns and residual red-team objections so the
+      Approver decides with eyes open. Save docs/decisions/${workflow.slug}-daci.md.
+    needs: [challenge]
+    artifacts:
+      - docs/decisions/${workflow.slug}-daci.md
+  - id: record
+    invoke: polymath-writing:adr
+    prompt: |
+      Record the decision in Nygard format with an "Open questions / revisit triggers" section carrying the
+      unresolved unknowns and the evidence that would justify superseding it. Save docs/adrs/NNNN-${workflow.slug}.md.
+    needs: [govern]
+    artifacts:
+      - docs/adrs/NNNN-${workflow.slug}.md
+mustPass:
+  - id: decision-docs-only
+    type: diffConstraint
+    filesChanged:
+      min: 4
+      max: 30
+    pathAllowlist:
+      - "docs/decisions/**"
+      - "docs/adrs/**"
+  - id: cynefin-exists
+    type: fileExists
+    path: docs/decisions/${workflow.slug}-cynefin.md
+  - id: evidence-exists
+    type: fileExists
+    path: docs/decisions/${workflow.slug}-evidence.md
+  - id: evidence-names-unknowns
+    type: fileMatches
+    path: docs/decisions/${workflow.slug}-evidence.md
+    pattern: "([Uu]nknown|[Aa]ssumption|would change|[Cc]onfidence)"
+  - id: tradeoff-exists
+    type: fileExists
+    path: docs/decisions/${workflow.slug}-tradeoff.md
+  - id: daci-exists
+    type: fileExists
+    path: docs/decisions/${workflow.slug}-daci.md
+  - id: adr-recorded
+    type: commandSucceeds
+    command: ls docs/adrs/*${workflow.slug}*.md
+  - id: daci-has-approver-deadline
+    type: fileMatches
+    severity: advisory
+    path: docs/decisions/${workflow.slug}-daci.md
+    pattern: "([Aa]pprover).*([Dd]eadline)"
+  - id: challenge-adversarial
+    type: stepSummaryMatches
+    severity: advisory
+    step: challenge
+    pattern: "(objection|assumption|reverse|residual|evidence)"

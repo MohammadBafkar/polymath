@@ -1,0 +1,71 @@
+schemaVersion: 0.1
+name: deliberationLoop
+version: 0.1.0
+description: Observe, frame, compare options, red-team, and produce a revised plan.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-thinking
+    - polymath-decisions
+    - polymath-planning
+inputs:
+  - name: subject
+    type: string
+    required: true
+    description: Plan, design, idea, implementation, document, or problem to deliberate.
+  - name: mode
+    type: enum
+    values: [plan, design, implementation, document, idea, problem]
+    default: plan
+    description: The kind of subject being evaluated.
+  - name: artifactPath
+    type: string
+    required: false
+    description: Optional local artifact path to inspect.
+steps:
+  - id: deliberate
+    invoke: polymath-thinking:deliberate
+    prompt: |
+      Run an observe-frame-options-tradeoffs-risks-revise loop for ${inputs.subject}.
+      Mode: ${inputs.mode}. If ${inputs.artifactPath} is non-empty, inspect that artifact first.
+      The deliberate skill composes brainstorm (divergence), red-team (critique), and pre-mortem
+      (failure modes) — produce a Critique section in the output, not a separate critique pass.
+      Save the durable result to docs/thinking/${workflow.slug}-deliberation.md.
+    artifacts:
+      - docs/thinking/${workflow.slug}-deliberation.md
+  - id: tradeoffs
+    invoke: polymath-decisions:tradeoff-matrix
+    prompt: |
+      Use docs/thinking/${workflow.slug}-deliberation.md to compare the viable options.
+      Save the matrix to docs/decisions/${workflow.slug}-tradeoff.md and name the tie-breaker.
+    needs: [deliberate]
+    artifacts:
+      - docs/decisions/${workflow.slug}-tradeoff.md
+  - id: revised-plan
+    invoke: polymath-planning:write-plan
+    prompt: |
+      Write a revised plan for ${inputs.subject}, using the deliberation (which already includes a
+      red-team + pre-mortem critique) and the tradeoff matrix. Save it to docs/plans/${workflow.slug}.md.
+      Include validation and rollback or exit criteria, and carry forward the residual risk the critique named.
+    needs: [tradeoffs]
+    artifacts:
+      - docs/plans/${workflow.slug}.md
+mustPass:
+  - id: deliberation-nonempty
+    type: commandSucceeds
+    command: test -s docs/thinking/${workflow.slug}-deliberation.md
+  - id: deliberation-exists
+    type: fileExists
+    path: docs/thinking/${workflow.slug}-deliberation.md
+  - id: recommendation-present
+    type: fileMatches
+    path: docs/thinking/${workflow.slug}-deliberation.md
+    pattern: "(Recommendation|recommendation)"
+  - id: critique-present
+    type: fileMatches
+    severity: advisory
+    path: docs/thinking/${workflow.slug}-deliberation.md
+    pattern: "(Critique|objection|assumption|reverse|risk)"
+  - id: plan-exists
+    type: fileExists
+    path: docs/plans/${workflow.slug}.md

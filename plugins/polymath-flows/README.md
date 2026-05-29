@@ -1,12 +1,12 @@
 # polymath-flows
 
-flows-lite: a deterministic serial workflow runner for the Polymath marketplace. v0.1 ships the `shipFeature` workflow end-to-end.
+flows-lite: a deterministic serial workflow runner for the Polymath marketplace. v0.1 ships SDLC workflows such as `shipFeature`, `activateProject`, and `deliberationLoop`.
 
 ## What it ships
 
 - Skills: `run-workflow`, `resume-workflow`, `list-workflows`.
 - Executable: `bin/polymath-flow` — owns YAML validation, state, mustPass checks.
-- Workflows: `workflows/shipFeature.yaml`.
+- Workflows: YAML files under `workflows/`, including `activateProject`, `deliberationLoop`, `shipFeature`, and the thinking/design family `decideUnderAmbiguity`, `rootCauseAnalysis`, `fuzzyGoalToPlan`, and `designSystem`.
 
 ## Why two layers (skill + executable)?
 
@@ -47,6 +47,8 @@ claude plugin install polymath-flows@polymath
 
 ```bash
 claude
+> /polymath-flows:run-workflow activateProject
+> /polymath-flows:run-workflow deliberationLoop subject="Project onboarding for Polymath" mode=plan
 > /polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small
 ```
 

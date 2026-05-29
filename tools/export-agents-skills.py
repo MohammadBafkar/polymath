@@ -52,6 +52,44 @@ DEFAULT_OUT = REPO / "dist" / "agents-skills"
 
 FM_NAME = re.compile(r"^name:\s*([^\n]+)$", re.MULTILINE)
 TEMPLATE_LINK = re.compile(r"\((\.\./\.\./templates/[^)]+)\)")
+# Cross-skill link in the source tree: ../../../<plugin>/skills/<skill>/SKILL.md
+SIBLING_LINK = re.compile(r"\((?:\.\./)+([a-z0-9-]+)/skills/([a-z0-9-]+)/SKILL\.md\)")
+# Any remaining relative link with a `../` target — strip to plain label text.
+OTHER_REL_LINK = re.compile(r"\[([^\]]+)\]\((?:\.\./)+[^)]*\)")
+# A link target that is allowed to contain `../` after rewriting (sibling skill).
+ALLOWED_REL_TARGET = re.compile(r"^\.\./[a-z0-9-]+/SKILL\.md$")
+LINK_TARGET = re.compile(r"\]\(([^)]+)\)")
+
+# Tokens whose presence means the skill body instructs the agent to use a
+# Claude-Code-only surface that a generic agentskills.io host does not provide.
+CLAUDE_COUPLING = [
+    (re.compile(r"\bMCP\b|mcp__|MCP server", re.IGNORECASE), "MCP server"),
+    (re.compile(r"SessionStart|CLAUDE_PLUGIN_DATA|project-context\.json"), "SessionStart hook / plugin data"),
+    (re.compile(r"\brun-workflow\b|polymath-flow\b|/polymath-flows:"), "polymath-flows runner"),
+    (re.compile(r"hooks/scripts/"), "hook script path"),
+]
+COUPLED_MARKER = "<!-- portability:claude-coupled -->"
+
+
+def coupling_reasons(body: str) -> list[str]:
+    """Return the distinct Claude-only surfaces this skill body depends on."""
+    reasons: list[str] = []
+    for rx, label in CLAUDE_COUPLING:
+        if rx.search(body) and label not in reasons:
+            reasons.append(label)
+    return reasons
+
+
+def coupling_banner(reasons: list[str]) -> str:
+    joined = ", ".join(reasons)
+    return (
+        f"{COUPLED_MARKER}\n"
+        f"> **Portability note (exported from Polymath).** This skill references "
+        f"Claude Code surfaces ({joined}) that a generic agentskills.io host does "
+        f"not provide. Steps that depend on them will not run here — use this skill "
+        f"on Claude Code, or substitute your harness's equivalent tool. See "
+        f"PORTABILITY.md in the Polymath repo.\n\n"
+    )
 
 
 def parse_frontmatter(text: str) -> tuple[str, str, str]:
@@ -95,6 +133,21 @@ def export_skill(skill_dir: pathlib.Path, plugin: pathlib.Path, out_root: pathli
         return f"({target})"
     new_body = TEMPLATE_LINK.sub(_sub, body)
 
+    # Rewrite cross-skill links to the flat exported sibling-dir form:
+    # ../../../<plugin>/skills/<skill>/SKILL.md  →  ../<plugin>-<skill>/SKILL.md
+    new_body = SIBLING_LINK.sub(
+        lambda m: f"(../{m.group(1)}-{m.group(2)}/SKILL.md)", new_body
+    )
+    # Any remaining `../` link (to shared/, docs/, …) does not exist in the flat
+    # bundle — drop the link, keep the label as plain text so nothing 404s.
+    new_body = OTHER_REL_LINK.sub(lambda m: m.group(1), new_body)
+
+    # Prepend an environment-requirements banner when the body depends on a
+    # Claude-Code-only surface, so the exported file is honest on its own.
+    reasons = coupling_reasons(new_body)
+    if reasons:
+        new_body = coupling_banner(reasons) + new_body
+
     (dest / "SKILL.md").write_text(f"---{new_fm}---\n{new_body}{trailing}")
 
     # Copy referenced templates (if any).
@@ -121,7 +174,24 @@ def export_skill(skill_dir: pathlib.Path, plugin: pathlib.Path, out_root: pathli
         "source_skill": skill_name,
         "source_path": str(src_skill.relative_to(REPO)),
         "templates_copied": copied,
+        "portability": "claude-coupled" if reasons else "portable",
+        "claudeCoupledReasons": reasons,
     }
+
+
+def lint_output(out_root: pathlib.Path) -> list[str]:
+    """Fail-closed check over the written bundle: no dead `../` links survive,
+    and every Claude-coupled body carries the banner marker."""
+    problems: list[str] = []
+    for skill_md in sorted(out_root.glob("*/SKILL.md")):
+        text = skill_md.read_text()
+        rel = skill_md.relative_to(out_root)
+        for target in LINK_TARGET.findall(text):
+            if "../" in target and not ALLOWED_REL_TARGET.match(target):
+                problems.append(f"{rel}: unrewritten relative link `{target}`")
+        if coupling_reasons(text) and COUPLED_MARKER not in text:
+            problems.append(f"{rel}: depends on a Claude-only surface but has no portability banner")
+    return problems
 
 
 def main() -> int:
@@ -150,11 +220,15 @@ def main() -> int:
             entry = export_skill(skill_dir, plugin, out_root)
             entries.append(entry)
 
+    portable_count = sum(1 for e in entries if e["portability"] == "portable")
+    coupled_count = len(entries) - portable_count
     manifest = {
         "spec": "agentskills.io",
         "specVersion": "1.0",
         "marketplace": "polymath",
         "skillCount": len(entries),
+        "portableCount": portable_count,
+        "claudeCoupledCount": coupled_count,
         "skills": entries,
         "notExported": {
             "rationale": "These surfaces are Claude-Code-specific and do not port via the SKILL.md standard. See docs/PORTABILITY.md.",
@@ -172,8 +246,22 @@ def main() -> int:
     }
     (out_root / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
-    print(f"export-agents-skills: wrote {len(entries)} skill(s) to {out_root.relative_to(REPO)}")
-    print(f"manifest:              {(out_root / 'manifest.json').relative_to(REPO)}")
+    def display(p: pathlib.Path) -> pathlib.Path | str:
+        try:
+            return p.relative_to(REPO)
+        except ValueError:
+            return p
+    print(f"export-agents-skills: wrote {len(entries)} skill(s) to {display(out_root)}")
+    print(f"manifest:              {display(out_root / 'manifest.json')}")
+    print(f"portability:           {portable_count} portable, {coupled_count} Claude-coupled (bannered)")
+
+    problems = lint_output(out_root)
+    if problems:
+        for p in problems:
+            print(f"::error::export lint: {p}", file=sys.stderr)
+        print(f"\nexport-agents-skills: {len(problems)} portability problem(s)", file=sys.stderr)
+        return 1
+    print("export lint:           OK — no dead relative links; coupled skills bannered")
     return 0
 
 

@@ -4,7 +4,7 @@ Platform craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `devex-metrics`, `golden-path`, `service-catalog-entry`.
+- Skills: `devex-metrics`, `golden-path`, `service-catalog-entry`, `production-readiness-review`.
 
 ## Installation
 

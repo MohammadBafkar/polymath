@@ -1,5 +1,16 @@
 # Changelog — polymath-core
 
+## [Unreleased]
+
+### Added
+
+- `initialize-project` skill and `/init-project` command to generate
+  `.polymath/project.yaml`, capability mappings, and onboarding notes
+  from an existing repository.
+- Project-context schema support for `setup:` and `polymath:` activation
+  metadata, including required tools, environment variable names,
+  recommended plugins, workflows, and compatible agent surfaces.
+
 ## [0.1.0]
 
 ### Added

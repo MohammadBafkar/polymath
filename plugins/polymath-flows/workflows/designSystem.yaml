@@ -1,0 +1,143 @@
+schemaVersion: 0.1
+name: designSystem
+version: 0.1.0
+description: Orient, frame, deliberate, trade off, document, threat-model, record, and red-team a system design under uncertainty.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-decisions
+    - polymath-thinking
+    - polymath-writing
+    - polymath-security
+inputs:
+  - name: subject
+    type: string
+    required: true
+    description: The system or change to design (one sentence). Drives the slug.
+  - name: scope
+    type: enum
+    values: [small, medium, large]
+    default: medium
+    description: Gates STRIDE depth (small may skip with justification) and ADR-status defaulting.
+  - name: docKind
+    type: enum
+    values: [architecture-doc, rfc]
+    default: architecture-doc
+    description: Selects the design-doc shape — C4 architecture-doc for durable systems, or rfc for group review with first-class Unresolved-questions.
+  - name: assumptions
+    type: string
+    required: false
+    description: Known gaps / assumptions the requester is already aware of, seeded into the deliberate step.
+  - name: codePath
+    type: string
+    required: false
+    default: "."
+    description: Path or glob the orient step should read.
+guards:
+  - id: design-dirs
+    type: command
+    command: mkdir -p docs/design docs/architecture docs/rfcs docs/adrs docs/threat-models && [ -w docs/design ]
+steps:
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: |
+      Map the existing area the design touches under ${inputs.codePath}. Produce a one-page orientation and
+      explicitly list what is NOT yet known from the codebase. Save docs/design/${workflow.slug}-orient.md.
+    artifacts:
+      - docs/design/${workflow.slug}-orient.md
+  - id: frame
+    invoke: polymath-decisions:cynefin-frame
+    prompt: |
+      Classify the design problem for "${inputs.subject}" (Clear / Complicated / Complex / Chaotic). This sets the
+      expected confidence downstream — under high uncertainty the recommendation stays provisional.
+      Save docs/design/${workflow.slug}-frame.md.
+    needs: [orient]
+    artifacts:
+      - docs/design/${workflow.slug}-frame.md
+  - id: options
+    invoke: polymath-thinking:deliberate
+    prompt: |
+      Deliberate the design options using orient + frame + the requester's assumptions (${inputs.assumptions}).
+      Label facts vs assumptions, enumerate viable options, and per assumption name the evidence/spike that would
+      confirm or falsify it. Save docs/design/${workflow.slug}-deliberation.md.
+    needs: [frame]
+    artifacts:
+      - docs/design/${workflow.slug}-deliberation.md
+  - id: compare
+    invoke: polymath-decisions:tradeoff-matrix
+    prompt: |
+      Score the viable options against weighted criteria; name the tie-breaker and flag where the numeric winner
+      depends on an unverified assumption. Save docs/design/${workflow.slug}-tradeoff.md.
+    needs: [options]
+    artifacts:
+      - docs/design/${workflow.slug}-tradeoff.md
+  - id: design-doc
+    invoke: polymath-writing:architecture-doc
+    prompt: |
+      Write the chosen design. If ${inputs.docKind} is rfc, follow polymath-writing:rfc conventions and write
+      docs/rfcs/${workflow.slug}.md; otherwise write a C4 architecture-doc at docs/architecture/${workflow.slug}.md.
+      Either way include explicit Assumptions, Open Unknowns, and Evidence-that-would-change-this sections.
+    needs: [compare]
+    artifacts:
+      - docs/architecture/${workflow.slug}.md
+  - id: threat-model
+    invoke: polymath-security:stride-threat-model
+    prompt: |
+      STRIDE-model the chosen design's data flow; each threat names a mitigation + owner. Skip with a one-line
+      justification ONLY when ${inputs.scope} is small and no external trust boundary is crossed.
+      Save docs/threat-models/${workflow.slug}.md.
+    needs: [design-doc]
+    artifacts:
+      - docs/threat-models/${workflow.slug}.md
+  - id: decision
+    invoke: polymath-writing:adr
+    prompt: |
+      Record the architectural decision in Nygard format with rejected alternatives and the assumptions it rests on.
+      Mark status Proposed (not Accepted) when the frame step classified the problem Complex or Chaotic.
+      Save docs/adrs/NNNN-${workflow.slug}.md.
+    needs: [threat-model]
+    artifacts:
+      - docs/adrs/NNNN-${workflow.slug}.md
+  - id: challenge
+    invoke: polymath-thinking:red-team
+    prompt: |
+      Red-team the leading design across the design doc, tradeoff matrix, threat model, and ADR: strongest
+      unrefuted objection, the assumption most likely wrong, and the single evidence that would reverse it.
+      Save docs/design/${workflow.slug}-challenge.md.
+    needs: [decision]
+    artifacts:
+      - docs/design/${workflow.slug}-challenge.md
+mustPass:
+  - id: design-docs-only
+    type: diffConstraint
+    filesChanged:
+      min: 5
+      max: 40
+    pathAllowlist:
+      - "docs/**"
+  - id: design-doc-nonempty
+    type: commandSucceeds
+    command: test -s docs/architecture/${workflow.slug}.md || test -s docs/rfcs/${workflow.slug}.md
+  - id: deliberation-nonempty
+    type: commandSucceeds
+    command: test -s docs/design/${workflow.slug}-deliberation.md
+  - id: design-names-assumptions
+    type: commandSucceeds
+    command: grep -qiE '(assumption|unknown|open question|evidence)' docs/architecture/${workflow.slug}.md docs/rfcs/${workflow.slug}.md 2>/dev/null
+  - id: adr-recorded
+    type: commandSucceeds
+    command: ls docs/adrs/*${workflow.slug}*.md
+  - id: challenge-exists
+    type: fileExists
+    path: docs/design/${workflow.slug}-challenge.md
+  - id: tradeoff-has-criteria
+    type: fileMatches
+    severity: advisory
+    path: docs/design/${workflow.slug}-tradeoff.md
+    pattern: "(weight|tie-?breaker|criteria)"
+  - id: threat-ran-or-skipped
+    type: stepSummaryMatches
+    severity: advisory
+    step: threat-model
+    pattern: "(STRIDE|threat|mitigation|skip)"

@@ -29,6 +29,7 @@ import textwrap
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SITE_DIR = REPO_ROOT / "docs" / "site"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
+CATALOG_JSON = REPO_ROOT / "shared" / "polymath-catalog.json"
 
 
 CATEGORY_ORDER = [
@@ -58,6 +59,13 @@ CATEGORY_ORDER = [
 
 def load_marketplace() -> dict:
     return json.loads(MARKETPLACE_JSON.read_text())
+
+
+def load_catalog_statuses() -> dict[str, str]:
+    if not CATALOG_JSON.exists():
+        return {}
+    data = json.loads(CATALOG_JSON.read_text())
+    return {name: entry.get("status", "experimental") for name, entry in data.get("plugins", {}).items()}
 
 
 def plugin_readme(plugin_dir: pathlib.Path) -> str:
@@ -255,6 +263,7 @@ def write_if_changed(path: pathlib.Path, content: str, check: bool) -> bool:
 
 def build(check: bool) -> int:
     marketplace = load_marketplace()
+    statuses = load_catalog_statuses()
     plugins = marketplace.get("plugins", [])
     grouped: dict[str, list[dict]] = {}
     for p in plugins:
@@ -290,7 +299,7 @@ def build(check: bool) -> int:
         cards = ['<div class="cards">']
         for p in sorted(grouped[cat], key=lambda x: x["name"]):
             name = p["name"]
-            status = p.get("status", "experimental")
+            status = statuses.get(name, "experimental")
             cards.append('<div class="card">')
             badge = (
                 f'<span class="status status-{html.escape(status)}">{html.escape(status)}</span>'

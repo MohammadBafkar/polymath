@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Append a user-facing entry to CHANGELOG.md under [Unreleased] using the Keep-a-Changelog format mapped from Conventional Commits.
+description: Slash entry point after a change lands — adds one [Unreleased] line to the changelog.
 ---
 
 # /changelog

@@ -1,0 +1,109 @@
+schemaVersion: 0.1
+name: fuzzyGoalToPlan
+version: 0.1.0
+description: Disambiguate a vague goal, then story-map, break down, estimate, and write an executable plan that carries its assumptions.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-thinking
+    - polymath-product
+    - polymath-planning
+inputs:
+  - name: goal
+    type: string
+    required: true
+    description: The fuzzy / under-specified goal to turn into a plan, in the user's own words.
+  - name: releases
+    type: number
+    required: false
+    default: 2
+    description: Intended number of releases for the story map (walking skeleton + N).
+  - name: contextPath
+    type: string
+    required: false
+    description: Optional path to an existing PRD, doc, or ticket that grounds the goal in evidence rather than assumption.
+guards:
+  - id: plan-dirs
+    type: command
+    command: mkdir -p docs/thinking docs/maps docs/plans && [ -w docs/plans ]
+steps:
+  - id: frame-goal
+    invoke: polymath-thinking:deliberate
+    prompt: |
+      Disambiguate "${inputs.goal}" BEFORE any decomposition. Separate facts from assumptions, enumerate
+      unknowns, and per unknown state the evidence that would change the plan. If too vague to frame even with
+      named assumptions, say so and pause. Ground in ${inputs.contextPath} if non-empty.
+      Save docs/thinking/${workflow.slug}-framing.md with explicit Assumptions and Unknowns sections.
+    artifacts:
+      - docs/thinking/${workflow.slug}-framing.md
+  - id: story-map
+    invoke: polymath-product:decompose-epic
+    prompt: |
+      Build a story map from the framed goal (${inputs.releases} releases): backbone activities, vertical
+      shippable slices, a walking skeleton. Treat the framing doc as a lightweight PRD. Mark any story whose
+      scope depends on an open unknown with [ASSUMES: ...]. Save docs/maps/${workflow.slug}.md.
+    needs: [frame-goal]
+    artifacts:
+      - docs/maps/${workflow.slug}.md
+  - id: work-breakdown
+    invoke: polymath-planning:work-breakdown
+    prompt: |
+      Decompose the walking-skeleton stories into independently completable steps, each a leading verb producing
+      an observable artifact; name the critical path; no bare "investigate" steps. Save docs/plans/${workflow.slug}-breakdown.md.
+    needs: [story-map]
+    artifacts:
+      - docs/plans/${workflow.slug}-breakdown.md
+  - id: estimate
+    invoke: polymath-planning:estimate
+    prompt: |
+      Three-point PERT estimate per breakdown step; flag steps with P/O > 3 as poorly scoped (the quantitative
+      signal of residual ambiguity); report the critical-path mean plus a range, not a single date.
+      Save docs/plans/${workflow.slug}-estimate.md.
+    needs: [work-breakdown]
+    artifacts:
+      - docs/plans/${workflow.slug}-estimate.md
+  - id: write-plan
+    invoke: polymath-planning:write-plan
+    prompt: |
+      Consolidate framing, story map, breakdown, and estimate into docs/plans/${workflow.slug}.md. The Why must
+      quote the named assumptions; Out-of-scope must list the unknowns deliberately deferred; Verification must be observable.
+    needs: [estimate]
+    artifacts:
+      - docs/plans/${workflow.slug}.md
+mustPass:
+  - id: planning-docs-only
+    type: diffConstraint
+    filesChanged:
+      min: 4
+      max: 30
+    pathAllowlist:
+      - "docs/thinking/**"
+      - "docs/maps/**"
+      - "docs/plans/**"
+  - id: framing-exists
+    type: fileExists
+    path: docs/thinking/${workflow.slug}-framing.md
+  - id: plan-nonempty
+    type: commandSucceeds
+    command: test -s docs/plans/${workflow.slug}.md
+  - id: framing-names-assumptions
+    type: fileMatches
+    path: docs/thinking/${workflow.slug}-framing.md
+    pattern: "([Aa]ssumption)"
+  - id: framing-names-unknowns
+    type: fileMatches
+    path: docs/thinking/${workflow.slug}-framing.md
+    pattern: "([Uu]nknown|would change|evidence)"
+  - id: plan-has-out-of-scope
+    type: fileMatches
+    severity: advisory
+    path: docs/plans/${workflow.slug}.md
+    pattern: "(Out of scope|Out-of-scope|Non-goal)"
+  - id: estimate-surfaces-range
+    type: fileMatches
+    severity: advisory
+    path: docs/plans/${workflow.slug}-estimate.md
+    pattern: "(Mean|Range|range|P/O)"
+  - id: breakdown-exists
+    type: fileExists
+    path: docs/plans/${workflow.slug}-breakdown.md

@@ -12,6 +12,15 @@ Skills port. Everything else (commands, hooks, MCP config, workflows,
 agents, artifact JSON schemas) is Claude-Code-specific and does
 **not** port via the SKILL.md standard.
 
+A subset of skills *reference* a Claude-only surface in their body — a
+connector's MCP server, the SessionStart project-context snapshot, or the
+polymath-flows runner. The file still copies, but those steps cannot run on a
+generic host, so the exporter marks each skill `portable` or `claude-coupled`
+in `manifest.json` and prepends a one-line portability banner to every
+`claude-coupled` SKILL.md. The export fails closed (`tools/export-agents-skills.py`
+returns non-zero) if a coupled skill is missing its banner or any cross-skill /
+`../` link did not get rewritten to the flat bundle layout.
+
 ```bash
 # From a Polymath checkout:
 python3 tools/export-agents-skills.py --clean

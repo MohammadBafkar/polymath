@@ -7,22 +7,7 @@
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
   "metadata": {
-    "version": "0.1.0",
-    "license": "Apache-2.0",
-    "homepage": "https://github.com/MohammadBafkar/Polymath",
-    "agentSkills": {
-      "version": "1.0",
-      "interop": [
-        "claude-code",
-        "claude-api",
-        "codex",
-        "cursor",
-        "gemini-cli",
-        "goose",
-        "jetbrains-junie"
-      ],
-      "notes": "Polymath declares conformance with the agentskills.io v1.0 open standard for SKILL.md format. All skills under this marketplace use the SKILL.md shape: frontmatter (name + description \u2264 200 chars) + body procedure. Skills are portable across any harness that implements the standard."
-    }
+    "version": "0.1.0"
   },
   "plugins": [
     {
@@ -38,8 +23,7 @@
         "grafana",
         "honeycomb",
         "elastic"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-core",
@@ -51,8 +35,7 @@
         "foundation",
         "core",
         "conventions"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-infra-cloud",
@@ -69,8 +52,7 @@
         "terraform",
         "iac",
         "patterns"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-product",
@@ -82,8 +64,7 @@
         "product",
         "prd",
         "acceptance-criteria"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-engineering",
@@ -95,8 +76,7 @@
         "engineering",
         "tdd",
         "code-review"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-release",
@@ -108,8 +88,7 @@
         "release",
         "changelog",
         "conventional-commits"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-flows",
@@ -122,8 +101,7 @@
         "workflow",
         "shipFeature",
         "reviewPR"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-thinking",
@@ -137,8 +115,7 @@
         "5-whys",
         "pre-mortem",
         "red-team"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-planning",
@@ -150,8 +127,7 @@
         "planning",
         "wbs",
         "estimate"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-writing",
@@ -165,8 +141,7 @@
         "rfc",
         "runbook",
         "c4"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-qa",
@@ -178,8 +153,7 @@
         "qa",
         "tests",
         "coverage"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-security",
@@ -191,8 +165,7 @@
         "security",
         "stride",
         "owasp"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-frontend",
@@ -204,8 +177,7 @@
         "frontend",
         "web-vitals",
         "bundle"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-backend",
@@ -218,8 +190,7 @@
         "api",
         "rest",
         "migrations"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-data",
@@ -231,8 +202,7 @@
         "sql",
         "metrics",
         "analytics"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-ai",
@@ -245,8 +215,7 @@
         "llm",
         "rag",
         "eval"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-platform",
@@ -258,8 +227,7 @@
         "platform",
         "devex",
         "dora"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-infra-postgres",
@@ -271,8 +239,7 @@
         "postgres",
         "migrations",
         "database"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-devops",
@@ -284,8 +251,7 @@
         "devops",
         "docker",
         "ci"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-infra-kubernetes",
@@ -298,8 +264,7 @@
         "k8s",
         "rbac",
         "pss"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-sre",
@@ -311,8 +276,7 @@
         "sre",
         "slo",
         "chaos"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-observability",
@@ -325,8 +289,7 @@
         "tracing",
         "metrics",
         "otel"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-incident",
@@ -338,21 +301,19 @@
         "incident",
         "postmortem",
         "comms"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-connector-github",
       "source": "./plugins/polymath-connector-github",
       "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "connector",
       "tags": [
         "connector",
         "github",
         "mcp"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-jira",
@@ -364,8 +325,7 @@
         "connector",
         "jira",
         "atlassian"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-pagerduty",
@@ -377,8 +337,7 @@
         "connector",
         "pagerduty",
         "incident"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-datadog",
@@ -390,8 +349,7 @@
         "connector",
         "datadog",
         "observability"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-snyk",
@@ -403,8 +361,7 @@
         "connector",
         "snyk",
         "security"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-author",
@@ -416,8 +373,7 @@
         "author",
         "governance",
         "conformance"
-      ],
-      "status": "beta"
+      ]
     },
     {
       "name": "polymath-decisions",
@@ -430,8 +386,7 @@
         "daci",
         "tradeoff",
         "cynefin"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-research",
@@ -444,8 +399,7 @@
         "interview",
         "persona",
         "journey"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-design",
@@ -458,8 +412,7 @@
         "a11y",
         "wcag",
         "ui"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-communication",
@@ -471,8 +424,7 @@
         "communication",
         "exec-brief",
         "six-pager"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-leadership",
@@ -485,8 +437,7 @@
         "1on1",
         "perf-review",
         "okr"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-learning",
@@ -498,8 +449,7 @@
         "learning",
         "explain",
         "feynman"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-performance",
@@ -511,8 +461,7 @@
         "performance",
         "latency",
         "caching"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-content",
@@ -525,8 +474,7 @@
         "release-notes",
         "sunset",
         "advisory"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-mobile",
@@ -538,8 +486,7 @@
         "mobile",
         "push",
         "deeplinks"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-slack",
@@ -551,8 +498,7 @@
         "connector",
         "slack",
         "comms"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-sentry",
@@ -564,8 +510,7 @@
         "connector",
         "sentry",
         "errors"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-linear",
@@ -577,21 +522,19 @@
         "connector",
         "linear",
         "issues"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-statuspage",
       "source": "./plugins/polymath-connector-statuspage",
-      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
+      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity→impact + customer-safe body).",
       "version": "0.1.0",
       "category": "connector",
       "tags": [
         "connector",
         "statuspage",
         "public-comms"
-      ],
-      "status": "experimental"
+      ]
     },
     {
       "name": "polymath-connector-terraform",
@@ -603,8 +546,7 @@
         "connector",
         "terraform",
         "iac"
-      ],
-      "status": "experimental"
+      ]
     }
   ]
 }

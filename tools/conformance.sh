@@ -35,23 +35,27 @@ check_one() {
       && echo "  ✓ MANIFEST-2: required fields present" \
       || { echo "  ✗ MANIFEST-2: required field(s) missing"; fail=1; }
     # MANIFEST-3: maturity tier (`status`) declared for this plugin in
-    # marketplace.json. Lives there rather than in plugin.json because
-    # Claude Code's `plugin validate --strict` rejects any unknown top-level
-    # field in plugin.json; marketplace.json is the catalog's own schema.
+    # shared/polymath-catalog.json. Lives there rather than in
+    # .claude-plugin/marketplace.json because Claude Code's
+    # `plugin validate --strict` rejects unknown fields like `status` on
+    # plugin entries; the catalog file is Polymath's own schema.
     python3 -c "
 import json, sys, pathlib
-mp = json.load(open(pathlib.Path(sys.argv[2]).resolve()))
+cat = json.load(open(pathlib.Path(sys.argv[2]).resolve()))
+mp = json.load(open(pathlib.Path(sys.argv[3]).resolve()))
 name = json.load(open(sys.argv[1])).get('name')
-entry = next((p for p in mp.get('plugins', []) if p.get('name') == name), None)
-if entry is None:
+if not any(p.get('name') == name for p in mp.get('plugins', [])):
     raise SystemExit(f'plugin {name!r} not listed in marketplace.json')
+entry = cat.get('plugins', {}).get(name)
+if entry is None:
+    raise SystemExit(f'plugin {name!r} not listed in shared/polymath-catalog.json')
 s = entry.get('status')
 allowed = {'stable', 'beta', 'experimental', 'deprecated'}
 if s not in allowed:
-    raise SystemExit(f'status missing or invalid in marketplace.json: {s!r} (allowed: {sorted(allowed)})')
-" "$manifest" "$root/.claude-plugin/marketplace.json" 2>&1 \
-      && echo "  ✓ MANIFEST-3: status declared in marketplace.json (stable / beta / experimental / deprecated)" \
-      || { echo "  ✗ MANIFEST-3: status missing or invalid in marketplace.json"; fail=1; }
+    raise SystemExit(f'status missing or invalid in shared/polymath-catalog.json: {s!r} (allowed: {sorted(allowed)})')
+" "$manifest" "$root/shared/polymath-catalog.json" "$root/.claude-plugin/marketplace.json" 2>&1 \
+      && echo "  ✓ MANIFEST-3: status declared in shared/polymath-catalog.json (stable / beta / experimental / deprecated)" \
+      || { echo "  ✗ MANIFEST-3: status missing or invalid in shared/polymath-catalog.json"; fail=1; }
   fi
   if command -v claude >/dev/null 2>&1; then
     if claude plugin validate --strict "$plugin_dir" >/dev/null 2>&1; then
@@ -205,6 +209,18 @@ if [[ "$mode" == "--all" ]]; then
   for plugin in "$root/plugins"/*/; do
     if ! check_one "${plugin%/}"; then overall=1; fi
   done
+  # Cross-plugin: marketplace.json, every plugin.json, and
+  # shared/polymath-catalog.json must agree on the plugin set and on
+  # per-plugin versions. Independent of whether the Claude CLI is
+  # installed; runs the same check in CI without claude on PATH.
+  echo
+  echo "── MANIFEST-3 cross-check (check-catalog.py)"
+  if python3 "$root/tools/check-catalog.py"; then
+    :
+  else
+    overall=1
+  fi
+
   # Cross-plugin: every in-scope README's connector-policy block must
   # match the policy table verbatim. Local block presence is checked
   # per-plugin above; this catches divergence after a policy-table edit.
@@ -223,6 +239,43 @@ if [[ "$mode" == "--all" ]]; then
   echo
   echo "── DOCS-2 cross-check (check-readme-inventory.py)"
   if python3 "$root/tools/check-readme-inventory.py"; then
+    :
+  else
+    overall=1
+  fi
+
+  # STABILITY-1: shared/stability-evidence.json must back every status
+  # claim in shared/polymath-catalog.json. The ledger is the receipt for
+  # a status flip — a plugin can only be `stable` once the ledger
+  # records a live bakeoff, live trigger, external adopter, promotion
+  # PR, and changelog entry. Connector/infra plugins additionally need
+  # primary-source distinct-value evidence. See docs/MATURITY.md.
+  echo
+  echo "── STABILITY-1 cross-check (check-stability-evidence.py)"
+  if python3 "$root/tools/check-stability-evidence.py"; then
+    :
+  else
+    overall=1
+  fi
+
+  # PROMOTION-1: skill-alias command descriptions must complement, not
+  # restate, their target skill (docs/PLUGIN-AUTHORING.md § 5.1). Command
+  # descriptions count against the per-plugin token budget, so a verbatim
+  # shim spends budget for zero added discoverability.
+  echo
+  echo "── PROMOTION-1 cross-check (check-command-overlap.py)"
+  if python3 "$root/tools/check-command-overlap.py"; then
+    :
+  else
+    overall=1
+  fi
+
+  # PROMOTION-2: every workflow step's `invoke: plugin:skill` must resolve
+  # to a real SKILL.md. Catches a workflow left pointing at a renamed or
+  # removed skill — no other gate checks this.
+  echo
+  echo "── PROMOTION-2 cross-check (check-workflow-invokes.py)"
+  if python3 "$root/tools/check-workflow-invokes.py"; then
     :
   else
     overall=1

@@ -36,6 +36,33 @@ if [[ -x "${script_dir}/load-project-context.py" ]]; then
   fi
 fi
 
+# --- first-run nudge ---
+# The highest-leverage onboarding moment is a fresh session in an
+# un-initialized repo: without this, the loader exits silently and the user
+# gets no signal that init-project exists. Surface exactly one suppressible
+# line when no project file resolved AND we are inside a git repo we have not
+# nudged before. Naturally suppressed once initialized (the loader then emits
+# a summary) and suppressed per-repo via the marker so it never nags.
+# If python3 is absent the loader, workflows, and most tooling are degraded.
+# Surface one actionable line instead of failing silently, and prefer it over
+# the init nudge (which points at init-project, itself needing python3).
+py_note=""
+if ! command -v python3 >/dev/null 2>&1; then
+  py_note="Polymath: python3 not found — project context, workflows, and hooks are degraded. Run /polymath-core:doctor."
+fi
+
+init_nudge=""
+if [[ -z "$project_summary" && -z "$py_note" ]] && command -v git >/dev/null 2>&1; then
+  repo_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ -n "$repo_root" ]]; then
+    nudge_marker="${data_root}/polymath-core/init-nudged"
+    if [[ ! -f "$nudge_marker" ]] || ! grep -Fxq "$repo_root" "$nudge_marker" 2>/dev/null; then
+      init_nudge="Polymath: this repo isn't initialized. Run /polymath-core:init-project to set up project context (or /polymath-core:doctor to check your tools)."
+      { mkdir -p "$(dirname "$nudge_marker")" && printf '%s\n' "$repo_root" >> "$nudge_marker"; } || true
+    fi
+  fi
+fi
+
 # --- paused workflows ---
 flows_workflows_dir="${data_root}/polymath-flows/workflows"
 # Older layouts wrote to ${data_root}/workflows; fall back if needed.
@@ -90,6 +117,16 @@ PY
 emitted=0
 if [[ -n "$project_summary" ]]; then
   echo "$project_summary"
+  emitted=1
+fi
+if [[ -n "$py_note" ]]; then
+  [[ $emitted -eq 1 ]] && echo
+  echo "$py_note"
+  emitted=1
+fi
+if [[ -n "$init_nudge" ]]; then
+  [[ $emitted -eq 1 ]] && echo
+  echo "$init_nudge"
   emitted=1
 fi
 if [[ ${#paused[@]} -gt 0 ]]; then

@@ -1,5 +1,5 @@
 ---
-description: Audit docker-compose.yaml for image pinning, volumes, networks, secrets, depends_on health-conditioning.
+description: Slash entry point to review a compose file before you ship it.
 ---
 
 Invoke `polymath-devops:audit-compose`.

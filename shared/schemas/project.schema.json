@@ -156,6 +156,85 @@
         "inherit_from": { "type": "string", "minLength": 1, "maxLength": 200 }
       }
     },
+    "setup": {
+      "description": "Onboarding and local setup metadata inferred from README, AGENTS.md, CLAUDE.md, docs, CI, and project config files. Used to tell coding agents which context to read, which tools to check, which environment variables matter, and what first steps a new contributor should take.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "context_sources": {
+          "description": "Repo files an agent should read first for project-specific expectations.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+        },
+        "required_tools": {
+          "description": "Tools expected in the local environment.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+              "version": { "type": "string", "maxLength": 80 },
+              "check": { "type": "string", "maxLength": 200 },
+              "required": { "type": "boolean", "default": true }
+            }
+          }
+        },
+        "environment": {
+          "description": "Environment variables, API keys, and tokens a contributor may need. Sensitive values are named only; never store values here.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+              "purpose": { "type": "string", "maxLength": 240 },
+              "required": { "type": "boolean", "default": false },
+              "sensitive": { "type": "boolean", "default": true }
+            }
+          }
+        },
+        "first_steps": {
+          "description": "Concrete first actions after installing the recommended plugins.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 240 }
+        }
+      }
+    },
+    "polymath": {
+      "description": "Polymath-specific activation hints: recommended plugins, workflows, and compatible agent surfaces for this repository.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recommended_plugins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+              "reason": { "type": "string", "maxLength": 240 },
+              "required": { "type": "boolean", "default": false }
+            }
+          }
+        },
+        "recommended_workflows": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" }
+        },
+        "compatible_agents": {
+          "description": "Agent or IDE surfaces the project explicitly supports. Capabilities vary by surface; see docs/PORTABILITY.md.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+        }
+      }
+    },
     "skill_overrides": {
       "description": "Per-skill customization. Key is `<plugin>:<skill>`. Each entry may declare additional context files, additional review axes, or test commands the skill should run.",
       "type": "object",

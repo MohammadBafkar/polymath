@@ -47,16 +47,36 @@ A plugin reaches `stable` when it has:
 
 1. **A passing bakeoff scenario** — at least one bakeoff case scoring
    ≥ 8 with delta ≥ 2 over baseline. Both the regex and judge scorers
-   must agree when `--judge` is enabled.
+   must agree when `--judge` is enabled. URL recorded in the ledger as
+   `live_bakeoff_run`.
 2. **A passing skill-triggering test** — at least one skill-triggering
-   test exercising three trigger phrasings.
+   test exercising three trigger phrasings. URL recorded as
+   `live_trigger_run`.
 3. **Conformance OK** at the head of `main`.
 4. **At least one external user** — a real adopter beyond the
    maintainer. Surfaced via a tracked issue, fork, or PR citing the
-   plugin's files.
+   plugin's files. URL recorded as `external_user_url`.
+5. **Connector / infra plugins additionally need distinct-value proof.**
+   Primary-source evidence (bakeoff case, side-by-side artifact, or
+   documented workflow-shape gap) that Polymath adds workflow,
+   critique, safety, or artifact value beyond the official MCP / CLI /
+   LSP / docs surface. URL recorded as `distinct_value_url`. Per
+   [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md), connector/infra
+   plugins are now **eligible for `stable` only after distinct-value
+   proof plus the normal stable gates** — they no longer "stay
+   experimental" by policy.
+6. **A CHANGELOG entry** records the promotion. URL recorded as
+   `promotion_pr`, anchor as `changelog_entry`.
 
-The first three are CI-mechanical; the external-user criterion is
-asserted by hand against a tracked issue per plugin.
+All six receipts are stored per plugin in
+[`shared/stability-evidence.json`](../shared/stability-evidence.json)
+and enforced by
+[`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
+(rule `STABILITY-1`). The human-facing view of the ledger is
+[`docs/STABILITY-ROADMAP.md`](STABILITY-ROADMAP.md).
+
+The first three rows are CI-mechanical; rows 4–6 are asserted by hand
+when the evidence is published.
 
 ## How `/evaluate` works
 

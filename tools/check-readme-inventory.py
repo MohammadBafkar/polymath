@@ -17,7 +17,7 @@ What we *don't* check (deliberately):
     that's the substance; the filename is implementation detail.
   - `hooks/hooks.json` — README typically lists hooks by event name
     (`PreToolUse(Write|Edit) — secret-scan`) which is what matters.
-  - `workflows/*.yaml` — polymath-flows alone ships 15; listing all
+  - `workflows/*.yaml` — polymath-flows alone ships many workflows; listing all
     in every README is overkill.
   - `templates/*` — README narrative or the skill that owns the
     template usually links it.

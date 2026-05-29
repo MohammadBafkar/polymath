@@ -1,0 +1,94 @@
+schemaVersion: 0.1
+name: rootCauseAnalysis
+version: 0.1.0
+description: Drill to a system root cause, anticipate the fix failing, challenge the cause, and synthesize a confidence-labelled RCA.
+requires:
+  plugins:
+    - polymath-core
+    - polymath-thinking
+    - polymath-writing
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short symptom title (drives the slug). Frame as the observed SYMPTOM, not a presumed cause.
+  - name: symptom
+    type: string
+    required: true
+    description: What was observed — error text, failing behavior, affected scope, when it started.
+  - name: evidence
+    type: string
+    required: false
+    description: Pointer to available evidence (log path, dashboard, trace id, repro). If empty, the run marks itself evidence-thin.
+guards:
+  - id: rca-dir
+    type: command
+    command: mkdir -p docs/rca && [ -w docs/rca ]
+steps:
+  - id: frame-symptom
+    invoke: polymath-thinking:5-whys
+    prompt: |
+      Apply 5-whys to "${inputs.title}". Symptom: ${inputs.symptom}. Evidence: ${inputs.evidence}.
+      Separate symptom from cause, stop at a system-level cause, cite evidence per step, and add an
+      Unknowns / "what evidence would change this" block. Save docs/rca/${workflow.slug}-whys.md.
+    artifacts:
+      - docs/rca/${workflow.slug}-whys.md
+  - id: anticipate-failure
+    invoke: polymath-thinking:pre-mortem
+    prompt: |
+      Run a pre-mortem on the PROPOSED corrective action from the whys doc (not the original system):
+      how could the fix fail or the misdiagnosis recur? Save docs/rca/${workflow.slug}-premortem.md.
+    needs: [frame-symptom]
+    artifacts:
+      - docs/rca/${workflow.slug}-premortem.md
+  - id: challenge-cause
+    invoke: polymath-thinking:red-team
+    prompt: |
+      Challenge the root-cause claim: is it the cause or a plausible correlate? Produce at least one rival
+      hypothesis and the single observation that would distinguish them. Save docs/rca/${workflow.slug}-challenge.md.
+    needs: [anticipate-failure]
+    artifacts:
+      - docs/rca/${workflow.slug}-challenge.md
+  - id: synthesize-rca
+    invoke: polymath-writing:editorial-pass
+    prompt: |
+      Reduce the three docs into one RCA report: confirmed-or-unconfirmed root cause, a confidence label,
+      the gating evidence, surviving rival hypotheses, the one corrective change, and an Open-questions section.
+      Save docs/rca/${workflow.slug}.md.
+    needs: [challenge-cause]
+    artifacts:
+      - docs/rca/${workflow.slug}.md
+mustPass:
+  - id: rca-docs-only
+    type: diffConstraint
+    filesChanged:
+      min: 4
+      max: 30
+    pathAllowlist:
+      - "docs/rca/**"
+  - id: whys-exists
+    type: fileExists
+    path: docs/rca/${workflow.slug}-whys.md
+  - id: premortem-exists
+    type: fileExists
+    path: docs/rca/${workflow.slug}-premortem.md
+  - id: challenge-exists
+    type: fileExists
+    path: docs/rca/${workflow.slug}-challenge.md
+  - id: synthesis-exists
+    type: fileExists
+    path: docs/rca/${workflow.slug}.md
+  - id: synthesis-states-confidence
+    type: fileMatches
+    path: docs/rca/${workflow.slug}.md
+    pattern: "([Cc]onfidence|[Aa]ssumption|[Uu]nknown|evidence would change)"
+  - id: whys-symptom-cause
+    type: fileMatches
+    severity: advisory
+    path: docs/rca/${workflow.slug}-whys.md
+    pattern: "([Ss]ymptom|[Cc]ause)"
+  - id: challenge-has-rival
+    type: fileMatches
+    severity: advisory
+    path: docs/rca/${workflow.slug}-challenge.md
+    pattern: "(alternative|rival|hypothesis|objection|distinguish)"

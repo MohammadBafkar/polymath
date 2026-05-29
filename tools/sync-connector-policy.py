@@ -4,7 +4,7 @@ polymath-connector-* and polymath-infra-* README.
 
 Single source of truth: the two markdown tables in
 docs/CONNECTOR-POLICY.md (§ 3.1 and § 3.2). The status field comes
-from .claude-plugin/marketplace.json so demote/promote stays in sync.
+from shared/polymath-catalog.json so demote/promote stays in sync.
 
 Modes:
   --check   Exit 1 if any in-scope README's policy block diverges
@@ -28,7 +28,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 POLICY = REPO / "docs" / "CONNECTOR-POLICY.md"
-MARKETPLACE = REPO / ".claude-plugin" / "marketplace.json"
+CATALOG = REPO / "shared" / "polymath-catalog.json"
 PLUGINS_DIR = REPO / "plugins"
 
 START_MARKER = "<!-- connector-policy:start -->"
@@ -56,8 +56,8 @@ def parse_policy_tables() -> dict[str, dict[str, str]]:
 
 
 def load_statuses() -> dict[str, str]:
-    data = json.loads(MARKETPLACE.read_text())
-    return {p["name"]: p.get("status", "unknown") for p in data.get("plugins", [])}
+    data = json.loads(CATALOG.read_text())
+    return {name: entry.get("status", "unknown") for name, entry in data.get("plugins", {}).items()}
 
 
 def render_block(name: str, row: dict[str, str], status: str) -> str:

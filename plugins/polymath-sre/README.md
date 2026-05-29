@@ -4,7 +4,7 @@ SRE craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `slo-design`, `error-budget-policy`, `chaos-experiment`.
+- Skills: `slo-design`, `error-budget-policy`, `chaos-experiment`, `capacity-plan`.
 
 ## Installation
 

@@ -1,0 +1,10 @@
+schemaVersion: 1
+capabilities:
+  vcs:
+    provider: github
+  ci:
+    provider: github_actions
+  issue_tracker:
+    provider: github_issues
+  vulnerability_scanner:
+    provider: dependabot
