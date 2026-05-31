@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`polymath-progressive-delivery` plugin (experimental).** Closes the
+  delivery-safety P1 gap: the `safe-rollout` skill designs a progressive
+  rollout — feature-flag strategy, canary/blue-green/ring stages with bake
+  times, SLO-driven health gates, automated rollback, and a kill switch —
+  and flags irreversible data changes a flag can't undo.
+- **`polymath-test-automation` plugin (experimental).** Closes the
+  test-automation P1 gap with two skills: `e2e-flow` (browser end-to-end
+  for a critical journey — stable selectors, web-first waits, deterministic
+  data) and `load-test` (load/stress/soak with a realistic workload model
+  and percentile pass/fail thresholds). Both ship golden fixtures and
+  skill-triggering tests.
+
 - **QA depth (P0 gap closure).** Added three skills to `polymath-qa`:
   `test-smell` (suite anti-pattern review), `integration-contract`
   (service-boundary + consumer-driven contract tests), and
