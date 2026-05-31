@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>polymath-planning · Polymath</title>
+  <title>polymath-i18n · Polymath</title>
   <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -14,22 +14,25 @@
   <main>
 <p><a href="../index.html">← all plugins</a></p>
 <p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
-<pre><code>claude plugin install polymath-planning@polymath</code></pre>
-<h1>polymath-planning</h1>
+<pre><code>claude plugin install polymath-i18n@polymath</code></pre>
+<h1>polymath-i18n</h1>
 
-<p>Planning craft for the Polymath marketplace.</p>
+<p>Internationalization craft: treat i18n as an architecture property and find where the code assumes one language, region, or text direction before a locale launch does.</p>
 
 <h2>What it ships</h2>
 
 <ul>
-<li>Skills: <code>write-plan</code>, <code>work-breakdown</code>, <code>estimate</code>, <code>forecast</code>.</li>
-<li>Templates: <code>Plan.md</code>.</li>
+<li>Skills: <code>i18n-audit</code> — audit for hardcoded strings, locale-aware date/number/currency formatting, ICU plurals/gender, text expansion, RTL/bidi, the fallback chain, and a pseudolocalization-in-CI workflow.</li>
 </ul>
+
+<h2>Why it exists</h2>
+
+<p>The audit found localization-i18n was the one SDLC phase with <strong>zero</strong> coverage. This plugin adds an i18n-readiness audit; it complements <code>polymath-design:a11y-audit</code> (accessibility) without overlapping it.</p>
 
 <h2>Installation</h2>
 
 <pre><code>
-claude plugin install polymath-planning@polymath
+claude plugin install polymath-i18n@polymath
 </code></pre>
 
 <h2>Dependencies</h2>

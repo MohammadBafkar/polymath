@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`polymath-i18n` plugin (experimental).** `i18n-audit` — assess
+  internationalization readiness (hardcoded strings, locale formatting, ICU
+  plurals, text expansion, RTL/bidi, fallback chain, pseudolocalization in CI).
+  Closes the one SDLC phase the audit found with zero coverage.
+- **`polymath-supply-chain` plugin (experimental).** `supply-chain-review` —
+  SBOM, dependency provenance/lockfiles, license audit, build-pipeline trust,
+  signing/SLSA attestation, and compliance-control mapping (distinct from
+  runtime CVE triage).
+- **`polymath-product-strategy` plugin (experimental).** `product-strategy` —
+  vision, ICP/segmentation, positioning, pricing/packaging, moat, and GTM as
+  explicit choices with testable assumptions.
+- **`polymath-planning:forecast` skill.** Probabilistic delivery forecasting
+  (reference-class, throughput/Monte-Carlo, cone of uncertainty), distinct from
+  the per-item three-point `estimate`.
+
 - **`polymath-deprecation` plugin (experimental).** `deprecation-plan`
   (two dates, telemetry-gated removal, comms cadence, exception path,
   in-product markers) and `migration-guide` (consumer before/after upgrade

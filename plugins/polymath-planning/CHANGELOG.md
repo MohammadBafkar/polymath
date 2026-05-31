@@ -1,5 +1,13 @@
 # Changelog — polymath-planning
 
+## [Unreleased]
+
+### Added
+
+- `forecast` skill — forecast a delivery date/scope as a probability range
+  (reference-class, throughput/Monte-Carlo, cone of uncertainty), distinct from
+  the per-item three-point `estimate`.
+
 ## [0.1.0]
 
 ### Added
