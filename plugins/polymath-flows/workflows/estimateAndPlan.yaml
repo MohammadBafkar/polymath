@@ -1,0 +1,51 @@
+schemaVersion: 0.1
+name: estimateAndPlan
+version: 0.1.0
+description: Turn a well-specified goal into a work breakdown, a three-point estimate, and an executable plan — skips fuzzy-goal disambiguation.
+whenToUse: "Scope a clear goal — work breakdown, estimate, plan."
+triggers:
+  - "scope and estimate this, then write the plan"
+  - "break this down, estimate it, and plan it"
+  - "give me a WBS, estimate, and an executable plan"
+  - "turn this clear goal into an estimated plan"
+detectionSignals:
+  paths:
+    - docs/plans/**
+  intents:
+    - scope-estimate-plan
+requires:
+  plugins:
+    - polymath-core
+    - polymath-planning
+inputs:
+  - name: goal
+    type: string
+    required: true
+    description: The well-specified goal to scope; used for the slug.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: breakdown
+    invoke: polymath-planning:work-breakdown
+    prompt: Break ${inputs.goal} into independently completable WBS steps, each with an observable artifact.
+  - id: estimate
+    invoke: polymath-planning:estimate
+    prompt: Apply a three-point (optimistic/expected/pessimistic) estimate to the work breakdown; surface uncertainty.
+    needs: [breakdown]
+  - id: plan
+    invoke: polymath-planning:write-plan
+    prompt: Write the executable plan to docs/plans/${workflow.slug}.md, carrying the breakdown, estimate, and assumptions.
+    needs: [estimate]
+    artifacts:
+      - docs/plans/${workflow.slug}.md
+mustPass:
+  - id: plan-strict
+    type: artifactSchemaStrict
+    path: docs/plans/${workflow.slug}.md
+    artifact: Plan
+    minBodyChars: 200
+  - id: plan-exists
+    type: fileExists
+    path: docs/plans/${workflow.slug}.md
