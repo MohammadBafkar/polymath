@@ -10,7 +10,9 @@
   into `data/`) so the agent can detect and propose a matching workflow
   before running it. The `run-workflow` skill documents the
   detect → propose → confirm → run contract; a `WORKFLOW-INDEX` conformance
-  diff-guard keeps the committed index in sync with the workflow YAML.
+  diff-guard keeps the committed index in sync with the workflow YAML. The
+  `WORKFLOW-2` gate (`build-workflow-index.py --strict`) requires `whenToUse`
+  and `triggers` on every workflow and rejects triggers shared across workflows.
 - Workflow-triggering tests (`tools/workflow-triggering.py`,
   `tests/workflow-triggering/*.md`): a naive prompt must make the model propose
   the right workflow. `check` mode (frontmatter + trigger-drift guard) runs in

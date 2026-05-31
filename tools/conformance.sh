@@ -287,8 +287,8 @@ if [[ "$mode" == "--all" ]]; then
   # SessionStart routing surface; this diff-guard keeps it from drifting and
   # asserts the injected min-index stays under its token ceiling.
   echo
-  echo "── WORKFLOW-INDEX cross-check (build-workflow-index.py --check)"
-  if python3 "$root/tools/build-workflow-index.py" --check; then
+  echo "── WORKFLOW-INDEX cross-check (build-workflow-index.py --check --strict)"
+  if python3 "$root/tools/build-workflow-index.py" --check --strict; then
     :
   else
     overall=1

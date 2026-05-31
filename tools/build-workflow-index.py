@@ -71,11 +71,11 @@ def render_injection(min_records: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def collect() -> tuple[list[dict], list[dict], list[dict], list[str]]:
+def collect() -> tuple[list[dict], list[dict], list[dict], dict]:
     full, mini, detect = [], [], []
-    warnings: list[str] = []
-    seen_triggers: dict[str, str] = {}
+    duplicates: list[str] = []
     no_routing: list[str] = []
+    seen_triggers: dict[str, str] = {}
 
     for path in sorted(WORKFLOWS_DIR.glob("*.yaml")):
         wf = yaml.safe_load(path.read_text()) or {}
@@ -84,7 +84,6 @@ def collect() -> tuple[list[dict], list[dict], list[dict], list[str]]:
         triggers = wf.get("triggers") or []
         signals = wf.get("detectionSignals") or {}
         if not name:
-            warnings.append(f"{path.name}: missing name; skipped")
             continue
         if not when or not triggers:
             no_routing.append(name)
@@ -99,20 +98,13 @@ def collect() -> tuple[list[dict], list[dict], list[dict], list[str]]:
         detect.append(rec)
         for t in triggers:
             if t in seen_triggers:
-                warnings.append(
-                    f"duplicate trigger {t!r} in {name} and {seen_triggers[t]}"
-                )
+                duplicates.append(f"trigger {t!r} in both {name} and {seen_triggers[t]}")
             seen_triggers[t] = name
-
-    if no_routing:
-        warnings.append(
-            "no whenToUse/triggers (not indexed): " + ", ".join(sorted(no_routing))
-        )
 
     full.sort(key=lambda r: r["n"])
     mini.sort(key=lambda r: r["n"])
     detect.sort(key=lambda r: r["n"])
-    return full, mini, detect, warnings
+    return full, mini, detect, {"no_routing": sorted(no_routing), "duplicates": duplicates}
 
 
 def serialize(full: list[dict], mini: list[dict], detect: list[dict]) -> dict[str, str]:
@@ -133,11 +125,33 @@ def main() -> int:
         action="store_true",
         help="verify on-disk files match a fresh build; exit 1 on drift",
     )
+    ap.add_argument(
+        "--strict",
+        action="store_true",
+        help="WORKFLOW-2: every workflow must declare whenToUse + triggers and "
+        "no trigger may be shared across workflows; exit 1 on violation",
+    )
     args = ap.parse_args()
 
-    full, mini, detect, warnings = collect()
-    for w in warnings:
-        print(f"build-workflow-index: warning: {w}", file=sys.stderr)
+    full, mini, detect, problems = collect()
+    # WORKFLOW-2 enforcement (required routing surface + global trigger uniqueness).
+    if args.strict:
+        strict_errs = []
+        if problems["no_routing"]:
+            strict_errs.append(
+                "missing whenToUse/triggers: " + ", ".join(problems["no_routing"])
+            )
+        strict_errs.extend(problems["duplicates"])
+        if strict_errs:
+            for e in strict_errs:
+                print(f"build-workflow-index: WORKFLOW-2: {e}", file=sys.stderr)
+            return 1
+    else:
+        # Grace mode: report the same issues as warnings without failing.
+        for w in problems["no_routing"]:
+            print(f"build-workflow-index: warning: {w} has no whenToUse/triggers (not indexed)", file=sys.stderr)
+        for d in problems["duplicates"]:
+            print(f"build-workflow-index: warning: duplicate {d}", file=sys.stderr)
 
     # Token budget on the rendered injection (what the hook surfaces).
     rendered = render_injection(mini)

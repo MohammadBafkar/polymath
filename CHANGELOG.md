@@ -18,7 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before running, rather than only running one by name. Adds the
   `reviewPlan` workflow (lightweight plan/design critique), a
   detect → propose → confirm → run contract in the `run-workflow` skill,
-  and `WORKFLOW-INDEX` + `WORKFLOW-TRIGGER` conformance gates. Adds
+  and `WORKFLOW-INDEX` + `WORKFLOW-2` + `WORKFLOW-TRIGGER` conformance gates
+  (`WORKFLOW-2` requires `whenToUse`/`triggers` on every workflow with
+  globally-unique triggers). Adds
   `tools/workflow-triggering.py` and `tests/workflow-triggering/*.md` — the
   workflow analogue of skill-triggering: a naive prompt must make the model
   propose the right workflow (`check` in CI; `run` opt-in under
