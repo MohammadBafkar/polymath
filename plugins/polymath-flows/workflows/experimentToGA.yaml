@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: experimentToGA
 version: 0.1.0
 description: Take a feature from experiment plan through pre-registration, flag rollout staging, results analysis, and GA decision artifact.
+whenToUse: "A/B + flag rollout from pre-registration to GA."
+triggers:
+  - "plan an A/B test to GA"
+  - "pre-register an experiment then decide GA"
+  - "stage a percentage rollout"
+  - "should we GA this feature"
+detectionSignals:
+  paths:
+    - "docs/experiments/**"
+    - "docs/rollouts/**"
+  intents:
+    - "experiment"
+    - "ab-test"
 requires:
   plugins:
     - polymath-core

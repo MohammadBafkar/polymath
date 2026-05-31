@@ -2,6 +2,21 @@ schemaVersion: 0.1
 name: designSystem
 version: 0.1.0
 description: Orient, frame, deliberate, trade off, document, threat-model, record, and red-team a system design under uncertainty.
+whenToUse: "Design a system: arch doc + threat model + ADR."
+triggers:
+  - "design this system"
+  - "write an architecture doc for this"
+  - "how should I architect this"
+  - "draft an RFC for this change"
+detectionSignals:
+  paths:
+    - "docs/architecture/**"
+    - "docs/rfcs/**"
+    - "docs/design/**"
+    - "docs/threat-models/**"
+  intents:
+    - "design"
+    - "architecture"
 requires:
   plugins:
     - polymath-core

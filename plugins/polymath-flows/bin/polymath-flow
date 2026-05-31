@@ -461,6 +461,9 @@ ALLOWED_TOP_LEVEL = {
     "name",
     "version",
     "description",
+    "whenToUse",
+    "triggers",
+    "detectionSignals",
     "extends",
     "requires",
     "inputs",
@@ -563,6 +566,36 @@ def _validate(workflow: dict) -> list[str]:
     unknown = set(workflow.keys()) - ALLOWED_TOP_LEVEL
     if unknown:
         errs.append(f"unknown top-level keys: {sorted(unknown)}")
+
+    # Routing surface (optional in v0.1 — grace mode). Validate shape only when
+    # present so the SessionStart workflow-index and triggering tests have a
+    # well-formed source of truth.
+    when = workflow.get("whenToUse")
+    if when is not None:
+        if not isinstance(when, str) or not (12 <= len(when) <= 160):
+            errs.append("whenToUse must be a string of 12-160 chars")
+    triggers = workflow.get("triggers")
+    if triggers is not None:
+        if not isinstance(triggers, list) or not (3 <= len(triggers) <= 5):
+            errs.append("triggers must be a list of 3-5 phrases")
+        elif len(set(triggers)) != len(triggers):
+            errs.append("triggers must be unique")
+        elif any(not isinstance(t, str) or not (6 <= len(t) <= 80) for t in triggers):
+            errs.append("each trigger must be a string of 6-80 chars")
+    signals = workflow.get("detectionSignals")
+    if signals is not None:
+        if not isinstance(signals, dict):
+            errs.append("detectionSignals must be a mapping")
+        else:
+            extra = set(signals.keys()) - {"paths", "intents"}
+            if extra:
+                errs.append(f"detectionSignals: unknown keys {sorted(extra)}")
+            for key in ("paths", "intents"):
+                val = signals.get(key)
+                if val is not None and (
+                    not isinstance(val, list) or any(not isinstance(x, str) for x in val)
+                ):
+                    errs.append(f"detectionSignals.{key} must be a list of strings")
 
     steps = workflow.get("steps")
     if steps is None and "extends" not in workflow:

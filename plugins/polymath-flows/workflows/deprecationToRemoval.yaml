@@ -2,6 +2,17 @@ schemaVersion: 0.1
 name: deprecationToRemoval
 version: 0.1.0
 description: Multi-quarter capability removal — announce, deprecate-in-code, midterm usage-decline check, then remove only when usage is below threshold and the removal date has arrived.
+whenToUse: "Multi-quarter, usage-gated capability removal."
+triggers:
+  - "deprecate this over time"
+  - "plan a multi-quarter sunset"
+  - "kill this API once usage drops"
+  - "retire this feature on a schedule"
+detectionSignals:
+  paths:
+    - "docs/deprecations/**"
+  intents:
+    - "deprecate-staged"
 requires:
   plugins:
     - polymath-core

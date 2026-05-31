@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: incidentRetroToActions
 version: 0.2.0
 description: Decompose a written postmortem into trackable action items — owners, due dates, estimates, tickets filed, postmortem back-linked to the resulting tickets.
+whenToUse: "Turn a postmortem into filed action tickets."
+triggers:
+  - "turn this postmortem into tickets"
+  - "file action items from the retro"
+  - "track the follow-ups from this incident"
+  - "make tickets from this postmortem"
+detectionSignals:
+  paths:
+    - "docs/postmortems/**"
+    - "docs/retros/**"
+  intents:
+    - "retro-actions"
+    - "input:postmortemPath"
 requires:
   plugins:
     - polymath-core

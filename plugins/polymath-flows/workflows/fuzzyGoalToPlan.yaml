@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: fuzzyGoalToPlan
 version: 0.1.0
 description: Disambiguate a vague goal, then story-map, break down, estimate, and write an executable plan that carries its assumptions.
+whenToUse: "Turn a vague goal into an estimated, mapped plan."
+triggers:
+  - "I have a fuzzy goal, help me plan it"
+  - "turn this vague idea into a plan"
+  - "story-map and estimate this"
+  - "help me scope and estimate this work"
+detectionSignals:
+  paths:
+    - "docs/maps/**"
+  intents:
+    - "scope"
+    - "plan-fuzzy"
 requires:
   plugins:
     - polymath-core

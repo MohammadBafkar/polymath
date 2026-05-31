@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: sunsetCapability
 version: 0.1.0
 description: Sunset a capability — write the customer-facing notice, deprecate in code with warnings, then later remove + release-note the change.
+whenToUse: "Two-stage sunset: notice + deprecate, remove later."
+triggers:
+  - "sunset this endpoint"
+  - "deprecate this with a customer notice"
+  - "add deprecation warnings and a sunset notice"
+  - "write the sunset notice and deprecate"
+detectionSignals:
+  paths:
+    - "docs/sunsets/**"
+  intents:
+    - "sunset-twostage"
+    - "input:removalDate"
 requires:
   plugins:
     - polymath-core

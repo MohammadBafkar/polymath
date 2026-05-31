@@ -17,6 +17,8 @@ tools/token-budget.sh                  # per-plugin always-on cost ≤400 tokens
 tools/conformance.sh --all             # MANIFEST/SKILL/TEMPLATE/WORKFLOW/CONNECTOR/FIXTURE checks
 tools/bakeoff.py check                 # parses bakeoff cases without running a judge
 tools/skill-triggering.py check        # validates skill-triggering test frontmatter
+tools/workflow-triggering.py check     # workflow-triggering frontmatter + trigger drift guard
+tools/build-workflow-index.py --check  # workflow routing index in sync with workflow YAML
 
 # Single-plugin conformance during authoring:
 tools/conformance.sh plugins/polymath-<name>
@@ -70,6 +72,9 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | SKILL-1 | SKILL.md description ≤200 chars, body ≤500 lines |
 | TEMPLATE-1 | Templates whose name matches `shared/schemas/artifacts/*.schema.json` must have frontmatter |
 | WORKFLOW-1 | Workflow YAML validates against `shared/schemas/workflow.schema.json` |
+| WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |
+| WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
+| WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | CONNECTOR-1 | Connector plugins need `.mcp.json`, `references/*.md`, and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only` |
 | CONNECTOR-2 | `polymath-connector-*` and `polymath-infra-*` must be audited in `docs/CONNECTOR-POLICY.md` |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |
@@ -93,6 +98,8 @@ A workflow step looks like:
 ```
 
 The `requires.capabilities` block in a workflow is resolved against `.polymath/capabilities.yaml` at run time — workflows declare *what* they need (issue tracker, observability); the project file declares *which* provider supplies it.
+
+Workflows also declare a routing surface — `whenToUse` (a terse, always-on hint), `triggers` (naive user phrasings, unique across workflows), and `detectionSignals` (file globs / intents). `tools/build-workflow-index.py` compiles these into `plugins/polymath-flows/data/` and the polymath-flows SessionStart hook injects the compact index so the agent can detect and **propose** a matching workflow (the detect → propose → confirm → run contract lives in `run-workflow/SKILL.md`). Re-run the builder after editing any workflow; the `WORKFLOW-INDEX` gate fails on drift, and `WORKFLOW-2` (`--strict`) requires `whenToUse` + `triggers` on every workflow with globally-unique triggers.
 
 ## Project localization
 

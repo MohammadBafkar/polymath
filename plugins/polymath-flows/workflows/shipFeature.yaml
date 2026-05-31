@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: shipFeature
 version: 0.1.0
 description: Ship a small feature from PRD to PR draft.
+whenToUse: "Ship a small feature from PRD to PR draft."
+triggers:
+  - "ship this feature"
+  - "build and ship this end to end"
+  - "take this from PRD to PR"
+  - "implement this small feature properly"
+detectionSignals:
+  paths:
+    - "docs/prds/**"
+  intents:
+    - "ship-feature"
+    - "input:title"
 requires:
   plugins:
     - polymath-core

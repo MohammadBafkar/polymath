@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: weeklyReleaseTrain
 version: 0.1.0
 description: Bundle the week's merged changes into a release — CHANGELOG audit, release-notes draft, verify, internal heads-up, PR for the tag.
+whenToUse: "Cut a release: notes, verify, tag PR."
+triggers:
+  - "cut this week's release"
+  - "prep the release train"
+  - "draft release notes for this version"
+  - "do the weekly release"
+detectionSignals:
+  paths:
+    - "docs/release-notes/**"
+  intents:
+    - "release"
+    - "cut-release"
+    - "input:version"
 requires:
   plugins:
     - polymath-core

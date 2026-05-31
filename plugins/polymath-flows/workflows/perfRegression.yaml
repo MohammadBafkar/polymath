@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: perfRegression
 version: 0.2.0
 description: Diagnose a performance regression — observability signals, review the diff that landed, implement the fix, verify the metric recovered.
+whenToUse: "Fix a perf regression and verify it recovered."
+triggers:
+  - "latency went up, find out why"
+  - "p99 regressed after the last deploy"
+  - "this got slow, fix it"
+  - "throughput dropped, investigate and fix"
+detectionSignals:
+  paths:
+    - "docs/perf/**"
+  intents:
+    - "perf-regression"
+    - "input:metric"
 requires:
   plugins:
     - polymath-core

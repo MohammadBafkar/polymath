@@ -1,0 +1,222 @@
+[
+  {
+    "n": "activateProject",
+    "w": "Set up Polymath: project.yaml + onboarding notes.",
+    "t": [
+      "set up polymath for this repo",
+      "onboard this project",
+      "initialize project context",
+      "generate onboarding docs"
+    ]
+  },
+  {
+    "n": "bugTriage",
+    "w": "Root-cause a reported bug and plan the fix.",
+    "t": [
+      "help me triage this bug",
+      "figure out why this is broken",
+      "investigate this defect and plan the fix",
+      "there's a bug, where do I start"
+    ]
+  },
+  {
+    "n": "bumpDependency",
+    "w": "Upgrade one dependency safely and fix call-sites.",
+    "t": [
+      "bump this dependency to the latest",
+      "upgrade this package safely",
+      "is it safe to bump this library",
+      "patch this CVE in a dependency"
+    ]
+  },
+  {
+    "n": "decideUnderAmbiguity",
+    "w": "Frame a hard decision, govern it, record an ADR.",
+    "t": [
+      "help me decide between these options",
+      "we need to make a call on this",
+      "should we do A or B",
+      "run a DACI and record the decision"
+    ]
+  },
+  {
+    "n": "deliberationLoop",
+    "w": "Pressure-test a plan and emit a revised one.",
+    "t": [
+      "pressure-test my approach",
+      "red-team my idea before I commit",
+      "critique this and give me a better plan",
+      "stress-test this and revise it"
+    ]
+  },
+  {
+    "n": "deprecationToRemoval",
+    "w": "Multi-quarter, usage-gated capability removal.",
+    "t": [
+      "deprecate this over time",
+      "plan a multi-quarter sunset",
+      "kill this API once usage drops",
+      "retire this feature on a schedule"
+    ]
+  },
+  {
+    "n": "designSystem",
+    "w": "Design a system: arch doc + threat model + ADR.",
+    "t": [
+      "design this system",
+      "write an architecture doc for this",
+      "how should I architect this",
+      "draft an RFC for this change"
+    ]
+  },
+  {
+    "n": "experimentToGA",
+    "w": "A/B + flag rollout from pre-registration to GA.",
+    "t": [
+      "plan an A/B test to GA",
+      "pre-register an experiment then decide GA",
+      "stage a percentage rollout",
+      "should we GA this feature"
+    ]
+  },
+  {
+    "n": "featureFromIdea",
+    "w": "Discovery (interviews/persona) then ship a feature.",
+    "t": [
+      "do discovery then ship this",
+      "interview users then build it",
+      "take this from research to PR",
+      "validate this idea then build it"
+    ]
+  },
+  {
+    "n": "fuzzyGoalToPlan",
+    "w": "Turn a vague goal into an estimated, mapped plan.",
+    "t": [
+      "I have a fuzzy goal, help me plan it",
+      "turn this vague idea into a plan",
+      "story-map and estimate this",
+      "help me scope and estimate this work"
+    ]
+  },
+  {
+    "n": "incidentRetroToActions",
+    "w": "Turn a postmortem into filed action tickets.",
+    "t": [
+      "turn this postmortem into tickets",
+      "file action items from the retro",
+      "track the follow-ups from this incident",
+      "make tickets from this postmortem"
+    ]
+  },
+  {
+    "n": "migrateLanguageVersion",
+    "w": "Phased migration to a new language/runtime version.",
+    "t": [
+      "upgrade us to the new runtime version",
+      "migrate to the new language version",
+      "bump the language version across the repo",
+      "do a phased runtime migration"
+    ]
+  },
+  {
+    "n": "perfRegression",
+    "w": "Fix a perf regression and verify it recovered.",
+    "t": [
+      "latency went up, find out why",
+      "p99 regressed after the last deploy",
+      "this got slow, fix it",
+      "throughput dropped, investigate and fix"
+    ]
+  },
+  {
+    "n": "refactorWithSafety",
+    "w": "Pin behavior in tests, then refactor safely.",
+    "t": [
+      "refactor this safely",
+      "clean up this module without breaking it",
+      "restructure this code with a safety net",
+      "pin behavior then refactor"
+    ]
+  },
+  {
+    "n": "respondToIncident",
+    "w": "Drive a live incident end-to-end to postmortem.",
+    "t": [
+      "we have an incident",
+      "prod is down, help",
+      "page just fired, walk me through response",
+      "sev1, what do I do"
+    ]
+  },
+  {
+    "n": "reviewPR",
+    "w": "Multi-critic review of a PR/diff + synthesis.",
+    "t": [
+      "review this PR",
+      "do a thorough review of my diff",
+      "run all the critics on this change",
+      "review the working tree before I push"
+    ]
+  },
+  {
+    "n": "reviewPlan",
+    "w": "Critique an existing plan; findings only, no rewrite.",
+    "t": [
+      "review this plan",
+      "is this plan any good before I start",
+      "poke holes in this plan",
+      "what's wrong with my design doc"
+    ]
+  },
+  {
+    "n": "rootCauseAnalysis",
+    "w": "Drive to a system root cause; write an RCA.",
+    "t": [
+      "do a root cause analysis",
+      "why did this really happen",
+      "run a 5-whys on this",
+      "write an RCA for this symptom"
+    ]
+  },
+  {
+    "n": "securityFinding",
+    "w": "Fix a security finding end-to-end and verify.",
+    "t": [
+      "fix this security finding",
+      "we have a vuln, patch it",
+      "address this OWASP issue",
+      "remediate this security report"
+    ]
+  },
+  {
+    "n": "shipFeature",
+    "w": "Ship a small feature from PRD to PR draft.",
+    "t": [
+      "ship this feature",
+      "build and ship this end to end",
+      "take this from PRD to PR",
+      "implement this small feature properly"
+    ]
+  },
+  {
+    "n": "sunsetCapability",
+    "w": "Two-stage sunset: notice + deprecate, remove later.",
+    "t": [
+      "sunset this endpoint",
+      "deprecate this with a customer notice",
+      "add deprecation warnings and a sunset notice",
+      "write the sunset notice and deprecate"
+    ]
+  },
+  {
+    "n": "weeklyReleaseTrain",
+    "w": "Cut a release: notes, verify, tag PR.",
+    "t": [
+      "cut this week's release",
+      "prep the release train",
+      "draft release notes for this version",
+      "do the weekly release"
+    ]
+  }
+]

@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: bugTriage
 version: 0.1.0
 description: Triage an inbound bug — clarify symptom, locate suspect code, review recent diff, decompose the fix.
+whenToUse: "Root-cause a reported bug and plan the fix."
+triggers:
+  - "help me triage this bug"
+  - "figure out why this is broken"
+  - "investigate this defect and plan the fix"
+  - "there's a bug, where do I start"
+detectionSignals:
+  paths:
+    - "docs/bugs/**"
+  intents:
+    - "triage"
+    - "debug"
 requires:
   plugins:
     - polymath-core
