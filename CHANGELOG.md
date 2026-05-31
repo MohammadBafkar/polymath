@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **QA depth (P0 gap closure).** Added three skills to `polymath-qa`:
+  `test-smell` (suite anti-pattern review), `integration-contract`
+  (service-boundary + consumer-driven contract tests), and
+  `assertion-quality` (assert behavior, not implementation).
+- **Product roadmapping/grooming (P0 gap closure).** Added `roadmap`
+  (Now/Next/Later by outcome) and `groom-backlog` (Definition-of-Ready
+  refinement) to `polymath-product`. Each new skill ships a skill-triggering
+  test with forbidden-prompt boundaries against its siblings.
+
 - **`polymath-prioritize` plugin (experimental).** Closes the top SDLC gap
   from the catalog audit: ranking a backlog with an explicit, inspectable
   method. The `prioritize` skill supports RICE, WSJF/cost-of-delay, MoSCoW,

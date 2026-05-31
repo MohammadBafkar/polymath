@@ -1,5 +1,15 @@
 # Changelog — polymath-product
 
+## [Unreleased]
+
+### Added
+
+- `roadmap` skill — sequence a Now/Next/Later roadmap grouped by outcome, with
+  confidence, dependencies, and explicit non-commitments per horizon.
+- `groom-backlog` skill — refine backlog items to a Definition of Ready
+  (clarify, acceptance criteria, estimate, split oversized, flag blockers).
+- Skill-triggering tests for both.
+
 ## [0.1.0]
 
 ### Added
