@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`polymath-deprecation` plugin (experimental).** `deprecation-plan`
+  (two dates, telemetry-gated removal, comms cadence, exception path,
+  in-product markers) and `migration-guide` (consumer before/after upgrade
+  steps with rollback) — the planning + consumer-migration half of
+  deprecation that the sunset notice/workflows didn't cover.
+- **`polymath-finops` plugin (experimental).** `cloud-cost-review` —
+  attribute cloud spend, find waste, rightsize, compute unit economics, assess
+  commitment coverage, and propose a budget + anomaly alert (real cloud cost,
+  distinct from internal token budgeting).
+- **Ideation skills in `polymath-thinking`.** `problem-framing` (frame the
+  problem before any solution) and `first-principles` (decompose to bedrock,
+  drop inherited assumptions) — closing the front-of-SDLC ideation gap.
+
 - **`polymath-progressive-delivery` plugin (experimental).** Closes the
   delivery-safety P1 gap: the `safe-rollout` skill designs a progressive
   rollout — feature-flag strategy, canary/blue-green/ring stages with bake
