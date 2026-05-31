@@ -1,0 +1,72 @@
+# Confusion-matrix gate for sibling skills the catalog audit found a router
+# cannot reliably split (clusters C1-C11). Each case sends a naive prompt and
+# asserts the model loads the EXPECTED skill and never a FORBIDDEN sibling.
+#
+# Fields:
+#   prompt          a naive user request (no skill name)
+#   expect          the one skill that should load (plugin:skill)
+#   expect_one_of   ambiguous-on-purpose: any of these is acceptable…
+#   must_ask        …but the model must disambiguate (ask), not silently guess
+#   forbidden       siblings that must NOT load for this prompt
+#
+# Validated structurally by tools/check-description-confusion.py check (CI);
+# run live with `run` under CLAUDE_CODE_OAUTH_TOKEN.
+
+# C1 — issue triage (platform must disambiguate)
+- prompt: "triage this GitHub issue and route it"
+  expect: polymath-connector-github:triage-issue
+  forbidden: [polymath-connector-jira:jira-triage, polymath-connector-linear:linear-triage]
+
+- prompt: "triage this Jira ticket"
+  expect: polymath-connector-jira:jira-triage
+  forbidden: [polymath-connector-github:triage-issue, polymath-connector-linear:linear-triage]
+
+- prompt: "triage this Linear issue"
+  expect: polymath-connector-linear:linear-triage
+  forbidden: [polymath-connector-jira:jira-triage, polymath-connector-github:triage-issue]
+
+# C5 — caching: strategy vs mechanics vs server config
+- prompt: "should we cache this, and where in the stack"
+  expect: polymath-performance:caching-tradeoffs
+  forbidden: [polymath-performance:design-cache-layer, polymath-performance:audit-redis-config]
+
+- prompt: "design the Redis key schema, TTLs, and stampede protection for our cache"
+  expect: polymath-performance:design-cache-layer
+  forbidden: [polymath-performance:caching-tradeoffs, polymath-performance:audit-redis-config]
+
+# C6 — decompose: story slices vs engineering WBS vs full plan doc
+- prompt: "break this epic into vertical user-facing stories"
+  expect: polymath-product:decompose-epic
+  forbidden: [polymath-planning:work-breakdown]
+
+- prompt: "break this engineering goal into independently completable tasks"
+  expect: polymath-planning:work-breakdown
+  forbidden: [polymath-product:decompose-epic, polymath-planning:write-plan]
+
+# C7 — test ownership: find gaps vs write vs plan vs review
+- prompt: "what test coverage is this diff missing"
+  expect: polymath-qa:coverage-gap
+  forbidden: [polymath-qa:unit-tests, polymath-qa:test-strategy, polymath-engineering:code-review]
+
+# C8 — perf budgets by surface
+- prompt: "set a performance budget for the mobile app"
+  expect: polymath-mobile:mobile-perf
+  forbidden: [polymath-frontend:web-vitals-budget, polymath-performance:perf-budget]
+
+- prompt: "set Core Web Vitals budgets for this web route"
+  expect: polymath-frontend:web-vitals-budget
+  forbidden: [polymath-mobile:mobile-perf]
+
+# C3 — adversarial critique: plan red-team vs architecture-specific
+- prompt: "red-team this rollout plan and find the weak assumptions"
+  expect: polymath-thinking:red-team
+  forbidden: [polymath-thinking:pre-mortem]
+
+# C11 — docs: recorded decision vs proposal-to-debate vs structure description
+- prompt: "record the decision we just made and the alternatives we rejected"
+  expect: polymath-writing:adr
+  forbidden: [polymath-writing:rfc, polymath-writing:architecture-doc]
+
+- prompt: "write a proposal to circulate so the team can debate this approach"
+  expect: polymath-writing:rfc
+  forbidden: [polymath-writing:adr]
