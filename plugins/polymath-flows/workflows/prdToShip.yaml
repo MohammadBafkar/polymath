@@ -1,0 +1,80 @@
+schemaVersion: 0.1
+name: prdToShip
+version: 0.1.0
+description: Ship from an existing PRD — skip drafting and go acceptance → implement → review → verify → changelog → PR draft.
+whenToUse: "Ship from an existing PRD — acceptance through PR draft."
+triggers:
+  - "we already have a PRD, build and ship it"
+  - "implement this existing spec end to end"
+  - "take this PRD to a PR"
+  - "build from the spec we already wrote"
+detectionSignals:
+  paths:
+    - docs/prds/**
+  intents:
+    - ship-from-prd
+    - input:prd
+requires:
+  plugins:
+    - polymath-core
+    - polymath-product
+    - polymath-engineering
+    - polymath-release
+inputs:
+  - name: prd
+    type: string
+    required: true
+    description: Path or name of the existing PRD; used for the slug.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: acceptance
+    invoke: polymath-product:acceptance-criteria
+    prompt: Add or confirm Given/When/Then acceptance criteria on the existing PRD at ${inputs.prd}.
+  - id: implement
+    invoke: polymath-engineering:feature-dev
+    prompt: Implement the smallest safe change satisfying the PRD and acceptance criteria.
+    needs: [acceptance]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: Review the diff for correctness, simplification, and missing tests.
+    needs: [implement]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: Run the repository-appropriate verification for the changed files.
+    needs: [review]
+  - id: changelog
+    invoke: polymath-release:changelog
+    prompt: Append a user-facing CHANGELOG entry under [Unreleased] for this change.
+    needs: [verify]
+    artifacts:
+      - CHANGELOG.md
+  - id: pr
+    invoke: polymath-release:pr
+    prompt: Draft the PR description and save to docs/pr/${workflow.slug}.md.
+    needs: [changelog]
+    artifacts:
+      - docs/pr/${workflow.slug}.md
+mustPass:
+  - id: implement-produced-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 200
+    linesChanged:
+      max: 5000
+    pathBlocklist:
+      - ".git/**"
+  - id: changelog-touched
+    type: fileExists
+    path: CHANGELOG.md
+  - id: pr-draft-exists
+    type: fileExists
+    path: docs/pr/${workflow.slug}.md
+  - id: tests-mentioned
+    type: stepSummaryMatches
+    severity: advisory
+    step: verify
+    pattern: "(test|tests|verified|verification)"

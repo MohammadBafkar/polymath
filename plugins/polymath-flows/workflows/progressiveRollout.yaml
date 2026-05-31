@@ -1,0 +1,66 @@
+schemaVersion: 0.1
+name: progressiveRollout
+version: 0.1.0
+description: Stage a feature-flag rollout with SLO guardrails and rollback — without experimentToGA's A/B pre-registration apparatus.
+whenToUse: "Flag rollout with SLO health gates (no A/B)."
+triggers:
+  - "roll this out behind a flag in stages with guardrails"
+  - "progressively release this without an A/B test"
+  - "ramp this feature from 1% to 100% safely"
+  - "flag rollout with SLO health gates and rollback"
+detectionSignals:
+  paths:
+    - docs/rollouts/**
+  intents:
+    - progressive-rollout
+requires:
+  plugins:
+    - polymath-core
+    - polymath-product
+    - polymath-sre
+    - polymath-progressive-delivery
+    - polymath-release
+inputs:
+  - name: feature
+    type: string
+    required: true
+    description: The feature being rolled out; used for the slug.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: acceptance
+    invoke: polymath-product:acceptance-criteria
+    prompt: State the acceptance criteria and the user-visible behavior ${inputs.feature} must hold across the rollout.
+  - id: slo
+    invoke: polymath-sre:slo-design
+    prompt: Define the SLI/SLO for the affected journey that the rollout's health gates will watch.
+    needs: [acceptance]
+  - id: rollout
+    invoke: polymath-progressive-delivery:safe-rollout
+    prompt: Design the staged flag rollout (stages + bake times, SLO health gates, automated rollback, kill switch). Write to docs/rollouts/${workflow.slug}.md.
+    needs: [slo]
+    artifacts:
+      - docs/rollouts/${workflow.slug}.md
+  - id: notes
+    invoke: polymath-release:release-notes
+    prompt: Draft the rollout/release note communicating the staged availability and what each stage gates on.
+    needs: [rollout]
+mustPass:
+  - id: rollout-plan-exists
+    type: fileExists
+    path: docs/rollouts/${workflow.slug}.md
+  - id: rollout-doc-produced
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 20
+    pathAllowlist:
+      - "docs/rollouts/**"
+      - "docs/release-notes/**"
+  - id: gates-mentioned
+    type: stepSummaryMatches
+    severity: advisory
+    step: rollout
+    pattern: "(rollback|health gate|kill switch|canary|flag)"

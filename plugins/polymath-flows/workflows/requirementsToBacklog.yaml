@@ -1,0 +1,61 @@
+schemaVersion: 0.1
+name: requirementsToBacklog
+version: 0.1.0
+description: Turn a PRD/requirements doc into a decomposed, groomed, estimated backlog of ready work items — the product-side analogue of incidentRetroToActions.
+whenToUse: "PRD to a decomposed, groomed, ready backlog."
+triggers:
+  - "turn this PRD into a backlog"
+  - "break this requirements doc into ready stories"
+  - "decompose and groom this spec into work items"
+  - "go from PRD to a sprint-ready backlog"
+detectionSignals:
+  paths:
+    - docs/prds/**
+    - docs/maps/**
+  intents:
+    - prd-to-backlog
+requires:
+  plugins:
+    - polymath-core
+    - polymath-product
+    - polymath-planning
+inputs:
+  - name: prd
+    type: string
+    required: true
+    description: Path or name of the PRD / requirements doc; used for the slug.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: decompose
+    invoke: polymath-product:decompose-epic
+    prompt: Decompose the PRD at ${inputs.prd} into vertically-sliced user stories; write the story map to docs/maps/${workflow.slug}.md.
+    artifacts:
+      - docs/maps/${workflow.slug}.md
+  - id: groom
+    invoke: polymath-product:groom-backlog
+    prompt: Refine the sliced stories to a Definition of Ready — acceptance criteria, rough estimate, split oversized, flag blockers.
+    needs: [decompose]
+  - id: breakdown
+    invoke: polymath-planning:work-breakdown
+    prompt: For the ready stories, produce an engineering WBS of independently completable items; write to docs/plans/${workflow.slug}-backlog.md.
+    needs: [groom]
+    artifacts:
+      - docs/plans/${workflow.slug}-backlog.md
+mustPass:
+  - id: backlog-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 2
+      max: 20
+    pathAllowlist:
+      - "docs/maps/**"
+      - "docs/plans/**"
+  - id: map-exists
+    type: fileExists
+    path: docs/maps/${workflow.slug}.md
+  - id: backlog-exists
+    type: fileExists
+    path: docs/plans/${workflow.slug}-backlog.md

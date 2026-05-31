@@ -76,6 +76,15 @@
     ]
   },
   {
+    "n": "estimateAndPlan",
+    "paths": [
+      "docs/plans/**"
+    ],
+    "intents": [
+      "scope-estimate-plan"
+    ]
+  },
+  {
     "n": "experimentToGA",
     "paths": [
       "docs/experiments/**",
@@ -118,6 +127,15 @@
     ]
   },
   {
+    "n": "incidentToReview",
+    "paths": [
+      "docs/postmortems/**"
+    ],
+    "intents": [
+      "incident-to-review"
+    ]
+  },
+  {
     "n": "migrateLanguageVersion",
     "paths": [
       "**/*.csproj",
@@ -139,12 +157,41 @@
     ]
   },
   {
+    "n": "prdToShip",
+    "paths": [
+      "docs/prds/**"
+    ],
+    "intents": [
+      "ship-from-prd",
+      "input:prd"
+    ]
+  },
+  {
+    "n": "progressiveRollout",
+    "paths": [
+      "docs/rollouts/**"
+    ],
+    "intents": [
+      "progressive-rollout"
+    ]
+  },
+  {
     "n": "refactorWithSafety",
     "paths": [
       "docs/refactors/**"
     ],
     "intents": [
       "refactor"
+    ]
+  },
+  {
+    "n": "requirementsToBacklog",
+    "paths": [
+      "docs/prds/**",
+      "docs/maps/**"
+    ],
+    "intents": [
+      "prd-to-backlog"
     ]
   },
   {

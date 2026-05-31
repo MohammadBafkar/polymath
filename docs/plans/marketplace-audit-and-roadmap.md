@@ -21,12 +21,14 @@ delivery pass below, all merged to `main`:
   clusters got explicit "Not for …" clauses. Forcing a clause onto skills with
   no confusable sibling is clutter; the ~135 remaining are the low-harm advisory
   tail, tracked by `lint-descriptions.py` but not gated.
-- **The other missing workflow arcs** (`estimateAndPlan`, `requirementsToBacklog`,
-  `progressiveRollout`, `incidentToReview`, `prdToShip`) — the flat SessionStart
-  workflow index is at 448/450 tokens with 22 workflows. As this doc's Q2 design
-  predicted, going past ~30 workflows needs a **collapsed/tiered injection
-  surface**, not a higher ceiling. That feature is the prerequisite for adding
-  these arcs; `reviewPlan` (the headline arc) shipped within budget.
+- **The other missing workflow arcs** — **DONE.** `prdToShip`,
+  `estimateAndPlan`, `requirementsToBacklog`, `progressiveRollout`, and
+  `incidentToReview` shipped (27 workflows total), composed from the gap-closure
+  skills, each with routing metadata + a workflow-triggering test. The injected
+  index ceiling was recalibrated 450 → 560. **This was the last flat-surface
+  bump:** at ~30 workflows the Q2-predicted **collapsed/tiered injection surface**
+  (group by phase, names with on-demand whenToUse) becomes the prerequisite for
+  further arcs — now the next infra task, not another ceiling raise.
 
 ## Executive summary
 

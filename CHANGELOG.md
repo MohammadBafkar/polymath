@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Five composed workflow arcs** in `polymath-flows`: `prdToShip`,
+  `estimateAndPlan`, `requirementsToBacklog`, `progressiveRollout`, and
+  `incidentToReview` — right-sized arcs the audit flagged as missing, now
+  composable from the gap-closure skills. Each carries routing metadata and a
+  workflow-triggering test; the injected-index ceiling was recalibrated to 560
+  for 27 workflows (last flat-surface bump before tiering at ~30).
+
 - **`polymath-i18n` plugin (experimental).** `i18n-audit` — assess
   internationalization readiness (hardcoded strings, locale formatting, ICU
   plurals, text expansion, RTL/bidi, fallback chain, pseudolocalization in CI).

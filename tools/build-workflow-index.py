@@ -48,10 +48,12 @@ INJECTION_FOOTER = (
     "otherwise just answer. Never start a workflow without asking."
 )
 # Ceiling on the always-on routing surface. The full catalog is one consolidated
-# block of ~18 tokens per workflow (name + terse whenToUse) plus framing. 450
-# fits the current 22 workflows with headroom; if the catalog grows past ~30,
-# replace the flat list with a collapsed/tiered surface rather than raising this.
-MAX_INJECTION_TOKENS = 450
+# block of ~18 tokens per workflow (name + terse whenToUse) plus framing. The
+# flat list is acceptable up to ~30 workflows; 560 fits the current 27 with
+# headroom. This is the LAST recalibration of the flat surface — at ~30
+# workflows, switch to a collapsed/tiered injection (group by phase, names with
+# on-demand whenToUse) rather than raising this again. See the audit roadmap Q2.
+MAX_INJECTION_TOKENS = 560
 
 
 def _count_tokens(text: str) -> int:
