@@ -607,6 +607,42 @@
         "cloud-cost",
         "rightsizing"
       ]
+    },
+    {
+      "name": "polymath-i18n",
+      "source": "./plugins/polymath-i18n",
+      "description": "Internationalization: audit for i18n/l10n readiness — strings, locale formatting, plurals, RTL, fallback.",
+      "version": "0.1.0",
+      "category": "engineering",
+      "tags": [
+        "i18n",
+        "l10n",
+        "localization"
+      ]
+    },
+    {
+      "name": "polymath-supply-chain",
+      "source": "./plugins/polymath-supply-chain",
+      "description": "Supply chain: review SBOM, dependency provenance, licenses, signing/SLSA attestation, build trust.",
+      "version": "0.1.0",
+      "category": "security",
+      "tags": [
+        "supply-chain",
+        "sbom",
+        "slsa"
+      ]
+    },
+    {
+      "name": "polymath-product-strategy",
+      "source": "./plugins/polymath-product-strategy",
+      "description": "Product strategy: vision, ICP, positioning, pricing/packaging, moat, and a go-to-market launch plan.",
+      "version": "0.1.0",
+      "category": "product",
+      "tags": [
+        "product-strategy",
+        "positioning",
+        "gtm"
+      ]
     }
   ]
 }

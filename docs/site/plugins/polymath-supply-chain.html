@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>polymath-planning · Polymath</title>
+  <title>polymath-supply-chain · Polymath</title>
   <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -14,22 +14,25 @@
   <main>
 <p><a href="../index.html">← all plugins</a></p>
 <p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
-<pre><code>claude plugin install polymath-planning@polymath</code></pre>
-<h1>polymath-planning</h1>
+<pre><code>claude plugin install polymath-supply-chain@polymath</code></pre>
+<h1>polymath-supply-chain</h1>
 
-<p>Planning craft for the Polymath marketplace.</p>
+<p>Software supply-chain craft: review what enters the build and whether you can prove where it came from.</p>
 
 <h2>What it ships</h2>
 
 <ul>
-<li>Skills: <code>write-plan</code>, <code>work-breakdown</code>, <code>estimate</code>, <code>forecast</code>.</li>
-<li>Templates: <code>Plan.md</code>.</li>
+<li>Skills: <code>supply-chain-review</code> — SBOM presence/completeness, dependency provenance + lockfile hygiene, license audit, build-pipeline trust, signing/SLSA attestation, risky-dependency flags, and compliance-control mapping.</li>
 </ul>
+
+<h2>Why it exists</h2>
+
+<p>The audit found supply-chain/compliance structurally absent — <code>polymath-connector-snyk:triage-vulns</code> handles runtime CVEs, but nothing reviewed SBOM, provenance, licensing, or signing posture. This plugin covers that posture; it is distinct from runtime vuln triage and from the <code>bumpDependency</code> workflow.</p>
 
 <h2>Installation</h2>
 
 <pre><code>
-claude plugin install polymath-planning@polymath
+claude plugin install polymath-supply-chain@polymath
 </code></pre>
 
 <h2>Dependencies</h2>

@@ -64,6 +64,9 @@
     "polymath-progressive-delivery": { "status": "experimental" },
     "polymath-test-automation": { "status": "experimental" },
     "polymath-deprecation": { "status": "experimental" },
-    "polymath-finops": { "status": "experimental" }
+    "polymath-finops": { "status": "experimental" },
+    "polymath-i18n": { "status": "experimental" },
+    "polymath-supply-chain": { "status": "experimental" },
+    "polymath-product-strategy": { "status": "experimental" }
   }
 }

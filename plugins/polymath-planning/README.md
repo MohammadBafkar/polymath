@@ -4,7 +4,7 @@ Planning craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `write-plan`, `work-breakdown`, `estimate`.
+- Skills: `write-plan`, `work-breakdown`, `estimate`, `forecast`.
 - Templates: `Plan.md`.
 
 ## Installation
