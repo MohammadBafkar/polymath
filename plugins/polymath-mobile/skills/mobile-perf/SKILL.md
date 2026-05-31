@@ -1,6 +1,6 @@
 ---
 name: mobile-perf
-description: Set mobile perf budgets — cold start (TTI), warm start, scroll FPS, memory; per audience device tier (low-end Android baseline); identify the dominant cost.
+description: Set mobile perf budgets — cold start (TTI), warm start, scroll FPS, memory; per audience device tier (low-end Android baseline); identify the dominant cost. Native only; not web CWV.
 ---
 
 # mobile-perf

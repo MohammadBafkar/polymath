@@ -1,6 +1,6 @@
 ---
 name: coverage-gap
-description: Inspect a diff for missing test coverage; pairs every changed behavior with either an existing test or a flagged gap with a recommended layer.
+description: Inspect a diff for missing test coverage; pairs every changed behavior with either an existing test or a flagged gap with a recommended layer. Finds gaps; doesn't write tests (unit-tests).
 ---
 
 # coverage-gap

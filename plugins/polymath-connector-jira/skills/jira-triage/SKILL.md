@@ -1,6 +1,6 @@
 ---
 name: jira-triage
-description: Triage a Jira issue — fetch via MCP, classify type/priority/component, ask for missing repro, transition state, route owner.
+description: Triage a Jira issue — fetch via MCP, classify type/priority/component, ask for missing repro, transition state, route owner. Jira only — not other trackers.
 ---
 
 # jira-triage

@@ -1,6 +1,6 @@
 ---
 name: linear-triage
-description: Triage a Linear issue — classify type/priority/state, ask for missing repro, transition through the workflow state machine, route to the right team.
+description: Triage a Linear issue — classify type/priority/state, ask for missing repro, transition through the workflow state machine, route to the right team. Linear only — not other trackers.
 ---
 
 # linear-triage

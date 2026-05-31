@@ -1,6 +1,6 @@
 ---
 name: red-team
-description: Adversarially challenge a plan, design, or PRD; produces a list of objections with the strongest case the proposer hasn't refuted.
+description: Adversarially challenge a plan, design, or PRD; produces a list of objections with the strongest case the proposer hasn't refuted. Challenges a plan/PRD, not pre-launch failures (pre-mortem).
 ---
 
 # red-team

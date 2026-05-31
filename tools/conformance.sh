@@ -270,6 +270,18 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # DESC-2: confusion-matrix frontmatter is well-formed (referenced skills
+  # exist). The behavioural assertion — naive prompt loads the expected skill,
+  # never a forbidden sibling — is the opt-in `run` mode under
+  # CLAUDE_CODE_OAUTH_TOKEN. See tools/check-description-confusion.py.
+  echo
+  echo "── DESC-2 cross-check (check-description-confusion.py check)"
+  if python3 "$root/tools/check-description-confusion.py" check; then
+    :
+  else
+    overall=1
+  fi
+
   # PROMOTION-1: skill-alias command descriptions must complement, not
   # restate, their target skill (docs/PLUGIN-AUTHORING.md § 5.1). Command
   # descriptions count against the per-plugin token budget, so a verbatim

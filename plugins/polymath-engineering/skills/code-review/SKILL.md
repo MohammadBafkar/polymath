@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review a code change for correctness, simplification, and missing tests; produces a structured review summary keyed to the diff.
+description: Review a code change for correctness, simplification, and missing tests; produces a structured review summary keyed to the diff. Reviews a diff; not test-gap hunting (coverage-gap).
 ---
 
 # code-review

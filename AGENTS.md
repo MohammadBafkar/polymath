@@ -20,6 +20,7 @@ tools/skill-triggering.py check        # validates skill-triggering test frontma
 tools/workflow-triggering.py check     # workflow-triggering frontmatter + trigger drift guard
 tools/build-workflow-index.py --check  # workflow routing index in sync with workflow YAML
 tools/lint-descriptions.py --strict    # no two descriptions token-collide (disambiguation floor)
+tools/check-description-confusion.py check   # confusion-matrix frontmatter (sibling routing) is valid
 
 # Single-plugin conformance during authoring:
 tools/conformance.sh plugins/polymath-<name>
@@ -77,6 +78,7 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
+| DESC-2 | `tools/check-description-confusion.py check`: `tests/forbidden_prompts.yaml` cases are well-formed (referenced skills exist). Behavioural `run` mode is opt-in under `CLAUDE_CODE_OAUTH_TOKEN` |
 | CONNECTOR-1 | Connector plugins need `.mcp.json`, `references/*.md`, and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only` |
 | CONNECTOR-2 | `polymath-connector-*` and `polymath-infra-*` must be audited in `docs/CONNECTOR-POLICY.md` |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |

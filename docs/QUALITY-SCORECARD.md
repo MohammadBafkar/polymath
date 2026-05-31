@@ -34,6 +34,10 @@ Every PR runs:
   --strict` (no two always-on descriptions token-collide without a
   distinguishing proper noun). `scope_boundary` / `trigger_clarity` are
   reported as advisory means, not gated.
+- **Confusion matrix** — `python3 tools/check-description-confusion.py check`
+  (the sibling-routing cases in `tests/forbidden_prompts.yaml` are
+  well-formed). The behavioural `run` mode — naive prompt loads the expected
+  skill, never a forbidden sibling — is opt-in under `CLAUDE_CODE_OAUTH_TOKEN`.
 - **Connector / infra boundary** — every in-scope plugin audited in
   [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is

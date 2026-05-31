@@ -1,6 +1,6 @@
 ---
 name: caching-tradeoffs
-description: Design a cache — what's cached, where (local / regional / shared), invalidation strategy, staleness tolerance, named failure modes (stampede, poisoning, drift).
+description: Design a cache — what's cached, where (local / regional / shared), invalidation strategy, staleness tolerance, named failure modes (stampede, poisoning, drift). Strategy, not Redis key/TTL design.
 ---
 
 # caching-tradeoffs

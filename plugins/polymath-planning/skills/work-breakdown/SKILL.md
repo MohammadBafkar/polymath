@@ -1,6 +1,6 @@
 ---
 name: work-breakdown
-description: Decompose a goal or plan into independently completable steps; each step produces an observable artifact.
+description: Decompose a goal or plan into independently completable steps; each step produces an observable artifact. Engineering task WBS; not story slicing (decompose-epic) or the plan doc (write-plan).
 ---
 
 # work-breakdown
