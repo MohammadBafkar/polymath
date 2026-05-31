@@ -1,5 +1,33 @@
 # Polymath Marketplace Audit & Roadmap
 
+## Implementation status
+
+Tracked in this doc per the project's plan-progress convention. As of the
+delivery pass below, all merged to `main`:
+
+| Stage | Scope | Status | Evidence |
+| --- | --- | --- | --- |
+| 0 — Instrument | `lint-descriptions.py` (DESC-1), `forbidden_prompts` + `check-description-confusion.py` (DESC-2), `build-workflow-index.py`, conformance wiring | ✅ Done | PRs #4, #5 |
+| 1 — Workflow discoverability | schema `whenToUse`/`triggers`/`detectionSignals`, SessionStart index injection, detect→propose→confirm→run contract, `reviewPlan` arc, WORKFLOW-2 enforcement, workflow-triggering tests | ✅ Done | PR #3 |
+| 2 — Description quality | DESC-1 disambiguation gate (0 collisions across 149 skills), scope-boundary clauses on the confusion clusters, DESC-2 confusion matrix | ✅ Done | PRs #4, #5 |
+| 3 — Gap closure (P0) | `polymath-prioritize`; qa `test-smell`/`integration-contract`/`assertion-quality`; product `roadmap`/`groom-backlog` | ✅ Done | PRs #6, #7 |
+| 3 — Gap closure (P1) | `polymath-progressive-delivery`, `polymath-test-automation`, `polymath-deprecation`, `polymath-finops`, thinking `problem-framing`/`first-principles` | ✅ Done | PRs #8, #9 |
+| 3 — Gap closure (P2) | `polymath-i18n`, `polymath-supply-chain`, `polymath-product-strategy`, planning `forecast` | ✅ Done | PR #10 |
+| 4 — Promotion | experimental → beta → stable | ⏸ Gated | New plugins are correctly `experimental`; beta needs an on-disk bakeoff case per plugin, stable needs live bakeoff/trigger runs (a `CLAUDE_CODE_OAUTH_TOKEN`) **and** an external adopter — not manufacturable by the maintainer. |
+
+**Deliberately not done, with reasons:**
+
+- **Full 147-artifact `scope_boundary` sweep** — only the high-harm confusion
+  clusters got explicit "Not for …" clauses. Forcing a clause onto skills with
+  no confusable sibling is clutter; the ~135 remaining are the low-harm advisory
+  tail, tracked by `lint-descriptions.py` but not gated.
+- **The other missing workflow arcs** (`estimateAndPlan`, `requirementsToBacklog`,
+  `progressiveRollout`, `incidentToReview`, `prdToShip`) — the flat SessionStart
+  workflow index is at 448/450 tokens with 22 workflows. As this doc's Q2 design
+  predicted, going past ~30 workflows needs a **collapsed/tiered injection
+  surface**, not a higher ceiling. That feature is the prerequisite for adding
+  these arcs; `reviewPlan` (the headline arc) shipped within budget.
+
 ## Executive summary
 
 This document consolidates three independent audits of the Polymath marketplace into a single roadmap: an SDLC phase-coverage gap analysis (Q1), a workflow auto-detection and discoverability design (Q2), and a description-quality evaluation of every shipped artifact (Q3). Read together they tell one story. The catalog's *skill spine* is strong where operations live (incident-response, observability, SRE, architecture, release, infra) but blind at the front (ideation, prioritization, requirements depth) and tail (progressive-delivery, deprecation, supply-chain) of the SDLC; its 21 multi-step *workflows* are effectively dark because nothing surfaces them to the model the way skill descriptions are surfaced; and the descriptions that do route well *trigger* well but almost never *fence their scope* — `scope_boundary` is the failing dimension across 70% of the 158 artifacts. The unified roadmap below sequences the fix as instrument-first, then make workflows discoverable, then refine descriptions, then close phase gaps, then promote — each stage gated on CI checks the repo already runs (token budget, conformance, triggering/golden tests, diff-guards).
