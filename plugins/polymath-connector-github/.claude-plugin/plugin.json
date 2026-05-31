@@ -2,7 +2,7 @@
   "name": "polymath-connector-github",
   "version": "0.2.0",
   "description": "GitHub connector: MCP server for PRs/issues/repo reads + Actions diagnostics + PR-URL fetch hook + end-of-turn nudges for PR + CI status.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

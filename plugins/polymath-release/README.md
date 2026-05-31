@@ -23,4 +23,4 @@ Each component is a thin alias around a procedure that does not bundle scripts o
 
 ## License
 
-Apache-2.0.
+MIT.

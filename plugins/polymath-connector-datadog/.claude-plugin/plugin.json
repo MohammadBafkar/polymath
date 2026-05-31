@@ -2,7 +2,7 @@
   "name": "polymath-connector-datadog",
   "version": "0.1.0",
   "description": "Datadog connector: MCP server for metrics/logs/dashboards + skills for monitor authoring and dashboard hygiene.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

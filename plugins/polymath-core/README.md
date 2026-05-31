@@ -20,4 +20,4 @@ Polymath uses a foundation plugin to keep cross-cutting context (naming, token b
 
 ## License
 
-Apache-2.0.
+MIT.

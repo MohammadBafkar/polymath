@@ -2,7 +2,7 @@
   "name": "polymath-learning",
   "version": "0.1.0",
   "description": "Learning craft: tiered explanations by audience, code walkthroughs, Feynman-style self-test of understanding.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

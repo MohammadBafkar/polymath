@@ -18,4 +18,4 @@ claude plugin install polymath-mobile@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

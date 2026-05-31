@@ -20,7 +20,7 @@
     },
     "license": {
       "type": "string",
-      "description": "SPDX identifier (e.g. Apache-2.0)."
+      "description": "SPDX identifier (e.g. MIT)."
     },
     "agentSkills": {
       "type": "object",

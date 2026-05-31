@@ -32,4 +32,4 @@ edit the policy table and re-run the script.
 
 ## License
 
-Apache-2.0.
+MIT.

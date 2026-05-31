@@ -2,7 +2,7 @@
   "name": "polymath-connector-monitoring",
   "version": "0.1.0",
   "description": "Observability umbrella connector: Grafana dashboard snapshots + Honeycomb trace investigation + Elasticsearch log search. Read-only investigative skills + bounded-scan discipline.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

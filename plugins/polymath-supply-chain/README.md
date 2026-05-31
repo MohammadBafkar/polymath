@@ -22,4 +22,4 @@ claude plugin install polymath-supply-chain@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

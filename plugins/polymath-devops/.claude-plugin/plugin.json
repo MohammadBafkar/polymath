@@ -2,7 +2,7 @@
   "name": "polymath-devops",
   "version": "0.1.0",
   "description": "DevOps craft: multi-stage Dockerfile authoring, GitHub Actions pipelines, env-promotion strategy.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

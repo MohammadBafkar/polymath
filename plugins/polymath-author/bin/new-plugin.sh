@@ -52,7 +52,7 @@ cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
   "name": "$full",
   "version": "0.1.0",
   "description": "$description",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "metadata": {
     "category": "TODO",
     "tags": []

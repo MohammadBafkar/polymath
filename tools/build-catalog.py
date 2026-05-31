@@ -159,7 +159,7 @@ PAGE_SHELL = """<!doctype html>
 {body}
   </main>
   <footer>
-    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+    <p>MIT · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
   </footer>
 </body>
 </html>
@@ -285,7 +285,7 @@ def build(check: bool) -> int:
     )
     sections_html.append(
         f'<p class="plugin-meta">{len(plugins)} plugins · '
-        f'Apache-2.0 · '
+        f'MIT · '
         f'<a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>'
     )
 

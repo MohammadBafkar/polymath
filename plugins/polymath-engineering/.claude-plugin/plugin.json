@@ -2,7 +2,7 @@
   "name": "polymath-engineering",
   "version": "0.1.0",
   "description": "Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation. Secret-scan + formatter hooks.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

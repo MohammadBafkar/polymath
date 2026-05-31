@@ -53,7 +53,7 @@ Conventional Commits. The `polymath-release` plugin enforces this for release-st
 
 ### License
 
-Apache-2.0 for all plugins. Patent grant matters for OSS plugins reused in commercial agents.
+MIT for all plugins. Patent grant matters for OSS plugins reused in commercial agents.
 
 ## Output
 

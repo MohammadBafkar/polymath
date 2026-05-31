@@ -18,4 +18,4 @@ claude plugin install polymath-design@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

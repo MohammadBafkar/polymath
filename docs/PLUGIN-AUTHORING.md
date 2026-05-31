@@ -51,7 +51,7 @@ plugins/polymath-<name>/
   "name": "polymath-thing",
   "version": "0.1.0",
   "description": "Short, ≤ 200 chars, trigger phrase first.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "dependencies": {
     "plugins": ["polymath-core"]
   },

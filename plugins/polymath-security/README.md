@@ -20,4 +20,4 @@ claude plugin install polymath-security@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

@@ -2,7 +2,7 @@
   "name": "polymath-connector-snyk",
   "version": "0.1.0",
   "description": "Snyk connector: MCP server for vulnerability test/monitor + Stop hook that warns if the current branch has open critical vulns.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

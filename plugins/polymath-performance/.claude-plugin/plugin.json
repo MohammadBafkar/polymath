@@ -2,7 +2,7 @@
   "name": "polymath-performance",
   "version": "0.1.0",
   "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoff design.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

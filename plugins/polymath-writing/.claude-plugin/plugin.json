@@ -2,7 +2,7 @@
   "name": "polymath-writing",
   "version": "0.1.0",
   "description": "Writing craft: C4 architecture docs, ADR (Nygard), RFC, runbook templates; editorial pass for tightening prose.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

@@ -67,4 +67,4 @@ Open an issue with:
 
 ## License
 
-Contributions are licensed under Apache-2.0. By opening a PR you agree your contribution is licensed under those terms.
+Contributions are licensed under MIT. By opening a PR you agree your contribution is licensed under those terms.

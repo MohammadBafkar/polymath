@@ -18,4 +18,4 @@ claude plugin install polymath-learning@polymath
 
 ## License
 
-Apache-2.0.
+MIT.
