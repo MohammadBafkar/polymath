@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`polymath-prioritize` plugin (experimental).** Closes the top SDLC gap
+  from the catalog audit: ranking a backlog with an explicit, inspectable
+  method. The `prioritize` skill supports RICE, WSJF/cost-of-delay, MoSCoW,
+  Kano, and value-vs-effort, picks the lightest method the signals support,
+  shows the inputs behind every score (never an opaque number), surfaces
+  confidence, and cuts a Now/Next/Later roadmap to `docs/prioritization/<slug>.md`.
+  Ships with a golden fixture and a skill-triggering test; registered in both
+  catalogs at `experimental`.
+
 - **Description-quality linter.** `tools/lint-descriptions.py` scores every
   always-on description (skill / command / agent) on trigger clarity, scope
   boundary, and disambiguation. The `DESC-1` conformance gate
