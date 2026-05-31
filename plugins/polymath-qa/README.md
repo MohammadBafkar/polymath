@@ -4,7 +4,7 @@ Quality craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `test-strategy`, `coverage-gap`, `unit-tests`.
+- Skills: `test-strategy`, `coverage-gap`, `unit-tests`, `test-smell`, `integration-contract`, `assertion-quality`.
 
 ## Installation
 
