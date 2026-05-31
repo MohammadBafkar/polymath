@@ -258,6 +258,18 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # DESC-1: no two always-on descriptions (skill/command/agent) may
+  # token-collide without a distinguishing proper noun — a router cannot split
+  # them otherwise. Enforces the disambiguation floor; scope_boundary and
+  # trigger_clarity are reported but advisory. See tools/lint-descriptions.py.
+  echo
+  echo "── DESC-1 cross-check (lint-descriptions.py --strict)"
+  if python3 "$root/tools/lint-descriptions.py" --strict; then
+    :
+  else
+    overall=1
+  fi
+
   # PROMOTION-1: skill-alias command descriptions must complement, not
   # restate, their target skill (docs/PLUGIN-AUTHORING.md § 5.1). Command
   # descriptions count against the per-plugin token budget, so a verbatim

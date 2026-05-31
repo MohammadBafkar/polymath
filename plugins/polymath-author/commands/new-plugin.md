@@ -1,6 +1,6 @@
 ---
 name: new-plugin
-description: Scaffold a new Polymath plugin via the bundled new-plugin.sh.
+description: Scaffold a new top-level Polymath plugin (plugin.json, README, CHANGELOG) via new-plugin.sh. Not for adding a skill or command to an existing plugin.
 ---
 
 # /new-plugin

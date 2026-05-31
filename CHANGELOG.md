@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Description-quality linter.** `tools/lint-descriptions.py` scores every
+  always-on description (skill / command / agent) on trigger clarity, scope
+  boundary, and disambiguation. The `DESC-1` conformance gate
+  (`--strict`) blocks any two descriptions that token-collide without a
+  distinguishing proper noun, so a router can always tell siblings apart;
+  scope-boundary coverage is reported as an advisory backlog. Rewrote the
+  scaffolder (`new-plugin`/`new-skill`/`new-command`/`new-connector`) and
+  alias (`init-project`, `review-migration`, `audit-redis-config`) command
+  descriptions to clear the existing collisions.
+
 - **Workflow discoverability.** Workflows now carry optional
   `whenToUse` / `triggers` / `detectionSignals` in their YAML
   (`shared/schemas/workflow.schema.json`), and a `polymath-flows`

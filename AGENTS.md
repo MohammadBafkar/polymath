@@ -19,6 +19,7 @@ tools/bakeoff.py check                 # parses bakeoff cases without running a 
 tools/skill-triggering.py check        # validates skill-triggering test frontmatter
 tools/workflow-triggering.py check     # workflow-triggering frontmatter + trigger drift guard
 tools/build-workflow-index.py --check  # workflow routing index in sync with workflow YAML
+tools/lint-descriptions.py --strict    # no two descriptions token-collide (disambiguation floor)
 
 # Single-plugin conformance during authoring:
 tools/conformance.sh plugins/polymath-<name>
@@ -75,6 +76,7 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |
 | WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
+| DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
 | CONNECTOR-1 | Connector plugins need `.mcp.json`, `references/*.md`, and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only` |
 | CONNECTOR-2 | `polymath-connector-*` and `polymath-infra-*` must be audited in `docs/CONNECTOR-POLICY.md` |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |

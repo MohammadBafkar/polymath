@@ -1,6 +1,6 @@
 ---
 name: new-skill
-description: Scaffold a new skill inside a plugin via the bundled new-skill.sh.
+description: Scaffold the SKILL.md and directories for a new skill inside an existing plugin via new-skill.sh. Not a whole plugin.
 ---
 
 # /new-skill
