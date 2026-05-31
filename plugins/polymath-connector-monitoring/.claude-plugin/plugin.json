@@ -1,6 +1,6 @@
 {
   "name": "polymath-connector-monitoring",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Observability umbrella connector: Grafana dashboard snapshots + Honeycomb trace investigation + Elasticsearch log search. Read-only investigative skills + bounded-scan discipline.",
   "license": "MIT",
   "author": {

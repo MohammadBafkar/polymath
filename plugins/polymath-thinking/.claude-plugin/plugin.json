@@ -1,6 +1,6 @@
 {
   "name": "polymath-thinking",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Thinking craft: brainstorm, deliberate, 5-whys, pre-mortem, red-team, and architecture-critic agent.",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "polymath-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Foundation: conventions, glossary, plugin-budget reporter, project-context loader, SessionStart hook.",
   "license": "MIT",
   "author": {

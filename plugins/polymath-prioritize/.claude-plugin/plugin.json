@@ -1,6 +1,6 @@
 {
   "name": "polymath-prioritize",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Prioritization craft: rank a backlog with RICE, WSJF, MoSCoW, Kano, or value-vs-effort and cut a Now/Next/Later roadmap.",
   "license": "MIT",
   "author": {

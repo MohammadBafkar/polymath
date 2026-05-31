@@ -1,6 +1,6 @@
 {
   "name": "polymath-progressive-delivery",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Progressive delivery craft: design safe rollouts — feature flags, canary, blue-green, SLO health gates, and automated rollback.",
   "license": "MIT",
   "author": {

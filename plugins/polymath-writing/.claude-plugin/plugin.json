@@ -1,6 +1,6 @@
 {
   "name": "polymath-writing",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Writing craft: C4 architecture docs, ADR (Nygard), RFC, runbook templates; editorial pass for tightening prose.",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "polymath-mobile",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Mobile craft: mobile perf budgets + JS thread + cold start, push notifications, deep-link routing.",
   "license": "MIT",
   "author": {

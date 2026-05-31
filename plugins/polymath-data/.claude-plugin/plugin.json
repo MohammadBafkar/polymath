@@ -1,6 +1,6 @@
 {
   "name": "polymath-data",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Data craft: SQL authoring, SQL plan-based optimization, metrics-tree decomposition from a North Star.",
   "license": "MIT",
   "author": {

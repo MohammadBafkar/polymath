@@ -1,6 +1,6 @@
 {
   "name": "polymath-observability",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design; the three pillars without the bloat.",
   "license": "MIT",
   "author": {

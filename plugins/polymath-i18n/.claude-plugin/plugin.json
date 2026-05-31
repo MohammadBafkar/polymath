@@ -1,6 +1,6 @@
 {
   "name": "polymath-i18n",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Internationalization craft: audit software for i18n/l10n readiness — strings, locale formatting, plurals, RTL, fallback.",
   "license": "MIT",
   "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },

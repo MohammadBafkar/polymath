@@ -1,6 +1,6 @@
 {
   "name": "polymath-deprecation",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Deprecation craft: plan a staged deprecation (two dates, telemetry-gated removal) and write the consumer migration guide.",
   "license": "MIT",
   "author": {

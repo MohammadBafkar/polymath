@@ -1,6 +1,6 @@
 {
   "name": "polymath-decisions",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing for non-trivial decisions.",
   "license": "MIT",
   "author": {
