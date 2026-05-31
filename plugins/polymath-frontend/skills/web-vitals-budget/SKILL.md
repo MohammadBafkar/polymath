@@ -1,6 +1,6 @@
 ---
 name: web-vitals-budget
-description: Set Core Web Vitals budgets (LCP, INP, CLS) per route and propose the cheapest fix path when one is over budget.
+description: Set Core Web Vitals budgets (LCP, INP, CLS) per route and propose the cheapest fix path when one is over budget. Web routes only; not mobile (mobile-perf) or backend (perf-budget).
 ---
 
 # web-vitals-budget

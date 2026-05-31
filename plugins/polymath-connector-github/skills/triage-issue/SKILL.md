@@ -1,6 +1,6 @@
 ---
 name: triage-issue
-description: Triage an inbound GitHub issue — label, severity, area, ask for missing repro details if needed, route to the right team.
+description: Triage an inbound GitHub issue — label, severity, area, ask for missing repro details if needed, route to the right team. GitHub issues only — not other trackers.
 ---
 
 # triage-issue

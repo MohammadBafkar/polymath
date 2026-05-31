@@ -1,6 +1,6 @@
 ---
 name: perf-budget
-description: Set a perf budget — per critical user journey, single percentile + threshold, explicit budget components (network / compute / dependencies), tripwire alerts.
+description: Set a perf budget — per critical user journey, single percentile + threshold, explicit budget components (network / compute / dependencies), tripwire alerts. Backend journeys; not web CWV or mobile.
 ---
 
 # perf-budget

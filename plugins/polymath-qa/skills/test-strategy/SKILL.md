@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: Design a layered test strategy (pyramid) for a feature or repo; recommends unit/integration/e2e split and the cheapest set that covers the acceptance criteria.
+description: Design a layered test strategy (pyramid) for a feature or repo; recommends unit/integration/e2e split and the cheapest set that covers the acceptance criteria. Plans layers; doesn't write tests.
 ---
 
 # test-strategy

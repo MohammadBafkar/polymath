@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   docs). The `DESC-2` gate validates the cases structurally; the behavioural
   `run` mode (naive prompt must load the expected skill, never a forbidden
   sibling) is opt-in under `CLAUDE_CODE_OAUTH_TOKEN`.
+- **Scope-boundary clauses on the confusion clusters.** Added explicit "Not
+  for X / use Y" boundaries to ~20 sibling skills the audit flagged as
+  confusable (issue triage, caching, decompose, test ownership, perf budgets,
+  critique, docs), so each names where it ends. Leading trigger text is
+  preserved; all stay within the per-plugin token budget.
 
 - **Workflow discoverability.** Workflows now carry optional
   `whenToUse` / `triggers` / `detectionSignals` in their YAML

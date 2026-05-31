@@ -1,6 +1,6 @@
 ---
 name: design-cache-layer
-description: Design a Redis cache layer — key schema, TTLs, eviction policy, stampede + thundering-herd protection, hot-key + big-key avoidance.
+description: Design a Redis cache layer — key schema, TTLs, eviction policy, stampede + thundering-herd protection, hot-key + big-key avoidance. Use after caching-tradeoffs picks where; not Redis server config.
 ---
 
 # design-cache-layer

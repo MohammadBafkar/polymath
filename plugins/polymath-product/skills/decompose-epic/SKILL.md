@@ -1,6 +1,6 @@
 ---
 name: decompose-epic
-description: Decompose a PRD or epic into vertically-sliced user stories using a Jeff Patton-style user story map; produces docs/maps/<slug>.md.
+description: Decompose a PRD or epic into vertically-sliced user stories using a Jeff Patton-style user story map; produces docs/maps/<slug>.md. Story slices, not an engineering WBS (work-breakdown).
 ---
 
 # decompose-epic

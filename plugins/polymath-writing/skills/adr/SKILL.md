@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Write an Architecture Decision Record (Michael Nygard format) to docs/adrs/NNNN-<slug>.md; frontmatter validated by the ADR artifact schema.
+description: Write an Architecture Decision Record (Michael Nygard format) to docs/adrs/NNNN-<slug>.md; frontmatter validated by the ADR artifact schema. Records a made decision, not a proposal to debate (rfc).
 ---
 
 # adr

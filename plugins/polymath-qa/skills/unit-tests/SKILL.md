@@ -1,6 +1,6 @@
 ---
 name: unit-tests
-description: Author unit tests using the repo's existing framework; one test per behavior, no mocking of internal collaborators.
+description: Author unit tests using the repo's existing framework; one test per behavior, no mocking of internal collaborators. Writes tests; not gap analysis (coverage-gap) or strategy (test-strategy).
 ---
 
 # unit-tests

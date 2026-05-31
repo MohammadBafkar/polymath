@@ -1,6 +1,6 @@
 ---
 name: architecture-doc
-description: Write a C4-style architecture document; System Context + Containers (+ Components when interesting) with mermaid diagrams.
+description: Write a C4-style architecture document; System Context + Containers (+ Components when interesting) with mermaid diagrams. Describes structure, not a decision (adr) or proposal (rfc).
 ---
 
 # architecture-doc
