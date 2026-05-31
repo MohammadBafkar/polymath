@@ -1,7 +1,7 @@
 [
   {
     "n": "activateProject",
-    "w": "First-time Polymath setup: project.yaml + onboarding.",
+    "w": "Set up Polymath: project.yaml + onboarding notes.",
     "t": [
       "set up polymath for this repo",
       "onboard this project",
@@ -91,7 +91,7 @@
   },
   {
     "n": "fuzzyGoalToPlan",
-    "w": "Turn a vague goal into an estimated, story-mapped plan.",
+    "w": "Turn a vague goal into an estimated, mapped plan.",
     "t": [
       "I have a fuzzy goal, help me plan it",
       "turn this vague idea into a plan",
@@ -121,7 +121,7 @@
   },
   {
     "n": "perfRegression",
-    "w": "Diagnose and fix a perf regression; verify recovery.",
+    "w": "Fix a perf regression and verify it recovered.",
     "t": [
       "latency went up, find out why",
       "p99 regressed after the last deploy",

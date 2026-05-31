@@ -2,7 +2,7 @@ schemaVersion: 0.1
 name: perfRegression
 version: 0.2.0
 description: Diagnose a performance regression — observability signals, review the diff that landed, implement the fix, verify the metric recovered.
-whenToUse: "Diagnose and fix a perf regression; verify recovery."
+whenToUse: "Fix a perf regression and verify it recovered."
 triggers:
   - "latency went up, find out why"
   - "p99 regressed after the last deploy"

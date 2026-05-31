@@ -31,10 +31,14 @@ except Exception:
     sys.exit(0)
 if not isinstance(idx, list) or not idx:
     sys.exit(0)
-print("Polymath workflows available (propose before running):")
+print("Polymath workflows available (multi-step arcs you can run):")
 for w in idx:
     print(f"  - {w['n']}: {w['w']}")
-print("When a request matches one, name it and ask before running it.")
+print(
+    "Before starting substantial multi-step work that matches one of these, first "
+    "propose that workflow in one line (name in backticks) and wait for approval; "
+    "otherwise just answer. Never start a workflow without asking."
+)
 PY
 )"
 

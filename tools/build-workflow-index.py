@@ -41,8 +41,12 @@ DATA_DIR = REPO / "plugins" / "polymath-flows" / "data"
 
 # Injection framing — kept byte-identical to the SessionStart hook so the
 # token assertion measures what is actually surfaced.
-INJECTION_HEADER = "Polymath workflows available (propose before running):"
-INJECTION_FOOTER = "When a request matches one, name it and ask before running it."
+INJECTION_HEADER = "Polymath workflows available (multi-step arcs you can run):"
+INJECTION_FOOTER = (
+    "Before starting substantial multi-step work that matches one of these, first "
+    "propose that workflow in one line (name in backticks) and wait for approval; "
+    "otherwise just answer. Never start a workflow without asking."
+)
 # Ceiling on the always-on routing surface. The full catalog is one consolidated
 # block of ~18 tokens per workflow (name + terse whenToUse) plus framing. 450
 # fits the current 22 workflows with headroom; if the catalog grows past ~30,
