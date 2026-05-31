@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-test-automation · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.1.0 · Apache-2.0 · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-test-automation@polymath</code></pre>
+<h1>polymath-test-automation</h1>
+
+<p>Test-automation craft beyond the unit level: protect the critical journeys with browser end-to-end tests, and find the system&#x27;s limits with load/stress/soak tests.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li>Skills:</li>
+<li><code>e2e-flow</code> — author a browser end-to-end test for a critical user journey (Playwright-style role/text selectors, web-first waits, deterministic data, one journey per spec).</li>
+<li><code>load-test</code> — design a load/stress/soak/spike test (k6/JMeter/Locust) with a realistic workload model, ramp + think time, and pass/fail thresholds on percentiles.</li>
+</ul>
+
+<h2>Why it exists</h2>
+
+<p>The audit found <code>polymath-qa</code> covered unit/coverage/strategy but had no browser e2e or load/stress authoring — a structurally absent phase. This plugin adds the distinct e2e and load toolchains, sitting between <code>polymath-qa:test-strategy</code> (the plan) and <code>polymath-devops:ci-pipeline-github</code> (where these gate).</p>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-test-automation@polymath
+</code></pre>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li><code>polymath-core</code></li>
+</ul>
+
+<h2>License</h2>
+
+<p>Apache-2.0.</p>
+  </main>
+  <footer>
+    <p>Apache-2.0 · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

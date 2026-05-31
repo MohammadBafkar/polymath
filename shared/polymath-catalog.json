@@ -60,6 +60,8 @@
     "polymath-connector-linear": { "status": "experimental" },
     "polymath-connector-statuspage": { "status": "experimental" },
     "polymath-connector-terraform": { "status": "experimental" },
-    "polymath-prioritize": { "status": "experimental" }
+    "polymath-prioritize": { "status": "experimental" },
+    "polymath-progressive-delivery": { "status": "experimental" },
+    "polymath-test-automation": { "status": "experimental" }
   }
 }

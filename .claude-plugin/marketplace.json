@@ -559,6 +559,30 @@
         "rice",
         "wsjf"
       ]
+    },
+    {
+      "name": "polymath-progressive-delivery",
+      "source": "./plugins/polymath-progressive-delivery",
+      "description": "Progressive delivery: safe rollouts — flags, canary/blue-green, SLO health gates, automated rollback.",
+      "version": "0.1.0",
+      "category": "release",
+      "tags": [
+        "progressive-delivery",
+        "feature-flags",
+        "canary"
+      ]
+    },
+    {
+      "name": "polymath-test-automation",
+      "source": "./plugins/polymath-test-automation",
+      "description": "Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.",
+      "version": "0.1.0",
+      "category": "quality",
+      "tags": [
+        "e2e",
+        "load-testing",
+        "playwright"
+      ]
     }
   ]
 }
