@@ -1,0 +1,238 @@
+[
+  {
+    "n": "activateProject",
+    "paths": [
+      ".polymath/project.yaml"
+    ],
+    "intents": [
+      "onboard",
+      "initialize"
+    ]
+  },
+  {
+    "n": "bugTriage",
+    "paths": [
+      "docs/bugs/**"
+    ],
+    "intents": [
+      "triage",
+      "debug"
+    ]
+  },
+  {
+    "n": "bumpDependency",
+    "paths": [
+      "package.json",
+      "pyproject.toml",
+      "go.mod",
+      "Cargo.toml",
+      "Directory.Packages.props"
+    ],
+    "intents": [
+      "upgrade-dependency"
+    ]
+  },
+  {
+    "n": "decideUnderAmbiguity",
+    "paths": [
+      "docs/decisions/**",
+      "docs/adrs/**"
+    ],
+    "intents": [
+      "decide"
+    ]
+  },
+  {
+    "n": "deliberationLoop",
+    "paths": [
+      "docs/plans/**",
+      "docs/thinking/**"
+    ],
+    "intents": [
+      "critique",
+      "revise-plan"
+    ]
+  },
+  {
+    "n": "deprecationToRemoval",
+    "paths": [
+      "docs/deprecations/**"
+    ],
+    "intents": [
+      "deprecate-staged"
+    ]
+  },
+  {
+    "n": "designSystem",
+    "paths": [
+      "docs/architecture/**",
+      "docs/rfcs/**",
+      "docs/design/**",
+      "docs/threat-models/**"
+    ],
+    "intents": [
+      "design",
+      "architecture"
+    ]
+  },
+  {
+    "n": "experimentToGA",
+    "paths": [
+      "docs/experiments/**",
+      "docs/rollouts/**"
+    ],
+    "intents": [
+      "experiment",
+      "ab-test"
+    ]
+  },
+  {
+    "n": "featureFromIdea",
+    "paths": [
+      "docs/research/**"
+    ],
+    "intents": [
+      "discovery",
+      "feature-from-idea"
+    ]
+  },
+  {
+    "n": "fuzzyGoalToPlan",
+    "paths": [
+      "docs/maps/**"
+    ],
+    "intents": [
+      "scope",
+      "plan-fuzzy"
+    ]
+  },
+  {
+    "n": "incidentRetroToActions",
+    "paths": [
+      "docs/postmortems/**",
+      "docs/retros/**"
+    ],
+    "intents": [
+      "retro-actions",
+      "input:postmortemPath"
+    ]
+  },
+  {
+    "n": "migrateLanguageVersion",
+    "paths": [
+      "**/*.csproj",
+      "go.mod",
+      "pyproject.toml"
+    ],
+    "intents": [
+      "runtime-migration"
+    ]
+  },
+  {
+    "n": "perfRegression",
+    "paths": [
+      "docs/perf/**"
+    ],
+    "intents": [
+      "perf-regression",
+      "input:metric"
+    ]
+  },
+  {
+    "n": "refactorWithSafety",
+    "paths": [
+      "docs/refactors/**"
+    ],
+    "intents": [
+      "refactor"
+    ]
+  },
+  {
+    "n": "respondToIncident",
+    "paths": [
+      "docs/postmortems/**"
+    ],
+    "intents": [
+      "incident",
+      "outage",
+      "input:incidentId"
+    ]
+  },
+  {
+    "n": "reviewPR",
+    "paths": [
+      "docs/reviews/**"
+    ],
+    "intents": [
+      "review-pr",
+      "input:pr",
+      "input:diffPath"
+    ]
+  },
+  {
+    "n": "reviewPlan",
+    "paths": [
+      "docs/plans/**",
+      "docs/thinking/**",
+      "docs/design/**"
+    ],
+    "intents": [
+      "review-plan",
+      "critique",
+      "input:plan"
+    ]
+  },
+  {
+    "n": "rootCauseAnalysis",
+    "paths": [
+      "docs/rca/**"
+    ],
+    "intents": [
+      "rca",
+      "root-cause",
+      "input:symptom"
+    ]
+  },
+  {
+    "n": "securityFinding",
+    "paths": [
+      "docs/security/**",
+      "docs/threat-models/**"
+    ],
+    "intents": [
+      "security-fix",
+      "vuln"
+    ]
+  },
+  {
+    "n": "shipFeature",
+    "paths": [
+      "docs/prds/**"
+    ],
+    "intents": [
+      "ship-feature",
+      "input:title"
+    ]
+  },
+  {
+    "n": "sunsetCapability",
+    "paths": [
+      "docs/sunsets/**"
+    ],
+    "intents": [
+      "sunset-twostage",
+      "input:removalDate"
+    ]
+  },
+  {
+    "n": "weeklyReleaseTrain",
+    "paths": [
+      "docs/release-notes/**"
+    ],
+    "intents": [
+      "release",
+      "cut-release",
+      "input:version"
+    ]
+  }
+]

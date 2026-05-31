@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: rootCauseAnalysis
 version: 0.1.0
 description: Drill to a system root cause, anticipate the fix failing, challenge the cause, and synthesize a confidence-labelled RCA.
+whenToUse: "Drive to a system root cause; write an RCA."
+triggers:
+  - "do a root cause analysis"
+  - "why did this really happen"
+  - "run a 5-whys on this"
+  - "write an RCA for this symptom"
+detectionSignals:
+  paths:
+    - "docs/rca/**"
+  intents:
+    - "rca"
+    - "root-cause"
+    - "input:symptom"
 requires:
   plugins:
     - polymath-core

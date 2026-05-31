@@ -12,6 +12,33 @@ description: Run a flows-lite workflow end-to-end; the skill drives the loop whi
 - The user types `/polymath-flows:run-workflow <name> ...`.
 - A user types something like "ship a small feature for X" and `shipFeature` is the appropriate workflow.
 
+## Detect → propose → confirm → run
+
+The SessionStart hook injects a compact `name: whenToUse` index of every workflow
+(built into `data/workflow-index.min.json`), so you can recognise when a request
+matches a multi-step arc instead of waiting to be told the workflow's name. A
+workflow is a state machine the user opts into — **never auto-start one.** Follow
+this contract:
+
+1. **Detect.** Compare the request to the injected `whenToUse` lines. To break ties
+   between colliding workflows you MAY read `data/workflow-detect.json` and weigh
+   its `paths`/`intents` signals (e.g. a `docs/plans/**` path raises `reviewPlan`).
+   Pick at most one primary candidate (plus an optional runner-up).
+2. **Propose (one line, no work yet).** e.g. *"This looks like the `reviewPlan`
+   workflow (critique an existing plan, findings only). Run it? (yes / just answer
+   directly / a different workflow)"*. If two candidates tie, name the alternative
+   in the same sentence.
+3. **Await approval.** Do NOT call `bin/polymath-flow` until the user agrees. On
+   "just answer"/"no", drop the workflow, answer directly with plain skills, and do
+   not re-propose the same workflow this turn.
+4. **Run.** On approval, proceed with the Procedure below.
+
+Guardrails: propose at most once per turn; never propose a workflow whose
+`requires` plugins/capabilities are unmet (surface the missing dependency
+instead); if the user names a workflow explicitly ("run shipFeature"), skip the
+proposal and run it; for `respondToIncident`-style sev1/sev2 phrasings, still ask
+in one line unless the user said "just do it".
+
 ## Inputs
 
 - Workflow name (required): e.g. `shipFeature`.

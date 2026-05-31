@@ -280,6 +280,19 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # WORKFLOW-INDEX: the committed workflow routing index
+  # (plugins/polymath-flows/data/*.json) must match a fresh build from the
+  # workflow YAML `whenToUse`/`triggers`/`detectionSignals`. The index is the
+  # SessionStart routing surface; this diff-guard keeps it from drifting and
+  # asserts the injected min-index stays under its token ceiling.
+  echo
+  echo "── WORKFLOW-INDEX cross-check (build-workflow-index.py --check)"
+  if python3 "$root/tools/build-workflow-index.py" --check; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

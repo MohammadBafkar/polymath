@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: {{name}}
 version: 0.1.0
 description: {{one_line_description}}
+# Routing surface — makes this workflow discoverable so the agent can PROPOSE it
+# from context instead of only running it by name. Run tools/build-workflow-index.py
+# after editing. whenToUse must be terse (it is injected always-on).
+whenToUse: One-line routing hint — when this workflow is the right arc to propose.
+triggers:
+  - replace with a naive user phrasing
+  - and another distinct phrasing
+  - and a third (3-5 total, unique across all workflows)
+detectionSignals:
+  paths:
+    - docs/{{name}}/**
+  intents:
+    - {{name}}
 requires:
   plugins:
     - polymath-core

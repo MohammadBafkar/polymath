@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: reviewPR
 version: 0.1.0
 description: Review a PR diff with parallel critics (security, qa, simplification) and a synthesizer; produces a structured review report.
+whenToUse: "Multi-critic review of a PR/diff + synthesis."
+triggers:
+  - "review this PR"
+  - "do a thorough review of my diff"
+  - "run all the critics on this change"
+  - "review the working tree before I push"
+detectionSignals:
+  paths:
+    - "docs/reviews/**"
+  intents:
+    - "review-pr"
+    - "input:pr"
+    - "input:diffPath"
 requires:
   plugins:
     - polymath-core

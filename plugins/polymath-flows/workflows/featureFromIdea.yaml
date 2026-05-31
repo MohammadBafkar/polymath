@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: featureFromIdea
 version: 0.1.0
 description: Extend shipFeature with discovery — interview guide, persona refresh, then PRD → acceptance → implement → review → verify → changelog → PR draft.
+whenToUse: "Discovery (interviews/persona) then ship a feature."
+triggers:
+  - "do discovery then ship this"
+  - "interview users then build it"
+  - "take this from research to PR"
+  - "validate this idea then build it"
+detectionSignals:
+  paths:
+    - "docs/research/**"
+  intents:
+    - "discovery"
+    - "feature-from-idea"
 requires:
   plugins:
     - polymath-core

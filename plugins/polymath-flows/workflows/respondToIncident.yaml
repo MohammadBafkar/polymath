@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: respondToIncident
 version: 0.2.0
 description: Drive incident response — context, triage, query, mitigation note, postmortem, follow-up tickets.
+whenToUse: "Drive a live incident end-to-end to postmortem."
+triggers:
+  - "we have an incident"
+  - "prod is down, help"
+  - "page just fired, walk me through response"
+  - "sev1, what do I do"
+detectionSignals:
+  paths:
+    - "docs/postmortems/**"
+  intents:
+    - "incident"
+    - "outage"
+    - "input:incidentId"
 requires:
   plugins:
     - polymath-core

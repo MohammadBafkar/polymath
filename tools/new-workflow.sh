@@ -29,3 +29,12 @@ fi
 mkdir -p "$(dirname "$target")"
 sed -e "s/{{name}}/$name/g" -e "s/{{one_line_description}}/Replace this description./g" "$template" > "$target"
 echo "Scaffolded $target"
+
+# Rebuild the workflow routing index so the new workflow becomes discoverable and
+# the WORKFLOW-INDEX conformance diff-guard stays green. The stub's placeholder
+# triggers are not unique — fill in whenToUse/triggers, then re-run the builder.
+if [[ "$plugin" == "polymath-flows" ]]; then
+  python3 "$root/tools/build-workflow-index.py" >/dev/null 2>&1 \
+    && echo "Rebuilt workflow index (edit whenToUse/triggers, then re-run tools/build-workflow-index.py)." \
+    || echo "Note: fill in whenToUse/triggers, then run tools/build-workflow-index.py."
+fi

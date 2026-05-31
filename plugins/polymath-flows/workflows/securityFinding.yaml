@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: securityFinding
 version: 0.1.0
 description: Address a security finding end-to-end — OWASP review of the implicated diff, STRIDE-model the system if scope warrants, implement, code review, verify.
+whenToUse: "Fix a security finding end-to-end and verify."
+triggers:
+  - "fix this security finding"
+  - "we have a vuln, patch it"
+  - "address this OWASP issue"
+  - "remediate this security report"
+detectionSignals:
+  paths:
+    - "docs/security/**"
+    - "docs/threat-models/**"
+  intents:
+    - "security-fix"
+    - "vuln"
 requires:
   plugins:
     - polymath-core

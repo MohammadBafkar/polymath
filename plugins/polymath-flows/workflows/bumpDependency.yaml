@@ -2,6 +2,21 @@ schemaVersion: 0.1
 name: bumpDependency
 version: 0.2.0
 description: Bump a dependency safely — vuln triage first, scoped read-code, smallest update, lint + tests, review.
+whenToUse: "Upgrade one dependency safely and fix call-sites."
+triggers:
+  - "bump this dependency to the latest"
+  - "upgrade this package safely"
+  - "is it safe to bump this library"
+  - "patch this CVE in a dependency"
+detectionSignals:
+  paths:
+    - "package.json"
+    - "pyproject.toml"
+    - "go.mod"
+    - "Cargo.toml"
+    - "Directory.Packages.props"
+  intents:
+    - "upgrade-dependency"
 requires:
   plugins:
     - polymath-core

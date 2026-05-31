@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: activateProject
 version: 0.1.0
 description: Generate project context, capability mapping, and onboarding notes for a repo.
+whenToUse: "First-time Polymath setup: project.yaml + onboarding."
+triggers:
+  - "set up polymath for this repo"
+  - "onboard this project"
+  - "initialize project context"
+  - "generate onboarding docs"
+detectionSignals:
+  paths:
+    - ".polymath/project.yaml"
+  intents:
+    - "onboard"
+    - "initialize"
 requires:
   plugins:
     - polymath-core

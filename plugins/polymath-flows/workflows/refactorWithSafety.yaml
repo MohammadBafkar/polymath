@@ -2,6 +2,17 @@ schemaVersion: 0.1
 name: refactorWithSafety
 version: 0.1.0
 description: Refactor with a safety net — orient, surface coverage gaps, pin current behavior with tests, refactor, verify, review.
+whenToUse: "Pin behavior in tests, then refactor safely."
+triggers:
+  - "refactor this safely"
+  - "clean up this module without breaking it"
+  - "restructure this code with a safety net"
+  - "pin behavior then refactor"
+detectionSignals:
+  paths:
+    - "docs/refactors/**"
+  intents:
+    - "refactor"
 requires:
   plugins:
     - polymath-core

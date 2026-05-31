@@ -2,6 +2,18 @@ schemaVersion: 0.1
 name: decideUnderAmbiguity
 version: 0.1.0
 description: Frame the context, ledger the unknowns, compare options, red-team, govern with DACI, and record an ADR.
+whenToUse: "Frame a hard decision, govern it, record an ADR."
+triggers:
+  - "help me decide between these options"
+  - "we need to make a call on this"
+  - "should we do A or B"
+  - "run a DACI and record the decision"
+detectionSignals:
+  paths:
+    - "docs/decisions/**"
+    - "docs/adrs/**"
+  intents:
+    - "decide"
 requires:
   plugins:
     - polymath-core

@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: migrateLanguageVersion
 version: 0.2.0
 description: Migrate a codebase to a new language / runtime version in phases (pin → fix → strict) with explicit gates between phases; language-agnostic.
+whenToUse: "Phased migration to a new language/runtime version."
+triggers:
+  - "upgrade us to the new runtime version"
+  - "migrate to the new language version"
+  - "bump the language version across the repo"
+  - "do a phased runtime migration"
+detectionSignals:
+  paths:
+    - "**/*.csproj"
+    - "go.mod"
+    - "pyproject.toml"
+  intents:
+    - "runtime-migration"
 requires:
   plugins:
     - polymath-core

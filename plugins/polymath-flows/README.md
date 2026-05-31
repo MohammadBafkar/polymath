@@ -6,7 +6,8 @@ flows-lite: a deterministic serial workflow runner for the Polymath marketplace.
 
 - Skills: `run-workflow`, `resume-workflow`, `list-workflows`.
 - Executable: `bin/polymath-flow` — owns YAML validation, state, mustPass checks.
-- Workflows: YAML files under `workflows/`, including `activateProject`, `deliberationLoop`, `shipFeature`, and the thinking/design family `decideUnderAmbiguity`, `rootCauseAnalysis`, `fuzzyGoalToPlan`, and `designSystem`.
+- Workflows: YAML files under `workflows/`, including `activateProject`, `deliberationLoop`, `shipFeature`, `reviewPlan`, and the thinking/design family `decideUnderAmbiguity`, `rootCauseAnalysis`, `fuzzyGoalToPlan`, and `designSystem`.
+- Routing surface: a SessionStart hook (`hooks/`) injects a compact `name: whenToUse` index of every workflow so the agent can **detect** a matching arc and **propose** it before running, instead of only running one by name. The index is built by `tools/build-workflow-index.py` into `data/` (the single producer; a conformance diff-guard keeps it from drifting). Each workflow declares `whenToUse` / `triggers` / `detectionSignals`; mute the surface with `touch "$CLAUDE_PLUGIN_DATA/polymath-flows/index-muted"`.
 
 ## Why two layers (skill + executable)?
 

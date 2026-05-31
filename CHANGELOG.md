@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Workflow discoverability.** Workflows now carry optional
+  `whenToUse` / `triggers` / `detectionSignals` in their YAML
+  (`shared/schemas/workflow.schema.json`), and a `polymath-flows`
+  SessionStart hook injects a compact routing index — built by
+  `tools/build-workflow-index.py` into `plugins/polymath-flows/data/` — so
+  the agent can detect a matching workflow from context and propose it
+  before running, rather than only running one by name. Adds the
+  `reviewPlan` workflow (lightweight plan/design critique), a
+  detect → propose → confirm → run contract in the `run-workflow` skill,
+  and a `WORKFLOW-INDEX` conformance diff-guard.
 - **Project activation path.** Added `polymath-core:initialize-project`
   and `/polymath-core:init-project` to generate
   `.polymath/project.yaml`, `.polymath/capabilities.yaml` when provider

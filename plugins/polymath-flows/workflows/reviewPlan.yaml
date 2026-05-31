@@ -1,0 +1,93 @@
+schemaVersion: 0.1
+name: reviewPlan
+version: 0.1.0
+description: Critique an existing plan/design doc with parallel critics (red-team, pre-mortem, tradeoffs) and synthesize a findings report — no revised plan, no governance.
+whenToUse: "Critique an existing plan; findings only, no rewrite."
+triggers:
+  - review this plan
+  - is this plan any good before I start
+  - poke holes in this plan
+  - what's wrong with my design doc
+detectionSignals:
+  paths:
+    - docs/plans/**
+    - docs/thinking/**
+    - docs/design/**
+  intents:
+    - review-plan
+    - critique
+    - input:plan
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-thinking
+    - polymath-decisions
+inputs:
+  - name: plan
+    type: string
+    required: true
+    description: Path or name of the plan/design doc under review; used for the slug.
+  - name: planPath
+    type: string
+    required: false
+    default: "."
+    description: Path the critics should read. Defaults to the working tree / the plan's location.
+guards:
+  - id: git-worktree-readable
+    type: command
+    command: git status --short
+steps:
+  - id: orient
+    invoke: polymath-engineering:read-code
+    prompt: Orient in the plan at ${inputs.planPath} and its surrounding context. Produce a short map of the plan's goals, scope, and the system it touches under docs/reviews/${workflow.slug}-plan-orient.md.
+    artifacts:
+      - docs/reviews/${workflow.slug}-plan-orient.md
+  - id: challenge
+    invoke: polymath-thinking:red-team
+    prompt: Red-team the plan — surface the strongest objections the author has not refuted. Write findings to docs/reviews/${workflow.slug}-challenge.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-challenge.md
+  - id: premortem
+    invoke: polymath-thinking:pre-mortem
+    prompt: Imagine this plan has already failed; list the most plausible reasons why. Write findings to docs/reviews/${workflow.slug}-premortem.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-premortem.md
+  - id: tradeoffs
+    invoke: polymath-decisions:tradeoff-matrix
+    prompt: If the plan commits to choices with viable alternatives, score them in a tradeoff matrix. Write to docs/reviews/${workflow.slug}-tradeoffs.md.
+    needs: [orient]
+    topology: fanout
+    artifacts:
+      - docs/reviews/${workflow.slug}-tradeoffs.md
+  - id: synthesize
+    invoke: polymath-thinking:red-team
+    prompt: Read the three critic reports (challenge, premortem, tradeoffs), dedupe overlapping findings, classify by severity, and write the synthesized plan-review to docs/reviews/${workflow.slug}.md. Do NOT rewrite the plan — produce findings and recommendations only.
+    needs: [challenge, premortem, tradeoffs]
+    artifacts:
+      - docs/reviews/${workflow.slug}.md
+mustPass:
+  # Strong-deterministic gate: a plan review is read-only outside docs/reviews/
+  # and produces orient + 3 critic docs + synthesis (5 files).
+  - id: review-docs-produced
+    type: diffConstraint
+    filesChanged:
+      min: 4
+      max: 12
+    pathAllowlist:
+      - "docs/reviews/**"
+  - id: review-exists
+    type: fileExists
+    path: docs/reviews/${workflow.slug}.md
+  - id: orient-exists
+    type: fileExists
+    path: docs/reviews/${workflow.slug}-plan-orient.md
+  - id: critics-all-ran
+    type: stepSummaryMatches
+    severity: advisory
+    step: synthesize
+    pattern: "(challenge|premortem|tradeoff)"

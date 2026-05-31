@@ -2,6 +2,19 @@ schemaVersion: 0.1
 name: deliberationLoop
 version: 0.1.0
 description: Observe, frame, compare options, red-team, and produce a revised plan.
+whenToUse: "Pressure-test a plan and emit a revised one."
+triggers:
+  - "pressure-test my approach"
+  - "red-team my idea before I commit"
+  - "critique this and give me a better plan"
+  - "stress-test this and revise it"
+detectionSignals:
+  paths:
+    - "docs/plans/**"
+    - "docs/thinking/**"
+  intents:
+    - "critique"
+    - "revise-plan"
 requires:
   plugins:
     - polymath-core

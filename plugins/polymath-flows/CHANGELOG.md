@@ -4,6 +4,16 @@
 
 ### Added
 
+- Workflow discoverability: every workflow now declares optional
+  `whenToUse` / `triggers` / `detectionSignals`, and a SessionStart hook
+  injects a compact routing index (built by `tools/build-workflow-index.py`
+  into `data/`) so the agent can detect and propose a matching workflow
+  before running it. The `run-workflow` skill documents the
+  detect → propose → confirm → run contract; a `WORKFLOW-INDEX` conformance
+  diff-guard keeps the committed index in sync with the workflow YAML.
+- `reviewPlan` workflow: lightweight multi-critic critique of an existing
+  plan/design doc (red-team + pre-mortem + tradeoffs → synthesis), findings
+  only — no revised plan, no governance.
 - `activateProject` workflow to generate `.polymath/project.yaml`,
   capability mappings, and onboarding notes for a repository.
 - `deliberationLoop` workflow to observe, frame, compare options,

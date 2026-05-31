@@ -27,6 +27,39 @@
       "type": "string",
       "maxLength": 200
     },
+    "whenToUse": {
+      "description": "One-line, model-facing routing hint: when this workflow is the right multi-step arc to propose. Mirrors a skill description. Surfaced verbatim in the SessionStart workflow-index, so keep it tight. Optional in v0.1 (grace mode); becomes required once WORKFLOW-2 enforcement lands.",
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 160
+    },
+    "triggers": {
+      "description": "3-5 naive user phrasings (no workflow name) that should surface this workflow. Consumed by tools/build-workflow-index.py and used as the falsification anchor for workflow-triggering tests. Not injected into context. Trigger phrases must be unique across workflows.",
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 6, "maxLength": 80 }
+    },
+    "detectionSignals": {
+      "description": "Deterministic, machine-checkable hints that raise this workflow's prior during detection. Not injected into context; consumed by the detect step to disambiguate proposals between colliding workflows.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "description": "File globs / artifact paths whose presence in the request or repo hints this workflow.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "intents": {
+          "description": "Short intent labels, input-presence markers, or keywords that hint this workflow.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 2 },
+          "uniqueItems": true
+        }
+      }
+    },
     "extends": {
       "description": "Parent workflow reference in the form '<plugin>:<workflow>@<version>'. v0.1 supports serial step replacement and named-anchor insertion only.",
       "type": "string",
