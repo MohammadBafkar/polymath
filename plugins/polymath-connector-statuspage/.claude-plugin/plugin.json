@@ -1,6 +1,6 @@
 {
   "name": "polymath-connector-statuspage",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Statuspage connector: MCP for incident lifecycle (create/update/resolve) + skill that maps polymath-incident severity to public status, scoped components, and customer-readable copy.",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "polymath-infra-cloud",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure, plus Terraform stack composition. Decision trees + named cost drivers + quantitative flip conditions per primitive.",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "polymath-frontend",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts; framework-agnostic.",
   "license": "MIT",
   "author": {

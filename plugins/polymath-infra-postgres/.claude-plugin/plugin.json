@@ -1,6 +1,6 @@
 {
   "name": "polymath-infra-postgres",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Postgres craft: review-migration skill for safe schema changes under load + audit-pg-config for memory/connection/autovacuum settings.",
   "license": "MIT",
   "author": {

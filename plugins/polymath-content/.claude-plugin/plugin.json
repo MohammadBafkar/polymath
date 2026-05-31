@@ -1,6 +1,6 @@
 {
   "name": "polymath-content",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Customer-facing content craft: release notes, sunset notice, security/breaking-change advisory.",
   "license": "MIT",
   "author": {

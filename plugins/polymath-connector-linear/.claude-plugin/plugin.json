@@ -1,6 +1,6 @@
 {
   "name": "polymath-connector-linear",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Linear connector: MCP for issues/cycles + UserPromptSubmit detect of TEAM-NNN keys + triage + file-bug-from-incident skills.",
   "license": "MIT",
   "author": {

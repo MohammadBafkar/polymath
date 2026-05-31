@@ -1,6 +1,6 @@
 {
   "name": "polymath-learning",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Learning craft: tiered explanations by audience, code walkthroughs, Feynman-style self-test of understanding.",
   "license": "MIT",
   "author": {

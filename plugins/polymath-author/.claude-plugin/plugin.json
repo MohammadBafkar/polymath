@@ -1,6 +1,6 @@
 {
   "name": "polymath-author",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Author craft: scaffold plugins, validate gates, measure budget, review skill quality.",
   "license": "MIT",
   "author": {

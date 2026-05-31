@@ -1,6 +1,6 @@
 {
   "name": "polymath-connector-snyk",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Snyk connector: MCP server for vulnerability test/monitor + Stop hook that warns if the current branch has open critical vulns.",
   "license": "MIT",
   "author": {
