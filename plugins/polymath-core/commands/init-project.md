@@ -1,5 +1,5 @@
 ---
-description: Inspect the repo and create Polymath project context, capability mapping, and onboarding notes.
+description: Run the initialize-project skill from the CLI to bootstrap a repo's Polymath setup in one command.
 ---
 
 Invoke `polymath-core:initialize-project`.

@@ -1,6 +1,6 @@
 ---
 name: new-command
-description: Scaffold a new slash command inside a plugin via the bundled new-command.sh.
+description: Scaffold a thin /slash-command alias file inside an existing plugin via new-command.sh. Not a capability or workflow.
 ---
 
 # /new-command

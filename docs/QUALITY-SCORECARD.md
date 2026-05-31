@@ -30,6 +30,10 @@ Every PR runs:
   check` (frontmatter valid; `trigger_prompts` a superset of the workflow's
   own `triggers`). The live `run` mode is opt-in under
   `CLAUDE_CODE_OAUTH_TOKEN`, like skill-triggering.
+- **Description disambiguation** — `python3 tools/lint-descriptions.py
+  --strict` (no two always-on descriptions token-collide without a
+  distinguishing proper noun). `scope_boundary` / `trigger_clarity` are
+  reported as advisory means, not gated.
 - **Connector / infra boundary** — every in-scope plugin audited in
   [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is

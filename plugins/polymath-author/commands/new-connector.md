@@ -1,6 +1,6 @@
 ---
 name: new-connector
-description: Scaffold a new polymath-connector-<service> plugin via the bundled new-connector.sh.
+description: Scaffold a polymath-connector-<service> plugin with .mcp.json and userConfig via new-connector.sh. Not a generic plugin (new-plugin).
 ---
 
 # /new-connector
