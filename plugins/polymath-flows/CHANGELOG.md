@@ -11,6 +11,10 @@
   before running it. The `run-workflow` skill documents the
   detect → propose → confirm → run contract; a `WORKFLOW-INDEX` conformance
   diff-guard keeps the committed index in sync with the workflow YAML.
+- Workflow-triggering tests (`tools/workflow-triggering.py`,
+  `tests/workflow-triggering/*.md`): a naive prompt must make the model propose
+  the right workflow. `check` mode (frontmatter + trigger-drift guard) runs in
+  conformance; `run` mode is opt-in under `CLAUDE_CODE_OAUTH_TOKEN`.
 - `reviewPlan` workflow: lightweight multi-critic critique of an existing
   plan/design doc (red-team + pre-mortem + tradeoffs → synthesis), findings
   only — no revised plan, no governance.

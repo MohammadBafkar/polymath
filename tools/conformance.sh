@@ -293,6 +293,18 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # WORKFLOW-TRIGGER: workflow-triggering test frontmatter is well-formed and in
+  # sync with the workflow YAML (every declared trigger appears in its test, and
+  # must_propose names resolve). Cheap structural check, no LLM; the live `run`
+  # mode is a separate opt-in CI job under CLAUDE_CODE_OAUTH_TOKEN.
+  echo
+  echo "── WORKFLOW-TRIGGER cross-check (workflow-triggering.py check)"
+  if python3 "$root/tools/workflow-triggering.py" check; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

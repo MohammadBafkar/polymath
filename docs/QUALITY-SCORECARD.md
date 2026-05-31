@@ -23,6 +23,13 @@ Every PR runs:
   symmetric-prompt contract (see § Bakeoff fairness) so the run
   cannot be silently engineered.
 - **Skill-triggering frontmatter** — `python3 tools/skill-triggering.py check`.
+- **Workflow routing index** — `python3 tools/build-workflow-index.py --check`
+  (the committed index matches a fresh build; injected min-index under its
+  token ceiling).
+- **Workflow-triggering frontmatter** — `python3 tools/workflow-triggering.py
+  check` (frontmatter valid; `trigger_prompts` a superset of the workflow's
+  own `triggers`). The live `run` mode is opt-in under
+  `CLAUDE_CODE_OAUTH_TOKEN`, like skill-triggering.
 - **Connector / infra boundary** — every in-scope plugin audited in
   [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is

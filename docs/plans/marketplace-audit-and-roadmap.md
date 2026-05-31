@@ -217,7 +217,7 @@ The fix is to give workflows the same model-facing routing surface skills alread
 
 A single pipeline, with **`triggers` + `whenToUse` in the workflow YAML as the single source of truth**:
 
-```
+```text
 workflow YAML (whenToUse / triggers / detectionSignals)   ← authored once, validated
         │  build-workflow-index.py  (single producer, idempotent)
         ▼
@@ -319,7 +319,7 @@ fi
 
 Rendered output (one header, one line per workflow, guarded behind the same `emitted` blank-line logic):
 
-```
+```text
 Polymath workflows available (propose before running):
   - shipFeature: Ship a small feature from PRD to PR draft
   - reviewPR: Multi-critic review of a PR diff
