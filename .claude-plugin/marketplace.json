@@ -583,6 +583,30 @@
         "load-testing",
         "playwright"
       ]
+    },
+    {
+      "name": "polymath-deprecation",
+      "source": "./plugins/polymath-deprecation",
+      "description": "Deprecation: staged plan (two dates, telemetry-gated removal) + consumer migration guide.",
+      "version": "0.1.0",
+      "category": "release",
+      "tags": [
+        "deprecation",
+        "sunset",
+        "migration"
+      ]
+    },
+    {
+      "name": "polymath-finops",
+      "source": "./plugins/polymath-finops",
+      "description": "FinOps: review cloud spend — rightsizing, waste, unit economics, commitments, budgets and anomaly alerts.",
+      "version": "0.1.0",
+      "category": "infra",
+      "tags": [
+        "finops",
+        "cloud-cost",
+        "rightsizing"
+      ]
     }
   ]
 }

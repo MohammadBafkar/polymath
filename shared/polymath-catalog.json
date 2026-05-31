@@ -62,6 +62,8 @@
     "polymath-connector-terraform": { "status": "experimental" },
     "polymath-prioritize": { "status": "experimental" },
     "polymath-progressive-delivery": { "status": "experimental" },
-    "polymath-test-automation": { "status": "experimental" }
+    "polymath-test-automation": { "status": "experimental" },
+    "polymath-deprecation": { "status": "experimental" },
+    "polymath-finops": { "status": "experimental" }
   }
 }

@@ -506,6 +506,28 @@
       "changelog_entry": null,
       "distinct_value_url": null,
       "notes": "New experimental plugin (Stage 3b / P1 gap closure). On disk: e2e-flow + load-test skills, golden fixtures, skill-triggering tests. Next: live bakeoff case + live trigger on three phrasings."
+    },
+    "polymath-deprecation": {
+      "target_status": "stable",
+      "evidence_state": "on-disk-skill",
+      "live_bakeoff_run": null,
+      "live_trigger_run": null,
+      "external_user_url": null,
+      "promotion_pr": null,
+      "changelog_entry": null,
+      "distinct_value_url": null,
+      "notes": "New experimental plugin (P1 gap closure). On disk: deprecation-plan + migration-guide skills, golden fixture, skill-triggering tests. Next: live bakeoff case + live trigger on three phrasings."
+    },
+    "polymath-finops": {
+      "target_status": "stable",
+      "evidence_state": "on-disk-skill",
+      "live_bakeoff_run": null,
+      "live_trigger_run": null,
+      "external_user_url": null,
+      "promotion_pr": null,
+      "changelog_entry": null,
+      "distinct_value_url": null,
+      "notes": "New experimental plugin (P1 gap closure). On disk: cloud-cost-review skill, golden fixture, skill-triggering test. Next: live bakeoff case + live trigger on three phrasings."
     }
   }
 }
