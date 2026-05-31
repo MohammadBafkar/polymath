@@ -24,4 +24,4 @@ claude plugin install polymath-deprecation@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

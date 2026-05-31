@@ -26,4 +26,4 @@ claude plugin install polymath-incident@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

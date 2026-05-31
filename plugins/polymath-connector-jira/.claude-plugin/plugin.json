@@ -2,7 +2,7 @@
   "name": "polymath-connector-jira",
   "version": "0.1.0",
   "description": "Jira connector: MCP server for issues + UserPromptSubmit hook that detects PROJ-123 keys and hints at issue fetch.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

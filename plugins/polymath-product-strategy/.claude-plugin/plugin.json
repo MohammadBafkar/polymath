@@ -2,7 +2,7 @@
   "name": "polymath-product-strategy",
   "version": "0.1.0",
   "description": "Product-strategy craft: define vision, ICP, positioning, pricing/packaging, moat, and a go-to-market launch plan.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
   "dependencies": ["polymath-core"],
   "keywords": ["product-strategy", "positioning", "gtm"]

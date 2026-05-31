@@ -2,7 +2,7 @@
   "name": "polymath-progressive-delivery",
   "version": "0.1.0",
   "description": "Progressive delivery craft: design safe rollouts — feature flags, canary, blue-green, SLO health gates, and automated rollback.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

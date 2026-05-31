@@ -2,7 +2,7 @@
   "name": "polymath-leadership",
   "version": "0.1.0",
   "description": "Leadership craft: 1:1 prep, performance review authoring, OKR setting.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

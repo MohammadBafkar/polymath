@@ -136,4 +136,4 @@ See [docs/PORTABILITY.md](docs/PORTABILITY.md) for the drop-location per harness
 
 ## License
 
-[Apache-2.0](LICENSE).
+[MIT](LICENSE).

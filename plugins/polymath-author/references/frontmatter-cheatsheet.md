@@ -10,7 +10,7 @@ while writing.
   "name": "polymath-<bare-name>",
   "version": "0.1.0",
   "description": "<≤ 200 chars; imperative verb first; says what kind of work>",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "<your name or team>",
     "url": "https://github.com/<org>/<repo>"

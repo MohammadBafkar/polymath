@@ -2,7 +2,7 @@
   "name": "polymath-infra-kubernetes",
   "version": "0.1.0",
   "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; PreToolUse hook confirms kubectl apply in prod.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

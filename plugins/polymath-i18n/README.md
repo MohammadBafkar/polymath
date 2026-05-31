@@ -22,4 +22,4 @@ claude plugin install polymath-i18n@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

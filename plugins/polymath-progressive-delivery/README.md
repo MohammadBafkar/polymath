@@ -22,4 +22,4 @@ claude plugin install polymath-progressive-delivery@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

@@ -20,4 +20,4 @@ claude plugin install polymath-writing@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

@@ -337,4 +337,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the polymath-core project-context loader's unit tests.
 - `/evaluate` PR slash command + nightly scheduled bakeoff in
   `.github/workflows/evaluation.yml`.
-- Apache-2.0 license; no telemetry (see [`docs/PRIVACY.md`](docs/PRIVACY.md)).
+- MIT license; no telemetry (see [`docs/PRIVACY.md`](docs/PRIVACY.md)).

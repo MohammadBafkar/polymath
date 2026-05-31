@@ -2,7 +2,7 @@
   "name": "polymath-design",
   "version": "0.1.0",
   "description": "Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

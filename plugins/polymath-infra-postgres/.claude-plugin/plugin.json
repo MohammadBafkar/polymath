@@ -2,7 +2,7 @@
   "name": "polymath-infra-postgres",
   "version": "0.1.0",
   "description": "Postgres craft: review-migration skill for safe schema changes under load + audit-pg-config for memory/connection/autovacuum settings.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

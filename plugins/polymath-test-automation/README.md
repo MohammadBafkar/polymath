@@ -24,4 +24,4 @@ claude plugin install polymath-test-automation@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

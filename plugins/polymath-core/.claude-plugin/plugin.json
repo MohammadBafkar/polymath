@@ -2,7 +2,7 @@
   "name": "polymath-core",
   "version": "0.2.0",
   "description": "Foundation: conventions, glossary, plugin-budget reporter, project-context loader, SessionStart hook.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

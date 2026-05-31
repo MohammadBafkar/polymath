@@ -22,4 +22,4 @@ claude plugin install polymath-product-strategy@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

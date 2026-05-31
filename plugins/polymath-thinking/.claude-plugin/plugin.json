@@ -2,7 +2,7 @@
   "name": "polymath-thinking",
   "version": "0.1.0",
   "description": "Thinking craft: brainstorm, deliberate, 5-whys, pre-mortem, red-team, and architecture-critic agent.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

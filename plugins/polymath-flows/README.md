@@ -65,4 +65,4 @@ The session must produce a PRD, acceptance criteria, an implementation diff, a c
 
 ## License
 
-Apache-2.0.
+MIT.

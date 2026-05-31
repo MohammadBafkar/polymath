@@ -19,4 +19,4 @@ claude plugin install polymath-frontend@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

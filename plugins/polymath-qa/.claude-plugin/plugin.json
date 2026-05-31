@@ -2,7 +2,7 @@
   "name": "polymath-qa",
   "version": "0.1.0",
   "description": "Quality craft: test strategy, unit/integration test authoring, coverage-gap analysis, flake hunting.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

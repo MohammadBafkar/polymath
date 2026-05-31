@@ -2,7 +2,7 @@
   "name": "polymath-ai",
   "version": "0.1.0",
   "description": "AI craft: prompt engineering, RAG architecture, eval-plan design; vendor-agnostic principles applicable across model providers.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

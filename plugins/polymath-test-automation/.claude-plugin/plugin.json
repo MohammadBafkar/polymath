@@ -2,7 +2,7 @@
   "name": "polymath-test-automation",
   "version": "0.1.0",
   "description": "Test-automation craft: author browser end-to-end flows and load/stress/soak profiles, and gate them in CI.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

@@ -63,7 +63,7 @@ cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
   "name": "$name",
   "version": "0.1.0",
   "description": "$description",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "dependencies": ["polymath-core"],
   "keywords": ["connector", "$service", "mcp"],
   "userConfig": {
@@ -144,7 +144,7 @@ claude plugin install $name@polymath --config apiKey=<value>
 
 ## License
 
-Apache-2.0.
+MIT.
 MD
 
 cat > "$plugin_dir/CHANGELOG.md" <<MD

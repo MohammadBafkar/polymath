@@ -2,7 +2,7 @@
   "name": "polymath-planning",
   "version": "0.1.0",
   "description": "Planning craft: write a plan, work-breakdown, lightweight estimation; produces docs/plans/<slug>.md.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

@@ -59,4 +59,4 @@ claude plugin install polymath-data@polymath
 
 ## License
 
-Apache-2.0.
+MIT.

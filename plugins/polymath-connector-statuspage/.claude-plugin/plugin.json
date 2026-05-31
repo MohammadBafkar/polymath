@@ -2,7 +2,7 @@
   "name": "polymath-connector-statuspage",
   "version": "0.1.0",
   "description": "Statuspage connector: MCP for incident lifecycle (create/update/resolve) + skill that maps polymath-incident severity to public status, scoped components, and customer-readable copy.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

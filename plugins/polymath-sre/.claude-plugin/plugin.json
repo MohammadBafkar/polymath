@@ -2,7 +2,7 @@
   "name": "polymath-sre",
   "version": "0.1.0",
   "description": "SRE craft: SLO design (SLI/SLO/error budget), error-budget policy, chaos experiment design.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"

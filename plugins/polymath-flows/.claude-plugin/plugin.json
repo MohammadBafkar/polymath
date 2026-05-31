@@ -2,7 +2,7 @@
   "name": "polymath-flows",
   "version": "0.1.0",
   "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
     "url": "https://github.com/MohammadBafkar/Polymath"
