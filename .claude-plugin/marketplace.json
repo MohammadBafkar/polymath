@@ -547,6 +547,18 @@
         "terraform",
         "iac"
       ]
+    },
+    {
+      "name": "polymath-prioritize",
+      "source": "./plugins/polymath-prioritize",
+      "description": "Prioritization craft: rank a backlog with RICE/WSJF/MoSCoW/Kano/value-vs-effort, cut Now/Next/Later.",
+      "version": "0.1.0",
+      "category": "planning",
+      "tags": [
+        "prioritization",
+        "rice",
+        "wsjf"
+      ]
     }
   ]
 }

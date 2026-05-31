@@ -24,7 +24,8 @@
 <ul>
 <li>Skills: <code>run-workflow</code>, <code>resume-workflow</code>, <code>list-workflows</code>.</li>
 <li>Executable: <code>bin/polymath-flow</code> — owns YAML validation, state, mustPass checks.</li>
-<li>Workflows: YAML files under <code>workflows/</code>, including <code>activateProject</code>, <code>deliberationLoop</code>, and <code>shipFeature</code>.</li>
+<li>Workflows: YAML files under <code>workflows/</code>, including <code>activateProject</code>, <code>deliberationLoop</code>, <code>shipFeature</code>, <code>reviewPlan</code>, and the thinking/design family <code>decideUnderAmbiguity</code>, <code>rootCauseAnalysis</code>, <code>fuzzyGoalToPlan</code>, and <code>designSystem</code>.</li>
+<li>Routing surface: a SessionStart hook (<code>hooks/</code>) injects a compact <code>name: whenToUse</code> index of every workflow so the agent can <strong>detect</strong> a matching arc and <strong>propose</strong> it before running, instead of only running one by name. The index is built by <code>tools/build-workflow-index.py</code> into <code>data/</code> (the single producer; a conformance diff-guard keeps it from drifting). Each workflow declares <code>whenToUse</code> / <code>triggers</code> / <code>detectionSignals</code>; mute the surface with <code>touch &quot;$CLAUDE_PLUGIN_DATA/polymath-flows/index-muted&quot;</code>.</li>
 </ul>
 
 <h2>Why two layers (skill + executable)?</h2>

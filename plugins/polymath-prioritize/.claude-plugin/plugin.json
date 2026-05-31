@@ -1,0 +1,18 @@
+{
+  "name": "polymath-prioritize",
+  "version": "0.1.0",
+  "description": "Prioritization craft: rank a backlog with RICE, WSJF, MoSCoW, Kano, or value-vs-effort and cut a Now/Next/Later roadmap.",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "prioritization",
+    "rice",
+    "wsjf"
+  ]
+}
