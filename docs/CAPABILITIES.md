@@ -9,7 +9,7 @@ Workflows that talk to external SaaS should describe **what** they need
 (an issue tracker, an observability platform, a pager) rather than
 **which provider** supplies it. Hard-coding `polymath-connector-pagerduty`
 into every incident-response workflow forces every team using opsgenie
-to fork. Hard-coding `polymath-connector-jira` into every ticket-filing
+to fork. Hard-coding `polymath-connector-tracker` into every ticket-filing
 step forces every team on Linear to fork. The capability layer
 separates the two:
 
@@ -69,7 +69,7 @@ capabilities:
     provider: jira
     # Optional `plugin:` override. Omit to use the catalog default for
     # this provider (looked up from shared/schemas/capabilities.json).
-    # plugin: polymath-connector-jira-internal-fork
+    # plugin: polymath-connector-tracker-internal-fork
   observability:
     provider: datadog
   pager:
@@ -116,7 +116,7 @@ Placeholders resolved at run time:
 
 - `${capabilities.<cap>.provider}` — provider token (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name (e.g.
-  `polymath-connector-datadog`).
+  `polymath-connector-observability`).
 - `${inputs.<name>}` — workflow input value.
 - `${workflow.<slug|id|name>}` — workflow run metadata.
 
@@ -164,7 +164,7 @@ The other workflows declare provider plugins directly via
 2. Add a `providerPlugins.<provider>` entry pointing at the adapter
    plugin name.
 3. Ship the adapter plugin (or point at an existing umbrella plugin
-   like `polymath-connector-monitoring`).
+   like `polymath-connector-observability`).
 4. Add a row to [`.polymath/capabilities.example.yaml`](../.polymath/capabilities.example.yaml)
    so users discover the option.
 

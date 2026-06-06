@@ -9,7 +9,7 @@ must_invoke:
   - polymath-product:roadmap
 allow_invoke:
   - polymath-product:*
-  - polymath-prioritize:*
+  - polymath-planning:*
   - polymath-core:*
 forbidden_prompts:
   - "rank these features by RICE"
@@ -19,5 +19,5 @@ forbidden_prompts:
 # Why this test exists
 
 Roadmap / Now-Next-Later / horizon phrasings route here. Forbidden
-prompts guard against `polymath-prioritize:prioritize` (ranking) and
+prompts guard against `polymath-planning:prioritize` (ranking) and
 `polymath-planning:write-plan` (change plan).

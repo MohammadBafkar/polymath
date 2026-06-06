@@ -50,7 +50,14 @@ already exists, so you know up front whether this is a create or an update.
      `bash` and `python3` are required; `git` and the `claude` CLI are
      recommended; PyYAML and `jq` are optional (do not mark `jq` required).
    - Environment variables / keys needed, names only, with owner or source if known.
-   - The recommended plugin install set for this project and one line of *why* per plugin.
+   - The recommended plugin install set for this project. **Start from the
+     closest install profile** in [`shared/polymath-profiles.json`](../../../../shared/polymath-profiles.json)
+     (`backend`, `frontend`, `sre`, `platform`, `pm`, `staff`, `author`) — pick
+     the one whose spine matches the inferred stack/role, emit its
+     `claude plugin install` line verbatim (every profile already includes the
+     `polymath-core` + `polymath-flows` spine), then add project-specific extras
+     a-la-carte with one line of *why* per added plugin. Naming a profile turns
+     "which of ~40 plugins?" into one decision plus a short delta.
    - Useful workflows and when to run them.
    - Agent compatibility: skills port via agentskills.io; commands, hooks,
      workflows, and MCP are Claude Code surfaces. Note that on another agent the

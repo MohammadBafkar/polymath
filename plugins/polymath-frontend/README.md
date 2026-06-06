@@ -4,7 +4,7 @@ Frontend craft for the Polymath marketplace. Framework-agnostic — patterns app
 
 ## What it ships
 
-- Skills: `component-design`, `web-vitals-budget`, `bundle-analyze`.
+- Skills: `component-design`, `web-vitals-budget`, `bundle-analyze`, `i18n-audit`.
 
 ## Installation
 

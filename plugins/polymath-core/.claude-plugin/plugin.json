@@ -1,7 +1,7 @@
 {
   "name": "polymath-core",
   "version": "0.3.0",
-  "description": "Foundation: conventions, glossary, plugin-budget reporter, project-context loader, SessionStart hook.",
+  "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
   "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",

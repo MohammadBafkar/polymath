@@ -8,7 +8,7 @@ expect:
     - polymath-incident:postmortem-blameless
     - polymath-planning:work-breakdown
     - polymath-planning:estimate
-    - polymath-connector-jira:file-bug-from-incident
+    - polymath-connector-tracker:file-bug-from-incident
     - polymath-engineering:feature-dev
     - polymath-engineering:code-review
   artifacts:

@@ -4,7 +4,7 @@ Product craft for the Polymath marketplace. Drafts PRDs, refines acceptance crit
 
 ## What it ships
 
-- Skills: `prd`, `acceptance-criteria`, `decompose-epic`, `roadmap`, `groom-backlog`.
+- Skills: `prd`, `acceptance-criteria`, `decompose-epic`, `roadmap`, `groom-backlog`, `product-strategy`.
 - Templates: `PRD.md`, `User-story-map.md`.
 
 ## Installation

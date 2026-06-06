@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `product-strategy` skill folded in from the former `polymath-product-strategy` plugin.
+
 ### Added
 
 - `roadmap` skill — sequence a Now/Next/Later roadmap grouped by outcome, with

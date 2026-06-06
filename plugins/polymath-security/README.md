@@ -4,7 +4,7 @@ Security craft for the Polymath marketplace.
 
 ## What it ships
 
-- Skills: `stride-threat-model`, `owasp-review`.
+- Skills: `stride-threat-model`, `owasp-review`, `supply-chain-review`.
 - Templates: `Threat-model.md`.
 - Workflows that invoke this plugin can validate the threat-model frontmatter with `mustPass: artifactValid` against the `ThreatModel` artifact schema.
 

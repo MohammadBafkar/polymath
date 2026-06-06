@@ -4,6 +4,20 @@
 
 ### Added
 
+- **Ambient routing hint** (`UserPromptSubmit` hook). `route-hint.sh` /
+  `route-hint.py` extract deterministic signals from the prompt (URLs,
+  CVE/GHSA keys, mentioned paths, inline diffs, intent phrasings), score them
+  against the bundled `data/route-signals.json` table, and — only when a *hard*
+  signal is present — emit one quiet line proposing the smallest matching
+  surface. Detect → propose → confirm; never auto-runs. Intent phrasing alone
+  never fires (false-positive guard). Suppress with `POLYMATH_ROUTE_MUTE=1` or a
+  `.polymath/route-muted` marker. Moves routing from pull (`/route`) to push.
+  Tested by `tools/route-triggering.py` (deterministic, no model) and wired into
+  `conformance.sh --all` as the `ROUTE-TRIGGER` gate.
+- `route` skill and `/route` command to select the right Polymath
+  workflow, skill, connector, agent, or external catalog for a prompt,
+  returning JSON with confidence, evidence, alternatives, and the next
+  action.
 - `initialize-project` skill and `/init-project` command to generate
   `.polymath/project.yaml`, capability mappings, and onboarding notes
   from an existing repository.

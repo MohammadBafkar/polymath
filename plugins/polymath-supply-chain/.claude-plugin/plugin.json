@@ -1,9 +1,0 @@
-{
-  "name": "polymath-supply-chain",
-  "version": "0.3.0",
-  "description": "Supply-chain craft: review SBOM, dependency provenance, licenses, signing/SLSA attestation, and build-pipeline trust.",
-  "license": "MIT",
-  "author": { "name": "Mohammad Bafkar", "url": "https://github.com/MohammadBafkar/Polymath" },
-  "dependencies": ["polymath-core"],
-  "keywords": ["supply-chain", "sbom", "slsa"]
-}

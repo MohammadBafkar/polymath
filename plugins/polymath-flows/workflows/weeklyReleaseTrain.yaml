@@ -20,7 +20,7 @@ requires:
     - polymath-core
     - polymath-engineering
     - polymath-release
-    - polymath-content
+    - polymath-communication
 inputs:
   - name: version
     type: string
@@ -69,7 +69,7 @@ steps:
     needs: [release-notes]
 
   - id: internal-heads-up
-    invoke: polymath-content:write-advisory
+    invoke: polymath-communication:write-advisory
     prompt: Write a brief internal-only advisory for ${inputs.version} — what is shipping, who is impacted, monitoring + rollback. Save to docs/release-notes/${inputs.version}-internal.md. This is for the team channel, not customers.
     needs: [verify]
     artifacts:

@@ -18,7 +18,6 @@ requires:
     - polymath-core
     - polymath-product
     - polymath-sre
-    - polymath-progressive-delivery
     - polymath-release
 inputs:
   - name: feature
@@ -38,7 +37,7 @@ steps:
     prompt: Define the SLI/SLO for the affected journey that the rollout's health gates will watch.
     needs: [acceptance]
   - id: rollout
-    invoke: polymath-progressive-delivery:safe-rollout
+    invoke: polymath-release:safe-rollout
     prompt: Design the staged flag rollout (stages + bake times, SLO health gates, automated rollback, kill switch). Write to docs/rollouts/${workflow.slug}.md.
     needs: [slo]
     artifacts:

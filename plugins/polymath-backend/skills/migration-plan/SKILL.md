@@ -15,7 +15,7 @@ description: Plan a safe online database migration in expand-migrate-contract ph
 
 ## Related skills
 
-- [`polymath-infra-postgres:review-migration`](../../../polymath-infra-postgres/skills/review-migration/SKILL.md)
+- [`polymath-backend:review-migration`](../review-migration/SKILL.md)
   — Postgres-specific statement-level review: per-statement lock
   taxonomy (`ACCESS EXCLUSIVE` vs `SHARE UPDATE EXCLUSIVE`), the safe
   `NOT NULL` multi-step pattern, big-table hazards. Use *this* skill

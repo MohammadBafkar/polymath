@@ -329,6 +329,29 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # ROUTE-TRIGGER: the ambient routing hint hook (polymath-core route-hint) is a
+  # deterministic function of the prompt text, so unlike skill/workflow triggering
+  # this is run live here — no model, no token, no opt-in. A regression in the
+  # signal table or the scorer fails the build.
+  echo
+  echo "── ROUTE-TRIGGER cross-check (route-triggering.py run)"
+  if python3 "$root/tools/route-triggering.py" run; then
+    :
+  else
+    overall=1
+  fi
+
+  # PROFILE-1: install profiles (shared/polymath-profiles.json) only name
+  # plugins that exist in the marketplace. Drift-guard so a fold/rename can't
+  # leave a dangling profile reference.
+  echo
+  echo "── PROFILE-1 cross-check (check-profiles.py)"
+  if python3 "$root/tools/check-profiles.py"; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

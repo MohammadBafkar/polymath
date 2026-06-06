@@ -17,14 +17,24 @@
 <pre><code>claude plugin install polymath-release@polymath</code></pre>
 <h1>polymath-release</h1>
 
-<p>Release craft for the Polymath marketplace. Drafts commit messages, PR descriptions, CHANGELOG entries, and release notes.</p>
+<p>Release &amp; delivery craft for the Polymath marketplace — the lifecycle of a</p>
+<p>shipped change, from commit through progressive rollout to eventual sunset.</p>
 
 <h2>What it ships</h2>
 
 <ul>
+<li>Skills: <code>commit</code>, <code>pr</code>, <code>changelog</code>, <code>release-notes</code>, <code>safe-rollout</code>,</li>
+</ul>
+<p><code>deprecation-plan</code>, <code>migration-guide</code>.</p>
+<ul>
 <li>Commands: <code>/commit</code>, <code>/pr</code>, <code>/changelog</code>, <code>/release-notes</code>.</li>
 <li>Templates: <code>CHANGELOG-entry.md</code>, <code>PR-description.md</code>.</li>
 </ul>
+
+<p><code>safe-rollout</code> (from the former <code>polymath-progressive-delivery</code>) and</p>
+<p><code>deprecation-plan</code> + <code>migration-guide</code> (from the former <code>polymath-deprecation</code>)</p>
+<p>were folded in: shipping a change, rolling it out behind flags/SLO gates, and</p>
+<p>eventually retiring it are one lifecycle, not three install decisions.</p>
 
 <h2>Installation</h2>
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `prioritize` skill folded in from the former `polymath-prioritize` plugin — prioritization is planning.
+
 ### Added
 
 - `forecast` skill — forecast a delivery date/scope as a probability range

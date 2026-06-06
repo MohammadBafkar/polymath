@@ -17,7 +17,7 @@ detectionSignals:
 requires:
   plugins:
     - polymath-core
-    - polymath-content
+    - polymath-communication
     - polymath-engineering
     - polymath-release
 inputs:
@@ -48,7 +48,7 @@ guards:
     command: mkdir -p docs/sunsets && [ -w docs/sunsets ]
 steps:
   - id: notice
-    invoke: polymath-content:write-sunset-notice
+    invoke: polymath-communication:write-sunset-notice
     prompt: Author the sunset notice for ${inputs.capability}. Sunset date ${inputs.sunsetDate}, removal date ${inputs.removalDate}, replacement ${inputs.replacement}. Save to docs/sunsets/${workflow.slug}.md.
     artifacts:
       - docs/sunsets/${workflow.slug}.md

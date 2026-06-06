@@ -1,11 +1,19 @@
 # polymath-release
 
-Release craft for the Polymath marketplace. Drafts commit messages, PR descriptions, CHANGELOG entries, and release notes.
+Release & delivery craft for the Polymath marketplace — the lifecycle of a
+shipped change, from commit through progressive rollout to eventual sunset.
 
 ## What it ships
 
+- Skills: `commit`, `pr`, `changelog`, `release-notes`, `safe-rollout`,
+  `deprecation-plan`, `migration-guide`.
 - Commands: `/commit`, `/pr`, `/changelog`, `/release-notes`.
 - Templates: `CHANGELOG-entry.md`, `PR-description.md`.
+
+`safe-rollout` (from the former `polymath-progressive-delivery`) and
+`deprecation-plan` + `migration-guide` (from the former `polymath-deprecation`)
+were folded in: shipping a change, rolling it out behind flags/SLO gates, and
+eventually retiring it are one lifecycle, not three install decisions.
 
 ## Installation
 

@@ -66,7 +66,7 @@ evidence is unit + end-to-end coverage rather than bakeoff cases.
 - `polymath-core` — SessionStart loader; has `plugins/polymath-core/tests/`.
 - `polymath-flows` — `bin/polymath-flow` runner, 15 workflows each with a strong `mustPass` gate, `plugins/polymath-flows/tests/`.
 
-### `pre-evidence` — Iteration 3 close-evidence work (18 plugins)
+### `pre-evidence` — Iteration 3 close-evidence work (17 plugins)
 
 Four plugins are listed as "near-beta" in the iteration plan because
 they ship multiple skills but have no bakeoff or trigger fixtures yet:
@@ -81,7 +81,6 @@ The remaining 14 are golden-only experimental skill plugins:
 - `polymath-ai`
 - `polymath-backend`
 - `polymath-communication`
-- `polymath-content`
 - `polymath-data`
 - `polymath-design`
 - `polymath-devops`
@@ -93,7 +92,7 @@ The remaining 14 are golden-only experimental skill plugins:
 - `polymath-platform`
 - `polymath-research`
 
-### `pre-evidence` — Iteration 4 connector / infra work (14 plugins)
+### `pre-evidence` — Iteration 4 connector / infra work (11 plugins)
 
 These need a bakeoff case, a skill-triggering test, **and** a
 `distinct_value_url` proving Polymath adds workflow / critique /
@@ -101,11 +100,9 @@ safety / artifact value beyond the official MCP / CLI / LSP / docs
 surface. The distinct-value field is required before any promotion
 past experimental.
 
-- `polymath-connector-datadog`
+- `polymath-connector-observability`
 - `polymath-connector-github`
-- `polymath-connector-jira`
-- `polymath-connector-linear`
-- `polymath-connector-monitoring`
+- `polymath-connector-tracker`
 - `polymath-connector-pagerduty`
 - `polymath-connector-sentry`
 - `polymath-connector-slack`
@@ -114,7 +111,6 @@ past experimental.
 - `polymath-connector-terraform`
 - `polymath-infra-cloud`
 - `polymath-infra-kubernetes`
-- `polymath-infra-postgres`
 
 ### `stable-ready` (0 plugins) and `stable` (0 plugins)
 

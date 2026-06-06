@@ -15,15 +15,15 @@
 # C1 — issue triage (platform must disambiguate)
 - prompt: "triage this GitHub issue and route it"
   expect: polymath-connector-github:triage-issue
-  forbidden: [polymath-connector-jira:jira-triage, polymath-connector-linear:linear-triage]
+  forbidden: [polymath-connector-tracker:jira-triage, polymath-connector-tracker:linear-triage]
 
 - prompt: "triage this Jira ticket"
-  expect: polymath-connector-jira:jira-triage
-  forbidden: [polymath-connector-github:triage-issue, polymath-connector-linear:linear-triage]
+  expect: polymath-connector-tracker:jira-triage
+  forbidden: [polymath-connector-github:triage-issue, polymath-connector-tracker:linear-triage]
 
 - prompt: "triage this Linear issue"
-  expect: polymath-connector-linear:linear-triage
-  forbidden: [polymath-connector-jira:jira-triage, polymath-connector-github:triage-issue]
+  expect: polymath-connector-tracker:linear-triage
+  forbidden: [polymath-connector-tracker:jira-triage, polymath-connector-github:triage-issue]
 
 # C5 — caching: strategy vs mechanics vs server config
 - prompt: "should we cache this, and where in the stack"

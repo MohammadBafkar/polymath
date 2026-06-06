@@ -1,5 +1,11 @@
 # Changelog — polymath-security
 
+## [Unreleased]
+
+### Changed
+
+- `supply-chain-review` skill folded in from the former `polymath-supply-chain` plugin — SBOM/SLSA/provenance are appsec.
+
 ## [0.1.0]
 
 ### Added

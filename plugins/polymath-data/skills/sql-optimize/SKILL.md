@@ -99,7 +99,7 @@ Likely permanent fix:
   — when the proposed fix is a schema change (new index, new
   composite key, change of partition / sort column), plan it as an
   online migration first.
-- [`polymath-infra-postgres:review-migration`](../../../polymath-infra-postgres/skills/review-migration/SKILL.md)
+- [`polymath-backend:review-migration`](../../../polymath-backend/skills/review-migration/SKILL.md)
   — Postgres-specific lock review before shipping the index change.
 - [`polymath-data:sql-write`](../sql-write/SKILL.md)
   — when the right fix is rewriting the query rather than the schema.

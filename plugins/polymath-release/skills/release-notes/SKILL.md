@@ -13,7 +13,7 @@ description: Draft customer-facing release notes from CHANGELOG [Unreleased] ent
 
 - The user says "draft release notes for vX.Y.Z".
 - A workflow's release step needs the customer-facing notes.
-- Pair with `polymath-content:write-release-notes` for advisories /
+- Pair with `polymath-communication:write-release-notes` for advisories /
   announcements that need broader content authoring; this skill is the
   developer-facing version-bump notes.
 
@@ -66,6 +66,6 @@ description: Draft customer-facing release notes from CHANGELOG [Unreleased] ent
 ## Cross-plugin pairing
 
 - For broader customer content (advisories, sunset notices, public
-  announcements), use `polymath-content:write-{advisory, sunset-notice}`.
+  announcements), use `polymath-communication:write-{advisory, sunset-notice}`.
 - For the PR description that ships with the release commit, use
   `polymath-release:pr`.

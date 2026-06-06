@@ -17,6 +17,10 @@ Terraform stack composition.
   - `design-stack-composition` — Terraform stack layout: blast-radius
     zones (foundational / platform / service), state backend choice,
     workspaces-vs-directories rule, per-apply RBAC.
+  - `cloud-cost-review` — review cloud spend: rightsizing, waste,
+    unit economics, commitments, budgets and anomaly alerts. (Folded in
+    from the former `polymath-finops` — cost is a property of the cloud
+    choice, so it lives with the cloud-pattern skills.)
 - **Commands:** `/design-aws`, `/design-gcp`, `/design-azure`,
   `/design-terraform-stack` (thin aliases).
 
@@ -24,7 +28,8 @@ Terraform stack composition.
 
 - `polymath-infra-kubernetes` for k8s manifests when the runtime
   choice is Kubernetes.
-- `polymath-infra-postgres` for migration safety on the DB choice.
+- `polymath-backend` for migration safety (`review-migration`,
+  `audit-pg-config`) on the DB choice.
 - `polymath-connector-terraform` for plan-review when the IaC
   changes land.
 - Official cloud CLI / MCP for actual operations (`aws`, `gcloud`,

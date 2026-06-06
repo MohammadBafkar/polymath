@@ -4,9 +4,33 @@
 
 ## The marketplace
 
-**43 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **17 workflows** that compose those plugins into proven SDLC scenarios — `activateProject`, `deliberationLoop`, `shipFeature`, `reviewPR`, `respondToIncident`, `bugTriage`, `perfRegression`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `sunsetCapability`, `featureFromIdea`, `experimentToGA`, `weeklyReleaseTrain`, `incidentRetroToActions`, `deprecationToRemoval`.
+**40 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **27 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
+
+## Start with a journey, not a plugin
+
+The unit of value is the **workflow** — an end-to-end SDLC arc that composes
+plugins for you. Reach for one of these before hand-picking plugins; run with
+`/polymath-flows:run-workflow <name>` (or just describe the task and let
+`polymath-core:route` propose one):
+
+| Journey | When to run it |
+| --- | --- |
+| `featureFromIdea` | Discovery (interviews/persona) then ship a feature. |
+| `shipFeature` / `prdToShip` | Ship a small feature from PRD to PR draft. |
+| `reviewPR` | Multi-critic review of a PR/diff + synthesis. |
+| `respondToIncident` | Drive a live incident end-to-end to postmortem. |
+| `rootCauseAnalysis` | Drive to a system root cause; write an RCA. |
+| `designSystem` | Design a system: arch doc + threat model + ADR. |
+| `decideUnderAmbiguity` | Frame a hard decision, govern it, record an ADR. |
+| `refactorWithSafety` | Pin behavior in tests, then refactor safely. |
+| `securityFinding` | Fix a security finding end-to-end and verify. |
+| `bumpDependency` | Upgrade one dependency safely and fix call-sites. |
+| `progressiveRollout` | Flag rollout with SLO health gates. |
+| `weeklyReleaseTrain` | Cut a release: notes, verify, tag PR. |
+
+Full list (27): `/polymath-flows:list-workflows`, or see [`plugins/polymath-flows/workflows/`](plugins/polymath-flows/workflows/).
 
 ## Quick start
 
@@ -19,9 +43,36 @@ claude plugin install \
   polymath-core@polymath polymath-engineering@polymath \
   polymath-release@polymath polymath-flows@polymath
 
-# 3. Run a workflow
+# 3. Route a prompt or run a workflow
 claude
+> /polymath-core:route "Review this PR for correctness, security, and missing tests"
 > /polymath-flows:run-workflow shipFeature title="Rate-limit /login" scope=small
+```
+
+### Install profiles
+
+Picking a handful of plugins out of ~45 is the real first hurdle. Install
+profiles in [`shared/polymath-profiles.json`](shared/polymath-profiles.json)
+are curated role spines — install one, then add more a-la-carte on top. Every
+profile implicitly includes the `polymath-core` + `polymath-flows` spine.
+
+| Profile | For | Adds (beyond the core+flows spine) |
+| --- | --- | --- |
+| `backend` | API/service devs | engineering, backend, qa, security, release, connector-github |
+| `frontend` | Web/UI devs | engineering, frontend, design, qa, release, connector-github |
+| `sre` | Reliability / on-call | sre, observability, incident, performance, connector-{pagerduty,datadog,slack} |
+| `platform` | Platform / DevOps | platform, devops, infra-cloud, infra-kubernetes, sre, release, connector-terraform |
+| `pm` | Product managers | product, research, planning, communication, decisions, connector-jira |
+| `staff` | Staff+ / tech leads | thinking, decisions, writing, planning, engineering, communication, leadership |
+| `author` | Plugin authors | author, engineering, writing |
+
+```bash
+# e.g. the backend spine
+claude plugin install \
+  polymath-core@polymath polymath-flows@polymath \
+  polymath-engineering@polymath polymath-backend@polymath \
+  polymath-qa@polymath polymath-security@polymath \
+  polymath-release@polymath polymath-connector-github@polymath
 ```
 
 For a new target repository, run `/polymath-core:init-project` or
@@ -35,15 +86,15 @@ The full catalog is published as the marketplace's GitHub Pages site under `docs
 
 ## Catalog by tier
 
-- **Foundation** — `polymath-core` (conventions, glossary, project initialization, project-context loader, plugin-budget, SessionStart hook).
+- **Foundation** — `polymath-core` (route prompts, conventions, glossary, project initialization, project-context loader, plugin-budget, SessionStart hook).
 - **Mind & craft** — `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-decisions`, `polymath-learning`.
 - **Product & discovery** — `polymath-product`, `polymath-research`, `polymath-design`.
 - **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
 - **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
 - **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
-- **Infra** — `polymath-infra-kubernetes`, `polymath-infra-postgres`, `polymath-infra-cloud`.
-- **People & content** — `polymath-communication`, `polymath-leadership`, `polymath-content`.
-- **Connectors (MCP + hooks)** — `polymath-connector-github`, `-jira`, `-linear`, `-pagerduty`, `-datadog`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`, `-monitoring`.
+- **Infra** — `polymath-infra-kubernetes`, `polymath-infra-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
+- **People & content** — `polymath-communication` (internal + customer-facing prose), `polymath-leadership`.
+- **Connectors (MCP + hooks, by capability)** — `polymath-connector-github`, `-tracker` (Jira + Linear), `-observability` (Datadog + Grafana + Honeycomb + Elastic), `-pagerduty`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`.
 - **Orchestration** — `polymath-flows`.
 - **Authoring** — `polymath-author`.
 
@@ -125,7 +176,7 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [polymath-author](plugins/p
 
 ## Use outside Claude Code
 
-Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the 126 skills to a portable bundle and drop them into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
+Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the portable skills bundle and drop it into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
 
 ```bash
 python3 tools/export-agents-skills.py --clean

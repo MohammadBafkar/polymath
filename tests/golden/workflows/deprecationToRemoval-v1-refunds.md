@@ -4,7 +4,7 @@ scenario: deprecationToRemoval-v1-refunds
 expect:
   invoked:
     - polymath-flows:run-workflow
-    - polymath-content:write-sunset-notice
+    - polymath-communication:write-sunset-notice
     - polymath-observability:metrics-design
     - polymath-engineering:feature-dev
     - polymath-engineering:read-code

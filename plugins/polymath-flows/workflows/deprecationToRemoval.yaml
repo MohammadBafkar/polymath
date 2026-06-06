@@ -16,7 +16,7 @@ detectionSignals:
 requires:
   plugins:
     - polymath-core
-    - polymath-content
+    - polymath-communication
     - polymath-engineering
     - polymath-observability
     - polymath-release
@@ -56,7 +56,7 @@ guards:
 
 steps:
   - id: notice
-    invoke: polymath-content:write-sunset-notice
+    invoke: polymath-communication:write-sunset-notice
     prompt: |
       Author the deprecation notice for ${inputs.capability}. Sunset (announce) ${inputs.announceDate}, removal ${inputs.removalDate}, replacement ${inputs.replacement}. Save to docs/deprecations/${workflow.slug}.md.
 

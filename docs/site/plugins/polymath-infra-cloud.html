@@ -43,6 +43,12 @@
 <p>zones (foundational / platform / service), state backend choice,</p>
 <p>workspaces-vs-directories rule, per-apply RBAC.</p>
 <ul>
+<li><code>cloud-cost-review</code> — review cloud spend: rightsizing, waste,</li>
+</ul>
+<p>unit economics, commitments, budgets and anomaly alerts. (Folded in</p>
+<p>from the former <code>polymath-finops</code> — cost is a property of the cloud</p>
+<p>choice, so it lives with the cloud-pattern skills.)</p>
+<ul>
 <li><strong>Commands:</strong> <code>/design-aws</code>, <code>/design-gcp</code>, <code>/design-azure</code>,</li>
 </ul>
 <p><code>/design-terraform-stack</code> (thin aliases).</p>
@@ -54,7 +60,10 @@
 </ul>
 <p>choice is Kubernetes.</p>
 <ul>
-<li><code>polymath-infra-postgres</code> for migration safety on the DB choice.</li>
+<li><code>polymath-backend</code> for migration safety (<code>review-migration</code>,</li>
+</ul>
+<p><code>audit-pg-config</code>) on the DB choice.</p>
+<ul>
 <li><code>polymath-connector-terraform</code> for plan-review when the IaC</li>
 </ul>
 <p>changes land.</p>

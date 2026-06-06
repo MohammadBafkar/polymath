@@ -4,7 +4,7 @@ scenario: sunsetCapability-old-refunds
 expect:
   invoked:
     - polymath-flows:run-workflow
-    - polymath-content:write-sunset-notice
+    - polymath-communication:write-sunset-notice
     - polymath-engineering:feature-dev
     - polymath-engineering:verify-change
     - polymath-release:release-notes

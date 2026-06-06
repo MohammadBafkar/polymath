@@ -56,6 +56,17 @@ CATEGORY_ORDER = [
     "author",
 ]
 
+WORKFLOW_INDEX = REPO_ROOT / "plugins" / "polymath-flows" / "data" / "workflow-index.min.json"
+
+
+def load_workflows() -> list[dict]:
+    """Workflow journeys from the flows index (name + whenToUse). Empty if absent."""
+    try:
+        data = json.loads(WORKFLOW_INDEX.read_text())
+    except Exception:
+        return []
+    return data if isinstance(data, list) else []
+
 
 def load_marketplace() -> dict:
     return json.loads(MARKETPLACE_JSON.read_text())
@@ -283,11 +294,31 @@ def build(check: bool) -> int:
         '<h2>Install the marketplace</h2>\n'
         '<pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>'
     )
+    workflows = load_workflows()
     sections_html.append(
         f'<p class="plugin-meta">{len(plugins)} plugins · '
+        f'{len(workflows)} workflows · '
         f'MIT · '
         f'<a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>'
     )
+
+    # Journeys lead — the workflow is the unit of value; plugins are ingredients.
+    if workflows:
+        sections_html.append(
+            '<h2 id="journeys">Start with a journey</h2>\n'
+            '<p>End-to-end SDLC arcs that compose plugins for you. Run with '
+            '<code>/polymath-flows:run-workflow &lt;name&gt;</code>, or describe the '
+            'task and let <code>polymath-core:route</code> propose one.</p>'
+        )
+        rows = ['<table class="journeys"><thead><tr><th>Journey</th><th>When to run it</th></tr></thead><tbody>']
+        for wf in workflows:
+            rows.append(
+                f'<tr><td><code>{html.escape(wf.get("n",""))}</code></td>'
+                f'<td>{html.escape(wf.get("w",""))}</td></tr>'
+            )
+        rows.append("</tbody></table>")
+        sections_html.append("\n".join(rows))
+        sections_html.append('<h2>Plugins by tier</h2>')
 
     seen_cats: set[str] = set()
     order = CATEGORY_ORDER + sorted(c for c in grouped if c not in CATEGORY_ORDER)

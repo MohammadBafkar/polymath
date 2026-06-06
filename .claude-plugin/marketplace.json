@@ -11,24 +11,9 @@
   },
   "plugins": [
     {
-      "name": "polymath-connector-monitoring",
-      "source": "./plugins/polymath-connector-monitoring",
-      "description": "Observability umbrella connector: Grafana dashboard snapshots + Honeycomb trace investigation + Elasticsearch log search.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "monitoring",
-        "observability",
-        "grafana",
-        "honeycomb",
-        "elastic"
-      ]
-    },
-    {
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
-      "description": "Foundation: conventions, glossary, tone references, plugin-budget reporter, project-context loader, SessionStart hook.",
+      "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
       "version": "0.3.0",
       "category": "foundation",
       "tags": [
@@ -230,18 +215,6 @@
       ]
     },
     {
-      "name": "polymath-infra-postgres",
-      "source": "./plugins/polymath-infra-postgres",
-      "description": "Postgres craft: review-migration (per-statement lock + multi-step NOT NULL rollout) + audit-pg-config (memory, connections, WAL, autovacuum).",
-      "version": "0.3.0",
-      "category": "infra",
-      "tags": [
-        "postgres",
-        "migrations",
-        "database"
-      ]
-    },
-    {
       "name": "polymath-devops",
       "source": "./plugins/polymath-devops",
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
@@ -316,18 +289,6 @@
       ]
     },
     {
-      "name": "polymath-connector-jira",
-      "source": "./plugins/polymath-connector-jira",
-      "description": "Jira connector: MCP for issues + UserPromptSubmit ticket-key detection (PROJ-123 / browse URLs).",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "jira",
-        "atlassian"
-      ]
-    },
-    {
       "name": "polymath-connector-pagerduty",
       "source": "./plugins/polymath-connector-pagerduty",
       "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
@@ -337,18 +298,6 @@
         "connector",
         "pagerduty",
         "incident"
-      ]
-    },
-    {
-      "name": "polymath-connector-datadog",
-      "source": "./plugins/polymath-connector-datadog",
-      "description": "Datadog connector: MCP for metrics/logs/dashboards + monitor authoring and incident-time querying skills.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "datadog",
-        "observability"
       ]
     },
     {
@@ -464,19 +413,6 @@
       ]
     },
     {
-      "name": "polymath-content",
-      "source": "./plugins/polymath-content",
-      "description": "Customer-facing content craft: release notes, sunset notice, security/breaking-change advisory.",
-      "version": "0.3.0",
-      "category": "content",
-      "tags": [
-        "content",
-        "release-notes",
-        "sunset",
-        "advisory"
-      ]
-    },
-    {
       "name": "polymath-mobile",
       "source": "./plugins/polymath-mobile",
       "description": "Mobile craft: mobile perf budgets, push notification design, deep-link routing.",
@@ -513,21 +449,9 @@
       ]
     },
     {
-      "name": "polymath-connector-linear",
-      "source": "./plugins/polymath-connector-linear",
-      "description": "Linear connector: MCP for issues/cycles + UserPromptSubmit detect + triage + file-bug-from-incident skills.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "linear",
-        "issues"
-      ]
-    },
-    {
       "name": "polymath-connector-statuspage",
       "source": "./plugins/polymath-connector-statuspage",
-      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity→impact + customer-safe body).",
+      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -549,30 +473,6 @@
       ]
     },
     {
-      "name": "polymath-prioritize",
-      "source": "./plugins/polymath-prioritize",
-      "description": "Prioritization craft: rank a backlog with RICE/WSJF/MoSCoW/Kano/value-vs-effort, cut Now/Next/Later.",
-      "version": "0.3.0",
-      "category": "planning",
-      "tags": [
-        "prioritization",
-        "rice",
-        "wsjf"
-      ]
-    },
-    {
-      "name": "polymath-progressive-delivery",
-      "source": "./plugins/polymath-progressive-delivery",
-      "description": "Progressive delivery: safe rollouts — flags, canary/blue-green, SLO health gates, automated rollback.",
-      "version": "0.3.0",
-      "category": "release",
-      "tags": [
-        "progressive-delivery",
-        "feature-flags",
-        "canary"
-      ]
-    },
-    {
       "name": "polymath-test-automation",
       "source": "./plugins/polymath-test-automation",
       "description": "Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.",
@@ -585,63 +485,32 @@
       ]
     },
     {
-      "name": "polymath-deprecation",
-      "source": "./plugins/polymath-deprecation",
-      "description": "Deprecation: staged plan (two dates, telemetry-gated removal) + consumer migration guide.",
+      "name": "polymath-connector-tracker",
+      "source": "./plugins/polymath-connector-tracker",
+      "description": "Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.",
       "version": "0.3.0",
-      "category": "release",
+      "category": "connector",
       "tags": [
-        "deprecation",
-        "sunset",
-        "migration"
+        "connector",
+        "issue-tracker",
+        "jira",
+        "linear",
+        "atlassian"
       ]
     },
     {
-      "name": "polymath-finops",
-      "source": "./plugins/polymath-finops",
-      "description": "FinOps: review cloud spend — rightsizing, waste, unit economics, commitments, budgets and anomaly alerts.",
+      "name": "polymath-connector-observability",
+      "source": "./plugins/polymath-connector-observability",
+      "description": "Observability connector: Datadog + Grafana + Honeycomb + Elastic MCP; dashboard snapshot, log search, trace investigate, query-during-incident, monitor authoring.",
       "version": "0.3.0",
-      "category": "infra",
+      "category": "connector",
       "tags": [
-        "finops",
-        "cloud-cost",
-        "rightsizing"
-      ]
-    },
-    {
-      "name": "polymath-i18n",
-      "source": "./plugins/polymath-i18n",
-      "description": "Internationalization: audit for i18n/l10n readiness — strings, locale formatting, plurals, RTL, fallback.",
-      "version": "0.3.0",
-      "category": "engineering",
-      "tags": [
-        "i18n",
-        "l10n",
-        "localization"
-      ]
-    },
-    {
-      "name": "polymath-supply-chain",
-      "source": "./plugins/polymath-supply-chain",
-      "description": "Supply chain: review SBOM, dependency provenance, licenses, signing/SLSA attestation, build trust.",
-      "version": "0.3.0",
-      "category": "security",
-      "tags": [
-        "supply-chain",
-        "sbom",
-        "slsa"
-      ]
-    },
-    {
-      "name": "polymath-product-strategy",
-      "source": "./plugins/polymath-product-strategy",
-      "description": "Product strategy: vision, ICP, positioning, pricing/packaging, moat, and a go-to-market launch plan.",
-      "version": "0.3.0",
-      "category": "product",
-      "tags": [
-        "product-strategy",
-        "positioning",
-        "gtm"
+        "connector",
+        "observability",
+        "datadog",
+        "grafana",
+        "honeycomb",
+        "elastic"
       ]
     }
   ]

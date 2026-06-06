@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polymath-connector-observability · Polymath</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="../index.html">Polymath marketplace</a></h1>
+    <p class="tagline">A public, open-source Claude Code marketplace of work-shaped plugins.</p>
+  </header>
+  <main>
+<p><a href="../index.html">← all plugins</a></p>
+<p class="plugin-meta">version 0.3.0 · MIT · dependencies: polymath-core</p>
+<pre><code>claude plugin install polymath-connector-observability@polymath</code></pre>
+<h1>polymath-connector-observability</h1>
+
+<p>Observability umbrella connector for the Polymath marketplace —</p>
+<p>merges Datadog + Grafana + Honeycomb + Elasticsearch under one plugin so a user</p>
+<p>can install one capability and configure only the providers they</p>
+<p>actually use.</p>
+
+<h2>What it ships</h2>
+
+<ul>
+<li><strong>Skills:</strong></li>
+<li><code>dashboard-snapshot</code> — capture a permalinked Grafana dashboard</li>
+</ul>
+<p>snapshot for incident timelines and postmortem evidence.</p>
+<ul>
+<li><code>trace-investigate</code> — walk a Honeycomb trace, surface the</li>
+</ul>
+<p>offending span with its dependency chain.</p>
+<ul>
+<li><code>log-search</code> — Elasticsearch time-bounded, field-typed queries</li>
+</ul>
+<p>that refuse unbounded scans.</p>
+<ul>
+<li><code>query-during-incident</code> — focused Datadog metric/log queries that</li>
+</ul>
+<p>narrow root cause under incident time pressure.</p>
+<ul>
+<li><code>author-monitor</code> — author a Datadog monitor with sane thresholds,</li>
+</ul>
+<p>burn-rate windows, and notification routing.</p>
+<ul>
+<li><strong>References:</strong> <code>datadog-tools.md</code>, <code>grafana-tools.md</code>,</li>
+</ul>
+<p><code>honeycomb-tools.md</code>, <code>elastic-tools.md</code> — provider MCP tool catalogs.</p>
+<ul>
+<li><strong>MCP servers:</strong> all four are declared in <code>.mcp.json</code>. Configure</li>
+</ul>
+<p>only the providers your project uses; leave the others&#x27; credentials</p>
+<p>blank. The plugin doesn&#x27;t insist that all four are present.</p>
+
+<p>Datadog (<code>query-during-incident</code>, <code>author-monitor</code>) was folded in from the</p>
+<p>former <code>polymath-connector-datadog</code>, so the <code>observability</code> capability resolves</p>
+<p>to one plugin across all four providers.</p>
+
+<h2>Pairs with</h2>
+
+<ul>
+<li><code>polymath-observability</code> — RED/USE metrics design, logging</li>
+</ul>
+<p>strategy, tracing strategy. Use those skills to design what you</p>
+<p>emit; use this plugin to investigate what you&#x27;ve emitted.</p>
+<ul>
+<li><code>polymath-sre:slo-design</code> — SLO burn-rate queries land in</li>
+</ul>
+<p>Grafana / Honeycomb.</p>
+<ul>
+<li><code>polymath-incident:postmortem-blameless</code> — snapshots become</li>
+</ul>
+<p>postmortem evidence.</p>
+
+<h2>Installation</h2>
+
+<pre><code>
+claude plugin install polymath-connector-observability@polymath
+</code></pre>
+
+<p>Then configure only the providers you actually use — the others&#x27;</p>
+<p>credentials can be left blank.</p>
+
+<h2>v0.2 — merged from three predecessors</h2>
+
+<p>Three provider adapters — Grafana, Honeycomb, and Elasticsearch —</p>
+<p>share one umbrella plugin under the <code>observability</code> capability.</p>
+<p>Projects select the provider in <code>.polymath/capabilities.yaml</code>; skills</p>
+<p>route to the configured adapter rather than the plugin namespace.</p>
+
+<p>&lt;!-- connector-policy:start --&gt;</p>
+<h2>Connector policy disclosure</h2>
+
+<p>Auto-generated from <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code></a></p>
+<p>by <code>tools/sync-connector-policy.py</code>. Do not edit by hand —</p>
+<p>edit the policy table and re-run the script.</p>
+
+<ul>
+<li><strong>Official surface:</strong> Wraps Datadog + Grafana + Honeycomb + Elasticsearch MCPs under one observability capability</li>
+<li><strong>Polymath value:</strong> Snapshot + trace-walk + bounded-scan + incident-query + monitor-authoring disciplines; single capability mapping for all four</li>
+<li><strong>Sunset trigger:</strong> Demote a provider when its upstream MCP ships postmortem-evidence + investigative templates.</li>
+<li><strong>Status:</strong> <code>experimental</code></li>
+</ul>
+<p>&lt;!-- connector-policy:end --&gt;</p>
+
+<h2>License</h2>
+
+<p>MIT.</p>
+  </main>
+  <footer>
+    <p>MIT · <a href="https://github.com/MohammadBafkar/Polymath">Source</a> · Generated from <code>.claude-plugin/marketplace.json</code></p>
+  </footer>
+</body>
+</html>

@@ -7,7 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Consolidation: 51 → 40 plugins (no skills lost).** Folded single-skill and
+  thin fragments into their parent craft, and merged per-vendor connectors by
+  capability, to cut install decisions and confusable descriptions (see
+  [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):
+  - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-infra-cloud`;
+    `polymath-prioritize:prioritize` → `polymath-planning`;
+    `polymath-product-strategy:product-strategy` → `polymath-product`;
+    `polymath-supply-chain:supply-chain-review` → `polymath-security`;
+    `polymath-i18n:i18n-audit` → `polymath-frontend`.
+  - **Data tier:** `polymath-infra-postgres` (`review-migration`,
+    `audit-pg-config` + commands) → `polymath-backend`, next to
+    `db-schema`/`migration-plan` (also dropped from `docs/CONNECTOR-POLICY.md`).
+  - **Comms:** `polymath-content` (`write-release-notes`, `write-advisory`,
+    `write-sunset-notice`) → `polymath-communication`.
+  - **Delivery:** `polymath-progressive-delivery` (`safe-rollout`) and
+    `polymath-deprecation` (`deprecation-plan`, `migration-guide`) →
+    `polymath-release`, which now spans commit → rollout → sunset.
+  - **Connectors by capability (11 → 9):** `polymath-connector-jira` +
+    `polymath-connector-linear` → **`polymath-connector-tracker`** (one
+    `issue_tracker` umbrella; both MCP servers; the colliding
+    `file-bug-from-incident` unified into one provider-agnostic skill).
+    `polymath-connector-datadog` + `polymath-connector-monitoring` →
+    **`polymath-connector-observability`** (Datadog/Grafana/Honeycomb/Elastic;
+    closes a latent `query-during-incident` resolution gap). The capability
+    vocabulary (`shared/schemas/capabilities.json`) now maps those providers to
+    the umbrella plugins. `pagerduty`/`slack`/`statuspage` were evaluated and
+    **kept separate** — distinct capabilities and slack is dual-use.
+
+  Skill bodies, commands, golden fixtures, skill-triggering tests, and workflow
+  `invoke:`/`requires.plugins` refs moved with each skill; only the
+  `plugin:skill` prefix changed. The standalone fragment/vendor plugins are
+  removed from the marketplace. Fragment/delivery/comms merges used
+  absorb-into-incumbent (preserving the `polymath-release`/`polymath-communication`
+  names and their workflow refs) rather than the doc's aspirational
+  `polymath-delivery`/`polymath-comms` rename — lower-risk, same consolidation.
+
 ### Added
+
+- **Install profiles (discovery Layer 1).** `shared/polymath-profiles.json`
+  defines seven curated role spines (`backend`, `frontend`, `sre`, `platform`,
+  `pm`, `staff`, `author`) so a new user picks one profile instead of choosing
+  from ~45 plugins, then installs more a-la-carte. Validated by
+  `tools/check-profiles.py` (`PROFILE-1` in `conformance.sh --all`) so a
+  fold/rename can never leave a dangling profile reference. Documented in the
+  README quick-start. **Layer 2:** `initialize-project` now starts its
+  recommended-install set from the closest profile and emits the install
+  command.
+
+- **Lead with journeys.** The README opens with a journeys table, and
+  `tools/build-catalog.py` renders a data-driven journeys section atop the
+  generated site (above plugins-by-tier) — the workflow is the unit of value;
+  plugins are the ingredients.
+
+- **Ambient routing (pull → push).** `polymath-core` gained a
+  `UserPromptSubmit` hook that extracts deterministic signals from a prompt
+  (URLs, CVE/GHSA keys, mentioned paths, inline diffs, intent phrasings),
+  scores them against a bundled signal table, and proposes the smallest
+  matching Polymath surface in one quiet line — only when a *hard* signal is
+  present, never auto-running. New `tools/route-triggering.py` makes routing
+  precision a deterministic, model-free CI gate (`ROUTE-TRIGGER` in
+  `conformance.sh --all`). See
+  [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md).
+- **Workflow-first routing surface.** Added `polymath-core:route` and
+  `/polymath-core:route` to choose the right workflow, skill, connector,
+  agent, or external catalog for a prompt before doing work. The router
+  returns JSON with confidence, evidence, alternatives, a clarifying
+  question when needed, and the next action. Added skill-triggering and
+  golden fixtures, and refreshed the README's marketplace counts.
 
 - **Five composed workflow arcs** in `polymath-flows`: `prdToShip`,
   `estimateAndPlan`, `requirementsToBacklog`, `progressiveRollout`, and

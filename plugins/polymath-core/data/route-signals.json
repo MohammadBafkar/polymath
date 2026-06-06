@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "_note": "Deterministic signal -> Polymath surface table read by hooks/scripts/route-hint.py. Hard signals (url, regex, path, diff) are required to emit a hint; intents alone never fire. Workflow rows mirror polymath-flows/data/workflow-detect.json; keep them loosely in sync. This table is bundled in polymath-core so the hint hook is self-contained and works even when polymath-flows is not installed (the proposal is still useful; run-workflow simply won't exist to confirm into).",
+  "rules": [
+    {
+      "id": "reviewPR",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow reviewPR",
+      "alt": "polymath-engineering:code-review",
+      "url": ["https?://(www\\.)?github\\.com/[^/\\s]+/[^/\\s]+/pull/\\d+", "https?://[^/\\s]+/[^/\\s]+/[^/\\s]+/-/merge_requests/\\d+", "dev\\.azure\\.com/[^\\s]+/pullrequest/\\d+"],
+      "diff": true,
+      "intents": ["review this pr", "review the pr", "review my pr", "review this diff", "review the diff", "review this change", "review the change", "code review", "pr review"]
+    },
+    {
+      "id": "respondToIncident",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow respondToIncident",
+      "alt": "polymath-incident:incident-triage",
+      "url": ["https?://[^/\\s]+\\.pagerduty\\.com/incidents/[A-Z0-9]+", "https?://[^/\\s]+\\.statuspage\\.io"],
+      "intents": ["production is down", "prod is down", "prod down", "sev1", "sev0", "sev-1", "active incident", "ongoing incident", "we have an incident", "site is down", "service is down"]
+    },
+    {
+      "id": "securityFinding",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow securityFinding",
+      "alt": "polymath-security:owasp-review",
+      "regex": ["\\bCVE-\\d{4}-\\d{4,7}\\b", "\\bGHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}\\b"],
+      "intents": ["security finding", "fix the vulnerability", "fix this vuln", "security fix", "remediate the cve"]
+    },
+    {
+      "id": "bumpDependency",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow bumpDependency",
+      "paths": ["package.json", "package-lock.json", "pyproject.toml", "requirements.txt", "go.mod", "Cargo.toml", "Gemfile", "Directory.Packages.props"],
+      "intents": ["upgrade the dependency", "bump the dependency", "update the dependency", "upgrade the package", "bump the version of", "upgrade to the latest"]
+    },
+    {
+      "id": "migrateLanguageVersion",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow migrateLanguageVersion",
+      "paths": [".csproj", "global.json", "go.mod", "pyproject.toml", ".python-version", "tsconfig.json"],
+      "intents": ["migrate to .net", "upgrade the runtime", "migrate the runtime", "upgrade to python 3", "migrate to go 1", "bump the language version", "upgrade node to"]
+    },
+    {
+      "id": "perfRegression",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow perfRegression",
+      "alt": "polymath-performance:backend-tail-latency",
+      "paths": ["docs/perf/"],
+      "intents": ["performance regression", "perf regression", "got slower", "latency regression", "p99 went up", "throughput dropped"]
+    },
+    {
+      "id": "weeklyReleaseTrain",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow weeklyReleaseTrain",
+      "alt": "polymath-release:release-notes",
+      "paths": ["docs/release-notes/"],
+      "intents": ["cut a release", "cut the release", "release train", "prepare the release", "tag a release"]
+    },
+    {
+      "id": "designSystem",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow designSystem",
+      "alt": "polymath-writing:architecture-doc",
+      "paths": ["docs/architecture/", "docs/rfcs/", "docs/design/"],
+      "intents": ["design the system", "design a system", "system design for", "architecture for", "design the architecture"]
+    },
+    {
+      "id": "decideUnderAmbiguity",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow decideUnderAmbiguity",
+      "alt": "polymath-decisions:tradeoff-matrix",
+      "paths": ["docs/adrs/", "docs/decisions/"],
+      "intents": ["help me decide between", "decide between", "which should we choose", "hard decision", "weigh the tradeoffs", "make the call on"]
+    },
+    {
+      "id": "shipFeature",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow shipFeature",
+      "alt": "polymath-flows:run-workflow prdToShip",
+      "paths": ["docs/prds/"],
+      "intents": ["ship this feature", "ship the feature", "implement the prd", "build out the feature", "ship from the prd", "ship from prd"]
+    },
+    {
+      "id": "rootCauseAnalysis",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow rootCauseAnalysis",
+      "alt": "polymath-thinking:5-whys",
+      "paths": ["docs/rca/"],
+      "intents": ["root cause analysis", "write an rca", "drive to root cause"]
+    },
+    {
+      "id": "changelog",
+      "kind": "skill",
+      "surface": "polymath-release:changelog",
+      "diff": true,
+      "intents": ["changelog entry", "update the changelog", "add to the changelog", "add a changelog line"]
+    },
+    {
+      "id": "adr",
+      "kind": "skill",
+      "surface": "polymath-writing:adr",
+      "alt": "polymath-writing:rfc",
+      "paths": ["docs/adrs/"],
+      "intents": ["write an adr", "record the decision", "architecture decision record", "log this decision"]
+    },
+    {
+      "id": "prd",
+      "kind": "skill",
+      "surface": "polymath-product:prd",
+      "paths": ["docs/prds/"],
+      "intents": ["write a prd", "draft a prd", "product requirements doc", "product requirements document"]
+    },
+    {
+      "id": "threat-model",
+      "kind": "skill",
+      "surface": "polymath-security:stride-threat-model",
+      "paths": ["docs/threat-models/"],
+      "intents": ["threat model", "stride analysis", "stride threat"]
+    }
+  ]
+}

@@ -79,8 +79,7 @@ python3 tools/export-agents-skills.py --clean
 This writes `dist/agents-skills/` with one directory per skill. Each
 directory's `SKILL.md` has its frontmatter `name:` rewritten to
 `<plugin>-<skill>` so two plugins shipping a skill with the same slug
-(today: `file-bug-from-incident` in `polymath-connector-jira` and
-`-linear`) don't collide.
+(e.g. a `triage` skill in more than one connector) don't collide.
 
 ### 2. Drop into your target harness
 

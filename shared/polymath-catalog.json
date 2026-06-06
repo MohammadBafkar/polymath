@@ -14,59 +14,128 @@
       "gemini-cli",
       "jetbrains-junie"
     ],
-    "notes": "Polymath declares conformance with the agentskills.io v1.0 open standard for SKILL.md format. All skills under this marketplace use the SKILL.md shape: frontmatter (name + description ≤ 200 chars) + body procedure. Skills are portable across any harness that implements the standard."
+    "notes": "Polymath declares conformance with the agentskills.io v1.0 open standard for SKILL.md format. All skills under this marketplace use the SKILL.md shape: frontmatter (name + description \u2264 200 chars) + body procedure. Skills are portable across any harness that implements the standard."
   },
   "plugins": {
-    "polymath-connector-monitoring": { "status": "experimental" },
-    "polymath-core": { "status": "beta" },
-    "polymath-infra-cloud": { "status": "experimental" },
-    "polymath-product": { "status": "beta" },
-    "polymath-engineering": { "status": "beta" },
-    "polymath-release": { "status": "experimental" },
-    "polymath-flows": { "status": "beta" },
-    "polymath-thinking": { "status": "beta" },
-    "polymath-planning": { "status": "beta" },
-    "polymath-writing": { "status": "beta" },
-    "polymath-qa": { "status": "experimental" },
-    "polymath-security": { "status": "beta" },
-    "polymath-frontend": { "status": "experimental" },
-    "polymath-backend": { "status": "experimental" },
-    "polymath-data": { "status": "experimental" },
-    "polymath-ai": { "status": "experimental" },
-    "polymath-platform": { "status": "experimental" },
-    "polymath-infra-postgres": { "status": "experimental" },
-    "polymath-devops": { "status": "experimental" },
-    "polymath-infra-kubernetes": { "status": "experimental" },
-    "polymath-sre": { "status": "beta" },
-    "polymath-observability": { "status": "experimental" },
-    "polymath-incident": { "status": "beta" },
-    "polymath-connector-github": { "status": "experimental" },
-    "polymath-connector-jira": { "status": "experimental" },
-    "polymath-connector-pagerduty": { "status": "experimental" },
-    "polymath-connector-datadog": { "status": "experimental" },
-    "polymath-connector-snyk": { "status": "experimental" },
-    "polymath-author": { "status": "beta" },
-    "polymath-decisions": { "status": "experimental" },
-    "polymath-research": { "status": "experimental" },
-    "polymath-design": { "status": "experimental" },
-    "polymath-communication": { "status": "experimental" },
-    "polymath-leadership": { "status": "experimental" },
-    "polymath-learning": { "status": "experimental" },
-    "polymath-performance": { "status": "experimental" },
-    "polymath-content": { "status": "experimental" },
-    "polymath-mobile": { "status": "experimental" },
-    "polymath-connector-slack": { "status": "experimental" },
-    "polymath-connector-sentry": { "status": "experimental" },
-    "polymath-connector-linear": { "status": "experimental" },
-    "polymath-connector-statuspage": { "status": "experimental" },
-    "polymath-connector-terraform": { "status": "experimental" },
-    "polymath-prioritize": { "status": "experimental" },
-    "polymath-progressive-delivery": { "status": "experimental" },
-    "polymath-test-automation": { "status": "experimental" },
-    "polymath-deprecation": { "status": "experimental" },
-    "polymath-finops": { "status": "experimental" },
-    "polymath-i18n": { "status": "experimental" },
-    "polymath-supply-chain": { "status": "experimental" },
-    "polymath-product-strategy": { "status": "experimental" }
+    "polymath-core": {
+      "status": "beta"
+    },
+    "polymath-infra-cloud": {
+      "status": "experimental"
+    },
+    "polymath-product": {
+      "status": "beta"
+    },
+    "polymath-engineering": {
+      "status": "beta"
+    },
+    "polymath-release": {
+      "status": "experimental"
+    },
+    "polymath-flows": {
+      "status": "beta"
+    },
+    "polymath-thinking": {
+      "status": "beta"
+    },
+    "polymath-planning": {
+      "status": "beta"
+    },
+    "polymath-writing": {
+      "status": "beta"
+    },
+    "polymath-qa": {
+      "status": "experimental"
+    },
+    "polymath-security": {
+      "status": "beta"
+    },
+    "polymath-frontend": {
+      "status": "experimental"
+    },
+    "polymath-backend": {
+      "status": "experimental"
+    },
+    "polymath-data": {
+      "status": "experimental"
+    },
+    "polymath-ai": {
+      "status": "experimental"
+    },
+    "polymath-platform": {
+      "status": "experimental"
+    },
+    "polymath-devops": {
+      "status": "experimental"
+    },
+    "polymath-infra-kubernetes": {
+      "status": "experimental"
+    },
+    "polymath-sre": {
+      "status": "beta"
+    },
+    "polymath-observability": {
+      "status": "experimental"
+    },
+    "polymath-incident": {
+      "status": "beta"
+    },
+    "polymath-connector-github": {
+      "status": "experimental"
+    },
+    "polymath-connector-pagerduty": {
+      "status": "experimental"
+    },
+    "polymath-connector-snyk": {
+      "status": "experimental"
+    },
+    "polymath-author": {
+      "status": "beta"
+    },
+    "polymath-decisions": {
+      "status": "experimental"
+    },
+    "polymath-research": {
+      "status": "experimental"
+    },
+    "polymath-design": {
+      "status": "experimental"
+    },
+    "polymath-communication": {
+      "status": "experimental"
+    },
+    "polymath-leadership": {
+      "status": "experimental"
+    },
+    "polymath-learning": {
+      "status": "experimental"
+    },
+    "polymath-performance": {
+      "status": "experimental"
+    },
+    "polymath-mobile": {
+      "status": "experimental"
+    },
+    "polymath-connector-slack": {
+      "status": "experimental"
+    },
+    "polymath-connector-sentry": {
+      "status": "experimental"
+    },
+    "polymath-connector-statuspage": {
+      "status": "experimental"
+    },
+    "polymath-connector-terraform": {
+      "status": "experimental"
+    },
+    "polymath-test-automation": {
+      "status": "experimental"
+    },
+    "polymath-connector-tracker": {
+      "status": "experimental"
+    },
+    "polymath-connector-observability": {
+      "status": "experimental"
+    }
   }
 }

@@ -13,11 +13,11 @@ description: Sequence a Now/Next/Later roadmap grouped by outcome, with confiden
 - The user asks for a roadmap, a Now/Next/Later view, or "what are we doing this quarter vs later".
 - A workflow invokes `polymath-product:roadmap`.
 
-This *sequences and communicates*. It does not rank with a method (`polymath-prioritize:prioritize` — run that first), break work into tasks (`polymath-planning:work-breakdown`), or write a change plan (`polymath-planning:write-plan`).
+This *sequences and communicates*. It does not rank with a method (`polymath-planning:prioritize` — run that first), break work into tasks (`polymath-planning:work-breakdown`), or write a change plan (`polymath-planning:write-plan`).
 
 ## Inputs
 
-- The candidate items, ideally already ranked (from `polymath-prioritize:prioritize`).
+- The candidate items, ideally already ranked (from `polymath-planning:prioritize`).
 - The outcomes / goals they ladder up to.
 - Known dependencies and rough confidence per item.
 

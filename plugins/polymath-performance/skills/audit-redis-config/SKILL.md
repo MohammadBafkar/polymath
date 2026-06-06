@@ -1,6 +1,6 @@
 ---
 name: audit-redis-config
-description: Audit Redis config — maxmemory + eviction, persistence (RDB/AOF), replication, slow-log, ACL, TLS.
+description: Audit a live Redis instance's config — maxmemory + eviction, persistence (RDB/AOF), replication, slow-log, ACL, TLS. Audits existing settings; not cache design (design-cache-layer).
 ---
 
 # audit-redis-config

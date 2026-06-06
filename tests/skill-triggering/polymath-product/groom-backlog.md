@@ -19,5 +19,5 @@ forbidden_prompts:
 # Why this test exists
 
 Refinement / ready / DoR phrasings route here. Forbidden prompts guard
-against `polymath-prioritize:prioritize` (ranking) and
+against `polymath-planning:prioritize` (ranking) and
 `polymath-product:decompose-epic` (epic story-mapping).

@@ -8,7 +8,7 @@ expect:
     - polymath-release:changelog
     - polymath-release:release-notes
     - polymath-engineering:verify-change
-    - polymath-content:write-advisory
+    - polymath-communication:write-advisory
     - polymath-release:pr
   artifacts:
     - "docs/release-notes/v1.4.0-survey.md"

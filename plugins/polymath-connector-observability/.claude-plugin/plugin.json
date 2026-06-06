@@ -1,0 +1,86 @@
+{
+  "name": "polymath-connector-observability",
+  "version": "0.3.0",
+  "description": "Observability umbrella connector: Datadog + Grafana + Honeycomb + Elasticsearch MCP. Read-only investigative skills (dashboard snapshot, log search, trace investigate, query-during-incident) + monitor authoring + bounded-scan discipline.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "observability",
+    "datadog",
+    "grafana",
+    "honeycomb",
+    "elastic",
+    "elasticsearch",
+    "traces",
+    "logs",
+    "dashboards"
+  ],
+  "userConfig": {
+    "datadogApiKey": {
+      "type": "string",
+      "title": "Datadog API key",
+      "description": "Datadog API key. Leave blank if Datadog is not used.",
+      "sensitive": true,
+      "required": false
+    },
+    "datadogAppKey": {
+      "type": "string",
+      "title": "Datadog application key",
+      "description": "Datadog application key, scoped to read metrics/logs/monitors.",
+      "sensitive": true,
+      "required": false
+    },
+    "datadogSite": {
+      "type": "string",
+      "title": "Datadog site",
+      "description": "Datadog site (e.g. datadoghq.com, datadoghq.eu).",
+      "required": false
+    },
+    "grafanaUrl": {
+      "type": "string",
+      "title": "Grafana base URL",
+      "description": "Full URL to the Grafana instance (e.g. https://grafana.example.com). Leave blank if Grafana is not used.",
+      "required": false
+    },
+    "grafanaApiKey": {
+      "type": "string",
+      "title": "Grafana service account token",
+      "description": "Service account token with Viewer (or Editor for snapshots) role on the relevant org.",
+      "sensitive": true,
+      "required": false
+    },
+    "honeycombApiKey": {
+      "type": "string",
+      "title": "Honeycomb API key",
+      "description": "Environment-scoped API key. Leave blank if Honeycomb is not used.",
+      "sensitive": true,
+      "required": false
+    },
+    "honeycombDataset": {
+      "type": "string",
+      "title": "Honeycomb default dataset",
+      "description": "Default dataset name (e.g. 'refund-api').",
+      "required": false
+    },
+    "elasticEndpoint": {
+      "type": "string",
+      "title": "Elastic endpoint",
+      "description": "Full URL to the Elasticsearch endpoint or Elastic Cloud cloud_id. Leave blank if Elastic is not used.",
+      "required": false
+    },
+    "elasticApiKey": {
+      "type": "string",
+      "title": "Elastic API key",
+      "description": "API key with read access on the indices used for triage. Avoid superuser keys.",
+      "sensitive": true,
+      "required": false
+    }
+  }
+}

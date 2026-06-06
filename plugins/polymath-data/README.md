@@ -31,10 +31,10 @@ When the work needs an adjacent surface, defer:
 - **Schema migrations** —
   [`polymath-backend:migration-plan`](../polymath-backend/skills/migration-plan/SKILL.md)
   for expand-migrate-contract phasing;
-  [`polymath-infra-postgres:review-migration`](../polymath-infra-postgres/skills/review-migration/SKILL.md)
+  [`polymath-backend:review-migration`](../polymath-backend/skills/review-migration/SKILL.md)
   for Postgres-specific lock review.
 - **Database server configuration** —
-  [`polymath-infra-postgres:audit-pg-config`](../polymath-infra-postgres/skills/audit-pg-config/SKILL.md).
+  [`polymath-backend:audit-pg-config`](../polymath-backend/skills/audit-pg-config/SKILL.md).
 - **Data pipelines / ETL / orchestration** — currently deferred to
   external catalogs (dbt project conventions, Airflow / Dagster
   community docs). When a Polymath workflow shape becomes load-bearing,

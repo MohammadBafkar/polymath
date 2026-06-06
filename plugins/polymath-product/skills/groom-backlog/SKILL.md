@@ -13,7 +13,7 @@ description: Refine backlog items to ready — clarify stories, add acceptance c
 - Prepping items before sprint/iteration planning ("backlog refinement").
 - A workflow invokes `polymath-product:groom-backlog`.
 
-This refines *individual items* against a Definition of Ready. It does not rank them (`polymath-prioritize:prioritize`), slice an epic into a story map (`polymath-product:decompose-epic`), or estimate a whole initiative (`polymath-planning:estimate`).
+This refines *individual items* against a Definition of Ready. It does not rank them (`polymath-planning:prioritize`), slice an epic into a story map (`polymath-product:decompose-epic`), or estimate a whole initiative (`polymath-planning:estimate`).
 
 ## Definition of Ready (the bar each item must clear)
 

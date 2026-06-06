@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "datadog": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@datadog/mcp-server"],
+      "env": {
+        "DD_API_KEY": "${POLYMATH_CONNECTOR_OBSERVABILITY_DATADOGAPIKEY}",
+        "DD_APP_KEY": "${POLYMATH_CONNECTOR_OBSERVABILITY_DATADOGAPPKEY}",
+        "DD_SITE": "${POLYMATH_CONNECTOR_OBSERVABILITY_DATADOGSITE}"
+      }
+    },
+    "grafana": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@grafana/mcp-server"],
+      "env": {
+        "GRAFANA_URL": "${POLYMATH_CONNECTOR_OBSERVABILITY_GRAFANAURL}",
+        "GRAFANA_API_KEY": "${POLYMATH_CONNECTOR_OBSERVABILITY_GRAFANAAPIKEY}"
+      }
+    },
+    "honeycomb": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@honeycomb/mcp-server"],
+      "env": {
+        "HONEYCOMB_API_KEY": "${POLYMATH_CONNECTOR_OBSERVABILITY_HONEYCOMBAPIKEY}",
+        "HONEYCOMB_DATASET": "${POLYMATH_CONNECTOR_OBSERVABILITY_HONEYCOMBDATASET}"
+      }
+    },
+    "elastic": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@elastic/mcp-server"],
+      "env": {
+        "ELASTIC_ENDPOINT": "${POLYMATH_CONNECTOR_OBSERVABILITY_ELASTICENDPOINT}",
+        "ELASTIC_API_KEY": "${POLYMATH_CONNECTOR_OBSERVABILITY_ELASTICAPIKEY}"
+      }
+    }
+  }
+}
