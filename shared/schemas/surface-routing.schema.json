@@ -64,7 +64,7 @@
       "uniqueItems": true
     },
     "trust": {
-      "description": "Graduated autonomy (Phase 4). 'propose' (default) = detect and propose, never auto-run. 'auto-headless' = may run without confirmation in a non-interactive session (CI / cron / -p). 'auto' = may run without confirmation always (opt-in per project; forbidden for surfaces that write outside docs/).",
+      "description": "Graduated autonomy (Phase 4) — DECLARED metadata; no executor consumes it yet, so every surface still proposes-first regardless of this value (see run-workflow SKILL.md and docs/plans/consolidation-and-dispatch.md Outcome). 'propose' (default) = detect and propose, never auto-run. 'auto-headless' = declares eligibility to run without confirmation in a non-interactive session (CI / cron / -p) once an executor honors the axis. 'auto' = reserved and currently NOT permitted: the TRUST-1 gate fails the build on any 'auto' surface (it needs a per-surface write-scope analysis that does not exist yet).",
       "type": "string",
       "enum": ["propose", "auto-headless", "auto"],
       "default": "propose"

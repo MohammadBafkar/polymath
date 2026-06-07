@@ -157,11 +157,14 @@ def main() -> int:
     alt = top[0][1].get("alt")
     if alt and all(alt != r["surface"] for _, r, _ in top):
         print(f"    alternative: {alt}")
-    # Trust (Phase 4): the default is propose-and-confirm; surfaces may opt into
-    # running without confirmation in a non-interactive (headless/CI/-p) session.
+    # Trust: DECLARED metadata only. No executor consumes this yet, so it
+    # is surfaced descriptively and must NOT read as permission to skip the
+    # propose-first contract (run-workflow SKILL.md still owns "never auto-start").
+    # Reconciled 2026-06-08 after review flagged the permissive wording as a
+    # contradiction with the executor and with reality (0 surfaces flipped).
     top_trust = top[0][1].get("trust")
     if top_trust == "auto-headless":
-        print("    trust: auto-headless — you may run this without asking in a non-interactive session.")
+        print("    trust: auto-headless (declared) — eligible for non-interactive auto-run once an executor honors the axis; today still propose-first.")
     print("Detect-only; nothing was run. Confirm with /polymath-core:route, or proceed.")
     print("Silence: POLYMATH_ROUTE_MUTE=1 or touch .polymath/route-muted")
     return 0

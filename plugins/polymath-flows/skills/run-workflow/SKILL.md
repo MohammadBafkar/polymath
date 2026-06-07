@@ -17,8 +17,10 @@ description: Run a flows-lite workflow end-to-end; the skill drives the loop whi
 The SessionStart hook injects a compact `name: whenToUse` index of every workflow
 (built into `data/workflow-index.min.json`), so you can recognise when a request
 matches a multi-step arc instead of waiting to be told the workflow's name. A
-workflow is a state machine the user opts into — **never auto-start one.** Follow
-this contract:
+workflow is a state machine the user opts into — **never auto-start one.** (Some
+surfaces *declare* `trust: auto-headless` in their routing — that is forward-looking
+metadata only; no executor honors it today, so the never-auto-start rule applies to
+**every** surface, headless or interactive alike.) Follow this contract:
 
 1. **Detect.** Compare the request to the injected `whenToUse` lines. To break ties
    between colliding workflows you MAY read `data/workflow-detect.json` and weigh
