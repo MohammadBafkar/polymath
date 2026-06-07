@@ -4,7 +4,7 @@ schemaVersion: 0.1
 title: "Consolidation & Dispatch: one surface registry, one binding model"
 owner: "Mohammad Bafkar"
 created: "2026-06-07"
-status: draft
+status: done
 review_date: "2026-09-07"
 ---
 
@@ -13,6 +13,13 @@ review_date: "2026-09-07"
 > Canonical home of the dispatch-layer model that `route-hint.py` and
 > `polymath-profiles.json` already cite. This doc defines Layers 1–4 and the
 > consolidation that unifies routing, triggering, resumption, and connectors.
+>
+> **This is now a RECORD, not a forward plan.** It began as a plan; all five
+> phases shipped 2026-06-07. The **Approach / Risks / Verification** sections
+> below preserve what was *targeted* — several targets were missed, falsified, or
+> shipped as declared-but-inert metadata. Read **[Outcome (measured)](#outcome-measured)**
+> for the honest scorecard: it supersedes the forward-looking claims wherever they
+> disagree, with held-out measurements and the one premise still unmeasured.
 
 ## What
 
@@ -101,8 +108,11 @@ existing citations resolve.
   matching surface from what just happened (a failing test → `bugTriage`; a
   dependency-adding diff → `bumpDependency`), through the same registry.
 
-All four layers read **one** compiled registry; none hand-maintains routing
-facts.
+Layers 2–3 read **one** compiled registry (`build-surface-index.py` output) and
+hand-maintain nothing. Layer 4's event rules are the exception: they live in a
+separate hard-coded table in `event-trigger.py` (one rule today), not the
+compiled registry — see [Outcome](#outcome-measured). The "all four" unification
+is aspirational, not shipped.
 
 ## Approach
 
@@ -119,6 +129,8 @@ is the keystone; 2–3 generalize connectors; 4–5 add autonomy and resilience.
    a drop-in `bindings/<provider>/` (transport spec + config keys + tool
    reference). The active provider's `.mcp.json` is *generated* from
    `.polymath/capabilities.yaml`; only the configured server launches.
+   *(Planned — the Phase-2 spike falsified this; Option A shipped instead and all
+   bundled servers still launch. See [Outcome](#outcome-measured).)*
    `capabilities.json` `providerPlugins{}` becomes derived, not aspirational.
 3. **Tools as surfaces.** Define a `tools/<name>/` sub-plugin unit (a small
    manifest: how to invoke — MCP/CLI/HTTP — + reference + config keys) that
@@ -162,7 +174,9 @@ Each step is independently completable and produces an observable result.
 10. Define the `tools/<name>/` manifest + `TOOL-1` schema; expose binding tool
     docs as tool surfaces in the Phase-1 index. *(a tool appears in dispatch)*
 11. Add `trust:` handling to `route-hint` + run-workflow contract; `auto-headless`
-    runs without asking when non-interactive. *(headless fixture auto-runs)*
+    runs without asking when non-interactive. *(Shipped as DECLARED metadata only —
+    no executor honors it, 0 surfaces flipped; the "fixture auto-runs" criterion was
+    NOT met. See [Outcome](#outcome-measured).)*
 12. Add the generic `PostToolUse`/`Stop` trigger hook + `chainsTo` arc hand-off.
     *(failing-test fixture proposes `bugTriage`; `respondToIncident` proposes
     `incidentRetroToActions`)*
@@ -221,21 +235,39 @@ documentation alone.
 - Risk: binding indirection is pure overhead for single-provider shops.
   Mitigation: indirection is author-time only; the generated `.mcp.json` makes
   runtime identical to today.
+- Risk: **every dispatch layer is coupled to Claude Code-specific host
+  semantics** — `UserPromptSubmit`, `PostToolUse`, `Stop`, `SessionStart`,
+  `PreCompact` hooks and `.mcp.json` static load. None of it ports to Cursor /
+  Codex / Goose, and the Phase-2 spike already hit one such limit (`.mcp.json` is
+  read statically, *before* SessionStart). `PORTABILITY.md` covers the SKILL.md
+  format, **not** this dispatch layer. Mitigation: the surfaces stay portable
+  (routing / trust / bindings are plain declarations consumable by any host); only
+  the *hooks* that consume them are Claude-Code-bound. A host hook-contract change
+  is a first-class breakage risk, not a footnote.
 
 ## Verification
 
 - `build-surface-index.py --check` is green; `route-signals.json` and
   `workflow-detect.json` are build outputs (grep shows no hand-sync `_note`).
-- Deterministic-dispatch coverage rises from 4/149 skills to a measured majority;
-  hint hit-rate is reported, not assumed.
-- Installing `connector-observability` launches exactly **one** MCP server (the
-  configured provider); adding a new provider binding requires **zero** edits to
-  existing files; `capabilities.json` `providerPlugins{}` regenerates to match.
+- Deterministic-dispatch coverage reaches **20/149 skills** (≈13%) — *not* the
+  "measured majority" this bullet originally claimed; thinking skills with no hard
+  signal intentionally stay description-matched. Hit-rate is now **measured**
+  held-out (`tools/route-eval.py`): precision 9/9, false-positives 0/7,
+  naturalistic reach 1/16. See [Outcome](#outcome-measured).
+- ❌ **Not delivered as written.** The Phase-2 spike falsified "exactly one MCP
+  server" (Claude Code loads `.mcp.json` statically). Shipped **Option A**: all
+  bundled servers launch, hardened with `${VAR:-}`. What *did* hold: adding a
+  provider binding needs **zero** edits to existing files, and `providerPlugins{}`
+  is generated to match. "Exactly one server" needs Option C (deferred). See
+  [Outcome](#outcome-measured).
 - A run killed between `next` and `complete` is surfaced at the next SessionStart
   (stale-`active`) and resumes to the correct step; `budget.json` is enforced or
   gone; run dirs GC by TTL.
-- A headless (`claude -p`) run with `trust: auto-headless` resumes/triggers
-  without a prompt; an interactive run still proposes.
+- ⚠️ **Declared, not enforced.** `trust: auto-headless` compiles into
+  route-signals and `route-hint` annotates it descriptively, but **no executor
+  consumes it and 0 surfaces are flipped** — every surface still proposes-first,
+  interactive and headless alike. Autonomy is forward-looking metadata pending an
+  enforcing consumer. See [Outcome](#outcome-measured).
 - All existing gates plus the new ones (`SURFACE-INDEX`, `BINDING-1`, `TOOL-1`,
   `TRUST-1`) pass; bakeoff + triggering fixtures stay green.
 - This file exists; `route-hint.py` and `profiles.json` "Layer" citations
@@ -362,13 +394,16 @@ convention).
   subsumed** — `reviewPR` and `respondToIncident` already own those URLs, and re-adding them would
   collide on SURFACE-2 url-uniqueness. The Jira/Linear key ambiguity (identical syntax) is handled by
   scoring: a bare key defaults to jira; a `linear.app` URL + "Linear" wording lets linear (4) outscore
-  the shared key shape (3). **The 3rd detection layer (per-connector bash) is gone** — all
-  deterministic routing now flows through one builder/table. github keeps its `Stop` nudges for
-  Phase 4. `conformance: OK`.
+  the shared key shape (3). **The 3rd detection layer's *prompt-detectors* are gone** — all
+  *prompt-time* deterministic routing now flows through one builder/table. The 3 `Stop`
+  end-of-turn nudges (github suggest-pr / check-recent-ci, snyk check-criticals) **remain by
+  design** as event-time instances (Phase 4), so "the bash layer is gone" holds only for the
+  prompt-detectors, not the nudges. `conformance: OK`.
 - **2026-06-07 — Phase 4 landed (triggering + autonomy, Gaps 2/3).** (1) **Trust axis:** surfaces
   declare `trust` (`propose` | `auto-headless` | `auto`); `build-surface-index` emits it to
-  route-signals and `route-hint` surfaces an auto-headless note ("you may run this without asking in a
-  non-interactive session"). **TRUST-1** reserves `auto` (it needs a write-scope analysis we don't have
+  route-signals and `route-hint` surfaces an auto-headless note (originally permissive; **reworded
+  2026-06-08** to a non-permissive "declared… still propose-first" after review — see Outcome).
+  **TRUST-1** reserves `auto` (it needs a write-scope analysis we don't have
   for skills/tools) — only `propose`/`auto-headless` are permitted; the build fails on `auto`. No real
   surface was flipped (policy is the maintainer's per-surface knob — a one-line routing.yaml change).
   (2) **Arc chaining:** `chainsTo` added to the workflow schema + validator + `ALLOWED_TOP_LEVEL`; the
@@ -396,6 +431,100 @@ convention).
   `providerPlugins`" step replaced by the binding workflow. Option C (one plugin per provider — the
   only design where *only* the configured provider launches) stays a documented future path the
   binding model already supports; not adopted, to preserve the 51→40 consolidation. `conformance: OK`.
+
+## Outcome (measured)
+
+*Added 2026-06-08, after an adversarial review of the shipped work.* This is the
+honest scorecard. Where it disagrees with **Approach / Verification** above, this
+section wins.
+
+### Routing — measured, held-out
+
+`tools/route-eval.py` runs 35 held-out prompts (`tests/route-eval/heldout.jsonl`)
+through the real `route-hint.py`: naturalistic phrasings, deliberately-signalled
+prompts, and adversarial negatives — **none** of them the green-by-construction
+ROUTE-TRIGGER fixtures. Result:
+
+| Dimension | Result | Reading |
+| --- | --- | --- |
+| Precision (signal present → right surface) | **9/9**, 0 misroute, 0 silent-miss | when the hint speaks, it is right |
+| False positives (negatives → silent) | **0/7** | acronyms, bare `jira`/`linear`, `RFC 2616`, concept-questions all stay silent |
+| Reach (naturalistic prose → fires at all) | **1/16 (~6%)** | the hard-signal floor means natural phrasing rarely triggers a hint |
+| Ties (competing surfaces) | both surfaced (≤3); top is table-order-dependent | order is arbitrary on a score tie, but alternatives are *not* hidden |
+
+So the deterministic layer is **trustworthy but low-reach**: correct and quiet,
+but on a prompt that doesn't paste a URL/CVE/ticket or type a near-exact
+`path`+`intent` phrase, it contributes nothing and the model is back to 1-of-149.
+Three silent naturalistic cases even *named* a path token (`Dockerfile`,
+`docs/adrs/`, `k8s/`) but lacked the exact intent substring — `intents` are naive
+`in`-substring matches, the single biggest reach limiter. Making intents semantic
+is the highest-value next lever, but it would require **re-measuring** precision /
+false-positives (today's 0-FP rides on exact matching).
+
+### Claim B — the premise — is NOT measured
+
+The motivating premise (*"the model is reliable at 1-of-3 and unreliable at
+1-of-131"*) is about **model selection**, which the eval above does not test (it
+measures the router, not the model). It needs a live model and is **not runnable
+here** (`CLAUDE_CODE_OAUTH_TOKEN` unset; live fixtures disabled,
+`LIMITATIONS.md` §4). Procedure to close it:
+
+1. Take ~20 prompts that carry a hard signal (so the hint fires) with a
+   known-correct surface.
+2. Run each through `claude -p` twice: once normally, once with
+   `POLYMATH_ROUTE_MUTE=1` (hint suppressed).
+3. Score whether the model invoked/named the correct surface in each arm.
+4. The delta (unmuted − muted) **is** the routing layer's value. ≈0 → the hint is
+   decorative on artifact-bearing prompts; large → widen reach (semantic intents)
+   *with evidence*.
+
+Until that delta exists, the routing layer is justified by precision (it doesn't
+mislead) and bounded by reach (it rarely fires) — **not** by a proven selection
+lift. This is the one experiment that should gate any further routing investment.
+
+### Connectors (Phase 2) — metadata honest, runtime unchanged
+
+Option A shipped, not the "one server" goal. Bindings + `providerPlugins{}` are
+generated and honest (a provider is wired iff a binding exists), and `BINDING-1`
+keeps the binding ↔ `.mcp.json` ↔ `plugin.json` triple from drifting. But **all
+bundled servers still launch** (an unset provider now fails its own auth instead
+of crashing config parse). "Only the configured provider launches" needs Option C
+(one plugin per provider) — a deferred maintainer decision that reverses the
+51→40 consolidation. Note the binding files *do* duplicate the server name +
+`userConfigKeys` that live in `.mcp.json`/`plugin.json`; `BINDING-1` exists to
+police that overlap. The bindings earn their keep by adding the
+capability→provider vocabulary those files lack, not by removing duplication.
+
+### Autonomy + event-time (Phase 4) — declared, thin, not unified
+
+- **Trust axis:** declared on surfaces, compiled into route-signals, surfaced by
+  `route-hint` as a *descriptive* note — but **no executor consumes it and 0
+  surfaces are flipped**; `run-workflow` proposes-first for every surface. It is
+  forward-looking metadata, not active autonomy. `TRUST-1` does enforce one real
+  property: `auto` is forbidden (only `propose` / `auto-headless` compile).
+- **Event-time trigger** is a **separate hard-coded `RULES` table** in
+  `event-trigger.py` (one rule: failed tests → `bugTriage`), *not* the compiled
+  registry. Folding one rule into the registry would be over-engineering;
+  unification is worth it only if the rule set grows. It is smoke-tested, with no
+  committed PostToolUse harness — below this repo's ROUTE-TRIGGER bar.
+- **Arc chaining** (`chainsTo`) ships with two arcs.
+
+### What is unambiguously good
+
+Phase 5 **resumability** is a genuine user-facing fix: a run interrupted
+mid-flight (context death / `/clear`) is now surfaced as stale-`active` at
+SessionStart instead of going invisible. The **generated `route-signals.json`**
+(single producer, replacing a hand-synced copy) and the **honest
+`providerPlugins{}`** are real improvements independent of whether routing lifts
+selection. The adversarial hardening pass (Jira-acronym false positives, the
+fallback-YAML quoted-colon, `${VAR:-}` env defaults) fixed real bugs.
+
+### One-line verdict
+
+Careful, well-gated craft on an **unproven foundation**: the routing layer is
+**high-precision / low-reach**, its **selection-lift premise is still unmeasured**,
+and several Phase-4 surfaces are **declared, not enforced**. Close Claim B before
+widening reach.
 
 ## References
 
