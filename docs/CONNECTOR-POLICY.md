@@ -100,10 +100,38 @@ than the concrete plugin (see [`docs/CAPABILITIES.md`](CAPABILITIES.md)).
 Projects then map each capability to the configured provider once in
 `.polymath/capabilities.yaml`. New providers join the catalog by:
 
-1. Adding the provider token to `shared/schemas/capabilities.json`.
-2. Pointing `providerPlugins.<provider>` at the adapter plugin name.
-3. Updating this audit table with the disclosure fields for the new
-   adapter.
+1. Adding the provider token to `shared/schemas/capabilities.json`
+   `providers[]` (the recognised vocabulary).
+2. Dropping a `bindings/<provider>/binding.json` in the adapter plugin
+   (transport + `userConfigKeys` + references).
+   `tools/build-capability-index.py` regenerates `providerPlugins.<provider>`
+   from that binding — the map is never hand-edited (the `CAPABILITY-INDEX`
+   diff-guard and `BINDING-1` enforce this).
+3. Updating this audit table with the disclosure fields for the new adapter.
+
+### 4.1 Provider configuration & packaging
+
+A capability plugin may bundle several providers' MCP servers (e.g.
+`polymath-connector-observability` ships Datadog + Grafana + Honeycomb +
+Elastic). Claude Code loads `.mcp.json` statically at session start and cannot
+launch only a subset, so:
+
+- **All declared servers register; configure only the provider(s) you use.**
+  Every credential env uses a `${VAR:-}` empty default, so an *unconfigured*
+  provider can't break MCP config parsing — its server starts idle and fails its
+  own auth rather than blocking the whole session.
+- **To avoid idle servers, disable the unused ones** via the `/mcp` UI (or
+  `disabledMcpjsonServers` in settings).
+- **Bindings are the source of truth.** `BINDING-1` checks that every `mcp`
+  binding's `server` exists in the plugin's `.mcp.json` and every
+  `userConfigKey` exists in `plugin.json` `userConfig`, so the binding model and
+  the runtime config cannot drift.
+
+One-plugin-per-provider packaging (so only the installed provider launches) is a
+future option the binding model already supports — see
+[`docs/plans/consolidation-and-dispatch.md`](plans/consolidation-and-dispatch.md)
+Phase 2 (option C). It is intentionally not the default: it would expand the
+marketplace and reverse the recent connector consolidation.
 
 ## 5. Enforcement
 

@@ -19,6 +19,8 @@ tools/bakeoff.py check                 # parses bakeoff cases without running a 
 tools/skill-triggering.py check        # validates skill-triggering test frontmatter
 tools/workflow-triggering.py check     # workflow-triggering frontmatter + trigger drift guard
 tools/build-workflow-index.py --check  # workflow routing index in sync with workflow YAML
+tools/build-surface-index.py --check   # deterministic route-signals table in sync with per-surface routing.yaml
+tools/build-capability-index.py --check # capabilities.json providerPlugins in sync with per-provider bindings
 tools/lint-descriptions.py --strict    # no two descriptions token-collide (disambiguation floor)
 tools/check-description-confusion.py check   # confusion-matrix frontmatter (sibling routing) is valid
 
@@ -75,6 +77,10 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | TEMPLATE-1 | Templates whose name matches `shared/schemas/artifacts/*.schema.json` must have frontmatter |
 | WORKFLOW-1 | Workflow YAML validates against `shared/schemas/workflow.schema.json` |
 | WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |
+| SURFACE-INDEX | `plugins/polymath-core/data/route-signals.json` + `surface-index.json` match a fresh `tools/build-surface-index.py` build (diff-guard); `--strict` (SURFACE-2) requires every intent / url / regex pattern to be globally unique across all surfaces |
+| CAPABILITY-INDEX | `shared/schemas/capabilities.json` `providerPlugins{}` matches a fresh `tools/build-capability-index.py` build from per-provider `bindings/<provider>/binding.json` (diff-guard); `--strict` (BINDING-1) requires every binding's provider to be in its capability's `providers[]`, forbids two plugins claiming one `(capability, provider)`, and requires each `mcp` binding's `server` + `userConfigKeys` to exist in the plugin's `.mcp.json` / `plugin.json` |
+| TOOL-1 | every `tools/<name>/tool.json` validates against `shared/schemas/tool.schema.json` (enforced by `build-surface-index.py`, i.e. SURFACE-INDEX) |
+| TRUST-1 | a `routing.yaml` `trust` value is `propose` (default) or `auto-headless`; `auto` is reserved and fails `build-surface-index.py` until per-surface write-scope analysis exists |
 | WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
@@ -104,6 +110,12 @@ A workflow step looks like:
 The `requires.capabilities` block in a workflow is resolved against `.polymath/capabilities.yaml` at run time — workflows declare *what* they need (issue tracker, observability); the project file declares *which* provider supplies it.
 
 Workflows also declare a routing surface — `whenToUse` (a terse, always-on hint), `triggers` (naive user phrasings, unique across workflows), and `detectionSignals` (file globs / intents). `tools/build-workflow-index.py` compiles these into `plugins/polymath-flows/data/` and the polymath-flows SessionStart hook injects the compact index so the agent can detect and **propose** a matching workflow (the detect → propose → confirm → run contract lives in `run-workflow/SKILL.md`). Re-run the builder after editing any workflow; the `WORKFLOW-INDEX` gate fails on drift, and `WORKFLOW-2` (`--strict`) requires `whenToUse` + `triggers` on every workflow with globally-unique triggers.
+
+## Deterministic surface routing (route-signals)
+
+Any surface — skill, workflow, or tool — can opt into the deterministic prompt-time route hint (the `polymath-core` `route-hint` `UserPromptSubmit` hook) by dropping a `routing.yaml` sidecar declaring hard signals (`url` / `regex` / `paths` / `diff`) and soft `intents`. Skills declare it next to `SKILL.md` (`skills/<skill>/routing.yaml`); workflows declare it in `plugins/polymath-flows/routing/<name>.yaml` (kept outside the `workflows/*.yaml` glob so the flows validator never sees it). **Tools** are a first-class unit too: a `tools/<name>/tool.json` manifest (validated by [`shared/schemas/tool.schema.json`](shared/schemas/tool.schema.json), `TOOL-1`, enforced by the SURFACE-INDEX gate) plus an optional `routing.yaml` — added like a skill and dispatched through the same registry. This replaced the per-connector bash "detect-and-hint" scripts: detection signals now live in `routing.yaml`, and the MCP tool detail in `tool.json`.
+
+Three further dispatch facets build on this registry: a surface may declare `trust: auto-headless` so the agent MAY run it without confirmation in a non-interactive session (`auto` is reserved by `TRUST-1`); a workflow may declare `chainsTo: [<workflow>...]` so the runner proposes the natural next arc on completion (never auto-runs; dangling targets fail `build-workflow-index --strict`); and a `PostToolUse` event-trigger hook (`polymath-core/hooks/scripts/event-trigger.py`) proposes a surface from what just happened (e.g. a failed test run → `bugTriage`), the general form of the per-connector `Stop` nudges. `tools/build-surface-index.py` is the **single producer** that compiles every sidecar into `plugins/polymath-core/data/route-signals.json` (formerly hand-maintained) plus a `surface-index.json` catalog, validating each against [`shared/schemas/surface-routing.schema.json`](shared/schemas/surface-routing.schema.json) and enforcing globally-unique intent/url/regex patterns (`SURFACE-2`). Re-run the builder after editing any `routing.yaml`; the `SURFACE-INDEX` gate fails on drift. The full design lives in [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md).
 
 ## Project localization
 
