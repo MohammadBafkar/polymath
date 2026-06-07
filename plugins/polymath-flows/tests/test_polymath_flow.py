@@ -122,6 +122,26 @@ class YamlSubsetParserTests(unittest.TestCase):
         self.assertEqual(data["schemaVersion"], 0.1)
         self.assertEqual(data["name"], "x")
 
+    def test_quoted_list_item_with_colon_under_fallback(self) -> None:
+        # Force the homegrown parser (yaml import absent) and confirm a quoted
+        # scalar list item containing a colon (e.g. "input:incidentId", used by
+        # several workflows' detectionSignals) is NOT misparsed as an inline
+        # mapping. Guards the degraded (no-PyYAML) path even though CI has PyYAML.
+        saved = sys.modules.get("yaml", "__absent__")
+        sys.modules["yaml"] = None  # makes `import yaml` raise ImportError
+        try:
+            loader = importlib.machinery.SourceFileLoader("pf_noyaml", str(FLOW_SCRIPT))
+            spec = importlib.util.spec_from_loader("pf_noyaml", loader)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            got = mod._load_yaml('a:\n  intents:\n    - "input:incidentId"\n    - retro\n')
+        finally:
+            if saved == "__absent__":
+                sys.modules.pop("yaml", None)
+            else:
+                sys.modules["yaml"] = saved
+        self.assertEqual(got, {"a": {"intents": ["input:incidentId", "retro"]}})
+
 
 class SchemaValidationTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -561,6 +581,128 @@ class ArtifactValidTests(unittest.TestCase):
         }
         ok, _ = self.mod._run_check(check, self.tmp, {}, {"slug": "x"})
         self.assertTrue(ok)
+
+
+class ResumabilityTests(unittest.TestCase):
+    """Phase 5: last_active tracking, budget-stub removal, gc pruning."""
+
+    def setUp(self) -> None:
+        self.mod = _import_flow()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.work = pathlib.Path(self._tmp.name)
+        self._prev_data = os.environ.get("CLAUDE_PLUGIN_DATA")
+        os.environ["CLAUDE_PLUGIN_DATA"] = str(self.work / ".pdata")
+        self.runs = self.work / ".pdata" / "workflows"
+        self._prev_cwd = pathlib.Path.cwd()
+        os.chdir(self.work)  # isolate from the repo's own .polymath/
+
+    def tearDown(self) -> None:
+        os.chdir(self._prev_cwd)
+        if self._prev_data is None:
+            os.environ.pop("CLAUDE_PLUGIN_DATA", None)
+        else:
+            os.environ["CLAUDE_PLUGIN_DATA"] = self._prev_data
+        self._tmp.cleanup()
+
+    def _capture(self, *argv: str) -> tuple[int, str]:
+        from io import StringIO
+        from contextlib import redirect_stdout
+
+        buf = StringIO()
+        code = 0
+        with redirect_stdout(buf):
+            try:
+                code = self.mod.main(list(argv))
+            except SystemExit as e:
+                code = int(e.code) if e.code is not None else 0
+        return code, buf.getvalue()
+
+    def _mk_run(self, run_id: str, status: str, days_ago: float) -> None:
+        import datetime
+
+        d = self.runs / run_id
+        d.mkdir(parents=True, exist_ok=True)
+        ts = (
+            datetime.datetime.now(datetime.timezone.utc)
+            - datetime.timedelta(days=days_ago)
+        ).replace(microsecond=0).isoformat()
+        (d / "state.json").write_text(
+            json.dumps({"run_id": run_id, "workflow": "x", "status": status, "last_active": ts})
+        )
+
+    def test_start_writes_last_active_and_no_budget(self) -> None:
+        code, out = self._capture(
+            "start", "shipFeature", "--input", "title=Demo", "--input", "scope=small"
+        )
+        self.assertEqual(code, 0)
+        run_dir = self.runs / json.loads(out)["run_id"]
+        state = json.loads((run_dir / "state.json").read_text())
+        self.assertIn("last_active", state)
+        self.assertIsNotNone(self.mod._parse_iso(state["last_active"]))
+        self.assertFalse((run_dir / "budget.json").exists(), "budget.json stub must not be written")
+
+    def test_gc_prunes_only_old_terminal_runs(self) -> None:
+        self._mk_run("old-done", "completed", 40)
+        self._mk_run("recent-done", "completed", 1)
+        self._mk_run("old-paused", "paused", 90)
+        self._mk_run("old-active", "active", 90)
+        code, out = self._capture("gc", "--days", "30")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out)["removed"], ["old-done"])
+        self.assertFalse((self.runs / "old-done").exists())
+        for keep in ("recent-done", "old-paused", "old-active"):
+            self.assertTrue((self.runs / keep).exists(), f"{keep} must survive gc")
+
+    def test_gc_dry_run_does_not_delete(self) -> None:
+        self._mk_run("old-done", "completed", 40)
+        code, out = self._capture("gc", "--dry-run")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out)["removed"], ["old-done"])
+        self.assertTrue((self.runs / "old-done").exists(), "dry-run must not delete")
+
+    def test_gc_explicit_status_prunes_paused(self) -> None:
+        self._mk_run("old-paused", "paused", 90)
+        code, out = self._capture("gc", "--status", "paused", "--days", "30")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out)["removed"], ["old-paused"])
+        self.assertFalse((self.runs / "old-paused").exists())
+
+    def test_inflight_marker_set_by_next_cleared_by_complete(self) -> None:
+        code, out = self._capture("start", "shipFeature", "--input", "title=Demo", "--input", "scope=small")
+        self.assertEqual(code, 0)
+        run_id = json.loads(out)["run_id"]
+        sd = self.runs / run_id
+        # `next` marks the issued step in-flight.
+        code, out = self._capture("next", run_id)
+        self.assertEqual(code, 0)
+        step_id = json.loads(out)["step_id"]
+        state = json.loads((sd / "state.json").read_text())
+        self.assertIsNotNone(state.get("in_flight"))
+        self.assertEqual(state["in_flight"]["step"], step_id)
+        # `checkpoint` annotates the in-flight step.
+        code, _ = self._capture("checkpoint", run_id, "--note", "halfway")
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads((sd / "state.json").read_text())["in_flight"]["note"], "halfway")
+        # `complete` clears the in-flight breadcrumb.
+        code, _ = self._capture("complete", run_id, step_id, "--summary", "done")
+        self.assertEqual(code, 0)
+        self.assertIsNone(json.loads((sd / "state.json").read_text()).get("in_flight"))
+
+    def test_chainsto_surfaced_on_completion(self) -> None:
+        import contextlib
+        import io
+
+        run_dir = self.runs / "chain-run"
+        run_dir.mkdir(parents=True)
+        (run_dir / "state.json").write_text(json.dumps({"run_id": "chain-run", "status": "active", "steps": []}))
+        workflow = {"name": "x", "chainsTo": ["incidentRetroToActions"]}  # no mustPass -> immediate completion
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = self.mod._assert(run_dir, workflow, {}, {"slug": "x"})
+        out = json.loads(buf.getvalue())
+        self.assertEqual(rc, 0)
+        self.assertEqual(out["status"], "completed")
+        self.assertEqual(out["chainsTo"], ["incidentRetroToActions"])
 
 
 if __name__ == "__main__":

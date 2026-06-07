@@ -94,6 +94,12 @@ in one line unless the user said "just do it".
 
    This evaluates all `mustPass` checks. If any fail, the workflow is paused; report the failures and stop. The user can resume with `/polymath-flows:resume-workflow <run_id>` after addressing them.
 
+4. **Offer the next arc.** On `completed`, if the output JSON includes `chainsTo`,
+   propose the named next arc(s) in one line under the same detect → propose →
+   confirm contract (**never auto-start**), e.g. *"Incident closed. The natural
+   next arc is `incidentRetroToActions` (turn the postmortem into filed actions).
+   Run it? (yes / not now)"*.
+
 ## Reporting
 
 - One line per step: status + key artifact.

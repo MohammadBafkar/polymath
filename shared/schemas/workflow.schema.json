@@ -60,6 +60,12 @@
         }
       }
     },
+    "chainsTo": {
+      "description": "Workflow names to propose as the natural next arc when this workflow completes (Phase 4 arc chaining), e.g. respondToIncident -> incidentRetroToActions. The executor surfaces these in the completion output; the agent PROPOSES them and never auto-runs. Targets must be real workflows (enforced by build-workflow-index.py --strict).",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+      "uniqueItems": true
+    },
     "extends": {
       "description": "Parent workflow reference in the form '<plugin>:<workflow>@<version>'. v0.1 supports serial step replacement and named-anchor insertion only.",
       "type": "string",

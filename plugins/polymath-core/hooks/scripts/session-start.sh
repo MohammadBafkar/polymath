@@ -70,14 +70,65 @@ if [[ ! -d "$flows_workflows_dir" && -d "${data_root}/workflows" ]]; then
   flows_workflows_dir="${data_root}/workflows"
 fi
 
-paused=()
+# Surface resumable runs: paused (need attention) AND active (in-progress across
+# sessions). An active run was previously invisible here, so an interrupted run
+# (context death, /clear, closed tab) looked orphaned; we now surface it and flag
+# it stale when last_active is >= 2 days old.
+flows_section=""
 if [[ -d "$flows_workflows_dir" ]]; then
-  while IFS= read -r state; do
-    status="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('status','unknown'))" "$state" 2>/dev/null || echo unknown)"
-    if [[ "$status" == "paused" ]]; then
-      paused+=("$(basename "$(dirname "$state")")")
-    fi
-  done < <(find "$flows_workflows_dir" -maxdepth 2 -name state.json 2>/dev/null)
+  flows_section="$(python3 - "$flows_workflows_dir" <<'PY' 2>/dev/null || true
+import json, sys, pathlib, datetime
+base = pathlib.Path(sys.argv[1])
+now = datetime.datetime.now(datetime.timezone.utc)
+def parse(ts):
+    if not ts:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H-%M"):
+        try:
+            d = datetime.datetime.strptime(ts, fmt)
+            return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+        except ValueError:
+            continue
+    try:
+        d = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+    except Exception:
+        return None
+paused, active = [], []
+for sp in sorted(base.glob("*/state.json")):
+    try:
+        s = json.loads(sp.read_text())
+    except Exception:
+        continue
+    st = s.get("status")
+    rid = s.get("run_id", sp.parent.name)
+    if st == "paused":
+        paused.append((rid, s.get("pause_reason", "")))
+    elif st == "active":
+        la = parse(s.get("last_active") or s.get("started"))
+        inflight = s.get("in_flight") or {}
+        active.append((rid, (now - la).days if la else None, inflight.get("step")))
+out = []
+if paused:
+    out.append(f"Polymath: {len(paused)} paused workflow(s):")
+    for rid, reason in paused[:5]:
+        tail = f" — {reason}" if reason else ""
+        out.append(f"  - {rid}{tail}  (resume: /polymath-flows:resume-workflow {rid})")
+    if len(paused) > 5:
+        out.append(f"  …and {len(paused) - 5} more")
+if active:
+    if paused:
+        out.append("")
+    out.append(f"Polymath: {len(active)} in-progress workflow(s):")
+    for rid, age, step in active[:5]:
+        stale = f", stale ({age}d)" if (age is not None and age >= 2) else ""
+        mid = f", mid-step: {step}" if step else ""
+        out.append(f"  - {rid}{stale}{mid}  (continue: /polymath-flows:resume-workflow {rid})")
+    if len(active) > 5:
+        out.append(f"  …and {len(active) - 5} more")
+print("\n".join(out))
+PY
+)"
 fi
 
 # --- scheduled-work queue ---
@@ -129,12 +180,9 @@ if [[ -n "$init_nudge" ]]; then
   echo "$init_nudge"
   emitted=1
 fi
-if [[ ${#paused[@]} -gt 0 ]]; then
+if [[ -n "$flows_section" ]]; then
   [[ $emitted -eq 1 ]] && echo
-  echo "Polymath: ${#paused[@]} paused workflow(s):"
-  for w in "${paused[@]}"; do
-    echo "  - $w  (resume with /polymath-flows:resume-workflow $w)"
-  done
+  printf '%s\n' "$flows_section"
   emitted=1
 fi
 if [[ -n "$due_now" ]]; then

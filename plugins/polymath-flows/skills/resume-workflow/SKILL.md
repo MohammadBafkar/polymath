@@ -10,22 +10,26 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 ## When to use
 
 - The user types `/polymath-flows:resume-workflow [<run_id>]`.
-- The `polymath-core` SessionStart hook surfaced one or more paused workflows.
+- The `polymath-core` SessionStart hook surfaced a paused OR an in-progress
+  (active) run — including one interrupted in a prior session, possibly flagged stale.
 - A `mustPass` failure paused a previous run.
 
 ## Inputs
 
-- Optional `run_id`. If omitted, list paused runs and ask the user which to resume.
+- Optional `run_id`. If omitted, list paused and in-progress runs and ask which to resume.
 
 ## Procedure
 
-1. If no `run_id` was supplied, run:
+1. If no `run_id` was supplied, list both resumable buckets:
 
    ```bash
    ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow list --status paused
+   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow list --status active
    ```
 
-   Surface the table and ask the user to pick one. If none are paused, say so and stop.
+   Surface the combined table (`run_id` + status + `last_active`) and ask the user to
+   pick one. If both are empty, say so and stop. `resume` continues an active run
+   as-is and flips a paused run back to active.
 
 2. Resume the chosen run:
 

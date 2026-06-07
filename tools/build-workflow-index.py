@@ -78,6 +78,8 @@ def collect() -> tuple[list[dict], list[dict], list[dict], dict]:
     duplicates: list[str] = []
     no_routing: list[str] = []
     seen_triggers: dict[str, str] = {}
+    all_names: set[str] = set()
+    chain_decls: list[tuple[str, str]] = []
 
     for path in sorted(WORKFLOWS_DIR.glob("*.yaml")):
         wf = yaml.safe_load(path.read_text()) or {}
@@ -87,6 +89,9 @@ def collect() -> tuple[list[dict], list[dict], list[dict], dict]:
         signals = wf.get("detectionSignals") or {}
         if not name:
             continue
+        all_names.add(name)
+        for c in wf.get("chainsTo") or []:
+            chain_decls.append((name, c))
         if not when or not triggers:
             no_routing.append(name)
             continue
@@ -106,7 +111,16 @@ def collect() -> tuple[list[dict], list[dict], list[dict], dict]:
     full.sort(key=lambda r: r["n"])
     mini.sort(key=lambda r: r["n"])
     detect.sort(key=lambda r: r["n"])
-    return full, mini, detect, {"no_routing": sorted(no_routing), "duplicates": duplicates}
+    dangling = sorted(
+        f"chainsTo {t!r} in {w} is not a known workflow"
+        for (w, t) in chain_decls
+        if t not in all_names
+    )
+    return full, mini, detect, {
+        "no_routing": sorted(no_routing),
+        "duplicates": duplicates,
+        "dangling_chains": dangling,
+    }
 
 
 def serialize(full: list[dict], mini: list[dict], detect: list[dict]) -> dict[str, str]:
@@ -144,6 +158,7 @@ def main() -> int:
                 "missing whenToUse/triggers: " + ", ".join(problems["no_routing"])
             )
         strict_errs.extend(problems["duplicates"])
+        strict_errs.extend(problems["dangling_chains"])
         if strict_errs:
             for e in strict_errs:
                 print(f"build-workflow-index: WORKFLOW-2: {e}", file=sys.stderr)
@@ -154,6 +169,8 @@ def main() -> int:
             print(f"build-workflow-index: warning: {w} has no whenToUse/triggers (not indexed)", file=sys.stderr)
         for d in problems["duplicates"]:
             print(f"build-workflow-index: warning: duplicate {d}", file=sys.stderr)
+        for d in problems["dangling_chains"]:
+            print(f"build-workflow-index: warning: {d}", file=sys.stderr)
 
     # Token budget on the rendered injection (what the hook surfaces).
     rendered = render_injection(mini)

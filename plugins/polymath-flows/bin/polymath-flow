@@ -13,10 +13,9 @@ Does NOT own (those live in the skill / lead model context):
 
 State layout:
   ${CLAUDE_PLUGIN_DATA}/workflows/<run_id>/
-    ├── state.json
+    ├── state.json        (includes last_active for stale-run detection)
     ├── inputs.json
     ├── trace.jsonl
-    ├── budget.json
     ├── step-summaries/<step-id>.md
     └── artifacts/
 
@@ -40,6 +39,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -184,8 +184,9 @@ except ImportError:
                     if cur_indent < indent or not cur_line.startswith("- "):
                         break
                     body = cur_line[2:]
-                    if ":" in body and not body.startswith("{"):
-                        # inline mapping start: "- key: value"
+                    if ":" in body and not body.startswith("{") and body[:1] not in ("'", '"'):
+                        # inline mapping start: "- key: value" (but a fully-quoted
+                        # scalar like `- "input:incidentId"` is NOT a mapping)
                         # rewrite as a mapping at indent+2 and parse
                         # We carve out a virtual mapping block.
                         key, _, val = body.partition(":")
@@ -430,6 +431,28 @@ def _workflow_runs_dir() -> pathlib.Path:
     return _data_root() / "workflows"
 
 
+def _now_iso() -> str:
+    """UTC wall-clock as a comparable ISO-8601 string (used for last_active)."""
+    return datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _parse_iso(ts: str | None) -> datetime.datetime | None:
+    """Best-effort parse of last_active / started timestamps (tz-aware UTC)."""
+    if not ts:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H-%M"):
+        try:
+            d = datetime.datetime.strptime(ts, fmt)
+            return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+        except ValueError:
+            continue
+    try:
+        d = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+    except Exception:
+        return None
+
+
 def _resolve_workflow(name: str) -> pathlib.Path:
     """Three-layer resolution: project → user → marketplace."""
     project = pathlib.Path.cwd() / ".claude" / "polymath" / "workflows" / f"{name}.yaml"
@@ -464,6 +487,7 @@ ALLOWED_TOP_LEVEL = {
     "whenToUse",
     "triggers",
     "detectionSignals",
+    "chainsTo",
     "extends",
     "requires",
     "inputs",
@@ -596,6 +620,15 @@ def _validate(workflow: dict) -> list[str]:
                     not isinstance(val, list) or any(not isinstance(x, str) for x in val)
                 ):
                     errs.append(f"detectionSignals.{key} must be a list of strings")
+
+    chains = workflow.get("chainsTo")
+    if chains is not None:
+        if not isinstance(chains, list) or any(
+            not isinstance(c, str) or not re.match(r"^[a-z][a-zA-Z0-9]*$", c) for c in chains
+        ):
+            errs.append("chainsTo must be a list of camelCase workflow names")
+        elif len(set(chains)) != len(chains):
+            errs.append("chainsTo entries must be unique")
 
     steps = workflow.get("steps")
     if steps is None and "extends" not in workflow:
@@ -822,6 +855,7 @@ def cmd_start(args: argparse.Namespace) -> int:
         "workflow_path": str(workflow_path),
         "status": "active",
         "started": now,
+        "last_active": _now_iso(),
         "current_step_index": 0,
         "steps": [
             {"id": s["id"], "invoke": s["invoke"], "status": "pending"} for s in steps
@@ -830,13 +864,6 @@ def cmd_start(args: argparse.Namespace) -> int:
         "effective_plugins": effective_plugins,
     }
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-    (run_dir / "budget.json").write_text(json.dumps({
-        "run_id": run_id,
-        "soft_ceiling_tokens": 80000,
-        "hard_ceiling_tokens": 150000,
-        "estimated_consumed_tokens": 0,
-        "per_step": {},
-    }, indent=2))
 
     _trace(run_dir, "start", {"inputs": inputs, "workflow": workflow["name"]})
     print(json.dumps({"run_id": run_id, "status": "active"}, indent=2))
@@ -862,14 +889,25 @@ def cmd_next(args: argparse.Namespace) -> int:
         print(json.dumps({"status": state["status"]}, indent=2))
         return 0
 
+    # Record activity so an interrupted run can be detected as stale (vs. orphaned).
+    state["last_active"] = _now_iso()
+
     idx = state["current_step_index"]
     steps = workflow.get("steps", []) or []
     if idx >= len(steps):
-        # All steps complete; assert mustPass
+        # All steps complete; clear the in-flight marker and assert mustPass.
+        state["in_flight"] = None
+        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
         result = _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities)
         return 0 if result == 0 else 2
 
     step = steps[idx]
+    # Mark this step in-flight: if the session dies mid-step, the next
+    # SessionStart shows which step was open (resume re-issues it via `next`,
+    # which always points at current_step_index — only `complete` advances it).
+    state["in_flight"] = {"step": step["id"], "at": state["last_active"], "note": ""}
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+
     topology = step.get("topology", "series")
     payload = {
         "run_id": state["run_id"],
@@ -926,9 +964,36 @@ def cmd_complete(args: argparse.Namespace) -> int:
     if state["current_step_index"] >= len(state["steps"]):
         # Pre-finalize; mustPass is run by `assert` or by `next`.
         state["status"] = "active"  # remain active until assert passes
+    state["last_active"] = _now_iso()
+    state["in_flight"] = None  # step finished; clear the mid-step breadcrumb
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
     _trace(run_dir, "complete", {"step": step_id})
     print(json.dumps({"step": step_id, "status": "complete"}, indent=2))
+    return 0
+
+
+def cmd_checkpoint(args: argparse.Namespace) -> int:
+    """Record mid-step progress on the in-flight step (optional, agent-driven).
+
+    `next` already marks the issued step in-flight and `complete` clears it, so an
+    interrupted run is visible at the next SessionStart without this. `checkpoint`
+    lets a long step record a human-readable note ("ran migration, verifying") so the
+    breadcrumb is richer than the step id alone.
+    """
+    run_dir = _workflow_runs_dir() / args.run_id
+    if not run_dir.exists():
+        _err(f"unknown run: {args.run_id}", code=3)
+    state = json.loads((run_dir / "state.json").read_text())
+    inflight = state.get("in_flight") or {}
+    step = args.step or inflight.get("step")
+    if not step:
+        _err("no in-flight step to checkpoint (run `next` first, or pass --step)", code=2)
+    now = _now_iso()
+    state["in_flight"] = {"step": step, "at": now, "note": args.note or inflight.get("note", "")}
+    state["last_active"] = now
+    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _trace(run_dir, "checkpoint", {"step": step, "note": args.note or ""})
+    print(json.dumps({"run_id": args.run_id, "in_flight": state["in_flight"]}, indent=2))
     return 0
 
 
@@ -943,6 +1008,12 @@ def cmd_fail(args: argparse.Namespace) -> int:
         if s["id"] == args.step:
             s["status"] = "failed"
             break
+    # Match start/next/complete state hygiene: stamp activity so staleness/gc are
+    # accurate for a paused run, and clear the in-flight marker (the failed step's
+    # status is the breadcrumb now — an "in_flight" step that is actually failed is
+    # contradictory).
+    state["last_active"] = _now_iso()
+    state["in_flight"] = None
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
     _trace(run_dir, "fail", {"step": args.step, "reason": state["pause_reason"]})
     print(json.dumps({"status": "paused", "step": args.step}, indent=2))
@@ -956,6 +1027,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
     state = json.loads((run_dir / "state.json").read_text())
     if state["status"] == "paused":
         state["status"] = "active"
+        state["last_active"] = _now_iso()
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
         _trace(run_dir, "resume", {})
     return cmd_next(argparse.Namespace(run_id=args.run_id))
@@ -990,8 +1062,48 @@ def cmd_list(args: argparse.Namespace) -> int:
         s = json.loads(sp.read_text())
         if args.status and s["status"] != args.status:
             continue
-        results.append({"run_id": s["run_id"], "workflow": s["workflow"], "status": s["status"]})
+        results.append({"run_id": s["run_id"], "workflow": s["workflow"], "status": s["status"], "last_active": s.get("last_active")})
     print(json.dumps(results, indent=2))
+    return 0
+
+
+def cmd_gc(args: argparse.Namespace) -> int:
+    """Prune terminal run directories older than --days (default: completed runs).
+
+    Resumable runs (active / paused) are never pruned unless explicitly named via
+    --status, so a long-running or interrupted workflow is never collected out from
+    under the user. Keeps the run store from growing without bound.
+    """
+    base = _workflow_runs_dir()
+    if not base.exists():
+        print(json.dumps({"removed": [], "count": 0, "older_than_days": args.days}, indent=2))
+        return 0
+    statuses = set(args.status) if args.status else {"completed"}
+    cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=args.days)
+    removed: list[str] = []
+    for d in sorted(base.iterdir()):
+        sp = d / "state.json"
+        if not sp.exists():
+            continue
+        try:
+            s = json.loads(sp.read_text())
+        except Exception:
+            continue
+        if s.get("status") not in statuses:
+            continue
+        ts = _parse_iso(s.get("last_active") or s.get("started"))
+        if ts is None or ts > cutoff:
+            continue  # keep: missing/unparseable timestamp, or too recent to prune
+        removed.append(s.get("run_id", d.name))
+        if not args.dry_run:
+            shutil.rmtree(d, ignore_errors=True)
+    print(json.dumps({
+        "removed": removed,
+        "count": len(removed),
+        "older_than_days": args.days,
+        "statuses": sorted(statuses),
+        "dry_run": bool(args.dry_run),
+    }, indent=2))
     return 0
 
 
@@ -1012,7 +1124,10 @@ def _assert(
         state = json.loads((run_dir / "state.json").read_text())
         state["status"] = "completed"
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-        print(json.dumps({"status": "completed", "checks": 0}, indent=2))
+        out = {"status": "completed", "checks": 0}
+        if workflow.get("chainsTo"):
+            out["chainsTo"] = workflow["chainsTo"]  # arc hand-off; agent proposes, never auto-runs
+        print(json.dumps(out, indent=2))
         return 0
 
     blocking_failures: list[dict] = []
@@ -1059,16 +1174,14 @@ def _assert(
     state["status"] = "completed"
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
     _trace(run_dir, "complete", {"checks": len(checks), "advisories": advisory_failures})
-    print(
-        json.dumps(
-            {
-                "status": "completed",
-                "checks": len(checks),
-                "advisories": advisory_failures,
-            },
-            indent=2,
-        )
-    )
+    out = {
+        "status": "completed",
+        "checks": len(checks),
+        "advisories": advisory_failures,
+    }
+    if workflow.get("chainsTo"):
+        out["chainsTo"] = workflow["chainsTo"]  # arc hand-off; agent proposes, never auto-runs
+    print(json.dumps(out, indent=2))
     return 0
 
 
@@ -1512,6 +1625,18 @@ def build_parser() -> argparse.ArgumentParser:
     pl = sub.add_parser("list")
     pl.add_argument("--status", choices=["active", "paused", "completed"])
     pl.set_defaults(func=cmd_list)
+
+    pgc = sub.add_parser("gc", help="prune terminal runs older than --days")
+    pgc.add_argument("--days", type=int, default=30, help="age threshold in days (default 30)")
+    pgc.add_argument("--status", action="append", help="status(es) to prune; repeatable (default: completed)")
+    pgc.add_argument("--dry-run", action="store_true", help="list what would be removed without deleting")
+    pgc.set_defaults(func=cmd_gc)
+
+    pck = sub.add_parser("checkpoint", help="record mid-step progress on the in-flight step")
+    pck.add_argument("run_id")
+    pck.add_argument("--step", help="step id (defaults to the current in-flight step)")
+    pck.add_argument("--note", help="human-readable progress note")
+    pck.set_defaults(func=cmd_checkpoint)
 
     return p
 

@@ -1,5 +1,7 @@
 schemaVersion: 0.1
 name: reviewPlan
+chainsTo:
+  - deliberationLoop
 version: 0.1.0
 description: Critique an existing plan/design doc with parallel critics (red-team, pre-mortem, tradeoffs) and synthesize a findings report — no revised plan, no governance.
 whenToUse: "Critique an existing plan; findings only, no rewrite."
