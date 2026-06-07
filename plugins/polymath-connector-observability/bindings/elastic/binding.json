@@ -1,0 +1,14 @@
+{
+  "provider": "elastic",
+  "capability": "observability",
+  "transport": {
+    "kind": "mcp",
+    "server": "elastic"
+  },
+  "userConfigKeys": [
+    "elasticEndpoint",
+    "elasticApiKey"
+  ],
+  "title": "elastic",
+  "description": "elastic as observability provider, supplied by polymath-connector-observability."
+}

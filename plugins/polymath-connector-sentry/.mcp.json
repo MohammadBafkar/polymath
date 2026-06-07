@@ -5,8 +5,8 @@
       "command": "npx",
       "args": ["-y", "@sentry/mcp-server"],
       "env": {
-        "SENTRY_AUTH_TOKEN": "${POLYMATH_CONNECTOR_SENTRY_SENTRYTOKEN}",
-        "SENTRY_ORG": "${POLYMATH_CONNECTOR_SENTRY_SENTRYORG}"
+        "SENTRY_AUTH_TOKEN": "${POLYMATH_CONNECTOR_SENTRY_SENTRYTOKEN:-}",
+        "SENTRY_ORG": "${POLYMATH_CONNECTOR_SENTRY_SENTRYORG:-}"
       }
     }
   }

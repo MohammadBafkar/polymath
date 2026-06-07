@@ -20,9 +20,11 @@ actually use.
     burn-rate windows, and notification routing.
 - **References:** `datadog-tools.md`, `grafana-tools.md`,
   `honeycomb-tools.md`, `elastic-tools.md` — provider MCP tool catalogs.
-- **MCP servers:** all four are declared in `.mcp.json`. Configure
-  only the providers your project uses; leave the others' credentials
-  blank. The plugin doesn't insist that all four are present.
+- **MCP servers:** all four are declared in `.mcp.json`. Configure only the
+  providers your project uses; the others' credentials default to empty
+  (`${VAR:-}`) so an unconfigured provider can't break MCP config parsing — its
+  server starts idle and fails its own auth rather than blocking the session. To
+  avoid the idle servers entirely, disable the unused ones via the `/mcp` UI.
 
 Datadog (`query-during-incident`, `author-monitor`) was folded in from the
 former `polymath-connector-datadog`, so the `observability` capability resolves

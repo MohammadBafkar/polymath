@@ -1,0 +1,13 @@
+{
+  "provider": "linear",
+  "capability": "issue_tracker",
+  "transport": {
+    "kind": "mcp",
+    "server": "linear"
+  },
+  "userConfigKeys": [
+    "linearApiKey"
+  ],
+  "title": "linear",
+  "description": "linear as issue_tracker provider, supplied by polymath-connector-tracker."
+}

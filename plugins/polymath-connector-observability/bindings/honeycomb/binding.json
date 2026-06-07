@@ -1,0 +1,14 @@
+{
+  "provider": "honeycomb",
+  "capability": "observability",
+  "transport": {
+    "kind": "mcp",
+    "server": "honeycomb"
+  },
+  "userConfigKeys": [
+    "honeycombApiKey",
+    "honeycombDataset"
+  ],
+  "title": "honeycomb",
+  "description": "honeycomb as observability provider, supplied by polymath-connector-observability."
+}

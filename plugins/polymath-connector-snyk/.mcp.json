@@ -5,8 +5,8 @@
       "command": "npx",
       "args": ["-y", "@snyk/mcp-server"],
       "env": {
-        "SNYK_TOKEN": "${POLYMATH_CONNECTOR_SNYK_SNYKTOKEN}",
-        "SNYK_ORG": "${POLYMATH_CONNECTOR_SNYK_SNYKORG}"
+        "SNYK_TOKEN": "${POLYMATH_CONNECTOR_SNYK_SNYKTOKEN:-}",
+        "SNYK_ORG": "${POLYMATH_CONNECTOR_SNYK_SNYKORG:-}"
       }
     }
   }

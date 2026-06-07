@@ -5,8 +5,8 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-slack"],
       "env": {
-        "SLACK_BOT_TOKEN": "${POLYMATH_CONNECTOR_SLACK_SLACKBOTTOKEN}",
-        "SLACK_TEAM_ID": ""
+        "SLACK_BOT_TOKEN": "${POLYMATH_CONNECTOR_SLACK_SLACKBOTTOKEN:-}",
+        "SLACK_TEAM_ID": "${POLYMATH_CONNECTOR_SLACK_SLACKTEAMID:-}"
       }
     }
   }

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/shared/schemas/binding.schema.json",
+  "title": "Polymath capability provider binding",
+  "description": "Validates a `bindings/<provider>/binding.json` inside a connector or infra plugin. A binding is the AUTHORING unit for 'this plugin supplies <provider> for <capability>'. tools/build-capability-index.py reads every binding and GENERATES the `providerPlugins{}` map in shared/schemas/capabilities.json, so that map can never be aspirational — a provider is wired iff a binding exists. The providing plugin is derived from the file path (plugins/<plugin>/bindings/<provider>/binding.json), so a binding cannot claim the wrong plugin. Runtime packaging (how/whether the MCP server launches) is intentionally NOT decided here — see docs/plans/consolidation-and-dispatch.md Phase 2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provider", "capability", "transport"],
+  "properties": {
+    "provider": {
+      "description": "Provider id, lower_snake_case. Must appear in this capability's `providers[]` vocabulary in capabilities.json (add it there first to recognise a new provider).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "capability": {
+      "description": "The capability this binding supplies. Closed vocabulary, mirrors capabilities.schema.json.",
+      "enum": [
+        "issue_tracker",
+        "observability",
+        "incident_comms",
+        "pager",
+        "ci",
+        "cloud",
+        "runtime",
+        "vcs",
+        "vulnerability_scanner"
+      ]
+    },
+    "transport": {
+      "description": "How the provider is reached. 'mcp' = an MCP server (named by `server`, defined in the plugin's .mcp.json today; how it is packaged so only the configured one launches is the deferred Phase 2 decision). 'cli' = a local vendor CLI. 'skill' = no server/CLI; the plugin contributes design/workflow skills only (e.g. infra design plugins).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["mcp", "cli", "skill"] },
+        "server": {
+          "description": "For kind=mcp: the mcpServers key in the plugin's .mcp.json that serves this provider. Multiple providers may share one server (e.g. github_issues/github_actions/dependabot all ride the github server).",
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "description": "For kind=cli: the vendor CLI binary (e.g. terraform, kubectl).",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "userConfigKeys": {
+      "description": "plugin.json userConfig keys this provider needs (credentials / endpoints). Used to validate that a binding's provider is actually configurable, and by future packaging to scope secrets per provider.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "references": {
+      "description": "references/*.md tool docs for this provider.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 300 }
+  }
+}

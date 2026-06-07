@@ -9,8 +9,10 @@ shape of `polymath-connector-observability`.
 ## What it ships
 
 - MCP servers: Atlassian (`@modelcontextprotocol/server-atlassian`) and Linear
-  (`@linear/mcp-server`) via `npx`. Each activates from its own credentials; an
-  unconfigured server is simply unused.
+  (`@linear/mcp-server`) via `npx`. Each activates from its own credentials,
+  which default to empty (`${VAR:-}`) so an unconfigured server can't break MCP
+  config parsing — it starts idle and fails its own auth. Disable an unused one
+  via the `/mcp` UI.
 - Skills:
   - `jira-triage` — triage an inbound Jira issue.
   - `linear-triage` — triage an inbound Linear issue.

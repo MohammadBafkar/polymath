@@ -5,9 +5,9 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-atlassian"],
       "env": {
-        "ATLASSIAN_URL": "${POLYMATH_CONNECTOR_TRACKER_JIRAURL}",
-        "ATLASSIAN_EMAIL": "${POLYMATH_CONNECTOR_TRACKER_JIRAEMAIL}",
-        "ATLASSIAN_API_TOKEN": "${POLYMATH_CONNECTOR_TRACKER_JIRAAPITOKEN}"
+        "ATLASSIAN_URL": "${POLYMATH_CONNECTOR_TRACKER_JIRAURL:-}",
+        "ATLASSIAN_EMAIL": "${POLYMATH_CONNECTOR_TRACKER_JIRAEMAIL:-}",
+        "ATLASSIAN_API_TOKEN": "${POLYMATH_CONNECTOR_TRACKER_JIRAAPITOKEN:-}"
       }
     },
     "linear": {
@@ -15,7 +15,7 @@
       "command": "npx",
       "args": ["-y", "@linear/mcp-server"],
       "env": {
-        "LINEAR_API_KEY": "${POLYMATH_CONNECTOR_TRACKER_LINEARAPIKEY}"
+        "LINEAR_API_KEY": "${POLYMATH_CONNECTOR_TRACKER_LINEARAPIKEY:-}"
       }
     }
   }

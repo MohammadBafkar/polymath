@@ -1,0 +1,14 @@
+{
+  "provider": "sentry",
+  "capability": "observability",
+  "transport": {
+    "kind": "mcp",
+    "server": "sentry"
+  },
+  "userConfigKeys": [
+    "sentryToken",
+    "sentryOrg"
+  ],
+  "title": "sentry",
+  "description": "sentry as observability provider, supplied by polymath-connector-sentry."
+}

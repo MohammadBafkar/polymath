@@ -1,0 +1,14 @@
+{
+  "provider": "grafana",
+  "capability": "observability",
+  "transport": {
+    "kind": "mcp",
+    "server": "grafana"
+  },
+  "userConfigKeys": [
+    "grafanaUrl",
+    "grafanaApiKey"
+  ],
+  "title": "grafana",
+  "description": "grafana as observability provider, supplied by polymath-connector-observability."
+}

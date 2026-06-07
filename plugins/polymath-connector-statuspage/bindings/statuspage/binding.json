@@ -1,0 +1,14 @@
+{
+  "provider": "statuspage",
+  "capability": "incident_comms",
+  "transport": {
+    "kind": "mcp",
+    "server": "statuspage"
+  },
+  "userConfigKeys": [
+    "statuspageApiKey",
+    "statuspagePageId"
+  ],
+  "title": "statuspage",
+  "description": "statuspage as incident_comms provider, supplied by polymath-connector-statuspage."
+}

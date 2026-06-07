@@ -1,0 +1,13 @@
+{
+  "provider": "github",
+  "capability": "vcs",
+  "transport": {
+    "kind": "mcp",
+    "server": "github"
+  },
+  "userConfigKeys": [
+    "githubToken"
+  ],
+  "title": "github",
+  "description": "github as vcs provider, supplied by polymath-connector-github."
+}

@@ -24,6 +24,12 @@
       "sensitive": true,
       "required": true
     },
+    "slackTeamId": {
+      "type": "string",
+      "title": "Slack workspace (team) ID",
+      "description": "Workspace ID (starts with T…) that @modelcontextprotocol/server-slack requires to scope API calls.",
+      "required": true
+    },
     "defaultIncidentChannel": {
       "type": "string",
       "title": "Default incident channel",

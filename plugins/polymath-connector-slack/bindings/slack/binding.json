@@ -1,0 +1,14 @@
+{
+  "provider": "slack",
+  "capability": "incident_comms",
+  "transport": {
+    "kind": "mcp",
+    "server": "slack"
+  },
+  "userConfigKeys": [
+    "slackBotToken",
+    "slackTeamId"
+  ],
+  "title": "slack",
+  "description": "slack as incident_comms provider, supplied by polymath-connector-slack."
+}

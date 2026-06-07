@@ -1,0 +1,9 @@
+{
+  "provider": "aws",
+  "capability": "cloud",
+  "transport": {
+    "kind": "skill"
+  },
+  "title": "aws",
+  "description": "aws as cloud provider, supplied by polymath-infra-cloud."
+}
