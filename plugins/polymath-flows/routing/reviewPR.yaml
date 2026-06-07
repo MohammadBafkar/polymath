@@ -1,0 +1,19 @@
+# Routing declaration for polymath-flows:run-workflow reviewPR (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+url:
+- https?://(www\.)?github\.com/[^/\s]+/[^/\s]+/pull/\d+
+- https?://[^/\s]+/(?:[^/\s]+/){2,}-/merge_requests/\d+
+- dev\.azure\.com/[^\s]+/pullrequest/\d+
+diff: true
+intents:
+- review this pr
+- review the pr
+- review my pr
+- review this diff
+- review the diff
+- review this change
+- review the change
+- code review
+- pr review
+alt: polymath-engineering:code-review

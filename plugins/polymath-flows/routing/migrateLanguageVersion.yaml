@@ -1,0 +1,18 @@
+# Routing declaration for polymath-flows:run-workflow migrateLanguageVersion (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- .csproj
+- global.json
+- go.mod
+- pyproject.toml
+- .python-version
+- tsconfig.json
+intents:
+- migrate to .net
+- upgrade the runtime
+- migrate the runtime
+- upgrade to python 3
+- migrate to go 1
+- bump the language version
+- upgrade node to

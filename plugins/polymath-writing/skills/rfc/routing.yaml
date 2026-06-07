@@ -1,0 +1,10 @@
+# Routing declaration for polymath-writing:rfc (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/rfcs/
+intents:
+- draft an rfc
+- write an rfc
+- request for comments
+alt: polymath-writing:adr

@@ -1,0 +1,10 @@
+# Routing declaration for polymath-flows:run-workflow rootCauseAnalysis (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/rca/
+intents:
+- root cause analysis
+- write an rca
+- drive to root cause
+alt: polymath-thinking:5-whys

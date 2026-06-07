@@ -1,0 +1,9 @@
+# Routing declaration for polymath-data:sql-optimize (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- EXPLAIN ANALYZE
+intents:
+- optimize this query
+- slow query
+- explain analyze output

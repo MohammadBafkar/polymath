@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/shared/schemas/tool.schema.json",
+  "title": "Polymath tool surface",
+  "description": "Validates a `tools/<name>/tool.json` manifest. A tool is a first-class sub-plugin unit — added like a skill (drop a folder), discoverable and dispatchable through the SAME surface registry. It is a thin, declarative pointer to an external capability action (an MCP tool, CLI, or HTTP call) rather than a full procedure. Add a `routing.yaml` next to tool.json (validated by surface-routing.schema.json) to make the tool deterministically routable; tools/build-surface-index.py compiles it into route-signals.json as a `kind: tool` surface. This replaces the per-connector bash 'detect-and-hint' scripts: the detection signals move into routing.yaml, and the tool/MCP detail lives here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "summary"],
+  "properties": {
+    "name": {
+      "description": "Tool id, lower-kebab/snake. Must match the containing directory name.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "summary": {
+      "description": "One line: what the tool does and when to reach for it.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "capability": {
+      "description": "Capability this tool serves (links to the binding model). Optional.",
+      "enum": [
+        "issue_tracker",
+        "observability",
+        "incident_comms",
+        "pager",
+        "ci",
+        "cloud",
+        "runtime",
+        "vcs",
+        "vulnerability_scanner"
+      ]
+    },
+    "provider": {
+      "description": "Provider id this tool belongs to (matches a bindings/<provider>/). Optional.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "transport": {
+      "description": "How the tool is invoked. Mirrors binding.schema.json transport.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["mcp", "cli", "http"] },
+        "server": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 }
+      }
+    },
+    "mcpTools": {
+      "description": "Concrete MCP tool names this surface points the agent at (e.g. jira_get_issue). The deterministic value the old detect-*.sh hooks used to echo.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "references": {
+      "description": "references/*.md docs with the full tool catalog for this provider.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# Routing declaration for polymath-devops:dockerize (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- Dockerfile
+intents:
+- write a dockerfile
+- dockerize the service
+- containerize the app

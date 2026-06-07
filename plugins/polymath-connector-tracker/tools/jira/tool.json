@@ -1,0 +1,18 @@
+{
+  "name": "jira",
+  "summary": "Fetch/update Jira issues referenced in the prompt before responding.",
+  "capability": "issue_tracker",
+  "provider": "jira",
+  "transport": {
+    "kind": "mcp",
+    "server": "jira"
+  },
+  "mcpTools": [
+    "jira_get_issue",
+    "jira_search",
+    "jira_get_transitions"
+  ],
+  "references": [
+    "jira-tools.md"
+  ]
+}

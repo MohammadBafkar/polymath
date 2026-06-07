@@ -1,0 +1,13 @@
+# Routing declaration for polymath-flows:run-workflow shipFeature (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/prds/
+intents:
+- ship this feature
+- ship the feature
+- implement the prd
+- build out the feature
+- ship from the prd
+- ship from prd
+alt: polymath-flows:run-workflow prdToShip

@@ -1,0 +1,11 @@
+# Routing declaration for polymath-devops:audit-compose (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docker-compose
+- compose.yaml
+- compose.yml
+intents:
+- audit the compose file
+- review docker-compose
+- compose file review

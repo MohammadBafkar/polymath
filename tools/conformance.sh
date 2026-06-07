@@ -318,6 +318,37 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # SURFACE-INDEX: the deterministic route table (plugins/polymath-core/data/
+  # route-signals.json) and the surface catalog (surface-index.json) must match
+  # a fresh build from the per-surface routing.yaml sidecars (skills + workflows
+  # + tools). tools/build-surface-index.py is the SINGLE PRODUCER; route-signals
+  # is no longer hand-maintained. --strict additionally enforces SURFACE-2:
+  # every intent / url / regex pattern is globally unique (the disambiguation
+  # floor extended from workflows to all surfaces). See
+  # docs/plans/consolidation-and-dispatch.md.
+  echo
+  echo "── SURFACE-INDEX cross-check (build-surface-index.py --check --strict)"
+  if python3 "$root/tools/build-surface-index.py" --check --strict; then
+    :
+  else
+    overall=1
+  fi
+
+  # CAPABILITY-INDEX: shared/schemas/capabilities.json providerPlugins{} must match
+  # a fresh build from the per-provider bindings (plugins/<plugin>/bindings/<provider>/
+  # binding.json). tools/build-capability-index.py is the SINGLE PRODUCER, so the map
+  # can no longer be aspirational — a provider is wired iff a binding exists. --strict
+  # (BINDING-1) requires every binding's provider to appear in its capability's
+  # providers[] vocabulary and forbids two plugins claiming the same (capability,
+  # provider). See docs/plans/consolidation-and-dispatch.md Phase 2.
+  echo
+  echo "── CAPABILITY-INDEX cross-check (build-capability-index.py --check --strict)"
+  if python3 "$root/tools/build-capability-index.py" --check --strict; then
+    :
+  else
+    overall=1
+  fi
+
   # WORKFLOW-TRIGGER: workflow-triggering test frontmatter is well-formed and in
   # sync with the workflow YAML (every declared trigger appears in its test, and
   # must_propose names resolve). Cheap structural check, no LLM; the live `run`

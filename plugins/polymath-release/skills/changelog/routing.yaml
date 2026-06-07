@@ -1,0 +1,9 @@
+# Routing declaration for polymath-release:changelog (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+diff: true
+intents:
+- changelog entry
+- update the changelog
+- add to the changelog
+- add a changelog line

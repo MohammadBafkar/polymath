@@ -1,0 +1,10 @@
+# Routing declaration for polymath-infra-kubernetes:write-manifest (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- kustomization
+- k8s/
+intents:
+- write a kubernetes manifest
+- k8s deployment manifest
+- kubernetes deployment yaml

@@ -1,0 +1,9 @@
+# Routing declaration for polymath-planning:write-plan (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/plans/
+intents:
+- write a plan
+- draft a plan
+- write the implementation plan

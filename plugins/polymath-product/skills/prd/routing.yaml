@@ -1,0 +1,10 @@
+# Routing declaration for polymath-product:prd (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/prds/
+intents:
+- write a prd
+- draft a prd
+- product requirements doc
+- product requirements document

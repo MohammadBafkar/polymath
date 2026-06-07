@@ -1,0 +1,9 @@
+# Routing declaration for polymath-writing:runbook (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/runbooks/
+intents:
+- write a runbook
+- draft a runbook
+- operational runbook

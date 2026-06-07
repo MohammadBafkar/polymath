@@ -1,0 +1,10 @@
+# Routing declaration for polymath-decisions:daci (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/decisions/
+intents:
+- daci decision
+- run a daci
+- driver approver contributors informed
+alt: polymath-decisions:tradeoff-matrix

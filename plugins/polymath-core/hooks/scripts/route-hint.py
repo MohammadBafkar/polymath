@@ -157,6 +157,11 @@ def main() -> int:
     alt = top[0][1].get("alt")
     if alt and all(alt != r["surface"] for _, r, _ in top):
         print(f"    alternative: {alt}")
+    # Trust (Phase 4): the default is propose-and-confirm; surfaces may opt into
+    # running without confirmation in a non-interactive (headless/CI/-p) session.
+    top_trust = top[0][1].get("trust")
+    if top_trust == "auto-headless":
+        print("    trust: auto-headless — you may run this without asking in a non-interactive session.")
     print("Detect-only; nothing was run. Confirm with /polymath-core:route, or proceed.")
     print("Silence: POLYMATH_ROUTE_MUTE=1 or touch .polymath/route-muted")
     return 0

@@ -1,0 +1,19 @@
+{
+  "name": "linear",
+  "summary": "Fetch/update Linear issues referenced in the prompt before responding.",
+  "capability": "issue_tracker",
+  "provider": "linear",
+  "transport": {
+    "kind": "mcp",
+    "server": "linear"
+  },
+  "mcpTools": [
+    "issue_get",
+    "issue_list",
+    "issue_update",
+    "comment_create"
+  ],
+  "references": [
+    "linear-tools.md"
+  ]
+}

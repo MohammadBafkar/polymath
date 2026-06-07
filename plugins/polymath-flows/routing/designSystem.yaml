@@ -1,0 +1,14 @@
+# Routing declaration for polymath-flows:run-workflow designSystem (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/architecture/
+- docs/rfcs/
+- docs/design/
+intents:
+- design the system
+- design a system
+- system design for
+- architecture for
+- design the architecture
+alt: polymath-writing:architecture-doc

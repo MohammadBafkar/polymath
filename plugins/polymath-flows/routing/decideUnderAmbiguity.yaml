@@ -1,0 +1,14 @@
+# Routing declaration for polymath-flows:run-workflow decideUnderAmbiguity (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/adrs/
+- docs/decisions/
+intents:
+- help me decide between
+- decide between
+- which should we choose
+- hard decision
+- weigh the tradeoffs
+- make the call on
+alt: polymath-decisions:tradeoff-matrix

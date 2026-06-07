@@ -1,0 +1,19 @@
+# Routing declaration for polymath-flows:run-workflow bumpDependency (workflow). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- package.json
+- package-lock.json
+- pyproject.toml
+- requirements.txt
+- go.mod
+- Cargo.toml
+- Gemfile
+- Directory.Packages.props
+intents:
+- upgrade the dependency
+- bump the dependency
+- update the dependency
+- upgrade the package
+- bump the version of
+- upgrade to the latest

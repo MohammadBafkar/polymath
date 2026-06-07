@@ -1,0 +1,11 @@
+# Routing declaration for polymath-writing:adr (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/adrs/
+intents:
+- write an adr
+- record the decision
+- architecture decision record
+- log this decision
+alt: polymath-writing:rfc

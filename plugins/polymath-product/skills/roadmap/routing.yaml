@@ -1,0 +1,10 @@
+# Routing declaration for polymath-product:roadmap (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: shared/schemas/surface-routing.schema.json
+paths:
+- docs/roadmaps/
+- docs/roadmap
+intents:
+- build a roadmap
+- draft the roadmap
+- product roadmap
