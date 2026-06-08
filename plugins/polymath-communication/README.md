@@ -7,7 +7,8 @@ customer-facing prose.
 
 - Skills: `exec-brief`, `six-pager`, `meeting-notes`, `write-release-notes`,
   `write-advisory`, `write-sunset-notice`.
-- Templates: `Exec-brief.md`, `Six-pager.md`.
+- Templates: `Exec-brief.md`, `Six-pager.md`, `Advisory.md`,
+  `Sunset-notice.md`.
 
 `write-release-notes`, `write-advisory`, and `write-sunset-notice` were folded
 in from the former `polymath-content` plugin: customer-facing prose is the same

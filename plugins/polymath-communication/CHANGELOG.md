@@ -7,6 +7,8 @@
 - `write-release-notes`, `write-advisory`, and `write-sunset-notice` skills
   folded in from the former `polymath-content` plugin — customer-facing prose
   is the same audience-first craft as the internal briefs.
+- Added the missing `Advisory.md` and `Sunset-notice.md` templates referenced
+  by the folded-in skills so the workflow link-check passes.
 
 ## [0.1.0]
 
