@@ -84,7 +84,7 @@ to set on a new plugin or what to bump it to. The short table:
 | --- | --- |
 | `experimental` | Scaffolded; default for new plugins. |
 | `beta` | Structurally proven on disk (skill bakeoff + triggering tests, OR foundation-runner with ≥ 20 unit-test assertions + an end-to-end job). |
-| `stable` | Live bakeoff ≥ 8 / delta ≥ 2 + at least one external adopter. No plugin in the catalog is `stable` today. |
+| `stable` | Live bakeoff ≥ 8 / delta ≥ 2 + at least one external adopter. |
 | `deprecated` | Replacement and removal date named in `README.md`. |
 
 `tools/conformance.sh MANIFEST-3` rejects a plugin whose
@@ -294,7 +294,7 @@ path; workflows validate the frontmatter via `mustPass: artifactValid`
 or `artifactSchemaStrict` against the matching JSON schema in
 `registry/schemas/artifacts/`.
 
-Canonical artifact schemas the catalog enforces today:
+Canonical artifact schemas the catalog enforces:
 
 - `PRD`, `ADR`, `Plan`, `RFC`, `Runbook`, `ArchitectureDoc`,
   `DACIDecision`, `TradeoffMatrix`, `Postmortem`, `ThreatModel`,

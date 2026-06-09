@@ -6,5 +6,5 @@ must_not_appear:
   - "polymath-tracker:jira"
 ---
 A linear.app issue URL routes to the linear tool. jira must NOT appear: jira's
-hard signal is the Atlassian browse URL only (its over-broad bare-key regex was
-removed), so a Linear key inside a linear.app URL no longer misroutes to Jira.
+hard signal is the Atlassian browse URL only — a bare issue key is not a jira
+signal — so a Linear key inside a linear.app URL must not route to Jira.

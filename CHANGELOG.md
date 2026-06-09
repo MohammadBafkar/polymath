@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Stateless docs.** Documentation describes current behaviour only —
+  change narration, "as of" dates, and point-in-time snapshots are removed;
+  git history and this changelog are the records of evolution. Deleted
+  `docs/STABILITY-ROADMAP.md` (hand-reconciled ledger snapshot + iteration
+  plan) and `docs/QUALITY-DASHBOARD.md`: the evidence ladder and
+  ledger-update procedure now live in `docs/MATURITY.md`, measurement and
+  artifact locations in `docs/QUALITY-SCORECARD.md`. Promotion bars are
+  stated once, in MATURITY — the scorecard's paraphrase had drifted from
+  the canonical text — and the scorecard's gate list now matches what CI
+  actually runs (per-PR gates vs `main`-push and opt-in live runs).
+
 - **Concept/capability-centric plugins (breaking — published names change).**
   Integration plugins are now named by the capability they serve, with vendors
   as interchangeable providers underneath:

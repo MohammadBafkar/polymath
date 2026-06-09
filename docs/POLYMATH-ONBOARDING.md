@@ -157,7 +157,7 @@ captured as open questions, not guessed.
 ## Agent compatibility
 
 Skills are portable through the agentskills.io format. Commands, hooks,
-workflows, and MCP connector config are Claude Code surfaces today.
+workflows, and MCP connector config are Claude Code surfaces.
 
 | Surface | Portable to other agents | Notes |
 | --- | --- | --- |

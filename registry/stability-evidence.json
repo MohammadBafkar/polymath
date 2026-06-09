@@ -1,5 +1,5 @@
 {
-  "description": "Polymath stability evidence ledger. One entry per plugin in registry/polymath-catalog.json. Records the live-run, adopter, and connector/infra distinct-value evidence that backs promotion. Updated whenever a plugin gains live proof, an external adopter, or a promotion PR. The catalog's status field is the user-facing claim; this ledger is the receipt. Enforced by tools/check-stability-evidence.py (rule STABILITY-1). Human-readable view: docs/STABILITY-ROADMAP.md.",
+  "description": "Polymath stability evidence ledger. One entry per plugin in registry/polymath-catalog.json. Records the live-run, adopter, and connector/infra distinct-value evidence that backs promotion. Updated whenever a plugin gains live proof, an external adopter, or a promotion PR. The catalog's status field is the user-facing claim; this ledger is the receipt. Enforced by tools/check-stability-evidence.py (rule STABILITY-1). Documented in docs/MATURITY.md.",
   "entries": {
     "polymath-ai": {
       "target_status": "stable",

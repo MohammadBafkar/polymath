@@ -5,9 +5,9 @@ Scaffolder template:
 [`plugins/polymath-author/templates/Workflow.yaml`](../plugins/polymath-author/templates/Workflow.yaml)
 (used by `polymath-author:new-workflow`).
 
-flows-lite is serial today. Parallel steps, agent panels, connector
+flows-lite is serial. Parallel steps, agent panels, connector
 events, and `wait-for-event` are reserved for future schema versions
-and not yet supported by the runner.
+and unsupported by the runner.
 
 ## 1. Anatomy
 

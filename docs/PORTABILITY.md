@@ -60,7 +60,7 @@ will pick up the skills.
 
 ## Target harnesses
 
-Confirmed clients of the agentskills.io v1.0 standard as of May 2026
+Confirmed clients of the agentskills.io v1.0 standard
 (per [agentskills.io](https://agentskills.io)). Each lists its own
 discovery paths in its docs; the column below names the path that
 back-compat-reads SKILL.md unchanged.
@@ -129,17 +129,17 @@ own SKILL.md discovery logs — frontmatter parsing differs by vendor.
   form.
 - **No vendor-specific frontmatter extensions.** Some harnesses (e.g.
   VS Code) document optional fields (`argument-hint`,
-  `user-invocable`, `context: fork`). Polymath does not emit these
-  today. If a target harness requires them, add a vendor-specific
+  `user-invocable`, `context: fork`). Polymath does not emit these.
+  If a target harness requires them, add a vendor-specific
   post-export rewrite step in your own toolchain.
 
 ## Open questions
 
 - **Continue.dev / Aider** are not listed on agentskills.io's clients
-  page as of May 2026. Exported skills may still be usable as plain
+  page. Exported skills may still be usable as plain
   Markdown context, but discovery semantics are vendor-specific.
 - **Frontmatter `name` length**: agentskills.io v1.0 does not document
-  a hard upper bound. Polymath's longest namespaced name today is
+  a hard upper bound. Polymath's longest namespaced name is
   ~50 characters; if a target harness imposes a stricter limit,
   shorten via a custom post-export step.
 - **Description budget**: vendors report different SKILL.md discovery

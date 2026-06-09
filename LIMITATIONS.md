@@ -85,23 +85,22 @@ elsewhere is intentional.
 
 ## 4. Known operational gaps
 
-- **Live-model fixtures are currently disabled.** Only the jobs that
-  call a real model are off: `claude-cli-fixtures` in
-  [`.github/workflows/golden-tests.yml`](.github/workflows/golden-tests.yml.disabled)
+- **Live-model fixtures are disabled.** Only the jobs that call a
+  real model are off: `claude-cli-fixtures` in
+  [`.github/workflows/golden-tests.yml.disabled`](.github/workflows/golden-tests.yml.disabled)
   and `live-bakeoff` in
-  [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml.disabled)
-  were disabled (renamed to `*.yml.disabled`) to avoid spending Claude
-  API budget on every push. The six token-free deterministic jobs that
-  used to share `golden-tests.yml` (executable unit tests, the
+  [`.github/workflows/evaluation.yml.disabled`](.github/workflows/evaluation.yml.disabled)
+  ship disabled so Claude API budget is not spent on every push. The
+  six token-free deterministic jobs (executable unit tests, the
   shipFeature scratch-repo e2e, the hollow-run falsifiability anchor,
   golden-fixture frontmatter parsing, skill-triggering frontmatter, and
-  bakeoff-case parsing) now run on every PR and push in
-  [`.github/workflows/golden-deterministic.yml`](.github/workflows/golden-deterministic.yml)
-  — they are **not** disabled. So CI still proves the executable
-  workflow runner, the gate hardening, and fixture well-formedness; what
-  it does not prove while the live jobs are off is real model behaviour.
-  To re-enable the live gate: rename the `*.yml.disabled` files back and
-  set `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets.
+  bakeoff-case parsing) run on every PR and push in
+  [`.github/workflows/golden-deterministic.yml`](.github/workflows/golden-deterministic.yml).
+  So CI proves the executable workflow runner, the gate hardening, and
+  fixture well-formedness; what it does not prove while the live jobs
+  are off is real model behaviour. To enable the live gate: rename the
+  `*.yml.disabled` files to `*.yml` and set `CLAUDE_CODE_OAUTH_TOKEN`
+  (or `ANTHROPIC_API_KEY`) in repo secrets.
 - **The fallback YAML parser in `polymath-flow` folds block scalars.**
   `|` and `>` are both treated as folded — newlines collapse to
   spaces. Workflows that depend on newline-preserving prompts must

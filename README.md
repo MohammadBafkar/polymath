@@ -165,8 +165,7 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 
 ## Quality
 
-- [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar and the proof loop.
-- [`docs/QUALITY-DASHBOARD.md`](docs/QUALITY-DASHBOARD.md) — what gets measured, where the artifacts land.
+- [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the gates, what gets measured, where the artifacts land, and the proof loop.
 - [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping a `.mcp.json` / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
 - [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 

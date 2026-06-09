@@ -2,7 +2,7 @@
 
 > **TL;DR:** Polymath ships **no telemetry**. Nothing is collected, nothing is sent. If that ever changes, it will be **opt-in**, gated behind `POLYMATH_TELEMETRY=1`, and only after this document is updated to describe exactly what's collected.
 
-## What we collect today
+## What we collect
 
 Nothing.
 

@@ -1,73 +1,74 @@
 # Quality scorecard
 
 Polymath reaches stable quality only when the repo proves the product
-thesis — not when it has a larger catalog.
+thesis — not when it has a larger catalog. This file names the gates,
+what they measure, and how to run the proof loop. Promotion bars are
+defined once, in [`docs/MATURITY.md`](MATURITY.md); the per-rule
+conformance table lives in [AGENTS.md](../AGENTS.md).
 
-## Required gates
+## Required gates (every PR)
 
-Every PR runs:
-
-- **Structural conformance** — `tools/conformance.sh --all`
-  (`MANIFEST-3` maturity tier, `INTEGRATION-2` audit, `SKILL-1`,
-  `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`).
+- **Structural conformance** — `tools/conformance.sh --all`. The full
+  rule table (MANIFEST, SKILL, TEMPLATE, WORKFLOW, SURFACE,
+  CAPABILITY, TOOL, TRUST, DESC, INTEGRATION, MCP-PKG, AGENT, FIXTURE,
+  DOCS, STABILITY) is in [AGENTS.md](../AGENTS.md).
 - **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
-  SKILL.md ≤ 500 lines).
+  SKILL.md ≤ 500 lines) plus markdownlint.
 - **Token budget** — `tools/token-budget.sh` (≤ 400 tokens per plugin
   always-on; total scales with plugin count).
-- **Catalog reproducibility** — `tools/build-catalog.py --check`.
-- **Workflow YAML schema** — `plugins/polymath-flows/bin/polymath-flow validate <path>`.
-- **Workflow runner tests** — `python3 -m unittest discover -s plugins/polymath-flows/tests`.
-- **Project-context loader tests** — `python3 -m unittest discover -s plugins/polymath-core/tests`.
-- **Bakeoff case validity** — `python3 tools/bakeoff.py check`. Nine
-  cases pre-registered across the catalog. The check enforces the
-  symmetric-prompt contract (see § Bakeoff fairness) so the run
-  cannot be silently engineered.
-- **Skill-triggering frontmatter** — `python3 tools/skill-triggering.py check`.
-- **Workflow routing index** — `python3 tools/build-workflow-index.py --check`
-  (the committed index matches a fresh build; injected min-index under its
-  token ceiling).
-- **Workflow-triggering frontmatter** — `python3 tools/workflow-triggering.py
-  check` (frontmatter valid; `trigger_prompts` a superset of the workflow's
-  own `triggers`). The live `run` mode is opt-in under
-  `CLAUDE_CODE_OAUTH_TOKEN`, like skill-triggering.
-- **Description disambiguation** — `python3 tools/lint-descriptions.py
-  --strict` (no two always-on descriptions token-collide without a
-  distinguishing proper noun). `scope_boundary` / `trigger_clarity` are
-  reported as advisory means, not gated.
-- **Confusion matrix** — `python3 tools/check-description-confusion.py check`
-  (the sibling-routing cases in `tests/forbidden_prompts.yaml` are
-  well-formed). The behavioural `run` mode — naive prompt loads the expected
-  skill, never a forbidden sibling — is opt-in under `CLAUDE_CODE_OAUTH_TOKEN`.
-- **Connector / infra boundary** — every in-scope plugin audited in
-  [`docs/INTEGRATION-POLICY.md`](INTEGRATION-POLICY.md).
+- **Deterministic golden suite** —
+  [`.github/workflows/golden-deterministic.yml`](../.github/workflows/golden-deterministic.yml):
+  polymath-flows + polymath-core unit tests, the shipFeature
+  scratch-repo end-to-end job, the hollow-run falsifiability anchor,
+  golden-fixture frontmatter parsing, `python3
+  tools/skill-triggering.py check`, and `python3 tools/bakeoff.py
+  check` (which enforces the symmetric-prompt contract, see § Bakeoff
+  fairness).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
   updated alongside any change that resolves a documented limitation.
-- **Live-model fixtures** — required CI gate on `main` pushes. Setup
-  at [`LIMITATIONS.md § 4.1`](../LIMITATIONS.md#41-providing-the-claude-code-auth-secret).
+
+Outside the per-PR loop:
+
+- **Catalog reproducibility** — `tools/build-catalog.py --check`, run
+  by the Pages deploy on `main` pushes.
+- **Live-model runs** — bakeoff, skill-triggering `run` mode, and
+  workflow-triggering `run` mode spend Claude API budget and are
+  opt-in under `CLAUDE_CODE_OAUTH_TOKEN`; the CI workflows that
+  automate them ship disabled. See
+  [`LIMITATIONS.md § 4`](../LIMITATIONS.md#4-known-operational-gaps).
 
 ## Promotion bars
 
-Canonical definitions and per-tier requirements live in
-[`docs/MATURITY.md`](MATURITY.md). The short version:
+Canonical tier definitions and per-tier requirements live in
+[`docs/MATURITY.md`](MATURITY.md). Promotion is a CHANGELOG entry with
+the supporting evidence link, not just a status flip; receipts live in
+[`registry/stability-evidence.json`](../registry/stability-evidence.json)
+(rule `STABILITY-1`).
 
-- `experimental` — default; structural + ≥ 1 golden fixture.
-- `beta` — on-disk evidence loop closed: skill bakeoff + triggering
-  tests, **or** a foundation-runner with ≥ 20 unit-test assertions
-  plus an end-to-end job in golden-tests.yml. Live LLM runs are not
-  required.
-- `stable` — live bakeoff ≥ 8 / delta ≥ 2 (both regex and LLM-judge
-  scorers agree under `--judge`), every advertised workflow has at
-  least one strong deterministic blocking gate
-  (`commandSucceeds` / `artifactValid` / `artifactSchemaStrict` /
-  `diffConstraint`), skill-triggering test passing on three trigger
-  phrasings, and at least one external user beyond the maintainer.
-  Connector / infra plugins stay `experimental` unless primary-source
-  evidence shows Polymath adds workflow / critique / safety / artifact
-  value beyond the upstream official surface (see
-  [INTEGRATION-POLICY.md](INTEGRATION-POLICY.md)).
+## What gets measured and where it lands
 
-Promotion is a CHANGELOG entry with the supporting evidence link, not
-just a status flip.
+| Surface                          | Source                                                              | Cadence                                         |
+| -------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------- |
+| Conformance pass rate per plugin | [`tools/conformance.sh --all`](../tools/conformance.sh)             | every PR (validate.yml)                         |
+| Fixture + case well-formedness   | golden-deterministic.yml                                            | every PR                                        |
+| Token budget                     | [`tools/token-budget.sh`](../tools/token-budget.sh)                 | every PR (token-budget.yml)                     |
+| Skill-triggering pass rate       | [`tools/skill-triggering.py run`](../tools/skill-triggering.py)     | opt-in live run (evaluation workflow disabled)  |
+| Bakeoff regex deltas             | [`tools/bakeoff.py run`](../tools/bakeoff.py)                       | opt-in live run (evaluation workflow disabled)  |
+| Bakeoff LLM-judge deltas         | [`tools/bakeoff.py run --judge`](../tools/bakeoff.py)               | opt-in live run                                 |
+| Judge calibration drift          | [`tools/bakeoff.py calibrate`](../tools/bakeoff.py)                 | opt-in live run                                 |
+
+Per-run JSON reports land under `.pdata/bakeoff/<case-id>.json`, one
+per case, with `baseline_score`, `polymath_score`, `delta`, the
+`threshold` block (`minimum_polymath_score`, `minimum_delta`),
+per-side rubric results, and — when the judge is enabled — a parallel
+`judge` block with its own scores and delta.
+
+The evaluation workflow
+([`evaluation.yml.disabled`](../.github/workflows/evaluation.yml.disabled))
+uploads the `.pdata/bakeoff/` tree as a GitHub Actions artifact
+(`evaluation-<run_id>`, 30-day retention) and answers `/evaluate` PR
+comments with a summary table. It ships disabled to avoid Claude API
+cost; rename it to `evaluation.yml` to enable both.
 
 ## Bakeoff fairness
 
@@ -121,11 +122,13 @@ python3 tools/bakeoff.py check
 python3 tools/skill-triggering.py check
 ```
 
-With an authenticated Claude Code CLI:
+With an authenticated Claude Code CLI (`CLAUDE_CODE_OAUTH_TOKEN` or
+`ANTHROPIC_API_KEY`):
 
 ```bash
 tests/golden/run-fixtures.sh --plugin polymath-thinking
-python3 tools/bakeoff.py run --judge
+python3 tools/bakeoff.py run --judge --out-dir .pdata/bakeoff
 python3 tools/skill-triggering.py run --timeout 180
 python3 tools/bakeoff.py calibrate
+python3 tools/skill-triggering.py list   # inspect expected invocations
 ```

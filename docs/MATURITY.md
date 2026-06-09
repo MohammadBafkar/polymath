@@ -6,10 +6,9 @@ the `status` field. The tier is a contract with users about how much to
 trust the plugin. This file is the canonical definition; other docs
 link here.
 
-The status field used to live in `.claude-plugin/marketplace.json`,
-but Claude Code's `plugin validate --strict` rejects unknown fields
-there. The catalog file is Polymath's own schema; the validator does
-not see it.
+`status` lives in the catalog file — Polymath's own schema — rather
+than in `.claude-plugin/marketplace.json`, because Claude Code's
+`plugin validate --strict` rejects unknown fields there.
 
 The tier is **not** a quality label — it is a statement about how the
 plugin's value has been *verified on disk*. A polished `experimental`
@@ -25,7 +24,7 @@ to an unknown value (rule `MANIFEST-3`).
 | --- | --- |
 | `experimental` | Scaffolded. May change shape, be renamed, be merged into another plugin, or be removed. Default for new plugins and most integration / infra plugins. |
 | `beta` | Structurally proven on disk. Evidence loop is closed, but no live LLM run has been published. Shape is unlikely to change in a breaking way but is not guaranteed. |
-| `stable` | Demonstrated value with live results. Breaking changes go through a deprecation cycle. No plugin in the catalog is `stable` today (see [LIMITATIONS.md](../LIMITATIONS.md)). |
+| `stable` | Demonstrated value with live results. Breaking changes go through a deprecation cycle. |
 | `deprecated` | Scheduled for removal. The plugin's README must name the replacement and the removal date. |
 
 ## Promotion bars
@@ -108,13 +107,38 @@ The receipts that back every status claim live in
 one entry per catalog plugin, with `target_status`, `evidence_state`,
 `live_bakeoff_run`, `live_trigger_run`, `external_user_url`,
 `promotion_pr`, `changelog_entry`, and (for connector/infra) the
-required `distinct_value_url`. The ledger is enforced by
+required `distinct_value_url`. The ledger is the single source of
+truth for where each plugin stands. It is enforced by
 [`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
 as the `STABILITY-1` conformance gate: the catalog cannot claim
 `stable` for a plugin unless the ledger has populated every required
 field, and connector/infra plugins cannot reach `beta` without the
-distinct-value URL. The human-facing view of the ledger lives at
-[`docs/STABILITY-ROADMAP.md`](STABILITY-ROADMAP.md).
+distinct-value URL.
+
+Each entry's `evidence_state` sits on the **evidence ladder**:
+
+| State | Meaning |
+| --- | --- |
+| `pre-evidence` | Golden fixture only — the experimental floor. |
+| `on-disk-skill` | Golden + a parseable bakeoff case + a parseable skill-triggering test. Skill-shaped beta closure. |
+| `on-disk-foundation` | Golden + executable unit tests + an end-to-end workflow job. Foundation/runner beta closure. |
+| `stable-ready` | On-disk closure plus a live bakeoff and live trigger run that meet the stable bar. Awaiting adopter. |
+| `stable` | Promoted, with all live fields populated and a CHANGELOG entry recording the promotion. |
+| `deprecated` | Off-ladder; CHANGELOG entry names the replacement and removal date. |
+
+To update the ledger:
+
+1. A plugin earns a new piece of evidence (live run, adopter,
+   distinct-value artifact, promotion PR) — record the URL or anchor
+   in the plugin's entry in
+   [`registry/stability-evidence.json`](../registry/stability-evidence.json).
+2. If the entry now backs a status promotion, change the plugin's
+   `status` in
+   [`registry/polymath-catalog.json`](../registry/polymath-catalog.json)
+   in the same PR.
+3. Append a CHANGELOG entry recording the promotion + supporting
+   evidence link. `STABILITY-1` blocks the merge if any required
+   ledger field is missing.
 
 ### deprecated
 
@@ -152,8 +176,7 @@ policy and must be demoted to `experimental` at the next release.
 
 ## See also
 
-- [docs/QUALITY-SCORECARD.md](QUALITY-SCORECARD.md) — gates and the bakeoff-fairness contract.
-- [docs/QUALITY-DASHBOARD.md](QUALITY-DASHBOARD.md) — where measured artifacts land.
+- [docs/QUALITY-SCORECARD.md](QUALITY-SCORECARD.md) — gates, measurement, and the bakeoff-fairness contract.
 - [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md) — connector / infra disclosure rules.
 - [docs/PLUGIN-AUTHORING.md](PLUGIN-AUTHORING.md) — authoring layout and conventions.
-- [LIMITATIONS.md](../LIMITATIONS.md) — what the catalog does NOT prove yet.
+- [LIMITATIONS.md](../LIMITATIONS.md) — what the catalog does NOT prove.

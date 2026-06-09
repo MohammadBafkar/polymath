@@ -152,7 +152,8 @@ This is disclosed, not hidden: every affected connector README carries an
 package is neither known-resolving nor disclosed-as-placeholder. The check is
 offline (hermetic CI); run it with `--online` to re-verify against npm.
 
-Verified against npm on 2026-06-08:
+npm resolution status (the `MCP-PKG` gate keeps this table honest;
+re-verify any row with `tools/check-mcp-packages.py --online`):
 
 | Package | Connector(s) | npm status |
 | --- | --- | --- |

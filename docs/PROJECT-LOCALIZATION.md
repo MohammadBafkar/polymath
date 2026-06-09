@@ -220,7 +220,7 @@ validator has the same shape, trimmed for the runtime check.
 
 ## Versioning & refresh
 
-`schemaVersion` is currently `1`, and the loader accepts only `1`. There is no
+`schemaVersion` is `1`, and the loader accepts only `1`. There is no
 automatic migration: if a future Polymath release bumps the schema, an old
 file keeps working as long as it still validates against the version the loader
 accepts. **The supported refresh path is to re-run `/polymath-core:init-project`**
