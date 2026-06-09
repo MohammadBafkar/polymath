@@ -205,7 +205,7 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
-  # Cross-plugin: every in-scope README's connector-policy block must
+  # Cross-plugin: every in-scope README's integration-policy block must
   # match the policy table verbatim. Local block presence is checked
   # per-plugin above; this catches divergence after a policy-table edit.
   echo

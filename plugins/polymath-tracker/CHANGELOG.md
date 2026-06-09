@@ -4,16 +4,13 @@
 
 ### Changed
 
-- Renamed from `polymath-connector-jira` and merged `polymath-connector-linear`
-  into a single `issue_tracker` umbrella connector (mirrors
-  `polymath-connector-monitoring`). Ships both the Jira and Linear MCP servers
-  (each activated by its own credentials), both detect hooks, and the
-  `jira-triage` / `linear-triage` skills. The two providers' colliding
-  `file-bug-from-incident`
-  skills were unified into one provider-agnostic skill that resolves Jira vs
-  Linear from `${capabilities.issue_tracker.provider}`. The capability
-  vocabulary now maps both `jira` and `linear` → `polymath-tracker`.
-  All `userConfig` keys are optional — supply the set for your tracker.
+- One `issue_tracker` umbrella plugin: ships both the Jira and Linear MCP
+  servers (each activated by its own credentials), both detect hooks, and the
+  `jira-triage` / `linear-triage` skills. A single provider-agnostic
+  `file-bug-from-incident` skill resolves Jira vs Linear from
+  `${capabilities.issue_tracker.provider}`. The capability vocabulary maps both
+  `jira` and `linear` → `polymath-tracker`. All `userConfig` keys are optional —
+  supply the set for your tracker.
 
 ## [0.1.0]
 

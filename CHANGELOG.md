@@ -10,52 +10,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Concept/capability-centric plugins (breaking — published names change).**
-  Renamed the vendor-named integration plugins to the capability they serve,
-  vendors as interchangeable providers underneath (see
+  Integration plugins are now named by the capability they serve, with vendors
+  as interchangeable providers underneath (see
   [`docs/adrs/0002-concept-centric-plugins.md`](docs/adrs/0002-concept-centric-plugins.md)):
-  `polymath-connector-github` → `polymath-vcs`; `-tracker` → `polymath-tracker`;
-  `-pagerduty` → `polymath-paging`; `-slack` (+ `-statuspage`) → `polymath-chat`;
-  `-snyk` → `polymath-vuln-scan`; `polymath-infra-cloud` → `polymath-cloud`;
-  `polymath-infra-kubernetes` → `polymath-kubernetes`. The observability
-  connector (+ `-sentry`) merged into the `polymath-observability` discipline, so
-  one plugin holds both the RED/USE design skills and the
-  Datadog/Grafana/Honeycomb/Elastic/Sentry query integration. Connector/infra
-  conformance gates now detect by `.mcp.json`/`bindings/` rather than name
-  prefix. Additional vendors per concept (GitLab, Azure DevOps, Teams, Opsgenie,
-  …) are listed in the capability vocabulary as the roadmap and wired when a real
-  MCP package ships.
+  `polymath-vcs`, `polymath-tracker`, `polymath-paging`, `polymath-chat`, and
+  `polymath-vuln-scan`, plus infra `polymath-cloud` / `polymath-kubernetes`. The
+  observability design discipline absorbed the observability vendor integration,
+  so `polymath-observability` holds both the RED/USE design skills and the
+  Datadog/Grafana/Honeycomb/Elastic/Sentry query integration. Integration/infra
+  conformance gates detect by `.mcp.json`/`bindings/` rather than name prefix.
+  Additional vendors per concept (GitLab, Azure DevOps, Teams, Opsgenie, …) are
+  listed in the capability vocabulary as the roadmap and wired when a real MCP
+  package ships. The previous vendor-named plugins were renamed or merged into
+  the above — the old→new mapping is in git history.
 - **Consolidation: 51 → 36 plugins (no skills lost).** Folded single-skill and
-  thin fragments into their parent craft, and merged per-vendor connectors by
+  thin fragments into their parent craft, and merged per-vendor integrations by
   capability, to cut install decisions and confusable descriptions (see
   [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):
-  - **Costume connector:** `polymath-connector-terraform:plan-review` →
-    `polymath-cloud` — it shipped no MCP server or capability binding (a
-    CLI-only review skill in a connector wrapper), so it belongs with the IaC
-    design skills. `statuspage`/`pagerduty`/`slack` were evaluated and **kept**
-    as their own connectors.
+  - **Costume connector:** a CLI-only Terraform `plan-review` skill (no MCP
+    server or binding) → `polymath-cloud`, with the IaC design skills.
   - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-cloud`;
     `polymath-prioritize:prioritize` → `polymath-planning`;
     `polymath-product-strategy:product-strategy` → `polymath-product`;
     `polymath-supply-chain:supply-chain-review` → `polymath-security`;
     `polymath-i18n:i18n-audit` → `polymath-frontend`.
-  - **Data tier:** `polymath-infra-postgres` (`review-migration`,
+  - **Data tier:** Postgres migration skills (`review-migration`,
     `audit-pg-config` + commands) → `polymath-backend`, next to
-    `db-schema`/`migration-plan` (also dropped from `docs/INTEGRATION-POLICY.md`).
+    `db-schema`/`migration-plan`.
   - **Comms:** `polymath-content` (`write-release-notes`, `write-advisory`,
     `write-sunset-notice`) → `polymath-communication`.
   - **Delivery:** `polymath-progressive-delivery` (`safe-rollout`) and
     `polymath-deprecation` (`deprecation-plan`, `migration-guide`) →
     `polymath-release`, which now spans commit → rollout → sunset.
-  - **Connectors by capability (11 → 9):** `polymath-connector-jira` +
-    `polymath-connector-linear` → **`polymath-tracker`** (one
+  - **Integrations by capability:** Jira + Linear → **`polymath-tracker`** (one
     `issue_tracker` umbrella; both MCP servers; the colliding
-    `file-bug-from-incident` unified into one provider-agnostic skill).
-    `polymath-connector-datadog` + `polymath-connector-monitoring` →
-    **`polymath-observability`** (Datadog/Grafana/Honeycomb/Elastic;
-    closes a latent `query-during-incident` resolution gap). The capability
-    vocabulary (`registry/schemas/capabilities.json`) now maps those providers to
-    the umbrella plugins. `pagerduty`/`slack`/`statuspage` were evaluated and
-    **kept separate** — distinct capabilities and slack is dual-use.
+    `file-bug-from-incident` unified into one provider-agnostic skill). Datadog +
+    Grafana/Honeycomb/Elastic → **`polymath-observability`** (closes a latent
+    `query-during-incident` resolution gap). The capability vocabulary
+    (`registry/schemas/capabilities.json`) maps those providers to the umbrella
+    plugins.
 
   Skill bodies, commands, golden fixtures, skill-triggering tests, and workflow
   `invoke:`/`requires.plugins` refs moved with each skill; only the
@@ -238,9 +231,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Portability adapter to agentskills.io v1.0 harnesses.**
   `tools/export-agents-skills.py` materializes Polymath's 126 skills
   into `dist/agents-skills/<plugin>-<skill>/SKILL.md` with namespaced
-  frontmatter `name:` (resolves the one collision in the catalog —
-  `file-bug-from-incident` is shipped by both `polymath-connector-jira`
-  and `-linear`), copies referenced templates, rewrites
+  frontmatter `name:` (which resolves any name collision in the
+  catalog), copies referenced templates, rewrites
   `../../templates/X.md` links, and emits a `manifest.json` mapping
   back to source `<plugin>:<skill>`. New `docs/PORTABILITY.md`
   documents the per-harness drop directory (Codex CLI, Cursor,
@@ -264,9 +256,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `audit-redis-config` skills and the matching commands),
   `polymath-writing` (added `editorial-pass`).
 - **`tools/sync-integration-policy.py`** — generates the
-  `connector-policy` disclosure block (`official_surface`,
-  `polymath_value`, `sunset_trigger`, `status`) for every
-  `polymath-connector-*` and `polymath-infra-*` README from a single
+  integration-policy disclosure block (`official_surface`,
+  `polymath_value`, `sunset_trigger`, `status`) for every integration &
+  infra plugin README from a single
   source: the tables in [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md)
   § 3.1–3.2 + `marketplace.json` status. Two modes: `--update`
   (write/rewrite blocks) and `--check` (CI: fail if any README's
@@ -303,8 +295,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`polymath-data` scope clarified and narrowed.** README now lists
   all four skills (was: omitted `run-experiment`), declares the
   intentional narrow scope (SQL + metrics + experiments), and points
-  to `polymath-backend` / `polymath-infra-postgres` for schema /
-  migration work and to `polymath-ai` for evaluation. `LIMITATIONS.md`
+  to `polymath-backend` for schema / migration work and to
+  `polymath-ai` for evaluation. `LIMITATIONS.md`
   § 3 records the deferral of data-engineering and data-science
   surfaces.
 - **`sql-optimize` deepened to multi-dialect EXPLAIN reading.** New
@@ -320,7 +312,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `:audit-redis-config`.
   - `polymath-release:release-notes` ↔ `polymath-content:write-release-notes`
     (engineer ↔ customer audience), both linking `polymath-release:changelog`.
-  - `polymath-backend:migration-plan` ↔ `polymath-infra-postgres:review-migration`
+  - `polymath-backend:migration-plan` ↔ `polymath-backend:review-migration`
     (vendor-agnostic phasing ↔ Postgres statement review).
 - **GitHub Actions hygiene.** Added explicit `permissions:` (least
   privilege, default `contents: read`) and `concurrency:` (cancel

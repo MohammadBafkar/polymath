@@ -148,14 +148,14 @@ def main() -> int:
 
     if args.check:
         if diverged:
-            print("connector-policy: divergent READMEs (re-run with --update):", file=sys.stderr)
+            print("integration-policy: divergent READMEs (re-run with --update):", file=sys.stderr)
             for n in diverged:
                 print(f"  ✗ plugins/{n}/README.md", file=sys.stderr)
             return 1
-        print(f"connector-policy: {len(in_scope)} in-scope READMEs in sync")
+        print(f"integration-policy: {len(in_scope)} in-scope READMEs in sync")
         return 0
 
-    print(f"connector-policy: updated {len(updated)} README(s); {len(in_scope) - len(updated)} already in sync")
+    print(f"integration-policy: updated {len(updated)} README(s); {len(in_scope) - len(updated)} already in sync")
     for n in updated:
         print(f"  ✓ plugins/{n}/README.md")
     return 0
