@@ -11,8 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Concept/capability-centric plugins (breaking — published names change).**
   Integration plugins are now named by the capability they serve, with vendors
-  as interchangeable providers underneath (see
-  [`docs/adrs/0002-concept-centric-plugins.md`](docs/adrs/0002-concept-centric-plugins.md)):
+  as interchangeable providers underneath:
   `polymath-vcs`, `polymath-tracker`, `polymath-paging`, `polymath-chat`, and
   `polymath-vuln-scan`, plus infra `polymath-cloud` / `polymath-kubernetes`. The
   observability design discipline absorbed the observability vendor integration,
