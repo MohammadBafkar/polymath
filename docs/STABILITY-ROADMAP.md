@@ -1,7 +1,7 @@
 # Stability roadmap — where each plugin stands
 
 This is the human-facing view of
-[`shared/stability-evidence.json`](../shared/stability-evidence.json).
+[`registry/stability-evidence.json`](../registry/stability-evidence.json).
 The machine-readable ledger is the source of truth; this page exists
 so a reader can scan the catalog without opening JSON. The ledger and
 this page are reconciled by hand when the ledger changes.
@@ -32,7 +32,7 @@ the ledger is fully populated.**
 
 | # | Scope                                                                 | Output                                                                                                                |
 | - | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 0 | All 43 plugins                                                        | The ledger, schema, and `STABILITY-1` checker land. No status promotions.                                             |
+| 0 | All 39 plugins                                                        | The ledger, schema, and `STABILITY-1` checker land. No status promotions.                                             |
 | 1 | 9 skill-shaped beta plugins already at `on-disk-skill`                | Live bakeoff + live trigger run on three phrasings. Mark `stable-ready` only when both pass; promote only with adopter.|
 | 2 | `polymath-core`, `polymath-flows` (`on-disk-foundation`)              | Foundation-specific live proof (workflow e2e job + bakeoff coverage where load-bearing). External adopter.            |
 | 3 | 4 near-beta experimental + 14 golden-only experimental skill plugins  | Close on-disk evidence (bakeoff case + 3-phrasing trigger test) for each, then run Iteration 1's live-proof loop.     |
@@ -64,7 +64,7 @@ These plugins are runners or shared infrastructure: their on-disk
 evidence is unit + end-to-end coverage rather than bakeoff cases.
 
 - `polymath-core` — SessionStart loader; has `plugins/polymath-core/tests/`.
-- `polymath-flows` — `bin/polymath-flow` runner, 15 workflows each with a strong `mustPass` gate, `plugins/polymath-flows/tests/`.
+- `polymath-flows` — `bin/polymath-flow` runner, 26 workflows each with a strong `mustPass` gate, `plugins/polymath-flows/tests/`.
 
 ### `pre-evidence` — Iteration 3 close-evidence work (17 plugins)
 
@@ -92,7 +92,7 @@ The remaining 14 are golden-only experimental skill plugins:
 - `polymath-platform`
 - `polymath-research`
 
-### `pre-evidence` — Iteration 4 connector / infra work (11 plugins)
+### `pre-evidence` — Iteration 4 connector / infra work (10 plugins)
 
 These need a bakeoff case, a skill-triggering test, **and** a
 `distinct_value_url` proving Polymath adds workflow / critique /
@@ -108,7 +108,6 @@ past experimental.
 - `polymath-connector-slack`
 - `polymath-connector-snyk`
 - `polymath-connector-statuspage`
-- `polymath-connector-terraform`
 - `polymath-infra-cloud`
 - `polymath-infra-kubernetes`
 
@@ -124,11 +123,11 @@ no external users still stands.
 1. A plugin earns a new piece of evidence (live run, adopter,
    distinct-value artifact, promotion PR).
 2. Update the plugin's entry in
-   [`shared/stability-evidence.json`](../shared/stability-evidence.json)
+   [`registry/stability-evidence.json`](../registry/stability-evidence.json)
    with the URL or anchor.
 3. If the entry now backs a status promotion, change the plugin's
    `status` in
-   [`shared/polymath-catalog.json`](../shared/polymath-catalog.json)
+   [`registry/polymath-catalog.json`](../registry/polymath-catalog.json)
    in the same PR.
 4. Append a CHANGELOG entry recording the promotion + supporting
    evidence link.
@@ -141,5 +140,5 @@ no external users still stands.
 - [docs/MATURITY.md](MATURITY.md) — promotion bar definitions.
 - [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md) — connector / infra disclosure rules and distinct-value requirement.
 - [docs/QUALITY-DASHBOARD.md](QUALITY-DASHBOARD.md) — where measured artifacts land.
-- [shared/stability-evidence.json](../shared/stability-evidence.json) — machine-readable ledger.
+- [registry/stability-evidence.json](../registry/stability-evidence.json) — machine-readable ledger.
 - [tools/check-stability-evidence.py](../tools/check-stability-evidence.py) — STABILITY-1 enforcement.

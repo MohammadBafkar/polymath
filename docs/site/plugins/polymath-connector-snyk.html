@@ -28,6 +28,16 @@
 <li>Reference: <a href="references/snyk-tools.md"><code>references/snyk-tools.md</code></a>.</li>
 </ul>
 
+<p>&lt;!-- mcp-package-status --&gt;</p>
+<p>&gt; ⚠️ <strong>MCP package not yet published.</strong> This connector&#x27;s <code>.mcp.json</code> names</p>
+<p>&gt; <code>@snyk/mcp-server</code>, which does <strong>not</strong> resolve on npm as of 2026-06-08, so</p>
+<p>&gt; <code>npx -y @snyk/mcp-server</code> will fail to start. Snyk&#x27;s MCP support ships via the</p>
+<p>&gt; <code>snyk</code> CLI (e.g. a <code>snyk mcp</code> subcommand), not this npm package — substitute</p>
+<p>&gt; the real command in <code>.mcp.json</code> before relying on this connector. This is part</p>
+<p>&gt; of why the connector is <code>status: experimental</code>. See</p>
+<p>&gt; <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code> §4.2</a>.</p>
+<p>&lt;!-- /mcp-package-status --&gt;</p>
+
 <h2>Installation</h2>
 
 <pre><code>

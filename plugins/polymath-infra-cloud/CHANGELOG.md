@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `plan-review` skill folded in from the retired `polymath-connector-terraform` plugin (a CLI-only connector with no MCP server). Reads a `terraform plan` and flags destructive actions, drift, and unsafe diffs before apply. Its tool reference moved to `skills/plan-review/references/terraform-tools.md`.
+
 ### Changed
 
 - `cloud-cost-review` skill folded in from the former `polymath-finops` plugin — cloud cost is a property of the cloud-pattern choice.

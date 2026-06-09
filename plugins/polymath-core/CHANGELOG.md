@@ -40,7 +40,7 @@
 - Project-context loader at `hooks/scripts/load-project-context.py`
   reads `.polymath/project.yaml` (project →
   `${CLAUDE_CONFIG_DIR}` → home), validates against
-  [`shared/schemas/project.schema.json`](../../shared/schemas/project.schema.json),
+  [`registry/schemas/project.schema.json`](../../registry/schemas/project.schema.json),
   and writes the resolved snapshot to
   `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`.
 - `/plugin-budget` command — thin alias for the budget reporter.

@@ -5,6 +5,7 @@ trigger_prompts:
   - "prod is down, help"
   - "page just fired, walk me through response"
   - "sev1, what do I do"
+  - "take this incident from response all the way to action items"
 must_propose:
   - respondToIncident
 allow_propose:

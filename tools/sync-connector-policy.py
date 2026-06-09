@@ -4,7 +4,7 @@ polymath-connector-* and polymath-infra-* README.
 
 Single source of truth: the two markdown tables in
 docs/CONNECTOR-POLICY.md (§ 3.1 and § 3.2). The status field comes
-from shared/polymath-catalog.json so demote/promote stays in sync.
+from registry/polymath-catalog.json so demote/promote stays in sync.
 
 Modes:
   --check   Exit 1 if any in-scope README's policy block diverges
@@ -28,7 +28,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 POLICY = REPO / "docs" / "CONNECTOR-POLICY.md"
-CATALOG = REPO / "shared" / "polymath-catalog.json"
+CATALOG = REPO / "registry" / "polymath-catalog.json"
 PLUGINS_DIR = REPO / "plugins"
 
 START_MARKER = "<!-- connector-policy:start -->"

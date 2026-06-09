@@ -28,8 +28,10 @@
 <ul>
 <li>MCP servers: Atlassian (<code>@modelcontextprotocol/server-atlassian</code>) and Linear</li>
 </ul>
-<p>(<code>@linear/mcp-server</code>) via <code>npx</code>. Each activates from its own credentials; an</p>
-<p>unconfigured server is simply unused.</p>
+<p>(<code>@linear/mcp-server</code>) via <code>npx</code>. Each activates from its own credentials,</p>
+<p>which default to empty (<code>${VAR:-}</code>) so an unconfigured server can&#x27;t break MCP</p>
+<p>config parsing — it starts idle and fails its own auth. Disable an unused one</p>
+<p>via the <code>/mcp</code> UI.</p>
 <ul>
 <li>Skills:</li>
 <li><code>jira-triage</code> — triage an inbound Jira issue.</li>
@@ -48,6 +50,17 @@
 <li>References: <a href="references/jira-tools.md"><code>references/jira-tools.md</code></a>,</li>
 </ul>
 <p><a href="references/linear-tools.md"><code>references/linear-tools.md</code></a>.</p>
+
+<p>&lt;!-- mcp-package-status --&gt;</p>
+<p>&gt; ⚠️ <strong>MCP packages not yet published.</strong> This connector&#x27;s <code>.mcp.json</code> names</p>
+<p>&gt; <code>@modelcontextprotocol/server-atlassian</code> (Jira) and <code>@linear/mcp-server</code>,</p>
+<p>&gt; neither of which resolves on npm as of 2026-06-08, so the <code>npx -y …</code> commands</p>
+<p>&gt; will fail to start. Atlassian and Linear both offer <strong>hosted/remote</strong> MCP</p>
+<p>&gt; servers (and there are community npm packages) rather than these names —</p>
+<p>&gt; substitute the real command for your tracker in <code>.mcp.json</code> before relying on</p>
+<p>&gt; this connector. This is part of why it is <code>status: experimental</code>. See</p>
+<p>&gt; <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code> §4.2</a>.</p>
+<p>&lt;!-- /mcp-package-status --&gt;</p>
 
 <h2>Installation</h2>
 

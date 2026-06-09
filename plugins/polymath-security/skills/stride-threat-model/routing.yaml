@@ -1,6 +1,6 @@
 # Routing declaration for polymath-security:stride-threat-model (skill). Compiled into
 # route-signals.json by tools/build-surface-index.py.
-# Schema: shared/schemas/surface-routing.schema.json
+# Schema: registry/schemas/surface-routing.schema.json
 paths:
 - docs/threat-models/
 intents:

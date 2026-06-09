@@ -50,10 +50,12 @@
 </ul>
 <p><code>honeycomb-tools.md</code>, <code>elastic-tools.md</code> — provider MCP tool catalogs.</p>
 <ul>
-<li><strong>MCP servers:</strong> all four are declared in <code>.mcp.json</code>. Configure</li>
+<li><strong>MCP servers:</strong> all four are declared in <code>.mcp.json</code>. Configure only the</li>
 </ul>
-<p>only the providers your project uses; leave the others&#x27; credentials</p>
-<p>blank. The plugin doesn&#x27;t insist that all four are present.</p>
+<p>providers your project uses; the others&#x27; credentials default to empty</p>
+<p>(<code>${VAR:-}</code>) so an unconfigured provider can&#x27;t break MCP config parsing — its</p>
+<p>server starts idle and fails its own auth rather than blocking the session. To</p>
+<p>avoid the idle servers entirely, disable the unused ones via the <code>/mcp</code> UI.</p>
 
 <p>Datadog (<code>query-during-incident</code>, <code>author-monitor</code>) was folded in from the</p>
 <p>former <code>polymath-connector-datadog</code>, so the <code>observability</code> capability resolves</p>
@@ -74,6 +76,17 @@
 <li><code>polymath-incident:postmortem-blameless</code> — snapshots become</li>
 </ul>
 <p>postmortem evidence.</p>
+
+<p>&lt;!-- mcp-package-status --&gt;</p>
+<p>&gt; ⚠️ <strong>MCP packages not yet published.</strong> This connector&#x27;s <code>.mcp.json</code> names</p>
+<p>&gt; <code>@datadog/mcp-server</code>, <code>@grafana/mcp-server</code>, <code>@honeycomb/mcp-server</code>, and</p>
+<p>&gt; <code>@elastic/mcp-server</code> — <strong>none</strong> resolve on npm as of 2026-06-08, so the</p>
+<p>&gt; <code>npx -y …</code> commands will fail to start. Each vendor distributes its MCP server</p>
+<p>&gt; differently (hosted endpoint, Go binary, or a different package) — substitute</p>
+<p>&gt; the real command(s) in <code>.mcp.json</code> for the provider(s) you use before relying</p>
+<p>&gt; on this connector. This is part of why it is <code>status: experimental</code>. See</p>
+<p>&gt; <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code> §4.2</a>.</p>
+<p>&lt;!-- /mcp-package-status --&gt;</p>
 
 <h2>Installation</h2>
 

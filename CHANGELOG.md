@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Consolidation: 51 → 40 plugins (no skills lost).** Folded single-skill and
+- **Consolidation: 51 → 39 plugins (no skills lost).** Folded single-skill and
   thin fragments into their parent craft, and merged per-vendor connectors by
   capability, to cut install decisions and confusable descriptions (see
   [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):
+  - **Costume connector:** `polymath-connector-terraform:plan-review` →
+    `polymath-infra-cloud` — it shipped no MCP server or capability binding (a
+    CLI-only review skill in a connector wrapper), so it belongs with the IaC
+    design skills. `statuspage`/`pagerduty`/`slack` were evaluated and **kept**
+    as their own connectors.
   - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-infra-cloud`;
     `polymath-prioritize:prioritize` → `polymath-planning`;
     `polymath-product-strategy:product-strategy` → `polymath-product`;
@@ -33,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `polymath-connector-datadog` + `polymath-connector-monitoring` →
     **`polymath-connector-observability`** (Datadog/Grafana/Honeycomb/Elastic;
     closes a latent `query-during-incident` resolution gap). The capability
-    vocabulary (`shared/schemas/capabilities.json`) now maps those providers to
+    vocabulary (`registry/schemas/capabilities.json`) now maps those providers to
     the umbrella plugins. `pagerduty`/`slack`/`statuspage` were evaluated and
     **kept separate** — distinct capabilities and slack is dual-use.
 
@@ -47,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Install profiles (discovery Layer 1).** `shared/polymath-profiles.json`
+- **Install profiles (discovery Layer 1).** `registry/polymath-profiles.json`
   defines seven curated role spines (`backend`, `frontend`, `sre`, `platform`,
   `pm`, `staff`, `author`) so a new user picks one profile instead of choosing
   from ~45 plugins, then installs more a-la-carte. Validated by
@@ -78,12 +83,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   question when needed, and the next action. Added skill-triggering and
   golden fixtures, and refreshed the README's marketplace counts.
 
-- **Five composed workflow arcs** in `polymath-flows`: `prdToShip`,
-  `estimateAndPlan`, `requirementsToBacklog`, `progressiveRollout`, and
-  `incidentToReview` — right-sized arcs the audit flagged as missing, now
-  composable from the gap-closure skills. Each carries routing metadata and a
-  workflow-triggering test; the injected-index ceiling was recalibrated to 560
-  for 27 workflows (last flat-surface bump before tiering at ~30).
+- **Four composed workflow arcs** in `polymath-flows`: `prdToShip`,
+  `estimateAndPlan`, `requirementsToBacklog`, and `progressiveRollout` —
+  right-sized arcs the audit flagged as missing, now composable from the
+  gap-closure skills. Each carries routing metadata and a workflow-triggering
+  test; the injected-index ceiling was recalibrated to 560 (last flat-surface
+  bump before tiering at ~30). A fifth, `incidentToReview`, was dropped before
+  release as a duplicate of the `respondToIncident → incidentRetroToActions`
+  chain; its trigger phrasings moved onto `respondToIncident`.
 
 - **`polymath-i18n` plugin (experimental).** `i18n-audit` — assess
   internationalization readiness (hardcoded strings, locale formatting, ICU
@@ -166,7 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Workflow discoverability.** Workflows now carry optional
   `whenToUse` / `triggers` / `detectionSignals` in their YAML
-  (`shared/schemas/workflow.schema.json`), and a `polymath-flows`
+  (`registry/schemas/workflow.schema.json`), and a `polymath-flows`
   SessionStart hook injects a compact routing index — built by
   `tools/build-workflow-index.py` into `plugins/polymath-flows/data/` — so
   the agent can detect a matching workflow from context and propose it
@@ -193,13 +200,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   revised plan work on plans, designs, documents, implementations, and
   ambiguous problems.
 - **Project-context activation metadata.** Extended
-  `shared/schemas/project.schema.json` and the SessionStart loader with
+  `registry/schemas/project.schema.json` and the SessionStart loader with
   `setup:` and `polymath:` sections for required tools, environment
   variable names, first steps, recommended plugins, recommended
   workflows, and compatible agent surfaces. The Polymath repo now
   dogfoods `.polymath/project.yaml` and `.polymath/capabilities.yaml`.
-- **`shared/schemas/polymath-catalog.schema.json`** — JSON Schema
-  2020-12 definition for `shared/polymath-catalog.json`, the new
+- **`registry/schemas/polymath-catalog.schema.json`** — JSON Schema
+  2020-12 definition for `registry/polymath-catalog.json`, the new
   Polymath-only catalog file. Enforces required fields (`name`,
   `plugins`), allowed status values (`stable` / `beta` /
   `experimental` / `deprecated`), the `polymath-…` plugin-name
@@ -207,7 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tools/check-catalog.py` when `jsonschema` is on PATH.
 - **`tools/check-catalog.py` + `MANIFEST-3` cross-check.** Verifies
   that `.claude-plugin/marketplace.json`, every plugin's `plugin.json`,
-  and `shared/polymath-catalog.json` agree on the plugin set and on
+  and `registry/polymath-catalog.json` agree on the plugin set and on
   per-plugin versions, independent of whether the Claude CLI is on
   PATH. Catches the same version-drift class of bug that
   `claude plugin validate --strict` catches, plus catalog-set
@@ -324,7 +331,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`plugins[N].status`, `metadata.agentSkills`, `metadata.homepage`,
   `metadata.license`). Marketplace entry bumped to `0.2.0` to match
   plugin.json. Polymath-only metadata relocated to a new
-  `shared/polymath-catalog.json` (the catalog's own schema, not
+  `registry/polymath-catalog.json` (the catalog's own schema, not
   governed by Claude's); `tools/conformance.sh` (MANIFEST-3),
   `tools/build-catalog.py` (status badges on the generated site), and
   `tools/sync-connector-policy.py` (README disclosure block) all read
@@ -368,16 +375,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   & safety, platform & operate, infra, people & content, connectors,
   orchestration, and authoring. 15 workflows orchestrating those
   plugins into SDLC scenarios.
-- Capability abstraction (`shared/schemas/capabilities.schema.json`):
+- Capability abstraction (`registry/schemas/capabilities.schema.json`):
   workflows declare *what* they need (issue tracker, observability,
   pager, vulnerability scanner, …) and projects pick the provider once
   in `.polymath/capabilities.yaml`.
-- Project localization (`shared/schemas/project.schema.json`):
+- Project localization (`registry/schemas/project.schema.json`):
   `.polymath/project.yaml` describes a project's stack, conventions,
   external skill catalogs, and per-skill overrides; the polymath-core
   SessionStart hook loads it and exposes a resolved snapshot to every
   skill.
-- Eleven artifact schemas under `shared/schemas/artifacts/`: `PRD`,
+- Eleven artifact schemas under `registry/schemas/artifacts/`: `PRD`,
   `ADR`, `Plan`, `RFC`, `Runbook`, `ArchitectureDoc`, `DACIDecision`,
   `TradeoffMatrix`, `Postmortem`, `ThreatModel`, `PRDescription`.
   Workflows enforce frontmatter discipline via `mustPass:

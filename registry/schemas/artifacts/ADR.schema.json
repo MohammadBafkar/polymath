@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/artifacts/ADR.schema.json",
+  "title": "Polymath ADR (Michael Nygard) frontmatter",
+  "description": "Validates only the YAML frontmatter block of an ADR.md. The Markdown body stays free-form.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["artifact", "title", "status", "deciders", "date"],
+  "properties": {
+    "artifact": { "const": "ADR" },
+    "schemaVersion": { "type": "number", "enum": [0.1] },
+    "number": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "deprecated", "superseded", "rejected"]
+    },
+    "deciders": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+      ]
+    },
+    "date": { "type": "string", "format": "date" },
+    "supersedes": { "type": ["string", "integer", "null"] },
+    "supersededBy": { "type": ["string", "integer", "null"] }
+  }
+}

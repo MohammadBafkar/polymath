@@ -1,6 +1,6 @@
 # Capabilities — provider-agnostic workflows
 
-**Schema:** [`shared/schemas/capabilities.schema.json`](../shared/schemas/capabilities.schema.json) (vocabulary in [`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json)).
+**Schema:** [`registry/schemas/capabilities.schema.json`](../registry/schemas/capabilities.schema.json) (vocabulary in [`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json)).
 **Runtime:** [`plugins/polymath-flows/bin/polymath-flow`](../plugins/polymath-flows/bin/polymath-flow).
 
 ## Why this exists
@@ -40,7 +40,7 @@ entry in the vocabulary — never a new top-level catalog plugin.
 ## Capability vocabulary
 
 Authoritative list in
-[`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json).
+[`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json).
 
 | Capability              | Providers                                                                 |
 | ----------------------- | ------------------------------------------------------------------------- |
@@ -68,7 +68,7 @@ capabilities:
   issue_tracker:
     provider: jira
     # Optional `plugin:` override. Omit to use the catalog default for
-    # this provider (looked up from shared/schemas/capabilities.json).
+    # this provider (looked up from registry/schemas/capabilities.json).
     # plugin: polymath-connector-tracker-internal-fork
   observability:
     provider: datadog
@@ -160,7 +160,7 @@ The other workflows declare provider plugins directly via
 ## Adding a new provider
 
 1. Add the provider token to the relevant capability's `providers`
-   list in [`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json).
+   list in [`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json).
 2. Add a `providerPlugins.<provider>` entry pointing at the adapter
    plugin name.
 3. Ship the adapter plugin (or point at an existing umbrella plugin

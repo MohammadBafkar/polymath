@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scaffold a new polymath-connector-<service> plugin.
 #
-# Usage: tools/new-connector.sh <service> [description]
+# Usage: /polymath-author:new-connector <service> [description]  (bin/new-connector.sh)
 #   service is the bare name, e.g. "slack" → polymath-connector-slack.
 #
 # Generates plugin.json (with userConfig.apiKey), .mcp.json (stub),
@@ -154,7 +154,7 @@ cat > "$plugin_dir/CHANGELOG.md" <<MD
 
 ### Added
 
-- Initial scaffold via \`tools/new-connector.sh\`. Replace stub \`.mcp.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
+- Initial scaffold via \`/polymath-author:new-connector\`. Replace stub \`.mcp.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
 MD
 
 echo "Scaffolded $plugin_dir"

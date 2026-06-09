@@ -149,12 +149,25 @@ def _validate(t: dict[str, Any], workflows: dict[str, dict]) -> list[str]:
     return errs
 
 
-def cmd_check() -> int:
+def _no_fixtures(label: str, where: str, allow_empty: bool) -> int:
+    """A gate with zero fixtures is a silent no-op, not a pass. Fail by
+    default so a deleted/moved fixture set can't make this gate green."""
+    if allow_empty:
+        print(f"{label}: no tests under {where} — allowed by --allow-empty")
+        return 0
+    print(
+        f"{label}: no tests under {where} — refusing to pass an empty gate "
+        f"(pass --allow-empty to override)",
+        file=sys.stderr,
+    )
+    return 1
+
+
+def cmd_check(allow_empty: bool = False) -> int:
     workflows = _workflow_index()
     tests = discover()
     if not tests:
-        print(f"info: no workflow-triggering tests under {TESTS_DIR.relative_to(ROOT)}")
-        return 0
+        return _no_fixtures("workflow-triggering check", str(TESTS_DIR.relative_to(ROOT)), allow_empty)
     fail = 0
     for t in tests:
         errs = _validate(t, workflows)
@@ -246,7 +259,7 @@ def _run_prompt(prompt: str, *, timeout: int) -> tuple[int, str]:
     return proc.returncode, proc.stdout or ""
 
 
-def cmd_run(timeout: int) -> int:
+def cmd_run(timeout: int, allow_empty: bool = False) -> int:
     if shutil.which("claude") is None:
         print(
             "workflow-triggering run: claude CLI not on PATH — skipping (expected "
@@ -258,8 +271,7 @@ def cmd_run(timeout: int) -> int:
     _WORKFLOW_NAMES = set(workflows)
     tests = discover()
     if not tests:
-        print("info: no workflow-triggering tests to run")
-        return 0
+        return _no_fixtures("workflow-triggering run", str(TESTS_DIR.relative_to(ROOT)), allow_empty)
     failures = 0
     for t in tests:
         errs = _validate(t, workflows)
@@ -308,17 +320,21 @@ def cmd_run(timeout: int) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("check")
+    cp = sub.add_parser("check")
+    cp.add_argument("--allow-empty", action="store_true",
+                    help="Exit 0 (not 1) when no tests are present.")
     sub.add_parser("list")
     rp = sub.add_parser("run")
     rp.add_argument("--timeout", type=int, default=120)
+    rp.add_argument("--allow-empty", action="store_true",
+                    help="Exit 0 (not 1) when no tests are present.")
     args = parser.parse_args()
     if args.cmd == "check":
-        return cmd_check()
+        return cmd_check(args.allow_empty)
     if args.cmd == "list":
         return cmd_list()
     if args.cmd == "run":
-        return cmd_run(args.timeout)
+        return cmd_run(args.timeout, args.allow_empty)
     raise AssertionError(args.cmd)
 
 

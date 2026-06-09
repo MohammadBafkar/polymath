@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run conformance checks for one plugin against
-# shared/schemas/plugin-conformance.json.
+# registry/schemas/plugin-conformance.json.
 #
 # Usage:
 #   tools/conformance.sh <plugin-dir>
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-schema_file="$root/shared/schemas/plugin-conformance.json"
+schema_file="$root/registry/schemas/plugin-conformance.json"
 
 if [[ ! -f "$schema_file" ]]; then
   echo "error: $schema_file not found" >&2
@@ -35,7 +35,7 @@ check_one() {
       && echo "  ✓ MANIFEST-2: required fields present" \
       || { echo "  ✗ MANIFEST-2: required field(s) missing"; fail=1; }
     # MANIFEST-3: maturity tier (`status`) declared for this plugin in
-    # shared/polymath-catalog.json. Lives there rather than in
+    # registry/polymath-catalog.json. Lives there rather than in
     # .claude-plugin/marketplace.json because Claude Code's
     # `plugin validate --strict` rejects unknown fields like `status` on
     # plugin entries; the catalog file is Polymath's own schema.
@@ -48,14 +48,14 @@ if not any(p.get('name') == name for p in mp.get('plugins', [])):
     raise SystemExit(f'plugin {name!r} not listed in marketplace.json')
 entry = cat.get('plugins', {}).get(name)
 if entry is None:
-    raise SystemExit(f'plugin {name!r} not listed in shared/polymath-catalog.json')
+    raise SystemExit(f'plugin {name!r} not listed in registry/polymath-catalog.json')
 s = entry.get('status')
 allowed = {'stable', 'beta', 'experimental', 'deprecated'}
 if s not in allowed:
-    raise SystemExit(f'status missing or invalid in shared/polymath-catalog.json: {s!r} (allowed: {sorted(allowed)})')
-" "$manifest" "$root/shared/polymath-catalog.json" "$root/.claude-plugin/marketplace.json" 2>&1 \
-      && echo "  ✓ MANIFEST-3: status declared in shared/polymath-catalog.json (stable / beta / experimental / deprecated)" \
-      || { echo "  ✗ MANIFEST-3: status missing or invalid in shared/polymath-catalog.json"; fail=1; }
+    raise SystemExit(f'status missing or invalid in registry/polymath-catalog.json: {s!r} (allowed: {sorted(allowed)})')
+" "$manifest" "$root/registry/polymath-catalog.json" "$root/.claude-plugin/marketplace.json" 2>&1 \
+      && echo "  ✓ MANIFEST-3: status declared in registry/polymath-catalog.json (stable / beta / experimental / deprecated)" \
+      || { echo "  ✗ MANIFEST-3: status missing or invalid in registry/polymath-catalog.json"; fail=1; }
   fi
   if command -v claude >/dev/null 2>&1; then
     if claude plugin validate --strict "$plugin_dir" >/dev/null 2>&1; then
@@ -90,7 +90,7 @@ if s not in allowed:
   echo "  ✓ SKILL-1: SKILL.md discipline (all under limits)"
 
   # TEMPLATE-1: plugin-owned templates exist; full-artifact templates (those
-  # matching a shared/schemas/artifacts/<Name>.schema.json) have frontmatter.
+  # matching a registry/schemas/artifacts/<Name>.schema.json) have frontmatter.
   # Snippet templates (e.g. CHANGELOG-entry.md) are not required to have
   # frontmatter.
   if [[ -d "$plugin_dir/templates" ]]; then
@@ -99,7 +99,7 @@ if s not in allowed:
       missing=0
       while IFS= read -r -d '' tmpl; do
         base="$(basename "$tmpl" .md)"
-        schema="$root/shared/schemas/artifacts/${base}.schema.json"
+        schema="$root/registry/schemas/artifacts/${base}.schema.json"
         if [[ -f "$schema" ]]; then
           head -1 "$tmpl" | grep -q "^---" || { echo "  ✗ TEMPLATE-1: $tmpl missing frontmatter (schema exists at $schema)"; missing=1; fail=1; }
         fi
@@ -146,8 +146,8 @@ if s not in allowed:
     # A connector may delegate to another connector for the MCP server
     # via the dependencies array. In that case .mcp.json is allowed to
     # be absent. A connector may also wrap a local CLI rather than a
-    # remote service (e.g. polymath-connector-terraform shells out
-    # to `terraform`); those declare the `polymath-cli-only` keyword.
+    # remote service (it shells out to a local binary instead of an
+    # MCP server); those declare the `polymath-cli-only` keyword.
     delegates_mcp=0
     cli_only=0
     if [[ -f "$manifest" ]]; then
@@ -210,7 +210,7 @@ if [[ "$mode" == "--all" ]]; then
     if ! check_one "${plugin%/}"; then overall=1; fi
   done
   # Cross-plugin: marketplace.json, every plugin.json, and
-  # shared/polymath-catalog.json must agree on the plugin set and on
+  # registry/polymath-catalog.json must agree on the plugin set and on
   # per-plugin versions. Independent of whether the Claude CLI is
   # installed; runs the same check in CI without claude on PATH.
   echo
@@ -232,6 +232,18 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # MCP-PKG: every connector .mcp.json package is either confirmed to
+  # resolve on npm or explicitly disclosed as a placeholder in its README.
+  # Prevents a dead-on-install connector (npx -y <missing> never starts)
+  # from shipping silently. Offline/hermetic; see tools/check-connector-mcp.py.
+  echo
+  echo "── MCP-PKG cross-check (check-connector-mcp.py)"
+  if python3 "$root/tools/check-connector-mcp.py"; then
+    :
+  else
+    overall=1
+  fi
+
   # DOCS-2: every plugin README must mention every shipped first-class
   # surface (skill / command / agent / bin executable) by name. Catches
   # READMEs whose "What it ships" list lags the directory after a new
@@ -244,8 +256,8 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
-  # STABILITY-1: shared/stability-evidence.json must back every status
-  # claim in shared/polymath-catalog.json. The ledger is the receipt for
+  # STABILITY-1: registry/stability-evidence.json must back every status
+  # claim in registry/polymath-catalog.json. The ledger is the receipt for
   # a status flip — a plugin can only be `stable` once the ledger
   # records a live bakeoff, live trigger, external adopter, promotion
   # PR, and changelog entry. Connector/infra plugins additionally need
@@ -277,6 +289,17 @@ if [[ "$mode" == "--all" ]]; then
   echo
   echo "── DESC-2 cross-check (check-description-confusion.py check)"
   if python3 "$root/tools/check-description-confusion.py" check; then
+    :
+  else
+    overall=1
+  fi
+
+  # AGENT-1: every plugin agent ships a baseline-beating golden fixture and
+  # does not compete with a workflow on intent (docs/PLUGIN-AUTHORING.md §6 /
+  # §6.1). Blocks the role-as-agent anti-pattern from regressing silently.
+  echo
+  echo "── AGENT-1 cross-check (check-agents.py)"
+  if python3 "$root/tools/check-agents.py"; then
     :
   else
     overall=1
@@ -334,15 +357,18 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
-  # CAPABILITY-INDEX: shared/schemas/capabilities.json providerPlugins{} must match
-  # a fresh build from the per-provider bindings (plugins/<plugin>/bindings/<provider>/
-  # binding.json). tools/build-capability-index.py is the SINGLE PRODUCER, so the map
-  # can no longer be aspirational — a provider is wired iff a binding exists. --strict
+  # CAPABILITY-INDEX + BINDING-1 are ONE gate run by ONE command
+  # (build-capability-index.py --check --strict): --check is the drift guard on
+  # registry/schemas/capabilities.json `providerPlugins{}` (the SINGLE PRODUCER
+  # builds it from the per-provider bindings plugins/<plugin>/bindings/<provider>/
+  # binding.json, so a provider is wired iff a binding exists), and --strict
   # (BINDING-1) requires every binding's provider to appear in its capability's
   # providers[] vocabulary and forbids two plugins claiming the same (capability,
-  # provider). See docs/plans/consolidation-and-dispatch.md Phase 2.
+  # provider). The precomputed `providerPlugins{}` map is RETAINED (not resolved
+  # lazily) because bin/polymath-flow reads it at runtime for O(1) capability →
+  # plugin resolution. See docs/plans/consolidation-and-dispatch.md Phase 2.
   echo
-  echo "── CAPABILITY-INDEX cross-check (build-capability-index.py --check --strict)"
+  echo "── CAPABILITY-INDEX + BINDING-1 cross-check (build-capability-index.py --check --strict)"
   if python3 "$root/tools/build-capability-index.py" --check --strict; then
     :
   else
@@ -373,7 +399,7 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
-  # PROFILE-1: install profiles (shared/polymath-profiles.json) only name
+  # PROFILE-1: install profiles (registry/polymath-profiles.json) only name
   # plugins that exist in the marketplace. Drift-guard so a fold/rename can't
   # leave a dangling profile reference.
   echo

@@ -62,7 +62,7 @@ URL — primary-source evidence (a bakeoff case, side-by-side artifact,
 or documented workflow-shape gap) showing Polymath adds workflow,
 critique, safety, or artifact value beyond the official surface — is
 recorded in
-[`shared/stability-evidence.json`](../shared/stability-evidence.json)
+[`registry/stability-evidence.json`](../registry/stability-evidence.json)
 as `distinct_value_url` and enforced by `tools/check-stability-evidence.py`
 (rule `STABILITY-1`). Without it the ledger blocks the promotion.
 
@@ -84,7 +84,6 @@ release.
 | `polymath-connector-slack`      | Wraps official Slack MCP                                             | Incident-comms + async-update templates                                                      | Demote when Slack MCP ships incident-comms templates.                                      |
 | `polymath-connector-snyk`       | Wraps official Snyk MCP                                              | `triage-vulns` classification (exploitable / reachable / dev-only); Stop hook warns on critical findings | Demote when Snyk MCP ships classification + open-criticals surfacing.                     |
 | `polymath-connector-statuspage` | No official MCP yet (Atlassian Statuspage REST API)                  | Incident-comms drafting tied to severity ladder                                              | Demote when Statuspage ships an official MCP and our wrapper has no delta.                 |
-| `polymath-connector-terraform`  | CLI-only (declares `polymath-cli-only` keyword)                      | Plan/apply review workflow with safety opinions                                              | Demote when an official Terraform MCP covers plan-review.                                  |
 
 ### 3.2 `polymath-infra-*`
 
@@ -100,7 +99,7 @@ than the concrete plugin (see [`docs/CAPABILITIES.md`](CAPABILITIES.md)).
 Projects then map each capability to the configured provider once in
 `.polymath/capabilities.yaml`. New providers join the catalog by:
 
-1. Adding the provider token to `shared/schemas/capabilities.json`
+1. Adding the provider token to `registry/schemas/capabilities.json`
    `providers[]` (the recognised vocabulary).
 2. Dropping a `bindings/<provider>/binding.json` in the adapter plugin
    (transport + `userConfigKeys` + references).
@@ -132,6 +131,43 @@ future option the binding model already supports — see
 [`docs/plans/consolidation-and-dispatch.md`](plans/consolidation-and-dispatch.md)
 Phase 2 (option C). It is intentionally not the default: it would expand the
 marketplace and reverse the recent connector consolidation.
+
+### 4.2 MCP package availability
+
+Each connector's `.mcp.json` runs an MCP server via `npx -y <package>`. Some of
+those package names are **placeholders**: the vendor's MCP server exists, but it
+is distributed as a hosted/remote endpoint, a Go binary, a Python `uvx` package,
+or a CLI subcommand — not under that npm name. `npx -y <placeholder>` fails to
+download and the server never starts, so the connector is dead-on-install until
+the user substitutes the real command.
+
+This is disclosed, not hidden: every affected connector README carries an
+`<!-- mcp-package-status -->` callout, and `tools/check-connector-mcp.py`
+(`MCP-PKG`, wired into `tools/conformance.sh`) fails the build if a `.mcp.json`
+package is neither known-resolving nor disclosed-as-placeholder. The check is
+offline (hermetic CI); run it with `--online` to re-verify against npm.
+
+Verified against npm on 2026-06-08:
+
+| Package | Connector(s) | npm status |
+| --- | --- | --- |
+| `@modelcontextprotocol/server-github` | github | ✅ resolves |
+| `@modelcontextprotocol/server-slack` | slack | ✅ resolves |
+| `@sentry/mcp-server` | sentry | ✅ resolves |
+| `@datadog/mcp-server` | observability | ⚠️ placeholder — does not resolve |
+| `@grafana/mcp-server` | observability | ⚠️ placeholder — does not resolve |
+| `@honeycomb/mcp-server` | observability | ⚠️ placeholder — does not resolve |
+| `@elastic/mcp-server` | observability | ⚠️ placeholder — does not resolve |
+| `@pagerduty/mcp-server` | pagerduty | ⚠️ placeholder — does not resolve |
+| `@snyk/mcp-server` | snyk | ⚠️ placeholder — does not resolve |
+| `@statuspage/mcp-server` | statuspage | ⚠️ placeholder — does not resolve |
+| `@modelcontextprotocol/server-atlassian` | tracker (Jira) | ⚠️ placeholder — does not resolve |
+| `@linear/mcp-server` | tracker (Linear) | ⚠️ placeholder — does not resolve |
+
+When a vendor publishes a resolvable npm package (or the connector is repointed
+at the real distribution), update the package in `.mcp.json`, move it from
+`UNVERIFIED` to `VERIFIED` in `tools/check-connector-mcp.py`, and drop the
+README callout. The placeholder connectors stay `experimental` until then.
 
 ## 5. Enforcement
 

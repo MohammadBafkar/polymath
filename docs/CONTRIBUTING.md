@@ -9,7 +9,7 @@ open-source Claude Code marketplace.
 2. **Per-plugin always-on listing cost ≤ 400 tokens.** Measured by `tools/token-budget.sh`. CI enforces.
 3. **Skill body ≤ 500 lines.** Reference material spills to `references/`.
 4. **Description ≤ 200 chars**, trigger phrase first.
-5. **Each plugin owns its templates** in `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Plan, RFC, Runbook, ArchitectureDoc, DACIDecision, TradeoffMatrix, Postmortem, ThreatModel, PRDescription) is validated against the corresponding JSON schema in `shared/schemas/artifacts/`.
+5. **Each plugin owns its templates** in `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Plan, RFC, Runbook, ArchitectureDoc, DACIDecision, TradeoffMatrix, Postmortem, ThreatModel, PRDescription) is validated against the corresponding JSON schema in `registry/schemas/artifacts/`.
 6. **No secrets** in commits. The `polymath-engineering` secret-scan hook is a backstop, not a permission slip.
 
 ## Workflow

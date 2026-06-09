@@ -9,6 +9,16 @@ PagerDuty connector for the Polymath marketplace.
 - Hooks: `UserPromptSubmit` — detects PagerDuty incident URLs / IDs in the prompt.
 - Reference: [`references/pagerduty-tools.md`](references/pagerduty-tools.md).
 
+<!-- mcp-package-status -->
+> ⚠️ **MCP package not yet published.** This connector's `.mcp.json` names
+> `@pagerduty/mcp-server`, which does **not** resolve on npm as of 2026-06-08,
+> so `npx -y @pagerduty/mcp-server` will fail to start. PagerDuty's MCP server
+> may ship as a hosted endpoint, a different package name, or a CLI subcommand —
+> substitute the real command in `.mcp.json` before relying on this connector.
+> This is part of why the connector is `status: experimental`. See
+> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+<!-- /mcp-package-status -->
+
 ## Installation
 
 ```bash

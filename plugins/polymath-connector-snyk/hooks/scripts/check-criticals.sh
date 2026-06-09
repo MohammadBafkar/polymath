@@ -30,6 +30,9 @@ snyk config get api >/dev/null 2>&1 || exit 0
 # tells us there are open criticals.
 cache="$cwd/.snyk.last.json"
 [[ ! -f "$cache" ]] && exit 0
+# Don't nudge on a stale cache (>24h old): a fixed-since result is a false
+# alarm and a too-old one misses new criticals. Re-run `snyk test` to refresh.
+if [[ -n "$(find "$cache" -mtime +1 2>/dev/null)" ]]; then exit 0; fi
 
 criticals="$(python3 -c "
 import json, sys

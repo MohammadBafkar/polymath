@@ -12,6 +12,16 @@ Statuspage (Atlassian) connector for the Polymath marketplace. Translates intern
 
 - [`polymath-incident`](../polymath-incident/README.md) — `comms-update` writes the internal body; this plugin posts the external one.
 
+<!-- mcp-package-status -->
+> ⚠️ **MCP package not yet published.** This connector's `.mcp.json` names
+> `@statuspage/mcp-server`, which does **not** resolve on npm as of 2026-06-08,
+> so `npx -y @statuspage/mcp-server` will fail to start. There is no official
+> Statuspage MCP server yet (the policy notes the Statuspage REST API) —
+> substitute a real command in `.mcp.json` before relying on this connector.
+> This is part of why the connector is `status: experimental`. See
+> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+<!-- /mcp-package-status -->
+
 ## Installation
 
 ```bash

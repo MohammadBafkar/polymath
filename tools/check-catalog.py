@@ -2,9 +2,9 @@
 """Cross-file consistency check for the Polymath catalog.
 
 Verifies that .claude-plugin/marketplace.json, every plugin's
-.claude-plugin/plugin.json, and shared/polymath-catalog.json all agree
+.claude-plugin/plugin.json, and registry/polymath-catalog.json all agree
 on the plugin set and on per-plugin versions. Also validates the
-catalog file against shared/schemas/polymath-catalog.schema.json when
+catalog file against registry/schemas/polymath-catalog.schema.json when
 jsonschema is installed.
 
 Failure modes this catches that `claude plugin validate --strict`
@@ -25,8 +25,8 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 MARKETPLACE = REPO / ".claude-plugin" / "marketplace.json"
-CATALOG = REPO / "shared" / "polymath-catalog.json"
-CATALOG_SCHEMA = REPO / "shared" / "schemas" / "polymath-catalog.schema.json"
+CATALOG = REPO / "registry" / "polymath-catalog.json"
+CATALOG_SCHEMA = REPO / "registry" / "schemas" / "polymath-catalog.schema.json"
 PLUGINS_DIR = REPO / "plugins"
 
 

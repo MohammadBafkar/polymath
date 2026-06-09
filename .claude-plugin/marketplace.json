@@ -461,18 +461,6 @@
       ]
     },
     {
-      "name": "polymath-connector-terraform",
-      "source": "./plugins/polymath-connector-terraform",
-      "description": "Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "terraform",
-        "iac"
-      ]
-    },
-    {
       "name": "polymath-test-automation",
       "source": "./plugins/polymath-test-automation",
       "description": "Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.",

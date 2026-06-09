@@ -51,7 +51,7 @@ already exists, so you know up front whether this is a create or an update.
      recommended; PyYAML and `jq` are optional (do not mark `jq` required).
    - Environment variables / keys needed, names only, with owner or source if known.
    - The recommended plugin install set for this project. **Start from the
-     closest install profile** in [`shared/polymath-profiles.json`](../../../../shared/polymath-profiles.json)
+     closest install profile** in [`registry/polymath-profiles.json`](../../../../registry/polymath-profiles.json)
      (`backend`, `frontend`, `sre`, `platform`, `pm`, `staff`, `author`) — pick
      the one whose spine matches the inferred stack/role, emit its
      `claude plugin install` line verbatim (every profile already includes the

@@ -1,6 +1,6 @@
 # Workflow YAML schema
 
-Canonical schema: [`shared/schemas/workflow.schema.json`](../shared/schemas/workflow.schema.json).
+Canonical schema: [`registry/schemas/workflow.schema.json`](../registry/schemas/workflow.schema.json).
 Scaffolder template:
 [`plugins/polymath-author/templates/Workflow.yaml`](../plugins/polymath-author/templates/Workflow.yaml)
 (used by `polymath-author:new-workflow`).
@@ -105,7 +105,7 @@ Recognised artifact names for `artifactValid` / `artifactSchemaStrict`:
 `PRD`, `ADR`, `Plan`, `RFC`, `Runbook`, `ArchitectureDoc`,
 `DACIDecision`, `TradeoffMatrix`, `Postmortem`, `ThreatModel`,
 `PRDescription`. Each is backed by a JSON schema under
-[`shared/schemas/artifacts/`](../shared/schemas/artifacts/).
+[`registry/schemas/artifacts/`](../registry/schemas/artifacts/).
 
 ### 4.1 Severity
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scaffold a new Polymath plugin directory.
 #
-# Usage: tools/new-plugin.sh <plugin-name> [description]
+# Usage: /polymath-author:new-plugin <plugin-name> [description]  (bin/new-plugin.sh)
 #   plugin-name is the bare name, e.g. "qa" or "security". The script prepends "polymath-".
 set -euo pipefail
 

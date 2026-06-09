@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Polymath is an open-source Claude Code marketplace: 43 work-shaped plugins covering the full SDLC, 15 YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format, making them portable across Claude Code, Cursor, Codex, Goose, Gemini CLI, and JetBrains Junie.
+Polymath is an open-source Claude Code marketplace: 39 work-shaped plugins covering the full SDLC, 26 YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format, making them portable across Claude Code, Cursor, Codex, Goose, Gemini CLI, and JetBrains Junie.
 
 ## Local validation commands
 
@@ -42,6 +42,14 @@ polymath-author:new-connector <name>
 polymath-author:new-workflow <name>
 ```
 
+Hand-run analysis tools (not CI gates — measurement/diagnostics, run manually):
+
+```bash
+tools/route-eval.py                    # held-out routing measurement (precision/reach vs tests/route-eval/heldout.jsonl); reports, always exits 0 — NOT the tests/route-triggering gate
+tools/analyze-token-usage.py <file>    # break down a `claude -p --output-format stream-json` transcript by token consumption
+tools/check-connector-mcp.py --online  # re-verify connector .mcp.json packages against npm (the offline MCP-PKG gate runs in conformance)
+```
+
 ## Plugin anatomy
 
 Every plugin lives under `plugins/polymath-<name>/` and follows this layout:
@@ -72,21 +80,23 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | --- | --- |
 | MANIFEST-1 | `claude plugin validate --strict` passes |
 | MANIFEST-2 | plugin.json has `name`, `version`, `description`, `license` |
-| MANIFEST-3 | Plugin has a `status` in `shared/polymath-catalog.json` (`stable` / `beta` / `experimental` / `deprecated`) |
+| MANIFEST-3 | Plugin has a `status` in `registry/polymath-catalog.json` (`stable` / `beta` / `experimental` / `deprecated`) |
 | SKILL-1 | SKILL.md description ≤200 chars, body ≤500 lines |
-| TEMPLATE-1 | Templates whose name matches `shared/schemas/artifacts/*.schema.json` must have frontmatter |
-| WORKFLOW-1 | Workflow YAML validates against `shared/schemas/workflow.schema.json` |
+| TEMPLATE-1 | Templates whose name matches `registry/schemas/artifacts/*.schema.json` must have frontmatter |
+| WORKFLOW-1 | Workflow YAML validates against `registry/schemas/workflow.schema.json` |
 | WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |
 | SURFACE-INDEX | `plugins/polymath-core/data/route-signals.json` + `surface-index.json` match a fresh `tools/build-surface-index.py` build (diff-guard); `--strict` (SURFACE-2) requires every intent / url / regex pattern to be globally unique across all surfaces |
-| CAPABILITY-INDEX | `shared/schemas/capabilities.json` `providerPlugins{}` matches a fresh `tools/build-capability-index.py` build from per-provider `bindings/<provider>/binding.json` (diff-guard); `--strict` (BINDING-1) requires every binding's provider to be in its capability's `providers[]`, forbids two plugins claiming one `(capability, provider)`, and requires each `mcp` binding's `server` + `userConfigKeys` to exist in the plugin's `.mcp.json` / `plugin.json` |
-| TOOL-1 | every `tools/<name>/tool.json` validates against `shared/schemas/tool.schema.json` (enforced by `build-surface-index.py`, i.e. SURFACE-INDEX) |
-| TRUST-1 | a `routing.yaml` `trust` value is `propose` (default) or `auto-headless`; `auto` is reserved and fails `build-surface-index.py` until per-surface write-scope analysis exists |
+| CAPABILITY-INDEX | `registry/schemas/capabilities.json` `providerPlugins{}` matches a fresh `tools/build-capability-index.py` build from per-provider `bindings/<provider>/binding.json` (diff-guard); `--strict` (BINDING-1) requires every binding's provider to be in its capability's `providers[]`, forbids two plugins claiming one `(capability, provider)`, and requires each `mcp` binding's `server` + `userConfigKeys` to exist in the plugin's `.mcp.json` / `plugin.json` |
+| TOOL-1 | every `tools/<name>/tool.json` validates against `registry/schemas/tool.schema.json` (enforced by `build-surface-index.py`, i.e. SURFACE-INDEX) |
+| TRUST-1 | a `routing.yaml` `trust` value is `propose` (default) or `auto-headless` — enforced by the `registry/schemas/surface-routing.schema.json` `trust` enum (`build-surface-index.py` validates every sidecar against it). Unconditional `auto` is intentionally not in the enum until per-surface write-scope analysis exists |
 | WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
 | DESC-2 | `tools/check-description-confusion.py check`: `tests/forbidden_prompts.yaml` cases are well-formed (referenced skills exist). Behavioural `run` mode is opt-in under `CLAUDE_CODE_OAUTH_TOKEN` |
 | CONNECTOR-1 | Connector plugins need `.mcp.json`, `references/*.md`, and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only` |
 | CONNECTOR-2 | `polymath-connector-*` and `polymath-infra-*` must be audited in `docs/CONNECTOR-POLICY.md` |
+| MCP-PKG | `tools/check-connector-mcp.py`: every connector `.mcp.json` package is confirmed to resolve on npm or disclosed as a placeholder (`<!-- mcp-package-status -->`) in its README — no dead-on-install connector ships silently. Offline; `--online` re-verifies vs npm |
+| AGENT-1 | `tools/check-agents.py`: every `plugins/*/agents/<name>.md` has a baseline-beating golden fixture at `tests/golden/<plugin>/agent-<name>.md` (frontmatter `agent: <name>` + an `expect` trace), and no agent name/description collides with a workflow name or trigger phrase (the role-as-agent guard, PLUGIN-AUTHORING §6/§6.1) |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |
 | DOCS-1 | Both `README.md` and `CHANGELOG.md` present in plugin root |
 
@@ -94,7 +104,7 @@ When adding a new connector, populate the `polymath_value` row in [docs/CONNECTO
 
 ## Workflow YAML architecture
 
-Workflows live in `plugins/polymath-flows/workflows/*.yaml` and are executed by `plugins/polymath-flows/bin/polymath-flow` — a deterministic state machine with resume and `mustPass` validation. The schema is `shared/schemas/workflow.schema.json`.
+Workflows live in `plugins/polymath-flows/workflows/*.yaml` and are executed by `plugins/polymath-flows/bin/polymath-flow` — a deterministic state machine with resume and `mustPass` validation. The schema is `registry/schemas/workflow.schema.json`.
 
 A workflow step looks like:
 
@@ -113,9 +123,9 @@ Workflows also declare a routing surface — `whenToUse` (a terse, always-on hin
 
 ## Deterministic surface routing (route-signals)
 
-Any surface — skill, workflow, or tool — can opt into the deterministic prompt-time route hint (the `polymath-core` `route-hint` `UserPromptSubmit` hook) by dropping a `routing.yaml` sidecar declaring hard signals (`url` / `regex` / `paths` / `diff`) and soft `intents`. Skills declare it next to `SKILL.md` (`skills/<skill>/routing.yaml`); workflows declare it in `plugins/polymath-flows/routing/<name>.yaml` (kept outside the `workflows/*.yaml` glob so the flows validator never sees it). **Tools** are a first-class unit too: a `tools/<name>/tool.json` manifest (validated by [`shared/schemas/tool.schema.json`](shared/schemas/tool.schema.json), `TOOL-1`, enforced by the SURFACE-INDEX gate) plus an optional `routing.yaml` — added like a skill and dispatched through the same registry. This replaced the per-connector bash "detect-and-hint" scripts: detection signals now live in `routing.yaml`, and the MCP tool detail in `tool.json`.
+Any surface — skill, workflow, or tool — can opt into the deterministic prompt-time route hint (the `polymath-core` `route-hint` `UserPromptSubmit` hook) by dropping a `routing.yaml` sidecar declaring hard signals (`url` / `regex` / `paths` / `diff`) and soft `intents`. Skills declare it next to `SKILL.md` (`skills/<skill>/routing.yaml`); workflows declare it in `plugins/polymath-flows/routing/<name>.yaml` (kept outside the `workflows/*.yaml` glob so the flows validator never sees it). **Tools** are a first-class unit too: a `tools/<name>/tool.json` manifest (validated by [`registry/schemas/tool.schema.json`](registry/schemas/tool.schema.json), `TOOL-1`, enforced by the SURFACE-INDEX gate) plus an optional `routing.yaml` — added like a skill and dispatched through the same registry. This replaced the per-connector bash "detect-and-hint" scripts: detection signals now live in `routing.yaml`, and the MCP tool detail in `tool.json`.
 
-Three further dispatch facets build on this registry: a surface may declare `trust: auto-headless` so the agent MAY run it without confirmation in a non-interactive session (`auto` is reserved by `TRUST-1`); a workflow may declare `chainsTo: [<workflow>...]` so the runner proposes the natural next arc on completion (never auto-runs; dangling targets fail `build-workflow-index --strict`); and a `PostToolUse` event-trigger hook (`polymath-core/hooks/scripts/event-trigger.py`) proposes a surface from what just happened (e.g. a failed test run → `bugTriage`), the general form of the per-connector `Stop` nudges. `tools/build-surface-index.py` is the **single producer** that compiles every sidecar into `plugins/polymath-core/data/route-signals.json` (formerly hand-maintained) plus a `surface-index.json` catalog, validating each against [`shared/schemas/surface-routing.schema.json`](shared/schemas/surface-routing.schema.json) and enforcing globally-unique intent/url/regex patterns (`SURFACE-2`). Re-run the builder after editing any `routing.yaml`; the `SURFACE-INDEX` gate fails on drift. The full design lives in [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md).
+Three further dispatch facets build on this registry: a surface may declare `trust: auto-headless` so the agent MAY run it without confirmation in a non-interactive session (unconditional `auto` is not an allowed value — the surface-routing schema enum permits only `propose`/`auto-headless`, `TRUST-1`); a workflow may declare `chainsTo: [<workflow>...]` so the runner proposes the natural next arc on completion (never auto-runs; dangling targets fail `build-workflow-index --strict`); and a `PostToolUse` event-trigger hook (`polymath-core/hooks/scripts/event-trigger.py`) proposes a surface from what just happened (e.g. a failed test run → `bugTriage`), the general form of the per-connector `Stop` nudges. `tools/build-surface-index.py` is the **single producer** that compiles every sidecar into `plugins/polymath-core/data/route-signals.json` (formerly hand-maintained) plus a `surface-index.json` catalog, validating each against [`registry/schemas/surface-routing.schema.json`](registry/schemas/surface-routing.schema.json) and enforcing globally-unique intent/url/regex patterns (`SURFACE-2`). Re-run the builder after editing any `routing.yaml`; the `SURFACE-INDEX` gate fails on drift. The full design lives in [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md).
 
 ## Project localization
 
@@ -125,7 +135,7 @@ See [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) for the full sc
 
 ## Marketplace registration
 
-Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) (Claude's catalog manifest) AND in [shared/polymath-catalog.json](shared/polymath-catalog.json) (Polymath's own catalog, where `status` lives). Update both when adding or renaming a plugin. `status` cannot live in `marketplace.json` or `plugin.json` — Claude Code's `--strict` validator rejects unknown fields in both, and `MANIFEST-3` enforces presence in the Polymath catalog. `tools/check-catalog.py` rejects divergent plugin sets between the two files.
+Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) (Claude's catalog manifest) AND in [registry/polymath-catalog.json](registry/polymath-catalog.json) (Polymath's own catalog, where `status` lives). Update both when adding or renaming a plugin. `status` cannot live in `marketplace.json` or `plugin.json` — Claude Code's `--strict` validator rejects unknown fields in both, and `MANIFEST-3` enforces presence in the Polymath catalog. `tools/check-catalog.py` rejects divergent plugin sets between the two files.
 
 ## Commit and PR conventions
 
@@ -144,4 +154,4 @@ Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/mar
 | [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) | `.polymath/project.yaml` schema |
 | [docs/CAPABILITIES.md](docs/CAPABILITIES.md) | Capability → provider mapping vocabulary |
 | [docs/QUALITY-SCORECARD.md](docs/QUALITY-SCORECARD.md) | Promotion bar and proof loop |
-| [shared/schemas/](shared/schemas/) | JSON schemas for workflows, project, capabilities, artifacts |
+| [registry/schemas/](registry/schemas/) | JSON schemas for workflows, project, capabilities, artifacts |

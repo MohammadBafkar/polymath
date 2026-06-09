@@ -49,6 +49,13 @@
 <p>from the former <code>polymath-finops</code> — cost is a property of the cloud</p>
 <p>choice, so it lives with the cloud-pattern skills.)</p>
 <ul>
+<li><code>plan-review</code> — read a <code>terraform plan</code> (binary or JSON) and surface</li>
+</ul>
+<p>destructive actions, drift, replacements, and unsafe diffs with a</p>
+<p>go/no-go recommendation before apply. (Folded in from the former</p>
+<p><code>polymath-connector-terraform</code>, which was a CLI-only skill with no MCP</p>
+<p>server — it belongs with the IaC design skills.)</p>
+<ul>
 <li><strong>Commands:</strong> <code>/design-aws</code>, <code>/design-gcp</code>, <code>/design-azure</code>,</li>
 </ul>
 <p><code>/design-terraform-stack</code> (thin aliases).</p>
@@ -63,10 +70,6 @@
 <li><code>polymath-backend</code> for migration safety (<code>review-migration</code>,</li>
 </ul>
 <p><code>audit-pg-config</code>) on the DB choice.</p>
-<ul>
-<li><code>polymath-connector-terraform</code> for plan-review when the IaC</li>
-</ul>
-<p>changes land.</p>
 <ul>
 <li>Official cloud CLI / MCP for actual operations (<code>aws</code>, <code>gcloud</code>,</li>
 </ul>

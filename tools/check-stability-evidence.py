@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""STABILITY-1: enforce shared/stability-evidence.json against the catalog.
+"""STABILITY-1: enforce registry/stability-evidence.json against the catalog.
 
-The ledger at shared/stability-evidence.json is the receipt for every
-status claim in shared/polymath-catalog.json. A status flip to `stable`
+The ledger at registry/stability-evidence.json is the receipt for every
+status claim in registry/polymath-catalog.json. A status flip to `stable`
 on its own is just a marketing change; the ledger is what proves the
 plugin has earned the tier.
 
 This checker enforces:
 
   1. Ledger validates against
-     shared/schemas/stability-evidence.schema.json (when jsonschema is
+     registry/schemas/stability-evidence.schema.json (when jsonschema is
      installed).
-  2. Every plugin in shared/polymath-catalog.json has exactly one ledger
+  2. Every plugin in registry/polymath-catalog.json has exactly one ledger
      entry, and vice versa.
   3. target_status is greater-than-or-equal to current catalog status
      on the experimental → beta → stable ladder (deprecated is
@@ -43,9 +43,9 @@ import pathlib
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-CATALOG = REPO / "shared" / "polymath-catalog.json"
-LEDGER = REPO / "shared" / "stability-evidence.json"
-LEDGER_SCHEMA = REPO / "shared" / "schemas" / "stability-evidence.schema.json"
+CATALOG = REPO / "registry" / "polymath-catalog.json"
+LEDGER = REPO / "registry" / "stability-evidence.json"
+LEDGER_SCHEMA = REPO / "registry" / "schemas" / "stability-evidence.schema.json"
 
 # experimental < beta < stable; deprecated is off-ladder.
 LADDER = {"experimental": 0, "beta": 1, "stable": 2}
@@ -80,9 +80,9 @@ def main() -> int:
 
     # 2. Plugin-set agreement.
     for name in sorted(catalog_names - ledger_names):
-        errors.append(f"{name}: in shared/polymath-catalog.json but missing from shared/stability-evidence.json")
+        errors.append(f"{name}: in registry/polymath-catalog.json but missing from registry/stability-evidence.json")
     for name in sorted(ledger_names - catalog_names):
-        errors.append(f"{name}: in shared/stability-evidence.json but missing from shared/polymath-catalog.json")
+        errors.append(f"{name}: in registry/stability-evidence.json but missing from registry/polymath-catalog.json")
 
     # 3 + 4 + 5. Per-entry checks.
     for name in sorted(catalog_names & ledger_names):
@@ -189,7 +189,7 @@ def main() -> int:
     n = len(catalog_names)
     print(
         f"check-stability-evidence: OK — {n} plugins have evidence ledger entries "
-        f"consistent with shared/polymath-catalog.json"
+        f"consistent with registry/polymath-catalog.json"
     )
     return 0
 

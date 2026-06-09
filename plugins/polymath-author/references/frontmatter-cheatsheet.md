@@ -77,7 +77,7 @@ fills in. Skills reference templates by relative path:
 ```
 
 The plugin templates have frontmatter that the corresponding artifact schema
-(`shared/schemas/artifacts/<Artifact>.schema.json`) validates via the
+(`registry/schemas/artifacts/<Artifact>.schema.json`) validates via the
 `artifactValid` `mustPass` check in a workflow.
 
 ## 5. hooks/hooks.json (plugins that ship hooks)

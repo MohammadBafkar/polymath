@@ -26,6 +26,17 @@ shape of `polymath-connector-observability`.
 - References: [`references/jira-tools.md`](references/jira-tools.md),
   [`references/linear-tools.md`](references/linear-tools.md).
 
+<!-- mcp-package-status -->
+> ⚠️ **MCP packages not yet published.** This connector's `.mcp.json` names
+> `@modelcontextprotocol/server-atlassian` (Jira) and `@linear/mcp-server`,
+> neither of which resolves on npm as of 2026-06-08, so the `npx -y …` commands
+> will fail to start. Atlassian and Linear both offer **hosted/remote** MCP
+> servers (and there are community npm packages) rather than these names —
+> substitute the real command for your tracker in `.mcp.json` before relying on
+> this connector. This is part of why it is `status: experimental`. See
+> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+<!-- /mcp-package-status -->
+
 ## Installation
 
 ```bash

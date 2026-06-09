@@ -41,7 +41,7 @@ elsewhere is intentional.
   [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md). Connectors
   are now **eligible for `beta` and `stable`** — but only after
   primary-source distinct-value proof is published in
-  [`shared/stability-evidence.json`](shared/stability-evidence.json)
+  [`registry/stability-evidence.json`](registry/stability-evidence.json)
   as `distinct_value_url`. The previous "stay experimental" default
   has been replaced by an evidence gate.
 - **Cloud resource operations.** For one-off operations against AWS /
@@ -79,21 +79,29 @@ elsewhere is intentional.
   further requires a live bakeoff ≥ 8 / delta ≥ 2 **and** at least one
   external user beyond the maintainer. Every status claim is backed by
   the evidence ledger at
-  [`shared/stability-evidence.json`](shared/stability-evidence.json)
+  [`registry/stability-evidence.json`](registry/stability-evidence.json)
   (enforced by `tools/check-stability-evidence.py`, rule `STABILITY-1`).
   No plugin in the catalog is `stable` today.
 
 ## 4. Known operational gaps
 
-- **Live-model fixtures are currently disabled.** The
-  `claude-cli-fixtures` job in
+- **Live-model fixtures are currently disabled.** Only the jobs that
+  call a real model are off: `claude-cli-fixtures` in
   [`.github/workflows/golden-tests.yml`](.github/workflows/golden-tests.yml.disabled)
-  and the `live-bakeoff` job in
+  and `live-bakeoff` in
   [`.github/workflows/evaluation.yml`](.github/workflows/evaluation.yml.disabled)
   were disabled (renamed to `*.yml.disabled`) to avoid spending Claude
-  API budget on every push. While disabled, CI no longer proves real
-  model behaviour. To re-enable: rename the files back and set
-  `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets.
+  API budget on every push. The six token-free deterministic jobs that
+  used to share `golden-tests.yml` (executable unit tests, the
+  shipFeature scratch-repo e2e, the hollow-run falsifiability anchor,
+  golden-fixture frontmatter parsing, skill-triggering frontmatter, and
+  bakeoff-case parsing) now run on every PR and push in
+  [`.github/workflows/golden-deterministic.yml`](.github/workflows/golden-deterministic.yml)
+  — they are **not** disabled. So CI still proves the executable
+  workflow runner, the gate hardening, and fixture well-formedness; what
+  it does not prove while the live jobs are off is real model behaviour.
+  To re-enable the live gate: rename the `*.yml.disabled` files back and
+  set `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`) in repo secrets.
 - **The fallback YAML parser in `polymath-flow` folds block scalars.**
   `|` and `>` are both treated as folded — newlines collapse to
   spaces. Workflows that depend on newline-preserving prompts must

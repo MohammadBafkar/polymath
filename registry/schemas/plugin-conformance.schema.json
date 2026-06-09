@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/plugin-conformance.schema.json",
+  "title": "Polymath plugin conformance",
+  "description": "Conformance criteria a plugin must satisfy before submission to the community marketplace. Each criterion produces a binary pass/fail in tools/conformance.sh.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["criteria"],
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "enum": [0.1]
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "level", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z]+-\\d+$",
+            "description": "Stable identifier (e.g. MANIFEST-1, BUDGET-1, DOCS-1)."
+          },
+          "level": {
+            "type": "string",
+            "enum": ["required", "recommended", "informational"]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 400
+          },
+          "evidence": {
+            "type": "string",
+            "description": "How conformance is checked (script command, file existence, etc.)."
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

@@ -69,7 +69,7 @@ A plugin reaches `stable` when it has:
    `promotion_pr`, anchor as `changelog_entry`.
 
 All six receipts are stored per plugin in
-[`shared/stability-evidence.json`](../shared/stability-evidence.json)
+[`registry/stability-evidence.json`](../registry/stability-evidence.json)
 and enforced by
 [`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
 (rule `STABILITY-1`). The human-facing view of the ledger is

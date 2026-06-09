@@ -2,7 +2,7 @@
 """polymath-flow — deterministic flows-lite workflow runner.
 
 Owns:
-  - workflow YAML validation against shared/schemas/workflow.schema.json
+  - workflow YAML validation against registry/schemas/workflow.schema.json
   - workflow state (start, next, complete, fail, resume, list)
   - mustPass deterministic checks (fileExists, fileMatches, commandSucceeds,
     stepSummaryMatches, command guards)
@@ -267,7 +267,7 @@ PLUGIN_ROOT = SCRIPT_DIR.parent
 # Capability vocabulary + project resolution
 # ---------------------------------------------------------------------------
 
-# The vocabulary lives at shared/schemas/capabilities.json in the marketplace
+# The vocabulary lives at registry/schemas/capabilities.json in the marketplace
 # tree. We load it lazily so the script can still run in environments that
 # don't ship the schemas (e.g. a partial install). Callers must handle the
 # `None` case by treating the workflow as having no capability requirements.
@@ -286,9 +286,9 @@ KNOWN_CAPABILITIES = {
 
 
 def _load_capability_vocabulary() -> dict:
-    """Read shared/schemas/capabilities.json from the marketplace tree."""
+    """Read registry/schemas/capabilities.json from the marketplace tree."""
     # PLUGIN_ROOT is .../plugins/polymath-flows; repo root is two levels up.
-    cand = PLUGIN_ROOT.parent.parent / "shared" / "schemas" / "capabilities.json"
+    cand = PLUGIN_ROOT.parent.parent / "registry" / "schemas" / "capabilities.json"
     if cand.exists():
         try:
             return json.loads(cand.read_text())
@@ -409,7 +409,7 @@ def _resolve_capability_requirements(
                 f"capability {cap_name}: no plugin mapping for provider "
                 f"{proj_provider!r} (set `plugin:` in "
                 f".polymath/capabilities.yaml or add the provider to "
-                f"shared/schemas/capabilities.json)"
+                f"registry/schemas/capabilities.json)"
             )
             continue
 
@@ -1422,15 +1422,15 @@ _REPO_ROOT_CANDIDATES = [
 
 def _find_artifact_schema(artifact: str) -> pathlib.Path | None:
     for root in _REPO_ROOT_CANDIDATES:
-        cand = root / "shared" / "schemas" / "artifacts" / f"{artifact}.schema.json"
+        cand = root / "registry" / "schemas" / "artifacts" / f"{artifact}.schema.json"
         if cand.exists():
             return cand
-        cand = root / "shared" / "schemas" / "artifacts" / f"{artifact.replace('-', '_')}.schema.json"
+        cand = root / "registry" / "schemas" / "artifacts" / f"{artifact.replace('-', '_')}.schema.json"
         if cand.exists():
             return cand
         # Allow PascalCase artifact named with a hyphen on disk
         if artifact == "ThreatModel":
-            cand = root / "shared" / "schemas" / "artifacts" / "Threat-model.schema.json"
+            cand = root / "registry" / "schemas" / "artifacts" / "Threat-model.schema.json"
             if cand.exists():
                 return cand
     return None

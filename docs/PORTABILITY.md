@@ -26,7 +26,16 @@ returns non-zero) if a coupled skill is missing its banner or any cross-skill /
 python3 tools/export-agents-skills.py --clean
 # → dist/agents-skills/<plugin>-<skill>/SKILL.md
 # → dist/agents-skills/manifest.json
+
+# CI runs this on every PR/push (no artifacts, builds into a temp dir):
+python3 tools/export-agents-skills.py --check
 ```
+
+The `--check` mode (wired into `.github/workflows/portability-export.yml`)
+builds the bundle into a throwaway temp directory, runs the same fail-closed
+lint, and validates `manifest.json`, so a frontmatter change or template move
+that would break the export is caught in CI rather than the first time a user
+runs it.
 
 Drop the contents of `dist/agents-skills/` into whichever well-known
 directory your harness reads from (table below). Run the harness; it
@@ -46,7 +55,7 @@ will pick up the skills.
 | `.mcp.json` | No | The Model Context Protocol server *can* be used by other clients, but the `.mcp.json` discovery layout is Claude-Code-specific. Configure the MCP server directly in your client (Codex: `codex mcp add`; Cursor: `mcp.json`). |
 | `workflows/*.yaml` | No | The polymath-flows runner is a Polymath executable. |
 | `bin/<exe>` | No | Plugin-shipped binaries are Claude Code's plugin surface. |
-| `shared/schemas/artifacts/*.json` | No | Polymath's artifact validation tooling is not portable; the schemas themselves are public and can be reused by any JSON-schema validator. |
+| `registry/schemas/artifacts/*.json` | No | Polymath's artifact validation tooling is not portable; the schemas themselves are public and can be reused by any JSON-schema validator. |
 | `.polymath/project.yaml` | No | Loaded by polymath-core's SessionStart hook into a snapshot at `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`. Other harnesses have their own per-project conventions. |
 
 ## Target harnesses

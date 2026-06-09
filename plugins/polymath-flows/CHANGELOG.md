@@ -4,13 +4,17 @@
 
 ### Added
 
-- Five composed workflow arcs: `prdToShip` (ship from an existing PRD),
+- Four composed workflow arcs: `prdToShip` (ship from an existing PRD),
   `estimateAndPlan` (clear goal → WBS + estimate + plan), `requirementsToBacklog`
-  (PRD → decomposed/groomed/estimated backlog), `progressiveRollout` (staged
-  flag rollout with SLO gates, no A/B), and `incidentToReview` (live incident →
-  filed follow-up actions). Each ships routing metadata + a workflow-triggering
-  test. The injected index token ceiling was recalibrated (450 → 560) for 27
-  workflows — the last flat-surface bump before a tiered injection at ~30.
+  (PRD → decomposed/groomed/estimated backlog), and `progressiveRollout` (staged
+  flag rollout with SLO gates, no A/B). Each ships routing metadata + a
+  workflow-triggering test. The injected index token ceiling was recalibrated
+  (450 → 560) for the workflow set — the last flat-surface bump before a tiered
+  injection at ~30.
+  - A fifth arc, `incidentToReview`, was dropped before release: it competed
+    head-to-head with the `respondToIncident → incidentRetroToActions` chain on
+    the same `docs/postmortems/**` detect path. Its arc trigger phrasings were
+    migrated onto `respondToIncident` (which `chainsTo incidentRetroToActions`).
 
 - Workflow discoverability: every workflow now declares optional
   `whenToUse` / `triggers` / `detectionSignals`, and a SessionStart hook

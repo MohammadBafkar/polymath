@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/artifacts/PRD.schema.json",
+  "title": "Polymath PRD frontmatter",
+  "description": "Validates only the YAML frontmatter block of a PRD.md. The Markdown body stays free-form.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["artifact", "title", "status", "owner", "created"],
+  "properties": {
+    "artifact": { "const": "PRD" },
+    "schemaVersion": { "type": "number", "enum": [0.1] },
+    "title": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "in-review", "approved", "shipped", "deprecated"]
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "created": { "type": "string", "format": "date" }
+  }
+}

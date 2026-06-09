@@ -2,7 +2,7 @@ schemaVersion: 0.1
 name: deprecationToRemoval
 version: 0.1.0
 description: Multi-quarter capability removal — announce, deprecate-in-code, midterm usage-decline check, then remove only when usage is below threshold and the removal date has arrived.
-whenToUse: "Multi-quarter, usage-gated capability removal."
+whenToUse: "Multi-quarter, usage-gated capability removal. Not the simple two-stage notice-then-remove — use sunsetCapability for that."
 triggers:
   - "deprecate this over time"
   - "plan a multi-quarter sunset"

@@ -45,6 +45,7 @@ import pathlib
 import re
 import shutil
 import sys
+import tempfile
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 PLUGINS_DIR = REPO / "plugins"
@@ -138,7 +139,7 @@ def export_skill(skill_dir: pathlib.Path, plugin: pathlib.Path, out_root: pathli
     new_body = SIBLING_LINK.sub(
         lambda m: f"(../{m.group(1)}-{m.group(2)}/SKILL.md)", new_body
     )
-    # Any remaining `../` link (to shared/, docs/, …) does not exist in the flat
+    # Any remaining `../` link (to registry/, docs/, …) does not exist in the flat
     # bundle — drop the link, keep the label as plain text so nothing 404s.
     new_body = OTHER_REL_LINK.sub(lambda m: m.group(1), new_body)
 
@@ -194,17 +195,71 @@ def lint_output(out_root: pathlib.Path) -> list[str]:
     return problems
 
 
+def validate_manifest(manifest: dict) -> list[str]:
+    """Structural checks on the emitted manifest (used by --check)."""
+    problems: list[str] = []
+    if manifest.get("spec") != "agentskills.io":
+        problems.append(f"manifest spec is {manifest.get('spec')!r}, expected 'agentskills.io'")
+    if not manifest.get("specVersion"):
+        problems.append("manifest missing specVersion")
+    skills = manifest.get("skills", [])
+    if manifest.get("skillCount") != len(skills):
+        problems.append(f"manifest skillCount {manifest.get('skillCount')} != {len(skills)} skills listed")
+    if manifest.get("portableCount", 0) + manifest.get("claudeCoupledCount", 0) != len(skills):
+        problems.append("manifest portableCount + claudeCoupledCount != skillCount")
+    required = {"exported_name", "source_plugin", "source_skill", "portability"}
+    for e in skills:
+        missing = required - e.keys()
+        if missing:
+            problems.append(
+                f"manifest skill entry {e.get('exported_name', '?')} missing keys: {sorted(missing)}"
+            )
+            break
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=pathlib.Path, default=DEFAULT_OUT,
                         help="Output directory (default: dist/agents-skills)")
     parser.add_argument("--clean", action="store_true",
-                        help="Remove the output directory before exporting.")
+                        help="Remove the output directory before exporting "
+                             "(refused outside dist/ unless --force).")
+    parser.add_argument("--force", action="store_true",
+                        help="Permit --clean to remove a path outside dist/.")
+    parser.add_argument("--check", action="store_true",
+                        help="Build into a throwaway temp dir, validate the "
+                             "manifest, and clean up. Touches nothing in dist/. "
+                             "Exit non-zero on any export/lint/manifest problem.")
     args = parser.parse_args()
 
-    out_root: pathlib.Path = args.out
-    if args.clean and out_root.exists():
-        shutil.rmtree(out_root)
+    def display(p: pathlib.Path) -> pathlib.Path | str:
+        try:
+            return p.relative_to(REPO)
+        except ValueError:
+            return p
+
+    # --check builds into a throwaway temp dir and validates the result, so it
+    # never touches dist/ and leaves nothing behind.
+    if args.check:
+        out_root = pathlib.Path(tempfile.mkdtemp(prefix="polymath-export-check-"))
+    else:
+        # --clean does a recursive delete; refuse to point it anywhere but dist/
+        # (the only directory this tool owns) unless the caller forces it.
+        # Without this guard a stray `--out` would silently rmtree an unrelated tree.
+        out_root = args.out.resolve()
+        dist_root = (REPO / "dist").resolve()
+        if args.clean and out_root.exists():
+            within_dist = out_root == dist_root or out_root.is_relative_to(dist_root)
+            if not within_dist and not args.force:
+                print(
+                    f"export-agents-skills: refusing to --clean {display(out_root)}: "
+                    f"not under {display(dist_root)}/ — re-run with --force to override.",
+                    file=sys.stderr,
+                )
+                return 2
+            print(f"export-agents-skills: removing {display(out_root)}")
+            shutil.rmtree(out_root)
     out_root.mkdir(parents=True, exist_ok=True)
 
     entries: list[dict] = []
@@ -239,29 +294,30 @@ def main() -> int:
                 ".mcp.json",
                 "workflows/*.yaml (polymath-flows runner)",
                 "bin/<exe>",
-                "shared/schemas/artifacts/*.json",
+                "registry/schemas/artifacts/*.json",
                 ".polymath/project.yaml + capabilities.yaml",
             ],
         },
     }
     (out_root / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
-    def display(p: pathlib.Path) -> pathlib.Path | str:
-        try:
-            return p.relative_to(REPO)
-        except ValueError:
-            return p
     print(f"export-agents-skills: wrote {len(entries)} skill(s) to {display(out_root)}")
     print(f"manifest:              {display(out_root / 'manifest.json')}")
     print(f"portability:           {portable_count} portable, {coupled_count} Claude-coupled (bannered)")
 
     problems = lint_output(out_root)
+    problems += validate_manifest(manifest)
+    if args.check:
+        shutil.rmtree(out_root, ignore_errors=True)
     if problems:
         for p in problems:
             print(f"::error::export lint: {p}", file=sys.stderr)
         print(f"\nexport-agents-skills: {len(problems)} portability problem(s)", file=sys.stderr)
         return 1
-    print("export lint:           OK — no dead relative links; coupled skills bannered")
+    if args.check:
+        print(f"export --check:        OK — {len(entries)} skill(s) export cleanly, manifest valid")
+    else:
+        print("export lint:           OK — no dead relative links; coupled skills bannered")
     return 0
 
 

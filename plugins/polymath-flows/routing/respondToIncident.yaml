@@ -1,6 +1,6 @@
 # Routing declaration for polymath-flows:run-workflow respondToIncident (workflow). Compiled into
 # route-signals.json by tools/build-surface-index.py.
-# Schema: shared/schemas/surface-routing.schema.json
+# Schema: registry/schemas/surface-routing.schema.json
 url:
 - https?://[^/\s]+\.pagerduty\.com/incidents/[A-Z0-9]+
 - https?://[^/\s]+\.statuspage\.io

@@ -40,6 +40,17 @@ to one plugin across all four providers.
 - `polymath-incident:postmortem-blameless` — snapshots become
   postmortem evidence.
 
+<!-- mcp-package-status -->
+> ⚠️ **MCP packages not yet published.** This connector's `.mcp.json` names
+> `@datadog/mcp-server`, `@grafana/mcp-server`, `@honeycomb/mcp-server`, and
+> `@elastic/mcp-server` — **none** resolve on npm as of 2026-06-08, so the
+> `npx -y …` commands will fail to start. Each vendor distributes its MCP server
+> differently (hosted endpoint, Go binary, or a different package) — substitute
+> the real command(s) in `.mcp.json` for the provider(s) you use before relying
+> on this connector. This is part of why it is `status: experimental`. See
+> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+<!-- /mcp-package-status -->
+
 ## Installation
 
 ```bash

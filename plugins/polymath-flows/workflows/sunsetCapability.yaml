@@ -2,7 +2,7 @@ schemaVersion: 0.1
 name: sunsetCapability
 version: 0.1.0
 description: Sunset a capability — write the customer-facing notice, deprecate in code with warnings, then later remove + release-note the change.
-whenToUse: "Two-stage sunset: notice + deprecate, remove later."
+whenToUse: "Two-stage sunset: notice + deprecate, remove later. Not usage-gated — use deprecationToRemoval for multi-quarter, usage-gated removal."
 triggers:
   - "sunset this endpoint"
   - "deprecate this with a customer notice"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scaffold a new flows-lite workflow YAML from the canonical template.
 #
-# Usage: tools/new-workflow.sh <workflow-name> [target-plugin]
+# Usage: /polymath-author:new-workflow <workflow-name> [target-plugin]  (bin/new-workflow.sh)
 #   target-plugin defaults to "polymath-flows"
 set -euo pipefail
 
