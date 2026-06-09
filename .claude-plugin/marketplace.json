@@ -254,7 +254,7 @@
     {
       "name": "polymath-observability",
       "source": "./plugins/polymath-observability",
-      "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design.",
+      "description": "Observability concept plugin: RED/USE + logging + tracing design AND Datadog/Grafana/Honeycomb/Elastic/Sentry query integration.",
       "version": "0.3.0",
       "category": "observability",
       "tags": [
@@ -279,7 +279,7 @@
     {
       "name": "polymath-vcs",
       "source": "./plugins/polymath-vcs",
-      "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
+      "description": "Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -291,7 +291,7 @@
     {
       "name": "polymath-paging",
       "source": "./plugins/polymath-paging",
-      "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
+      "description": "On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -303,7 +303,7 @@
     {
       "name": "polymath-vuln-scan",
       "source": "./plugins/polymath-vuln-scan",
-      "description": "Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.",
+      "description": "Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -427,7 +427,7 @@
     {
       "name": "polymath-chat",
       "source": "./plugins/polymath-chat",
-      "description": "Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.",
+      "description": "Incident-comms integration: Slack channels/threads + Statuspage public updates \u2014 internal + external incident communication.",
       "version": "0.3.0",
       "category": "connector",
       "tags": [

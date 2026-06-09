@@ -58,11 +58,11 @@ profile implicitly includes the `polymath-core` + `polymath-flows` spine.
 
 | Profile | For | Adds (beyond the core+flows spine) |
 | --- | --- | --- |
-| `backend` | API/service devs | engineering, backend, qa, security, release, connector-github |
-| `frontend` | Web/UI devs | engineering, frontend, design, qa, release, connector-github |
-| `sre` | Reliability / on-call | sre, observability, incident, performance, connector-{pagerduty,observability,slack} |
-| `platform` | Platform / DevOps | platform, devops, infra-cloud, infra-kubernetes, sre, release |
-| `pm` | Product managers | product, research, planning, communication, decisions, connector-tracker |
+| `backend` | API/service devs | engineering, backend, qa, security, release, vcs |
+| `frontend` | Web/UI devs | engineering, frontend, design, qa, release, vcs |
+| `sre` | Reliability / on-call | sre, observability, incident, performance, paging, chat |
+| `platform` | Platform / DevOps | platform, devops, cloud, kubernetes, sre, release |
+| `pm` | Product managers | product, research, planning, communication, decisions, tracker |
 | `staff` | Staff+ / tech leads | thinking, decisions, writing, planning, engineering, communication, leadership |
 | `author` | Plugin authors | author, engineering, writing |
 

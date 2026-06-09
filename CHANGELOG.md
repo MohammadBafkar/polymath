@@ -9,7 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Consolidation: 51 → 39 plugins (no skills lost).** Folded single-skill and
+- **Concept/capability-centric plugins (breaking — published names change).**
+  Renamed the vendor-named integration plugins to the capability they serve,
+  vendors as interchangeable providers underneath (see
+  [`docs/adrs/0002-concept-centric-plugins.md`](docs/adrs/0002-concept-centric-plugins.md)):
+  `polymath-connector-github` → `polymath-vcs`; `-tracker` → `polymath-tracker`;
+  `-pagerduty` → `polymath-paging`; `-slack` (+ `-statuspage`) → `polymath-chat`;
+  `-snyk` → `polymath-vuln-scan`; `polymath-infra-cloud` → `polymath-cloud`;
+  `polymath-infra-kubernetes` → `polymath-kubernetes`. The observability
+  connector (+ `-sentry`) merged into the `polymath-observability` discipline, so
+  one plugin holds both the RED/USE design skills and the
+  Datadog/Grafana/Honeycomb/Elastic/Sentry query integration. Connector/infra
+  conformance gates now detect by `.mcp.json`/`bindings/` rather than name
+  prefix. Additional vendors per concept (GitLab, Azure DevOps, Teams, Opsgenie,
+  …) are listed in the capability vocabulary as the roadmap and wired when a real
+  MCP package ships.
+- **Consolidation: 51 → 36 plugins (no skills lost).** Folded single-skill and
   thin fragments into their parent craft, and merged per-vendor connectors by
   capability, to cut install decisions and confusable descriptions (see
   [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):

@@ -64,7 +64,8 @@ agents/<role>.md               # Forked-context specialists (use sparingly)
 hooks/hooks.json + scripts/    # Deterministic gates (secret-scan, format-on-save)
 templates/                     # Artifact templates owned by this plugin
 workflows/*.yaml               # polymath-flows only
-.mcp.json                      # Connector plugins only
+.mcp.json                      # Integration plugins only (vcs/chat/observability/…)
+bindings/<provider>/binding.json  # Capability provider wiring (integration/infra plugins)
 bin/                           # Executables (polymath-flow, scaffolders)
 tests/                         # Unit tests, golden fixtures, skill-triggering cases
 README.md, CHANGELOG.md        # Both required (DOCS-1 conformance check)
@@ -93,14 +94,14 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
 | DESC-2 | `tools/check-description-confusion.py check`: `tests/forbidden_prompts.yaml` cases are well-formed (referenced skills exist). Behavioural `run` mode is opt-in under `CLAUDE_CODE_OAUTH_TOKEN` |
-| CONNECTOR-1 | Connector plugins need `.mcp.json`, `references/*.md`, and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only` |
-| CONNECTOR-2 | `polymath-connector-*` and `polymath-infra-*` must be audited in `docs/CONNECTOR-POLICY.md` |
+| CONNECTOR-1 | Integration plugins (those that ship a `.mcp.json`) need `references/*.md` and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only`. Detected by `.mcp.json` presence, not name |
+| CONNECTOR-2 | Every integration plugin (`.mcp.json` or `bindings/`) and infra plugin must be audited in `docs/CONNECTOR-POLICY.md` and carry the synced policy block. Detected by artifact, not name prefix |
 | MCP-PKG | `tools/check-connector-mcp.py`: every connector `.mcp.json` package is confirmed to resolve on npm or disclosed as a placeholder (`<!-- mcp-package-status -->`) in its README — no dead-on-install connector ships silently. Offline; `--online` re-verifies vs npm |
 | AGENT-1 | `tools/check-agents.py`: every `plugins/*/agents/<name>.md` has a baseline-beating golden fixture at `tests/golden/<plugin>/agent-<name>.md` (frontmatter `agent: <name>` + an `expect` trace), and no agent name/description collides with a workflow name or trigger phrase (the role-as-agent guard, PLUGIN-AUTHORING §6/§6.1) |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |
 | DOCS-1 | Both `README.md` and `CHANGELOG.md` present in plugin root |
 
-When adding a new connector, populate the `polymath_value` row in [docs/CONNECTOR-POLICY.md](docs/CONNECTOR-POLICY.md) before the PR can merge.
+When adding a new integration/infra plugin (one with a `.mcp.json` or `bindings/`), populate its `polymath_value` row in [docs/CONNECTOR-POLICY.md](docs/CONNECTOR-POLICY.md) before the PR can merge. Concept plugins are named by capability (`polymath-vcs`, `polymath-chat`, …) and map multiple vendor providers via `bindings/<provider>/binding.json`; the `registry/schemas/capabilities.json` vocabulary lists each capability's providers (some aspirational until a real MCP package ships).
 
 ## Workflow YAML architecture
 

@@ -36,7 +36,7 @@ the ledger is fully populated.**
 | 1 | 9 skill-shaped beta plugins already at `on-disk-skill`                | Live bakeoff + live trigger run on three phrasings. Mark `stable-ready` only when both pass; promote only with adopter.|
 | 2 | `polymath-core`, `polymath-flows` (`on-disk-foundation`)              | Foundation-specific live proof (workflow e2e job + bakeoff coverage where load-bearing). External adopter.            |
 | 3 | 4 near-beta experimental + 14 golden-only experimental skill plugins  | Close on-disk evidence (bakeoff case + 3-phrasing trigger test) for each, then run Iteration 1's live-proof loop.     |
-| 4 | 14 connector / infra plugins                                          | Add bakeoff + trigger that prove **distinct value** beyond official MCP/CLI/LSP/docs. Populate `distinct_value_url`.   |
+| 4 | 8 integration / infra plugins                                         | Add bakeoff + trigger that prove **distinct value** beyond official MCP/CLI/LSP/docs. Populate `distinct_value_url`.   |
 | 5 | Promotion batches                                                     | Small PRs (≤ 3 plugins each) flipping catalog status + appending CHANGELOG, with ledger receipts updated in lockstep. |
 
 ## Current standing — by evidence state
@@ -66,15 +66,17 @@ evidence is unit + end-to-end coverage rather than bakeoff cases.
 - `polymath-core` — SessionStart loader; has `plugins/polymath-core/tests/`.
 - `polymath-flows` — `bin/polymath-flow` runner, 26 workflows each with a strong `mustPass` gate, `plugins/polymath-flows/tests/`.
 
-### `pre-evidence` — Iteration 3 close-evidence work (17 plugins)
+### `pre-evidence` — Iteration 3 close-evidence work (16 plugins)
 
-Four plugins are listed as "near-beta" in the iteration plan because
+Three plugins are listed as "near-beta" in the iteration plan because
 they ship multiple skills but have no bakeoff or trigger fixtures yet:
 
 - `polymath-decisions`
-- `polymath-observability`
 - `polymath-qa`
 - `polymath-release`
+
+(`polymath-observability` moved to Iteration 4 below — it now also carries
+vendor integration bindings, so it falls under the connector/infra bar.)
 
 The remaining 14 are golden-only experimental skill plugins:
 
@@ -92,7 +94,7 @@ The remaining 14 are golden-only experimental skill plugins:
 - `polymath-platform`
 - `polymath-research`
 
-### `pre-evidence` — Iteration 4 connector / infra work (10 plugins)
+### `pre-evidence` — Iteration 4 integration / infra work (8 plugins)
 
 These need a bakeoff case, a skill-triggering test, **and** a
 `distinct_value_url` proving Polymath adds workflow / critique /
@@ -100,14 +102,12 @@ safety / artifact value beyond the official MCP / CLI / LSP / docs
 surface. The distinct-value field is required before any promotion
 past experimental.
 
-- `polymath-observability`
-- `polymath-vcs`
-- `polymath-tracker`
-- `polymath-paging`
-- `polymath-observability`
-- `polymath-chat`
-- `polymath-vuln-scan`
-- `polymath-chat`
+- `polymath-observability` (design discipline + Datadog/Grafana/Honeycomb/Elastic/Sentry integration)
+- `polymath-vcs` (GitHub today; GitLab/Azure DevOps/Bitbucket in the capability vocab)
+- `polymath-tracker` (Jira + Linear)
+- `polymath-paging` (PagerDuty)
+- `polymath-chat` (Slack + Statuspage)
+- `polymath-vuln-scan` (Snyk)
 - `polymath-cloud`
 - `polymath-kubernetes`
 

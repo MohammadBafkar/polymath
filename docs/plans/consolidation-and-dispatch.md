@@ -61,7 +61,7 @@ hand-synced instead of declared once and compiled.** Evidence:
   `tracker` hardcodes 2. Installing observability launches four `npx` servers;
   you configure one, three idle or fail. Adding a provider (GitLab, New Relic,
   Opsgenie, Azure DevOps) requires forking the connector — yet
-  `shared/schemas/capabilities.json` already *lists* those providers, so the
+  `registry/schemas/capabilities.json` already *lists* those providers, so the
   vocabulary advertises integrations that do not exist (`providers[]` ~30,
   `providerPlugins{}` ~10).
 - **No unit of integration smaller than a plugin.** `CONNECTOR-1` *requires*
@@ -149,7 +149,7 @@ is the keystone; 2–3 generalize connectors; 4–5 add autonomy and resilience.
 Each step is independently completable and produces an observable result.
 
 1. Write the surface-frontmatter schema (`triggers`, `capabilities`, `trust`,
-   `chainsTo`) and add it to `shared/schemas/`. *(schema file exists + validates)*
+   `chainsTo`) and add it to `registry/schemas/`. *(schema file exists + validates)*
 2. Build `tools/build-surface-index.py` that compiles all SKILL.md + workflow
    YAML into `surface-index.json`, emits `route-signals.json` and the
    SessionStart index as outputs. *(`--check` is green on a fresh build)*
@@ -307,7 +307,7 @@ convention).
   producer of `plugins/polymath-core/data/route-signals.json` (formerly hand-maintained,
   carrying a "keep loosely in sync" note) plus a new `surface-index.json` catalog. Each
   surface declares routing in a sidecar validated by
-  `shared/schemas/surface-routing.schema.json` — skills in `skills/<s>/routing.yaml`,
+  `registry/schemas/surface-routing.schema.json` — skills in `skills/<s>/routing.yaml`,
   workflows in `plugins/polymath-flows/routing/<name>.yaml` (outside the `workflows/*.yaml`
   glob, so the flows validator never sees them). The 15 pre-existing rules were migrated
   with **behaviour proven unchanged**: all 7 original ROUTE-TRIGGER fixtures still pass.
@@ -360,7 +360,7 @@ convention).
   The binding *data model* (bindings as authoring unit + generated `providerPlugins{}`) is worth
   doing under any option; only the runtime packaging differs.
 - **2026-06-07 — Phase 2 data-model landed** (maintainer chose "binding model, defer packaging").
-  Added [`shared/schemas/binding.schema.json`](../../shared/schemas/binding.schema.json) +
+  Added [`registry/schemas/binding.schema.json`](../../registry/schemas/binding.schema.json) +
   `tools/build-capability-index.py`, the single producer of `capabilities.json`
   `providerPlugins{}`. Bootstrapped **20** `bindings/<provider>/binding.json` across the connector
   and infra plugins from the existing wiring; the generator reproduces `providerPlugins{}`
@@ -385,7 +385,7 @@ convention).
   annotates long steps, and SessionStart now shows `mid-step: <step>` on interrupted runs.
   +1 unit test (44 total). Full battery green.
 - **2026-06-07 — Phase 3 landed (tools-as-surfaces, Gap 4 "tools added like skills").** Added
-  [`shared/schemas/tool.schema.json`](../../shared/schemas/tool.schema.json) + the `tools/<name>/`
+  [`registry/schemas/tool.schema.json`](../../registry/schemas/tool.schema.json) + the `tools/<name>/`
   unit (a `tool.json` manifest + an optional `routing.yaml`). `build-surface-index.py` now compiles
   `kind: tool` surfaces and validates every `tool.json` (**TOOL-1**, folded into the SURFACE-INDEX
   gate). The 5 connector `UserPromptSubmit` prompt-detectors were folded into the one registry:
@@ -533,5 +533,5 @@ widening reach.
 - `plugins/polymath-core/hooks/scripts/route-hint.py` + `data/route-signals.json`
 - `plugins/polymath-flows/bin/polymath-flow` + `data/workflow-detect.json`
 - `tools/build-workflow-index.py` (generalize → `build-surface-index.py`)
-- `shared/schemas/capabilities.json` + `shared/polymath-profiles.json`
+- `registry/schemas/capabilities.json` + `registry/polymath-profiles.json`
 - `docs/CONNECTOR-POLICY.md` — per-connector distinct-value table (`CONNECTOR-2`).
