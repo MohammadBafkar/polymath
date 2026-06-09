@@ -331,8 +331,7 @@ if [[ "$mode" == "--all" ]]; then
   # + tools). tools/build-surface-index.py is the SINGLE PRODUCER; route-signals
   # is no longer hand-maintained. --strict additionally enforces SURFACE-2:
   # every intent / url / regex pattern is globally unique (the disambiguation
-  # floor extended from workflows to all surfaces). See
-  # docs/plans/consolidation-and-dispatch.md.
+  # floor extended from workflows to all surfaces).
   echo
   echo "── SURFACE-INDEX cross-check (build-surface-index.py --check --strict)"
   if python3 "$root/tools/build-surface-index.py" --check --strict; then
@@ -350,7 +349,7 @@ if [[ "$mode" == "--all" ]]; then
   # providers[] vocabulary and forbids two plugins claiming the same (capability,
   # provider). The precomputed `providerPlugins{}` map is RETAINED (not resolved
   # lazily) because bin/polymath-flow reads it at runtime for O(1) capability →
-  # plugin resolution. See docs/plans/consolidation-and-dispatch.md Phase 2.
+  # plugin resolution.
   echo
   echo "── CAPABILITY-INDEX + BINDING-1 cross-check (build-capability-index.py --check --strict)"
   if python3 "$root/tools/build-capability-index.py" --check --strict; then

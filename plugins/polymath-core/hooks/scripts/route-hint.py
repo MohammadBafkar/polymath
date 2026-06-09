@@ -7,7 +7,7 @@ prompt, inline diffs, intent phrasings), scores them against the bundled
 ``data/route-signals.json`` table, and — only when a HARD signal is present —
 prints one quiet line proposing the smallest Polymath surface that fits.
 
-Design contract (matches docs/plans/consolidation-and-dispatch.md, Layer 3):
+Design contract:
 
 * Detect -> propose -> confirm. NEVER auto-run anything.
 * Hard signal required. Intent phrasings alone never fire (keeps false

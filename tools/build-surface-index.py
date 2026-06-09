@@ -31,7 +31,7 @@ Modes:
 This builder runs ALONGSIDE build-workflow-index.py: that one produces the
 always-on SessionStart workflow index (Dispatch Layer 2) from workflow
 whenToUse/triggers; this one produces the deterministic prompt-time table
-(Dispatch Layer 3) from routeSignals. See docs/plans/consolidation-and-dispatch.md.
+from routeSignals.
 """
 from __future__ import annotations
 

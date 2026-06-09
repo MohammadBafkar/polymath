@@ -25,8 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the above — the old→new mapping is in git history.
 - **Consolidation: 51 → 36 plugins (no skills lost).** Folded single-skill and
   thin fragments into their parent craft, and merged per-vendor integrations by
-  capability, to cut install decisions and confusable descriptions (see
-  [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):
+  capability, to cut install decisions and confusable descriptions:
   - **Costume connector:** a CLI-only Terraform `plan-review` skill (no MCP
     server or binding) → `polymath-cloud`, with the IaC design skills.
   - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-cloud`;
@@ -82,8 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   matching Polymath surface in one quiet line — only when a *hard* signal is
   present, never auto-running. New `tools/route-triggering.py` makes routing
   precision a deterministic, model-free CI gate (`ROUTE-TRIGGER` in
-  `conformance.sh --all`). See
-  [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md).
+  `conformance.sh --all`).
 - **Workflow-first routing surface.** Added `polymath-core:route` and
   `/polymath-core:route` to choose the right workflow, skill, connector,
   agent, or external catalog for a prompt before doing work. The router

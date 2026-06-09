@@ -1,5 +1,5 @@
 {
-  "description": "Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from ~45 plugins, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-profiles.py (PROFILE-1). See docs/plans/consolidation-and-dispatch.md (Dispatch Layer 1).",
+  "description": "Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from ~45 plugins, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-profiles.py (PROFILE-1).",
   "version": 1,
   "_spine": [
     "polymath-core",

@@ -14,8 +14,7 @@ the generated reality, and the coverage report makes the gap between them explic
 
 The providing plugin is DERIVED from the binding's path, so a binding cannot claim
 the wrong plugin. This is the authoring data-model only — it does NOT decide how
-the MCP server is packaged at runtime (the deferred Phase 2 decision; see
-docs/plans/consolidation-and-dispatch.md).
+the MCP server is packaged at runtime.
 
 Why keep the precomputed map (rather than resolving provider→plugin lazily from
 the bindings)? bin/polymath-flow reads `providerPlugins{}` directly for O(1)

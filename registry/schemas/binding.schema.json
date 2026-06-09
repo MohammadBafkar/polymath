@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/binding.schema.json",
   "title": "Polymath capability provider binding",
-  "description": "Validates a `bindings/<provider>/binding.json` inside a connector or infra plugin. A binding is the AUTHORING unit for 'this plugin supplies <provider> for <capability>'. tools/build-capability-index.py reads every binding and GENERATES the `providerPlugins{}` map in registry/schemas/capabilities.json, so that map can never be aspirational — a provider is wired iff a binding exists. The providing plugin is derived from the file path (plugins/<plugin>/bindings/<provider>/binding.json), so a binding cannot claim the wrong plugin. Runtime packaging (how/whether the MCP server launches) is intentionally NOT decided here — see docs/plans/consolidation-and-dispatch.md Phase 2.",
+  "description": "Validates a `bindings/<provider>/binding.json` inside a connector or infra plugin. A binding is the AUTHORING unit for 'this plugin supplies <provider> for <capability>'. tools/build-capability-index.py reads every binding and GENERATES the `providerPlugins{}` map in registry/schemas/capabilities.json, so that map can never be aspirational — a provider is wired iff a binding exists. The providing plugin is derived from the file path (plugins/<plugin>/bindings/<provider>/binding.json), so a binding cannot claim the wrong plugin. Runtime packaging (how/whether the MCP server launches) is intentionally NOT decided here.",
   "type": "object",
   "additionalProperties": false,
   "required": ["provider", "capability", "transport"],

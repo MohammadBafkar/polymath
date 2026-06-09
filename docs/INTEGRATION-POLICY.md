@@ -133,8 +133,7 @@ launch only a subset, so:
   the runtime config cannot drift.
 
 One-plugin-per-provider packaging (so only the installed provider launches) is a
-future option the binding model already supports — see
-[`docs/plans/consolidation-and-dispatch.md`](plans/consolidation-and-dispatch.md)
+future option the binding model already supports.
 Phase 2 (option C). It is intentionally not the default: it would expand the
 marketplace and reverse the recent connector consolidation.
 
