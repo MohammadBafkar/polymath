@@ -77,7 +77,10 @@ release.
 
 Named by the capability they serve; each maps multiple vendor providers under
 one capability (see `registry/schemas/capabilities.json`). Providers are wired
-incrementally via `bindings/<provider>/binding.json`.
+incrementally via `bindings/<provider>/binding.json`. Each pairs **MCP-dependent
+skills** (the procedure) with the `.mcp.json` server that backs them — the skill
+is the recipe, the MCP is the tooling (see the `polymath-core:glossary`); such
+skills are `claude-coupled` for portability (`docs/PORTABILITY.md`).
 
 | Plugin                  | Capability / providers                                                                 | Polymath value                                                                                           | Sunset trigger                                                                            |
 | ----------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
