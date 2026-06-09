@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/workflow.schema.json",
+  "title": "Polymath flows-lite workflow",
+  "description": "Workflow YAML schema for polymath-flows v0.1. Serial step replacement / insertion only. Unsupported keys must fail closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "version", "steps"],
+  "properties": {
+    "schemaVersion": {
+      "description": "Schema version. v0.1 accepts 0.1 only.",
+      "type": "number",
+      "enum": [0.1]
+    },
+    "name": {
+      "description": "Workflow identifier. Must be camelCase.",
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*$"
+    },
+    "version": {
+      "description": "Workflow semver.",
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "description": "One-sentence summary of what the workflow does.",
+      "type": "string",
+      "maxLength": 200
+    },
+    "whenToUse": {
+      "description": "One-line, model-facing routing hint: when this workflow is the right multi-step arc to propose. Mirrors a skill description. Surfaced verbatim in the SessionStart workflow-index, so keep it tight. Schema-optional (so external/partial workflows still validate), but REQUIRED for in-repo workflows by the WORKFLOW-2 conformance gate (build-workflow-index.py --strict).",
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 160
+    },
+    "triggers": {
+      "description": "3-5 naive user phrasings (no workflow name) that should surface this workflow. Consumed by tools/build-workflow-index.py and used as the falsification anchor for workflow-triggering tests. Not injected into context. Trigger phrases must be unique across ALL workflows (enforced by the WORKFLOW-2 gate). Schema-optional but required for in-repo workflows.",
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 6, "maxLength": 80 }
+    },
+    "detectionSignals": {
+      "description": "Deterministic, machine-checkable hints that raise this workflow's prior during detection. Not injected into context; consumed by the detect step to disambiguate proposals between colliding workflows.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "description": "File globs / artifact paths whose presence in the request or repo hints this workflow.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "intents": {
+          "description": "Short intent labels, input-presence markers, or keywords that hint this workflow.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 2 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "chainsTo": {
+      "description": "Workflow names to propose as the natural next arc when this workflow completes (Phase 4 arc chaining), e.g. respondToIncident -> incidentRetroToActions. The executor surfaces these in the completion output; the agent PROPOSES them and never auto-runs. Targets must be real workflows (enforced by build-workflow-index.py --strict).",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+      "uniqueItems": true
+    },
+    "extends": {
+      "description": "Parent workflow reference in the form '<plugin>:<workflow>@<version>'. v0.1 supports serial step replacement and named-anchor insertion only.",
+      "type": "string",
+      "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*@\\d+\\.\\d+$"
+    },
+    "requires": {
+      "description": "Hard dependencies. Workflow validation fails if any required plugin is not installed, or if a required capability has no provider configured in `.polymath/capabilities.yaml`. Either or both of `plugins` and `capabilities` may be declared; capabilities are the recommended shape for cross-provider work (issue tracker, observability, pager, etc.) and capability resolution adds the resolved adapter plugins to the effective plugin set transparently.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plugins": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "uniqueItems": true
+        },
+        "capabilities": {
+          "description": "Map of capability name (from registry/schemas/capabilities.schema.json) to either `true` (any provider OK) or a constraint object pinning a specific provider. The capability vocabulary is closed; declaring an unknown capability fails validation. Resolution looks up the configured provider in the project's `.polymath/capabilities.yaml`.",
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "boolean", "const": true },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "provider": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+                }
+              }
+            ]
+          },
+          "propertyNames": {
+            "enum": [
+              "issue_tracker",
+              "observability",
+              "incident_comms",
+              "pager",
+              "ci",
+              "cloud",
+              "runtime",
+              "vcs",
+              "vulnerability_scanner"
+            ]
+          }
+        }
+      }
+    },
+    "inputs": {
+      "description": "User-supplied inputs that the workflow expects at start time.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+          "type": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "enum"]
+          },
+          "required": { "type": "boolean", "default": false },
+          "default": {},
+          "description": { "type": "string", "maxLength": 200 },
+          "values": {
+            "description": "For type=enum: allowed values.",
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "guards": {
+      "description": "Preconditions checked before the first step. Failing guard pauses workflow before any work.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "steps": {
+      "description": "Ordered serial steps. v0.1: each step runs after the prior step completes successfully.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "invoke", "prompt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "invoke": {
+            "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call. May contain `${capabilities.<cap>.plugin}` or `${capabilities.<cap>.provider}` placeholders so workflows can be provider-agnostic; placeholders are resolved at run time from the project's `.polymath/capabilities.yaml`.",
+            "type": "string",
+            "pattern": "^(?:[a-z0-9_-]+|\\$\\{[^}]+\\})+:(?:[a-zA-Z0-9_-]+|\\$\\{[^}]+\\})+$"
+          },
+          "prompt": {
+            "description": "Instruction the executor presents when reaching this step. May reference ${inputs.*} and ${workflow.*} placeholders.",
+            "type": "string",
+            "minLength": 1
+          },
+          "needs": {
+            "description": "Step IDs that must be complete before this step. v0.1 expects a single predecessor (implicit serial order).",
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+            "uniqueItems": true
+          },
+          "artifacts": {
+            "description": "Files this step is expected to produce or update.",
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "topology": {
+            "description": "Composition pattern for this step (§ 4.6). 'series' executes after the previous step (default if absent). 'fanout' is accepted by validation but executor still runs serially in v0.1.5 — actual parallel execution lands when the runtime supports it. Other patterns reserved.",
+            "type": "string",
+            "enum": ["series", "fanout"]
+          }
+        }
+      }
+    },
+    "override": {
+      "description": "When 'extends' is set, replace steps in the parent with the same id.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "steps": { "$ref": "#/properties/steps" }
+      }
+    },
+    "insertAfter": {
+      "description": "When 'extends' is set, insert additional steps after a named anchor step id in the parent.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/properties/steps/items" }
+      }
+    },
+    "mustPass": {
+      "description": "Deterministic checks the executor runs after the last step. Failure pauses the workflow with a violation summary.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "fileExists",
+            "fileMatches",
+            "commandSucceeds",
+            "stepSummaryMatches",
+            "command",
+            "artifactValid",
+            "artifactSchemaStrict",
+            "diffConstraint"
+          ]
+        },
+        "severity": {
+          "description": "advisory checks run and report but cannot fail the workflow on their own. blocking checks halt the workflow on failure. If omitted, defaults are: stepSummaryMatches→advisory; everything else→blocking.",
+          "type": "string",
+          "enum": ["advisory", "blocking"]
+        },
+        "path": { "type": "string" },
+        "pattern": { "type": "string" },
+        "command": { "type": "string" },
+        "step": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "artifact": {
+          "description": "Artifact name (matches registry/schemas/artifacts/<name>.schema.json) for artifactValid / artifactSchemaStrict checks.",
+          "type": "string",
+          "enum": ["PRD", "ADR", "Postmortem", "ThreatModel", "PRDescription", "Plan", "DACIDecision", "TradeoffMatrix", "RFC", "Runbook", "ArchitectureDoc"]
+        },
+        "minBodyChars": {
+          "description": "For artifactSchemaStrict: minimum non-whitespace, non-heading characters in the body (after frontmatter). Catches hollow stub artifacts (e.g. '# PRD\\n').",
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejectAdditionalProperties": {
+          "description": "For artifactSchemaStrict: if true, reject any frontmatter field not declared in the artifact schema, regardless of the schema's own additionalProperties setting. Default true.",
+          "type": "boolean"
+        },
+        "filesChanged": {
+          "description": "For diffConstraint: bound on number of files changed in the working tree (or since the given ref).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "integer", "minimum": 0 },
+            "max": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "linesChanged": {
+          "description": "For diffConstraint: bound on total added+removed lines in the working tree (or since the given ref).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "integer", "minimum": 0 },
+            "max": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "pathAllowlist": {
+          "description": "For diffConstraint: glob patterns; any changed path that does not match at least one allowlist entry fails the check.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "pathBlocklist": {
+          "description": "For diffConstraint: glob patterns; any changed path that matches a blocklist entry fails the check.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "since": {
+          "description": "For diffConstraint: git ref to diff against. Defaults to the working tree vs HEAD.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "fileExists" } }, "required": ["type"] },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "fileMatches" } }, "required": ["type"] },
+          "then": { "required": ["path", "pattern"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "commandSucceeds" } }, "required": ["type"] },
+          "then": { "required": ["command"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "command" } }, "required": ["type"] },
+          "then": { "required": ["command"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "stepSummaryMatches" } }, "required": ["type"] },
+          "then": { "required": ["step", "pattern"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "artifactValid" } }, "required": ["type"] },
+          "then": { "required": ["path", "artifact"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "artifactSchemaStrict" } }, "required": ["type"] },
+          "then": { "required": ["path", "artifact"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "diffConstraint" } }, "required": ["type"] },
+          "then": {
+            "anyOf": [
+              { "required": ["filesChanged"] },
+              { "required": ["linesChanged"] },
+              { "required": ["pathAllowlist"] },
+              { "required": ["pathBlocklist"] }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

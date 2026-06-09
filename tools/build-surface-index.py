@@ -16,7 +16,7 @@ touches:
 
 ``kind`` / ``id`` / the proposed ``surface`` string are DERIVED from the file
 location, so a declaration cannot drift from the surface it routes to. Each
-sidecar's body validates against ``shared/schemas/surface-routing.schema.json``.
+sidecar's body validates against ``registry/schemas/surface-routing.schema.json``.
 
 Two outputs under plugins/polymath-core/data/:
   route-signals.json   the scored table consumed by route-hint.py
@@ -31,7 +31,7 @@ Modes:
 This builder runs ALONGSIDE build-workflow-index.py: that one produces the
 always-on SessionStart workflow index (Dispatch Layer 2) from workflow
 whenToUse/triggers; this one produces the deterministic prompt-time table
-(Dispatch Layer 3) from routeSignals. See docs/plans/consolidation-and-dispatch.md.
+from routeSignals.
 """
 from __future__ import annotations
 
@@ -50,8 +50,8 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 PLUGINS = REPO / "plugins"
 DATA_DIR = REPO / "plugins" / "polymath-core" / "data"
 WORKFLOW_ROUTING = PLUGINS / "polymath-flows" / "routing"
-SCHEMA_PATH = REPO / "shared" / "schemas" / "surface-routing.schema.json"
-TOOL_SCHEMA_PATH = REPO / "shared" / "schemas" / "tool.schema.json"
+SCHEMA_PATH = REPO / "registry" / "schemas" / "surface-routing.schema.json"
+TOOL_SCHEMA_PATH = REPO / "registry" / "schemas" / "tool.schema.json"
 
 KIND_RANK = {"workflow": 0, "skill": 1, "tool": 2}
 # Canonical key order for each emitted rule (route-hint.py is order-agnostic;
@@ -175,13 +175,9 @@ def collect() -> tuple[list[dict], list[str]]:
         _validate(d["body"], schema, d["where"], errors)
         decls.append(d)
 
-    # TRUST-1: `auto` (auto-run even interactively) is reserved — it needs a
-    # write-scope analysis we don't have for skills/tools yet. Only `propose`
-    # (default) and `auto-headless` (auto-run only in non-interactive sessions)
-    # are permitted today.
-    for d in decls:
-        if d["body"].get("trust") == "auto":
-            errors.append(f"{d['where']}: trust 'auto' is reserved (TRUST-1); use 'auto-headless'")
+    # The `trust` axis is now constrained by the surface-routing schema enum
+    # ({propose, auto-headless}) — `_validate` above rejects an unconditional
+    # `auto`. This replaced the bespoke TRUST-1 gate that used to live here.
 
     decls.sort(key=lambda d: (KIND_RANK.get(d["kind"], 9), d["id"]))
     return decls, errors

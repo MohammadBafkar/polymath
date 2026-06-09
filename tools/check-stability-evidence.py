@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""STABILITY-1: enforce shared/stability-evidence.json against the catalog.
+"""STABILITY-1: enforce registry/stability-evidence.json against the catalog.
 
-The ledger at shared/stability-evidence.json is the receipt for every
-status claim in shared/polymath-catalog.json. A status flip to `stable`
+The ledger at registry/stability-evidence.json is the receipt for every
+status claim in registry/polymath-catalog.json. A status flip to `stable`
 on its own is just a marketing change; the ledger is what proves the
 plugin has earned the tier.
 
 This checker enforces:
 
   1. Ledger validates against
-     shared/schemas/stability-evidence.schema.json (when jsonschema is
+     registry/schemas/stability-evidence.schema.json (when jsonschema is
      installed).
-  2. Every plugin in shared/polymath-catalog.json has exactly one ledger
+  2. Every plugin in registry/polymath-catalog.json has exactly one ledger
      entry, and vice versa.
   3. target_status is greater-than-or-equal to current catalog status
      on the experimental → beta → stable ladder (deprecated is
@@ -19,12 +19,12 @@ This checker enforces:
   4. Per-status evidence gates:
        - stable: live_bakeoff_run, live_trigger_run, external_user_url,
          promotion_pr, changelog_entry MUST be non-null. For
-         polymath-connector-* and polymath-infra-*, distinct_value_url
+         integration and infra plugins, distinct_value_url
          MUST also be non-null. evidence_state MUST be `stable` or
          `stable-ready`.
        - beta: evidence_state MUST be `on-disk-skill`,
          `on-disk-foundation`, or `stable-ready`. For
-         polymath-connector-* and polymath-infra-*, distinct_value_url
+         integration and infra plugins, distinct_value_url
          MUST be non-null (post-Iteration-0 connector/infra policy).
        - experimental: no required fields beyond presence.
        - deprecated: changelog_entry MUST be non-null.
@@ -43,9 +43,10 @@ import pathlib
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-CATALOG = REPO / "shared" / "polymath-catalog.json"
-LEDGER = REPO / "shared" / "stability-evidence.json"
-LEDGER_SCHEMA = REPO / "shared" / "schemas" / "stability-evidence.schema.json"
+CATALOG = REPO / "registry" / "polymath-catalog.json"
+LEDGER = REPO / "registry" / "stability-evidence.json"
+LEDGER_SCHEMA = REPO / "registry" / "schemas" / "stability-evidence.schema.json"
+PLUGINS_DIR = REPO / "plugins"
 
 # experimental < beta < stable; deprecated is off-ladder.
 LADDER = {"experimental": 0, "beta": 1, "stable": 2}
@@ -55,7 +56,12 @@ EVIDENCE_FOR_STABLE = {"stable-ready", "stable"}
 
 
 def is_conn_or_infra(name: str) -> bool:
-    return name.startswith("polymath-connector-") or name.startswith("polymath-infra-")
+    # Detect by artifact, not name prefix (concept plugins dropped the
+    # connector-/infra- prefix): an integration plugin ships a .mcp.json; an
+    # infra plugin carries capability bindings/ but no .mcp.json. Matches the
+    # detection used by INTEGRATION-1/2, MCP-PKG, and sync-integration-policy.
+    d = PLUGINS_DIR / name
+    return (d / ".mcp.json").exists() or (d / "bindings").is_dir()
 
 
 def main() -> int:
@@ -80,9 +86,9 @@ def main() -> int:
 
     # 2. Plugin-set agreement.
     for name in sorted(catalog_names - ledger_names):
-        errors.append(f"{name}: in shared/polymath-catalog.json but missing from shared/stability-evidence.json")
+        errors.append(f"{name}: in registry/polymath-catalog.json but missing from registry/stability-evidence.json")
     for name in sorted(ledger_names - catalog_names):
-        errors.append(f"{name}: in shared/stability-evidence.json but missing from shared/polymath-catalog.json")
+        errors.append(f"{name}: in registry/stability-evidence.json but missing from registry/polymath-catalog.json")
 
     # 3 + 4 + 5. Per-entry checks.
     for name in sorted(catalog_names & ledger_names):
@@ -142,7 +148,7 @@ def main() -> int:
             if conn_or_infra and not distinct:
                 errors.append(
                     f"{name}: connector/infra plugin marked `stable` but "
-                    f"distinct_value_url is null. Per docs/CONNECTOR-POLICY.md the "
+                    f"distinct_value_url is null. Per docs/INTEGRATION-POLICY.md the "
                     f"stable bar requires primary-source evidence that Polymath adds "
                     f"workflow / critique / safety value beyond the official surface."
                 )
@@ -161,7 +167,7 @@ def main() -> int:
             if conn_or_infra and not distinct:
                 errors.append(
                     f"{name}: connector/infra plugin marked `beta` but "
-                    f"distinct_value_url is null. Per docs/CONNECTOR-POLICY.md, "
+                    f"distinct_value_url is null. Per docs/INTEGRATION-POLICY.md, "
                     f"promotion above experimental requires primary-source "
                     f"distinct-value evidence."
                 )
@@ -176,8 +182,8 @@ def main() -> int:
         if not conn_or_infra and distinct is not None:
             errors.append(
                 f"{name}: distinct_value_url is set on a non-connector / non-infra "
-                f"plugin. This field is reserved for polymath-connector-* and "
-                f"polymath-infra-* per docs/CONNECTOR-POLICY.md."
+                f"plugin. This field is reserved for integration and infra plugins "
+                f"per docs/INTEGRATION-POLICY.md."
             )
 
     if errors:
@@ -189,7 +195,7 @@ def main() -> int:
     n = len(catalog_names)
     print(
         f"check-stability-evidence: OK — {n} plugins have evidence ledger entries "
-        f"consistent with shared/polymath-catalog.json"
+        f"consistent with registry/polymath-catalog.json"
     )
     return 0
 

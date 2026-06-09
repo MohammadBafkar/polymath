@@ -8,7 +8,7 @@ thesis — not when it has a larger catalog.
 Every PR runs:
 
 - **Structural conformance** — `tools/conformance.sh --all`
-  (`MANIFEST-3` maturity tier, `CONNECTOR-2` audit, `SKILL-1`,
+  (`MANIFEST-3` maturity tier, `INTEGRATION-2` audit, `SKILL-1`,
   `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`).
 - **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
   SKILL.md ≤ 500 lines).
@@ -39,7 +39,7 @@ Every PR runs:
   well-formed). The behavioural `run` mode — naive prompt loads the expected
   skill, never a forbidden sibling — is opt-in under `CLAUDE_CODE_OAUTH_TOKEN`.
 - **Connector / infra boundary** — every in-scope plugin audited in
-  [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md).
+  [`docs/INTEGRATION-POLICY.md`](INTEGRATION-POLICY.md).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
   updated alongside any change that resolves a documented limitation.
 - **Live-model fixtures** — required CI gate on `main` pushes. Setup
@@ -64,7 +64,7 @@ Canonical definitions and per-tier requirements live in
   Connector / infra plugins stay `experimental` unless primary-source
   evidence shows Polymath adds workflow / critique / safety / artifact
   value beyond the upstream official surface (see
-  [CONNECTOR-POLICY.md](CONNECTOR-POLICY.md)).
+  [INTEGRATION-POLICY.md](INTEGRATION-POLICY.md)).
 
 Promotion is a CHANGELOG entry with the supporting evidence link, not
 just a status flip.

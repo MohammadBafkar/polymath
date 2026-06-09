@@ -67,13 +67,13 @@ Code's `plugin validate --strict` treats unknown fields as warnings,
 and conformance runs the validator with `--strict` at both the
 marketplace root and per plugin. Polymath-only metadata that the
 official manifest schema rejects lives in
-[`shared/polymath-catalog.json`](../shared/polymath-catalog.json) —
+[`registry/polymath-catalog.json`](../registry/polymath-catalog.json) —
 see § 3.1.
 
 ## 3.1 Maturity tier (`status`)
 
 Every plugin declares a maturity tier in
-[`shared/polymath-catalog.json`](../shared/polymath-catalog.json).
+[`registry/polymath-catalog.json`](../registry/polymath-catalog.json).
 This file is Polymath's own schema and is not consumed by Claude Code
 directly; keeping the field there keeps `marketplace.json` strict-clean.
 The canonical definitions and promotion bars live in
@@ -88,7 +88,7 @@ to set on a new plugin or what to bump it to. The short table:
 | `deprecated` | Replacement and removal date named in `README.md`. |
 
 `tools/conformance.sh MANIFEST-3` rejects a plugin whose
-`shared/polymath-catalog.json` entry is missing `status` or sets it
+`registry/polymath-catalog.json` entry is missing `status` or sets it
 to an unknown value.
 
 Add the marketplace entry in `.claude-plugin/marketplace.json` (no
@@ -105,7 +105,7 @@ Add the marketplace entry in `.claude-plugin/marketplace.json` (no
 }
 ```
 
-…then the maturity entry in `shared/polymath-catalog.json`:
+…then the maturity entry in `registry/polymath-catalog.json`:
 
 ```jsonc
 {
@@ -117,7 +117,7 @@ Add the marketplace entry in `.claude-plugin/marketplace.json` (no
 
 `tools/check-catalog.py` (invoked by `tools/conformance.sh --all`)
 rejects mismatched plugin sets between `marketplace.json`,
-`plugin.json` files, and `shared/polymath-catalog.json`, and rejects
+`plugin.json` files, and `registry/polymath-catalog.json`, and rejects
 any version drift between a marketplace entry and its plugin.json.
 
 ## 4. Skill frontmatter rules
@@ -235,6 +235,37 @@ any subagent. The question an agent answers is *"does forking context
 catch something the same lead misses without it?"* Both traces are
 checked in and reviewed together.
 
+### 6.1 Anti-pattern: the org-role agent
+
+Do **not** ship a roster of org-chart / SDLC-position agents that *do* the
+main-line work — a "Product Manager", "Tech Lead", "Staff Engineer", "QA
+Engineer", "SRE", "Engineering Manager", "Designer", or "Incident Commander"
+agent. They fail the baseline test above: the lead Claude, with the relevant
+discipline plugin's skills already in context, produces the same output, so the
+fork catches nothing. Concretely:
+
+- **Roles already exist as discipline plugins.** `polymath-engineering`,
+  `polymath-qa`, `polymath-sre`, `polymath-product`, `polymath-incident`, … each
+  bundle exactly the skills a role-agent would curate. A role-agent just
+  shadows one of them at the cost of always-on description budget
+  (`tools/token-budget.sh` counts `agents/`).
+- **Role hand-offs already exist as workflows.** `plugins/polymath-flows/`
+  sequences PM → eng → reviewer → release (`featureFromIdea`) and the incident
+  arc (`respondToIncident`) with `mustPass` gates and artifact schemas a chain
+  of role-agents would lack — and subagents can't spawn subagents, so a roster
+  can't orchestrate itself anyway.
+- **An org-role doer collides with workflow intent.** An "Incident Commander"
+  agent competes with `respondToIncident` on the same prompt with no
+  trigger-uniqueness gate to catch it.
+
+The legitimate reading of "distinct named roles the user explicitly addresses"
+above is a role-flavored **critic/lens** — an agent that forks context to
+adversarially review through one discipline's eyes (the shipped
+`architecture-critic`, `research-scout`; a future `security-critic` or
+`sre-critic`), not a role that carries out the work. If "be my SRE"
+discoverability is the goal, add `routing.yaml` intents to the discipline
+skills/workflows instead of an agent.
+
 ## 7. Hooks
 
 - `PreToolUse(Write|Edit)` for secret-scan or format checks.
@@ -261,7 +292,7 @@ Each plugin owns its artifact templates under
 `plugins/<plugin>/templates/`. Skills reference templates by relative
 path; workflows validate the frontmatter via `mustPass: artifactValid`
 or `artifactSchemaStrict` against the matching JSON schema in
-`shared/schemas/artifacts/`.
+`registry/schemas/artifacts/`.
 
 Canonical artifact schemas the catalog enforces today:
 

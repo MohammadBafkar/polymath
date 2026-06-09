@@ -6,7 +6,7 @@ Each connector / infra plugin declares the providers it supplies as bindings:
   plugins/<plugin>/bindings/<provider>/binding.json   (schema: binding.schema.json)
 
 This builder is the SINGLE PRODUCER of the `providerPlugins{}` map inside
-shared/schemas/capabilities.json. That map used to be hand-maintained and drifted
+registry/schemas/capabilities.json. That map used to be hand-maintained and drifted
 from reality — the vocabulary advertised ~30 providers while only ~10 were wired,
 with no guard. Now a provider is wired iff a binding exists, so the map cannot be
 aspirational. `providers[]` stays the curated vocabulary; `providerPlugins{}` is
@@ -14,8 +14,15 @@ the generated reality, and the coverage report makes the gap between them explic
 
 The providing plugin is DERIVED from the binding's path, so a binding cannot claim
 the wrong plugin. This is the authoring data-model only — it does NOT decide how
-the MCP server is packaged at runtime (the deferred Phase 2 decision; see
-docs/plans/consolidation-and-dispatch.md).
+the MCP server is packaged at runtime.
+
+Why keep the precomputed map (rather than resolving provider→plugin lazily from
+the bindings)? bin/polymath-flow reads `providerPlugins{}` directly for O(1)
+capability→plugin resolution at workflow-run time. Dropping the map would force
+the runner to scan every binding on each resolution — a regression — so the map
+stays materialized and the CAPABILITY-INDEX drift-guard is what keeps it honest.
+The drift-guard (--check) and the BINDING-1 semantic checks (--strict) are one
+gate run by one command; conformance invokes them together.
 
 Modes:
   (default)   regenerate providerPlugins{} and write capabilities.json.
@@ -33,8 +40,8 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 PLUGINS = REPO / "plugins"
-CAPABILITIES = REPO / "shared" / "schemas" / "capabilities.json"
-SCHEMA_PATH = REPO / "shared" / "schemas" / "binding.schema.json"
+CAPABILITIES = REPO / "registry" / "schemas" / "capabilities.json"
+SCHEMA_PATH = REPO / "registry" / "schemas" / "binding.schema.json"
 
 
 def _load_schema() -> dict | None:

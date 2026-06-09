@@ -1,6 +1,6 @@
 # Workflow YAML schema
 
-Canonical schema: [`shared/schemas/workflow.schema.json`](../shared/schemas/workflow.schema.json).
+Canonical schema: [`registry/schemas/workflow.schema.json`](../registry/schemas/workflow.schema.json).
 Scaffolder template:
 [`plugins/polymath-author/templates/Workflow.yaml`](../plugins/polymath-author/templates/Workflow.yaml)
 (used by `polymath-author:new-workflow`).
@@ -105,7 +105,7 @@ Recognised artifact names for `artifactValid` / `artifactSchemaStrict`:
 `PRD`, `ADR`, `Plan`, `RFC`, `Runbook`, `ArchitectureDoc`,
 `DACIDecision`, `TradeoffMatrix`, `Postmortem`, `ThreatModel`,
 `PRDescription`. Each is backed by a JSON schema under
-[`shared/schemas/artifacts/`](../shared/schemas/artifacts/).
+[`registry/schemas/artifacts/`](../registry/schemas/artifacts/).
 
 ### 4.1 Severity
 
@@ -131,7 +131,7 @@ regex-matching summary).
 - `${capabilities.<cap>.provider}` — provider token resolved from
   `.polymath/capabilities.yaml` (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name resolved from
-  the same file (e.g. `polymath-connector-datadog`).
+  the same file (e.g. `polymath-observability`).
 
 The `invoke` field of a step accepts placeholders as well, so a
 workflow can be provider-agnostic by writing
@@ -170,4 +170,4 @@ State transitions are owned by
 - Shell steps that mutate infrastructure.
 - AI-based cross-artifact alignment as a blocking gate.
 - Real PR creation through GitHub (the `pr` skill drafts only;
-  `polymath-connector-github:open-pr` opens the PR through the MCP).
+  `polymath-vcs:open-pr` opens the PR through the MCP).

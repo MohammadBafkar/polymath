@@ -1,5 +1,16 @@
 name: golden-tests
 
+# DISABLED — live-model job only. This is the single golden-tests job that
+# needs Claude auth (CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY) and so is
+# kept off by default to avoid spending API budget on every push. See
+# LIMITATIONS.md §4 for the re-enable runbook.
+#
+# The six token-free deterministic jobs that used to live here (unit tests,
+# shipFeature e2e, hollow-run falsifiability anchor, golden-fixture frontmatter
+# parse, skill-triggering frontmatter, bakeoff-cases parse) now run on every
+# PR and push in .github/workflows/golden-deterministic.yml — they are NOT
+# disabled.
+
 on:
   pull_request:
   push:
@@ -13,219 +24,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  executable-unit:
-    name: bin/polymath-flow + polymath-core unit tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pyyaml jsonschema
-      - name: Run polymath-flows unit tests
-        run: python3 -m unittest discover -s plugins/polymath-flows/tests -v
-      - name: Run polymath-core unit tests
-        run: python3 -m unittest discover -s plugins/polymath-core/tests -v
-
-  executable-e2e:
-    name: shipFeature scratch-repo e2e
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pyyaml jsonschema
-      - name: Walk shipFeature end-to-end against a scratch repo with real artifacts
-        run: |
-          set -euxo pipefail
-          export PFLOW="$PWD/plugins/polymath-flows/bin/polymath-flow"
-          scratch="$(mktemp -d)"
-          export CLAUDE_PLUGIN_DATA="$scratch/.pdata"
-          cd "$scratch"
-          git init -q
-          git config user.email ci@polymath.test
-          git config user.name "CI"
-          touch README.md
-          git add . && git commit -q -m "init"
-
-          run_json="$($PFLOW start shipFeature --input title='Rate-limit /login' --input scope=small)"
-          run_id="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])' <<<"$run_json")"
-
-          first="$($PFLOW next "$run_id")"
-          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["step_id"])' <<<"$first")" = "prd"
-
-          mkdir -p docs/prds docs/pr src
-          # Write a PRD with real frontmatter + substantive body (≥200 chars
-          # after stripping headings and whitespace) so artifactSchemaStrict
-          # passes. A bare "# PRD" stub is the falsifiability-anchor case
-          # tested separately and must fail.
-          cat > docs/prds/rate-limit-login.md <<'PRD'
-          ---
-          artifact: PRD
-          schemaVersion: 0.1
-          title: "Rate-limit /login"
-          status: draft
-          owner: pmteam
-          created: "2026-05-24"
-          ---
-          ## Problem
-          The login endpoint accepts unlimited attempts per IP per minute,
-          which lets credential-stuffing actors enumerate accounts faster
-          than downstream rate limits can catch.
-
-          ## Goal
-          Cap unauthenticated login attempts to ten per IP per minute,
-          returning HTTP 429 once exceeded. The cap must be observable in
-          metrics and reversible via feature flag within sixty seconds.
-          PRD
-          echo "## [Unreleased]" > CHANGELOG.md
-          echo "# PR — Rate-limit /login" > docs/pr/rate-limit-login.md
-          # Implement step produces a real diff so diffConstraint passes.
-          cat > src/rate_limit.py <<'PY'
-          def is_rate_limited(ip: str, attempts: int) -> bool:
-              return attempts >= 10
-          PY
-
-          for step in prd acceptance implement review changelog pr; do
-            echo "step done" > "${step}.summary.md"
-            $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md"
-          done
-
-          echo "All tests verified, ran lint and typecheck" > verify.summary.md
-          $PFLOW complete "$run_id" verify --summary verify.summary.md
-
-          result="$($PFLOW assert "$run_id")"
-          echo "$result"
-          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "completed"
-          # 5 blocking gates + 1 advisory = 6 total mustPass entries in the
-          # hardened shipFeature.
-          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["checks"])' <<<"$result")" = "6"
-
-  falsifiability-anchor:
-    name: hollow shipFeature run is blocked by strong gates
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pyyaml jsonschema
-      - name: Confirm a deliberately hollow run is BLOCKED (regression guard)
-        run: |
-          # This job exists to prove the gate hardening is load-bearing.
-          # The day this passes (i.e. the hollow run is NOT blocked) is the
-          # day a gate has regressed below the v0.2 bar.
-          set -euxo pipefail
-          export PFLOW="$PWD/plugins/polymath-flows/bin/polymath-flow"
-          scratch="$(mktemp -d)"
-          export CLAUDE_PLUGIN_DATA="$scratch/.pdata"
-          cd "$scratch"
-          git init -q
-          git config user.email ci@polymath.test
-          git config user.name "CI"
-          touch README.md
-          git add . && git commit -q -m "init"
-
-          run_json="$($PFLOW start shipFeature --input title='hollow' --input scope=small)"
-          run_id="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])' <<<"$run_json")"
-
-          # Hollow stubs only: filenames the WEAK fileExists checks demand,
-          # but no real PRD body, no source change, no acceptance criteria.
-          mkdir -p docs/prds docs/pr
-          echo "# PRD" > docs/prds/hollow.md
-          echo "## [Unreleased]" > CHANGELOG.md
-          echo "# PR" > docs/pr/hollow.md
-
-          for step in prd acceptance implement review verify changelog pr; do
-            echo "tests verified, all green" > "${step}.summary.md"
-            $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md" || true
-          done
-
-          set +e
-          result="$($PFLOW assert "$run_id")"
-          rc=$?
-          set -e
-          echo "$result"
-          # Exit code 2 = blocked. Exit code 0 = the gates regressed.
-          if [[ "$rc" -ne 2 ]]; then
-            echo "::error::Hollow shipFeature run was NOT blocked. Gate regression."
-            exit 1
-          fi
-          test "$(python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])' <<<"$result")" = "paused"
-          # The PRD strict check must be among the failures.
-          python3 - <<PY
-          import json, sys
-          r = json.loads("""$result""")
-          ids = {f["id"] for f in r["failures"]}
-          assert "prd-strict" in ids, f"prd-strict missing from failures: {ids}"
-          PY
-
-  fixtures-parse:
-    name: tests/golden frontmatter parses
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pyyaml
-      - name: Parse every tests/golden fixture's frontmatter
-        run: |
-          python3 - <<'PY'
-          import pathlib, sys, yaml
-          fail = 0
-          for md in pathlib.Path("tests/golden").rglob("*.md"):
-              if md.name == "README.md":
-                  continue
-              text = md.read_text()
-              if not text.startswith("---"):
-                  print(f"::error file={md}::missing frontmatter")
-                  fail = 1
-                  continue
-              _, fm, _ = text.split("---", 2)
-              try:
-                  data = yaml.safe_load(fm)
-              except yaml.YAMLError as e:
-                  print(f"::error file={md}::invalid YAML: {e}")
-                  fail = 1
-                  continue
-              keys = {"plugin", "workflow"}
-              if not (data.keys() & keys):
-                  print(f"::error file={md}::frontmatter must declare plugin or workflow")
-                  fail = 1
-              if "scenario" not in data:
-                  print(f"::error file={md}::frontmatter missing scenario")
-                  fail = 1
-              if "expect" not in data:
-                  print(f"::error file={md}::frontmatter missing expect")
-                  fail = 1
-          sys.exit(fail)
-          PY
-
-  skill-triggering-check:
-    name: skill-triggering test frontmatter
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install pyyaml
-      - name: Validate every skill-triggering test's frontmatter
-        run: python3 tools/skill-triggering.py check
-
-  bakeoff-parse:
-    name: bakeoff cases parse
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Validate baseline-vs-Polymath bakeoff cases
-        run: python3 tools/bakeoff.py check
-
   claude-cli-fixtures:
     name: claude CLI fixture run
     runs-on: ubuntu-latest

@@ -234,7 +234,10 @@ def score_output(case: dict[str, Any], output: str) -> dict[str, Any]:
 # LLM-judge scoring
 # ---------------------------------------------------------------------------
 
-JUDGE_MODEL = "claude-sonnet-4-6"
+# Judge model id. Overridable via env so re-enabling the (currently disabled)
+# live bakeoff CI doesn't silently break if this alias retires — set
+# POLYMATH_BAKEOFF_JUDGE_MODEL to pin a current model.
+JUDGE_MODEL = os.environ.get("POLYMATH_BAKEOFF_JUDGE_MODEL", "claude-sonnet-4-6")
 JUDGE_PROMPT_FILE = ROOT / "tools" / "bakeoff" / "judge-prompt.md"
 CALIBRATION_DIR = ROOT / "tools" / "bakeoff" / "calibration"
 JUDGE_DRIFT_TOLERANCE = 1  # judge-vs-human delta > 1 ⇒ recalibrate

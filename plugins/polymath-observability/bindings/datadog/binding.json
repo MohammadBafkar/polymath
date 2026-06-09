@@ -1,0 +1,15 @@
+{
+  "provider": "datadog",
+  "capability": "observability",
+  "transport": {
+    "kind": "mcp",
+    "server": "datadog"
+  },
+  "userConfigKeys": [
+    "datadogApiKey",
+    "datadogAppKey",
+    "datadogSite"
+  ],
+  "title": "datadog",
+  "description": "datadog as observability provider, supplied by polymath-observability."
+}

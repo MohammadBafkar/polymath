@@ -1,6 +1,6 @@
 # Routing declaration for polymath-flows:run-workflow securityFinding (workflow). Compiled into
 # route-signals.json by tools/build-surface-index.py.
-# Schema: shared/schemas/surface-routing.schema.json
+# Schema: registry/schemas/surface-routing.schema.json
 regex:
 - \bCVE-\d{4}-\d{4,7}\b
 - \bGHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}\b

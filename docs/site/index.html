@@ -14,7 +14,7 @@
   <main>
 <h2>Install the marketplace</h2>
 <pre><code>claude plugin marketplace add https://github.com/MohammadBafkar/Polymath</code></pre>
-<p class="plugin-meta">40 plugins · 27 workflows · MIT · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
+<p class="plugin-meta">36 plugins · 26 workflows · MIT · <a href="https://github.com/MohammadBafkar/Polymath">Source on GitHub</a></p>
 <h2 id="journeys">Start with a journey</h2>
 <p>End-to-end SDLC arcs that compose plugins for you. Run with <code>/polymath-flows:run-workflow &lt;name&gt;</code>, or describe the task and let <code>polymath-core:route</code> propose one.</p>
 <table class="journeys"><thead><tr><th>Journey</th><th>When to run it</th></tr></thead><tbody>
@@ -23,14 +23,13 @@
 <tr><td><code>bumpDependency</code></td><td>Upgrade one dependency safely and fix call-sites.</td></tr>
 <tr><td><code>decideUnderAmbiguity</code></td><td>Frame a hard decision, govern it, record an ADR.</td></tr>
 <tr><td><code>deliberationLoop</code></td><td>Pressure-test a plan and emit a revised one.</td></tr>
-<tr><td><code>deprecationToRemoval</code></td><td>Multi-quarter, usage-gated capability removal.</td></tr>
+<tr><td><code>deprecationToRemoval</code></td><td>Multi-quarter, usage-gated capability removal. Not the simple two-stage notice-then-remove — use sunsetCapability for that.</td></tr>
 <tr><td><code>designSystem</code></td><td>Design a system: arch doc + threat model + ADR.</td></tr>
 <tr><td><code>estimateAndPlan</code></td><td>Scope a clear goal — work breakdown, estimate, plan.</td></tr>
 <tr><td><code>experimentToGA</code></td><td>A/B + flag rollout from pre-registration to GA.</td></tr>
 <tr><td><code>featureFromIdea</code></td><td>Discovery (interviews/persona) then ship a feature.</td></tr>
 <tr><td><code>fuzzyGoalToPlan</code></td><td>Turn a vague goal into an estimated, mapped plan.</td></tr>
 <tr><td><code>incidentRetroToActions</code></td><td>Turn a postmortem into filed action tickets.</td></tr>
-<tr><td><code>incidentToReview</code></td><td>Live incident through to filed follow-up actions.</td></tr>
 <tr><td><code>migrateLanguageVersion</code></td><td>Phased migration to a new language/runtime version.</td></tr>
 <tr><td><code>perfRegression</code></td><td>Fix a perf regression and verify it recovered.</td></tr>
 <tr><td><code>prdToShip</code></td><td>Ship from an existing PRD — acceptance through PR draft.</td></tr>
@@ -43,7 +42,7 @@
 <tr><td><code>rootCauseAnalysis</code></td><td>Drive to a system root cause; write an RCA.</td></tr>
 <tr><td><code>securityFinding</code></td><td>Fix a security finding end-to-end and verify.</td></tr>
 <tr><td><code>shipFeature</code></td><td>Ship a small feature from PRD to PR draft.</td></tr>
-<tr><td><code>sunsetCapability</code></td><td>Two-stage sunset: notice + deprecate, remove later.</td></tr>
+<tr><td><code>sunsetCapability</code></td><td>Two-stage sunset: notice + deprecate, remove later. Not usage-gated — use deprecationToRemoval for multi-quarter, usage-gated removal.</td></tr>
 <tr><td><code>weeklyReleaseTrain</code></td><td>Cut a release: notes, verify, tag PR.</td></tr>
 </tbody></table>
 <h2>Plugins by tier</h2>
@@ -161,12 +160,12 @@
 <h2 id="cat-infra">Infra</h2>
 <div class="cards">
 <div class="card">
-<h3><a href="plugins/polymath-infra-cloud.html">polymath-infra-cloud</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-cloud.html">polymath-cloud</a> <span class="status status-experimental">experimental</span></h3>
 <p>Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.</p>
 <div class="tags"><span>infra</span><span>cloud</span><span>aws</span><span>gcp</span><span>azure</span><span>terraform</span><span>iac</span><span>patterns</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-infra-kubernetes.html">polymath-infra-kubernetes</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-kubernetes.html">polymath-kubernetes</a> <span class="status status-experimental">experimental</span></h3>
 <p>Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.</p>
 <div class="tags"><span>kubernetes</span><span>k8s</span><span>rbac</span><span>pss</span></div>
 </div>
@@ -183,7 +182,7 @@
 <div class="cards">
 <div class="card">
 <h3><a href="plugins/polymath-observability.html">polymath-observability</a> <span class="status status-experimental">experimental</span></h3>
-<p>Observability craft: logging strategy, OTel tracing, RED/USE metrics design.</p>
+<p>Observability concept plugin: RED/USE + logging + tracing design AND Datadog/Grafana/Honeycomb/Elastic/Sentry query integration.</p>
 <div class="tags"><span>observability</span><span>tracing</span><span>metrics</span><span>otel</span></div>
 </div>
 </div>
@@ -214,49 +213,29 @@
 <h2 id="cat-connector">Connector</h2>
 <div class="cards">
 <div class="card">
-<h3><a href="plugins/polymath-connector-github.html">polymath-connector-github</a> <span class="status status-experimental">experimental</span></h3>
-<p>GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.</p>
-<div class="tags"><span>connector</span><span>github</span><span>mcp</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-observability.html">polymath-connector-observability</a> <span class="status status-experimental">experimental</span></h3>
-<p>Observability connector: Datadog + Grafana + Honeycomb + Elastic MCP; dashboard snapshot, log search, trace investigate, query-during-incident, monitor authoring.</p>
-<div class="tags"><span>connector</span><span>observability</span><span>datadog</span><span>grafana</span><span>honeycomb</span><span>elastic</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-pagerduty.html">polymath-connector-pagerduty</a> <span class="status status-experimental">experimental</span></h3>
-<p>PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.</p>
-<div class="tags"><span>connector</span><span>pagerduty</span><span>incident</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-sentry.html">polymath-connector-sentry</a> <span class="status status-experimental">experimental</span></h3>
-<p>Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.</p>
-<div class="tags"><span>connector</span><span>sentry</span><span>errors</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-slack.html">polymath-connector-slack</a> <span class="status status-experimental">experimental</span></h3>
-<p>Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.</p>
+<h3><a href="plugins/polymath-chat.html">polymath-chat</a> <span class="status status-experimental">experimental</span></h3>
+<p>Incident-comms integration: Slack channels/threads + Statuspage public updates — internal + external incident communication.</p>
 <div class="tags"><span>connector</span><span>slack</span><span>comms</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-connector-snyk.html">polymath-connector-snyk</a> <span class="status status-experimental">experimental</span></h3>
-<p>Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.</p>
-<div class="tags"><span>connector</span><span>snyk</span><span>security</span></div>
+<h3><a href="plugins/polymath-paging.html">polymath-paging</a> <span class="status status-experimental">experimental</span></h3>
+<p>On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).</p>
+<div class="tags"><span>connector</span><span>pagerduty</span><span>incident</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-connector-statuspage.html">polymath-connector-statuspage</a> <span class="status status-experimental">experimental</span></h3>
-<p>Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity→impact + customer-safe body).</p>
-<div class="tags"><span>connector</span><span>statuspage</span><span>public-comms</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-terraform.html">polymath-connector-terraform</a> <span class="status status-experimental">experimental</span></h3>
-<p>Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.</p>
-<div class="tags"><span>connector</span><span>terraform</span><span>iac</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-tracker.html">polymath-connector-tracker</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-tracker.html">polymath-tracker</a> <span class="status status-experimental">experimental</span></h3>
 <p>Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.</p>
 <div class="tags"><span>connector</span><span>issue-tracker</span><span>jira</span><span>linear</span><span>atlassian</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-vcs.html">polymath-vcs</a> <span class="status status-experimental">experimental</span></h3>
+<p>Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).</p>
+<div class="tags"><span>connector</span><span>github</span><span>mcp</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-vuln-scan.html">polymath-vuln-scan</a> <span class="status status-experimental">experimental</span></h3>
+<p>Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).</p>
+<div class="tags"><span>connector</span><span>snyk</span><span>security</span></div>
 </div>
 </div>
 <h2 id="cat-author">Author</h2>

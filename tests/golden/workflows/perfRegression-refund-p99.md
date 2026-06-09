@@ -4,7 +4,7 @@ scenario: perfRegression-refund-p99
 expect:
   invoked:
     - polymath-flows:run-workflow
-    - polymath-connector-observability:query-during-incident
+    - polymath-observability:query-during-incident
     - polymath-engineering:code-review
     - polymath-engineering:feature-dev
     - polymath-engineering:verify-change

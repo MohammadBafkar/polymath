@@ -1,15 +1,15 @@
 # Capabilities — provider-agnostic workflows
 
-**Schema:** [`shared/schemas/capabilities.schema.json`](../shared/schemas/capabilities.schema.json) (vocabulary in [`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json)).
+**Schema:** [`registry/schemas/capabilities.schema.json`](../registry/schemas/capabilities.schema.json) (vocabulary in [`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json)).
 **Runtime:** [`plugins/polymath-flows/bin/polymath-flow`](../plugins/polymath-flows/bin/polymath-flow).
 
 ## Why this exists
 
 Workflows that talk to external SaaS should describe **what** they need
 (an issue tracker, an observability platform, a pager) rather than
-**which provider** supplies it. Hard-coding `polymath-connector-pagerduty`
+**which provider** supplies it. Hard-coding `polymath-paging`
 into every incident-response workflow forces every team using opsgenie
-to fork. Hard-coding `polymath-connector-tracker` into every ticket-filing
+to fork. Hard-coding `polymath-tracker` into every ticket-filing
 step forces every team on Linear to fork. The capability layer
 separates the two:
 
@@ -40,7 +40,7 @@ entry in the vocabulary — never a new top-level catalog plugin.
 ## Capability vocabulary
 
 Authoritative list in
-[`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json).
+[`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json).
 
 | Capability              | Providers                                                                 |
 | ----------------------- | ------------------------------------------------------------------------- |
@@ -68,8 +68,8 @@ capabilities:
   issue_tracker:
     provider: jira
     # Optional `plugin:` override. Omit to use the catalog default for
-    # this provider (looked up from shared/schemas/capabilities.json).
-    # plugin: polymath-connector-tracker-internal-fork
+    # this provider (looked up from registry/schemas/capabilities.json).
+    # plugin: polymath-tracker-internal-fork
   observability:
     provider: datadog
   pager:
@@ -116,7 +116,7 @@ Placeholders resolved at run time:
 
 - `${capabilities.<cap>.provider}` — provider token (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name (e.g.
-  `polymath-connector-observability`).
+  `polymath-observability`).
 - `${inputs.<name>}` — workflow input value.
 - `${workflow.<slug|id|name>}` — workflow run metadata.
 
@@ -160,11 +160,11 @@ The other workflows declare provider plugins directly via
 ## Adding a new provider
 
 1. Add the provider token to the relevant capability's `providers`
-   list in [`shared/schemas/capabilities.json`](../shared/schemas/capabilities.json).
+   list in [`registry/schemas/capabilities.json`](../registry/schemas/capabilities.json).
 2. Add a `providerPlugins.<provider>` entry pointing at the adapter
    plugin name.
 3. Ship the adapter plugin (or point at an existing umbrella plugin
-   like `polymath-connector-observability`).
+   like `polymath-observability`).
 4. Add a row to [`.polymath/capabilities.example.yaml`](../.polymath/capabilities.example.yaml)
    so users discover the option.
 

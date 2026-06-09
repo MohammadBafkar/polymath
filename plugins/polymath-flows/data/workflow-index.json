@@ -51,7 +51,7 @@
   },
   {
     "n": "deprecationToRemoval",
-    "w": "Multi-quarter, usage-gated capability removal.",
+    "w": "Multi-quarter, usage-gated capability removal. Not the simple two-stage notice-then-remove — use sunsetCapability for that.",
     "t": [
       "deprecate this over time",
       "plan a multi-quarter sunset",
@@ -117,16 +117,6 @@
       "file action items from the retro",
       "track the follow-ups from this incident",
       "make tickets from this postmortem"
-    ]
-  },
-  {
-    "n": "incidentToReview",
-    "w": "Live incident through to filed follow-up actions.",
-    "t": [
-      "take this incident from response all the way to action items",
-      "respond to this incident and then track the follow-ups",
-      "handle the outage and produce the postmortem actions",
-      "incident response through to retro work items"
     ]
   },
   {
@@ -196,7 +186,8 @@
       "we have an incident",
       "prod is down, help",
       "page just fired, walk me through response",
-      "sev1, what do I do"
+      "sev1, what do I do",
+      "take this incident from response all the way to action items"
     ]
   },
   {
@@ -251,7 +242,7 @@
   },
   {
     "n": "sunsetCapability",
-    "w": "Two-stage sunset: notice + deprecate, remove later.",
+    "w": "Two-stage sunset: notice + deprecate, remove later. Not usage-gated — use deprecationToRemoval for multi-quarter, usage-gated removal.",
     "t": [
       "sunset this endpoint",
       "deprecate this with a customer notice",

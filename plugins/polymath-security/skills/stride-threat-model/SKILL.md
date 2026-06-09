@@ -28,7 +28,7 @@ description: Produce a STRIDE threat model for a system/scope; writes docs/threa
    - **Data flow** — mermaid or ASCII diagram showing every trust boundary the system spans (user → API → DB, internal → external, etc).
    - **Assumptions** — what the platform already protects.
    - **Threats by STRIDE** — one table per category. For each: threat description, mitigation, owner.
-4. Frontmatter must satisfy the `ThreatModel` artifact schema (`shared/schemas/artifacts/Threat-model.schema.json`): `artifact: ThreatModel`, `system`, `scope`, `owner`, `created`, `stride_categories` (subset of the six STRIDE values).
+4. Frontmatter must satisfy the `ThreatModel` artifact schema (`registry/schemas/artifacts/Threat-model.schema.json`): `artifact: ThreatModel`, `system`, `scope`, `owner`, `created`, `stride_categories` (subset of the six STRIDE values).
 
 ## Quality bar
 

@@ -1,0 +1,129 @@
+{
+  "name": "polymath",
+  "description": "Polymath-only catalog metadata kept out of .claude-plugin/marketplace.json so the marketplace manifest passes `claude plugin validate --strict`. Read by tools/conformance.sh (MANIFEST-3 status gate), tools/build-catalog.py (HTML status badges), and tools/sync-integration-policy.py (integration-policy README disclosure block).",
+  "homepage": "https://github.com/MohammadBafkar/Polymath",
+  "license": "MIT",
+  "agentSkills": {
+    "version": "1.0",
+    "interop": [
+      "claude-code",
+      "claude-api",
+      "codex",
+      "copilot",
+      "cursor",
+      "gemini-cli",
+      "jetbrains-junie"
+    ],
+    "notes": "Polymath declares conformance with the agentskills.io v1.0 open standard for SKILL.md format. All skills under this marketplace use the SKILL.md shape: frontmatter (name + description \u2264 200 chars) + body procedure. Skills are portable across any harness that implements the standard."
+  },
+  "plugins": {
+    "polymath-core": {
+      "status": "beta"
+    },
+    "polymath-cloud": {
+      "status": "experimental"
+    },
+    "polymath-product": {
+      "status": "beta"
+    },
+    "polymath-engineering": {
+      "status": "beta"
+    },
+    "polymath-release": {
+      "status": "experimental"
+    },
+    "polymath-flows": {
+      "status": "beta"
+    },
+    "polymath-thinking": {
+      "status": "beta"
+    },
+    "polymath-planning": {
+      "status": "beta"
+    },
+    "polymath-writing": {
+      "status": "beta"
+    },
+    "polymath-qa": {
+      "status": "experimental"
+    },
+    "polymath-security": {
+      "status": "beta"
+    },
+    "polymath-frontend": {
+      "status": "experimental"
+    },
+    "polymath-backend": {
+      "status": "experimental"
+    },
+    "polymath-data": {
+      "status": "experimental"
+    },
+    "polymath-ai": {
+      "status": "experimental"
+    },
+    "polymath-platform": {
+      "status": "experimental"
+    },
+    "polymath-devops": {
+      "status": "experimental"
+    },
+    "polymath-kubernetes": {
+      "status": "experimental"
+    },
+    "polymath-sre": {
+      "status": "beta"
+    },
+    "polymath-observability": {
+      "status": "experimental"
+    },
+    "polymath-incident": {
+      "status": "beta"
+    },
+    "polymath-vcs": {
+      "status": "experimental"
+    },
+    "polymath-paging": {
+      "status": "experimental"
+    },
+    "polymath-vuln-scan": {
+      "status": "experimental"
+    },
+    "polymath-author": {
+      "status": "beta"
+    },
+    "polymath-decisions": {
+      "status": "experimental"
+    },
+    "polymath-research": {
+      "status": "experimental"
+    },
+    "polymath-design": {
+      "status": "experimental"
+    },
+    "polymath-communication": {
+      "status": "experimental"
+    },
+    "polymath-leadership": {
+      "status": "experimental"
+    },
+    "polymath-learning": {
+      "status": "experimental"
+    },
+    "polymath-performance": {
+      "status": "experimental"
+    },
+    "polymath-mobile": {
+      "status": "experimental"
+    },
+    "polymath-chat": {
+      "status": "experimental"
+    },
+    "polymath-test-automation": {
+      "status": "experimental"
+    },
+    "polymath-tracker": {
+      "status": "experimental"
+    }
+  }
+}

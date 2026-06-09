@@ -1,0 +1,28 @@
+{
+  "name": "polymath-paging",
+  "version": "0.3.0",
+  "description": "PagerDuty connector: MCP server for incidents/oncall + UserPromptSubmit hook detecting incident URLs/IDs.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "pagerduty",
+    "incident",
+    "oncall"
+  ],
+  "userConfig": {
+    "pagerdutyApiKey": {
+      "type": "string",
+      "title": "PagerDuty REST API key",
+      "description": "Service-account key recommended; read-only for triage, read+write for ack/resolve.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

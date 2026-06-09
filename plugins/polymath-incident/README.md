@@ -12,7 +12,7 @@ Incident craft for the Polymath marketplace.
 ## Pairs with
 
 - `polymath-flows`: `respondToIncident` (drives end-to-end response) and `incidentRetroToActions` (decomposes a postmortem into trackable actions).
-- `polymath-connector-pagerduty`, `polymath-connector-observability`, `polymath-connector-tracker`: connectors the workflows depend on.
+- `polymath-paging`, `polymath-observability`, `polymath-tracker`: connectors the workflows depend on.
 
 ## Installation
 

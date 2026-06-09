@@ -28,23 +28,23 @@ steps:
     prompt: |
       Inspect this repository and generate Polymath activation files.
       If projectName is supplied, use ${inputs.projectName} as the project name.
-      Write .polymath/project.yaml, write .polymath/capabilities.yaml only for confident provider mappings, and write docs/polymath-onboarding.md.
+      Write .polymath/project.yaml, write .polymath/capabilities.yaml only for confident provider mappings, and write docs/POLYMATH-ONBOARDING.md.
     artifacts:
       - .polymath/project.yaml
-      - docs/polymath-onboarding.md
+      - docs/POLYMATH-ONBOARDING.md
 mustPass:
   - id: project-context-nonempty
     type: commandSucceeds
     command: test -s .polymath/project.yaml
   - id: onboarding-nonempty
     type: commandSucceeds
-    command: test -s docs/polymath-onboarding.md
+    command: test -s docs/POLYMATH-ONBOARDING.md
   - id: project-context-exists
     type: fileExists
     path: .polymath/project.yaml
   - id: onboarding-exists
     type: fileExists
-    path: docs/polymath-onboarding.md
+    path: docs/POLYMATH-ONBOARDING.md
   - id: unresolved-questions-mentioned
     type: stepSummaryMatches
     severity: advisory

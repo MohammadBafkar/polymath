@@ -1,0 +1,93 @@
+{
+  "description": "Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from ~45 plugins, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-profiles.py (PROFILE-1).",
+  "version": 1,
+  "_spine": [
+    "polymath-core",
+    "polymath-flows"
+  ],
+  "_note": "Every profile implicitly includes the _spine (core = routing/conventions/project-context; flows = workflow runner). check-profiles.py treats the spine as always present.",
+  "profiles": {
+    "backend": {
+      "title": "Backend engineer",
+      "for": "API/service developers shipping changes against a server + database.",
+      "plugins": [
+        "polymath-engineering",
+        "polymath-backend",
+        "polymath-qa",
+        "polymath-security",
+        "polymath-release",
+        "polymath-vcs"
+      ]
+    },
+    "frontend": {
+      "title": "Frontend / web engineer",
+      "for": "UI developers who care about components, Web Vitals, bundles, a11y, and i18n.",
+      "plugins": [
+        "polymath-engineering",
+        "polymath-frontend",
+        "polymath-design",
+        "polymath-qa",
+        "polymath-release",
+        "polymath-vcs"
+      ]
+    },
+    "sre": {
+      "title": "SRE / on-call",
+      "for": "Reliability and incident response \u2014 SLOs, observability, live incidents, postmortems.",
+      "plugins": [
+        "polymath-sre",
+        "polymath-observability",
+        "polymath-incident",
+        "polymath-performance",
+        "polymath-paging",
+        "polymath-chat"
+      ]
+    },
+    "platform": {
+      "title": "Platform / DevOps engineer",
+      "for": "Golden paths, CI/CD, containers, cloud and Kubernetes infra.",
+      "plugins": [
+        "polymath-platform",
+        "polymath-devops",
+        "polymath-cloud",
+        "polymath-kubernetes",
+        "polymath-sre",
+        "polymath-release"
+      ]
+    },
+    "pm": {
+      "title": "Product manager",
+      "for": "Discovery through delivery \u2014 PRDs, prioritization, roadmaps, research, comms.",
+      "plugins": [
+        "polymath-product",
+        "polymath-research",
+        "polymath-planning",
+        "polymath-communication",
+        "polymath-decisions",
+        "polymath-tracker"
+      ]
+    },
+    "staff": {
+      "title": "Staff+ / tech lead",
+      "for": "Thinking, architecture, decisions, planning, and review across the SDLC.",
+      "plugins": [
+        "polymath-thinking",
+        "polymath-decisions",
+        "polymath-writing",
+        "polymath-planning",
+        "polymath-engineering",
+        "polymath-communication",
+        "polymath-leadership"
+      ]
+    },
+    "author": {
+      "title": "Polymath plugin author",
+      "for": "Building and validating new Polymath plugins, skills, and connectors.",
+      "plugins": [
+        "polymath-author",
+        "polymath-engineering",
+        "polymath-writing"
+      ]
+    }
+  }
+}

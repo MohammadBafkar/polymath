@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scaffold a new skill inside a Polymath plugin.
 #
-# Usage: tools/new-skill.sh <plugin-name> <skill-name> [description]
+# Usage: /polymath-author:new-skill <plugin-name> <skill-name> [description]  (bin/new-skill.sh)
 set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
@@ -39,7 +39,7 @@ root="$(find_marketplace_root)"
 skill_dir="$root/plugins/$plugin/skills/$skill"
 
 if [[ ! -d "$root/plugins/$plugin" ]]; then
-  echo "error: plugin $plugin does not exist; run tools/new-plugin.sh first" >&2
+  echo "error: plugin $plugin does not exist; run /polymath-author:new-plugin first" >&2
   exit 1
 fi
 if [[ -d "$skill_dir" ]]; then
@@ -76,7 +76,7 @@ What this skill is expected to produce. List concrete files, frontmatter, or sum
 
 ## References
 
-- [shared/templates/…](../../../../shared/templates/)
+- [plugin templates](../../templates/) — reference the plugin's own templates/ dir.
 MD
 
 echo "Scaffolded $skill_dir"

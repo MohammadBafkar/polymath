@@ -166,7 +166,7 @@
       "trust": "propose"
     },
     {
-      "surface": "polymath-infra-kubernetes:write-manifest",
+      "surface": "polymath-kubernetes:write-manifest",
       "kind": "skill",
       "trust": "propose"
     },
@@ -176,7 +176,7 @@
       "trust": "propose"
     },
     {
-      "surface": "polymath-connector-tracker:jira",
+      "surface": "polymath-tracker:jira",
       "kind": "tool",
       "capabilities": [
         "issue_tracker"
@@ -184,7 +184,7 @@
       "trust": "propose"
     },
     {
-      "surface": "polymath-connector-tracker:linear",
+      "surface": "polymath-tracker:linear",
       "kind": "tool",
       "capabilities": [
         "issue_tracker"
@@ -192,7 +192,7 @@
       "trust": "propose"
     },
     {
-      "surface": "polymath-connector-sentry:sentry-issue",
+      "surface": "polymath-observability:sentry-issue",
       "kind": "tool",
       "capabilities": [
         "observability"

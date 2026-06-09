@@ -1,9 +1,9 @@
 ---
 prompt: "Check this Linear ticket https://linear.app/acme/issue/ENG-42 please."
 must_appear:
-  - "polymath-connector-tracker:linear"
+  - "polymath-tracker:linear"
 must_not_appear:
-  - "polymath-connector-tracker:jira"
+  - "polymath-tracker:jira"
 ---
 A linear.app issue URL routes to the linear tool. jira must NOT appear: jira's
 hard signal is the Atlassian browse URL only (its over-broad bare-key regex was

@@ -1,31 +1,30 @@
 #!/usr/bin/env bash
-# Scaffold a new polymath-connector-<service> plugin.
+# Scaffold a new integration (MCP) plugin — named by the capability it serves
+# (polymath-<concept>), NOT by a vendor. For a new *vendor* of a capability
+# that already has a concept plugin, add a bindings/<provider>/binding.json to
+# that plugin instead of scaffolding a new one.
 #
-# Usage: tools/new-connector.sh <service> [description]
-#   service is the bare name, e.g. "slack" → polymath-connector-slack.
+# Usage: /polymath-author:new-connector <concept> [description]  (bin/new-connector.sh)
+#   concept is the capability-ish bare name, e.g. "vcs", "chat", "paging" → polymath-vcs.
 #
 # Generates plugin.json (with userConfig.apiKey), .mcp.json (stub),
-# hooks/ directory, references/<service>-tools.md template, plus README
+# hooks/ directory, references/<concept>-tools.md template, plus README
 # and CHANGELOG.
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <service> [description]" >&2
+  echo "Usage: $0 <concept> [description]" >&2
   exit 1
 fi
 
 service="$1"
-description="${2:-${service^} connector — MCP server + event-driven hooks + skills.}"
+description="${2:-${service^} integration — MCP server(s) + capability bindings + skills.}"
 
-if [[ "$service" == polymath-connector-* ]]; then
-  name="$service"
-  service="${service#polymath-connector-}"
-elif [[ "$service" == polymath-* ]]; then
-  echo "error: service must not start with 'polymath-' (will be prefixed automatically)" >&2
+if [[ "$service" == polymath-* ]]; then
+  echo "error: name must not start with 'polymath-' (it is prefixed automatically)" >&2
   exit 1
-else
-  name="polymath-connector-$service"
 fi
+name="polymath-$service"
 
 # Locate the *caller's* marketplace root, not this plugin's bin/.
 # Walk up from $PWD looking for .claude-plugin/marketplace.json (the
@@ -54,7 +53,7 @@ if [[ -d "$plugin_dir" ]]; then
 fi
 
 upper_service="$(echo "$service" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"
-config_envvar="POLYMATH_CONNECTOR_${upper_service}_APIKEY"
+config_envvar="POLYMATH_${upper_service}_APIKEY"
 
 mkdir -p "$plugin_dir/.claude-plugin" "$plugin_dir/hooks/scripts" "$plugin_dir/skills" "$plugin_dir/references"
 
@@ -65,7 +64,7 @@ cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
   "description": "$description",
   "license": "MIT",
   "dependencies": ["polymath-core"],
-  "keywords": ["connector", "$service", "mcp"],
+  "keywords": ["integration", "$service", "mcp"],
   "userConfig": {
     "apiKey": {
       "type": "string",
@@ -154,7 +153,7 @@ cat > "$plugin_dir/CHANGELOG.md" <<MD
 
 ### Added
 
-- Initial scaffold via \`tools/new-connector.sh\`. Replace stub \`.mcp.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
+- Initial scaffold via \`/polymath-author:new-connector\`. Replace stub \`.mcp.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
 MD
 
 echo "Scaffolded $plugin_dir"
@@ -163,5 +162,6 @@ echo "  1. Replace .mcp.json command+args with the real upstream MCP server"
 echo "  2. Add userConfig fields if more than apiKey is needed (jiraUrl, datadogSite, ...)"
 echo "  3. Add at least one hook script + one skill"
 echo "  4. Fill references/$service-tools.md with actual tool list"
-echo "  5. Register in .claude-plugin/marketplace.json"
-echo "  6. Run polymath-author:validate-plugin"
+echo "  5. Add bindings/<provider>/binding.json per vendor (capability + server + userConfigKeys)"
+echo "  6. Register in .claude-plugin/marketplace.json + registry/polymath-catalog.json + INTEGRATION-POLICY.md"
+echo "  7. Run polymath-author:validate-plugin"

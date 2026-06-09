@@ -6,8 +6,8 @@
 # match the providers you use. Workflows declare WHAT they need (issue
 # tracker, observability); this file declares WHICH provider supplies it.
 #
-# Schema: shared/schemas/capabilities.schema.json (vocabulary lives in
-# shared/schemas/capabilities.json). Adding an in-house provider not in the
+# Schema: registry/schemas/capabilities.schema.json (vocabulary lives in
+# registry/schemas/capabilities.json). Adding an in-house provider not in the
 # vocabulary requires a PR against the catalog vocabulary file.
 #
 # Resolution order at polymath-flow start time:
@@ -23,9 +23,9 @@ capabilities:
   issue_tracker:
     provider: jira
     # `plugin:` is optional. When omitted, polymath-flow looks up the default
-    # plugin for this provider from shared/schemas/capabilities.json. Set it
+    # plugin for this provider from registry/schemas/capabilities.json. Set it
     # to override (e.g. you fork the catalog adapter).
-    # plugin: polymath-connector-jira
+    # plugin: polymath-tracker
 
   # Observability — invoked by perfRegression, respondToIncident.
   observability:

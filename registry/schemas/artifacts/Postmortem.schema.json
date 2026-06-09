@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/artifacts/Postmortem.schema.json",
+  "title": "Polymath Postmortem (blameless) frontmatter",
+  "description": "Validates only the YAML frontmatter block of a Postmortem.md.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["artifact", "incident_id", "severity", "status", "facilitator", "occurred", "resolved"],
+  "properties": {
+    "artifact": { "const": "Postmortem" },
+    "schemaVersion": { "type": "number", "enum": [0.1] },
+    "incident_id": { "type": "string", "minLength": 1 },
+    "severity": {
+      "type": "string",
+      "enum": ["sev0", "sev1", "sev2", "sev3", "sev4"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "published"]
+    },
+    "facilitator": { "type": "string", "minLength": 1 },
+    "occurred": { "type": "string", "format": "date-time" },
+    "resolved": { "type": "string", "format": "date-time" },
+    "duration_minutes": { "type": "integer", "minimum": 0 },
+    "blameless": { "type": "boolean", "const": true }
+  }
+}

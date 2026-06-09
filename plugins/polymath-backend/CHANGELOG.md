@@ -4,10 +4,10 @@
 
 ### Changed
 
-- `review-migration` and `audit-pg-config` skills (and their `/review-migration`
-  and `/audit-config` commands) folded in from the former
-  `polymath-infra-postgres` plugin — migration safety belongs next to
-  `db-schema` and `migration-plan`.
+- Added Postgres migration-safety skills `review-migration` and
+  `audit-pg-config` (and their `/review-migration` and `/audit-config`
+  commands) — migration safety belongs next to `db-schema` and
+  `migration-plan`.
 
 ## [0.1.0]
 

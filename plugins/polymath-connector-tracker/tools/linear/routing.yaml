@@ -1,9 +1,0 @@
-# Routing for tool polymath-connector-tracker:linear. Compiled into route-signals.json by
-# tools/build-surface-index.py. Schema: shared/schemas/surface-routing.schema.json
-url:
-- https://linear\.app/[A-Za-z0-9_-]+/issue/[A-Z][A-Z0-9_]+-[0-9]+
-intents:
-- linear issue
-- linear ticket
-capabilities:
-- issue_tracker

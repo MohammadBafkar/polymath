@@ -61,7 +61,7 @@ A plugin reaches `stable` when it has:
    documented workflow-shape gap) that Polymath adds workflow,
    critique, safety, or artifact value beyond the official MCP / CLI /
    LSP / docs surface. URL recorded as `distinct_value_url`. Per
-   [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md), connector/infra
+   [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md), connector/infra
    plugins are now **eligible for `stable` only after distinct-value
    proof plus the normal stable gates** — they no longer "stay
    experimental" by policy.
@@ -69,7 +69,7 @@ A plugin reaches `stable` when it has:
    `promotion_pr`, anchor as `changelog_entry`.
 
 All six receipts are stored per plugin in
-[`shared/stability-evidence.json`](../shared/stability-evidence.json)
+[`registry/stability-evidence.json`](../registry/stability-evidence.json)
 and enforced by
 [`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
 (rule `STABILITY-1`). The human-facing view of the ledger is

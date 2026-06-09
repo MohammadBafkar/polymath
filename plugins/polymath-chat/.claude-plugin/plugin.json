@@ -1,0 +1,56 @@
+{
+  "name": "polymath-chat",
+  "version": "0.3.0",
+  "description": "Slack connector: MCP for channels/messages/threads + skill for posting incident comms updates with the right channel + thread routing.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "comms",
+    "connector",
+    "mcp",
+    "public-comms",
+    "slack",
+    "status",
+    "statuspage"
+  ],
+  "userConfig": {
+    "slackBotToken": {
+      "type": "string",
+      "title": "Slack bot token",
+      "description": "Bot token (xoxb-\u2026) with chat:write, channels:read, groups:read, im:read, mpim:read scopes.",
+      "sensitive": true,
+      "required": true
+    },
+    "slackTeamId": {
+      "type": "string",
+      "title": "Slack workspace (team) ID",
+      "description": "Workspace ID (starts with T\u2026) that @modelcontextprotocol/server-slack requires to scope API calls.",
+      "required": true
+    },
+    "defaultIncidentChannel": {
+      "type": "string",
+      "title": "Default incident channel",
+      "description": "Channel name (e.g. \"incidents\") used as a fallback when no per-incident channel is supplied.",
+      "required": false
+    },
+    "statuspageApiKey": {
+      "type": "string",
+      "title": "Statuspage API key",
+      "description": "API key from Statuspage \u2192 User settings \u2192 API. Page-scoped; do not reuse personal keys across pages.",
+      "sensitive": true,
+      "required": true
+    },
+    "statuspagePageId": {
+      "type": "string",
+      "title": "Statuspage page ID",
+      "description": "Numeric page ID for the customer-facing status page (visible in the page URL).",
+      "required": true
+    }
+  }
+}

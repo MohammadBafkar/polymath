@@ -1,0 +1,123 @@
+{
+  "$schema": "./capabilities.schema.json",
+  "schemaVersion": 1,
+  "capabilities": {
+    "issue_tracker": {
+      "description": "Bug / story / epic backlog with REST-or-equivalent ticket APIs.",
+      "providers": [
+        "jira",
+        "linear",
+        "github_issues",
+        "azure_devops"
+      ],
+      "providerPlugins": {
+        "jira": "polymath-tracker",
+        "linear": "polymath-tracker",
+        "github_issues": "polymath-vcs"
+      }
+    },
+    "observability": {
+      "description": "Metrics + traces + logs platform with query API and dashboards.",
+      "providers": [
+        "datadog",
+        "honeycomb",
+        "grafana",
+        "elastic",
+        "sentry"
+      ],
+      "providerPlugins": {
+        "datadog": "polymath-observability",
+        "honeycomb": "polymath-observability",
+        "grafana": "polymath-observability",
+        "elastic": "polymath-observability",
+        "sentry": "polymath-observability"
+      }
+    },
+    "incident_comms": {
+      "description": "Incident communications channel (humans + status page).",
+      "providers": [
+        "slack",
+        "statuspage"
+      ],
+      "providerPlugins": {
+        "slack": "polymath-chat",
+        "statuspage": "polymath-chat"
+      }
+    },
+    "pager": {
+      "description": "On-call paging / alert routing platform.",
+      "providers": [
+        "pagerduty",
+        "opsgenie",
+        "splunk_oncall"
+      ],
+      "providerPlugins": {
+        "pagerduty": "polymath-paging"
+      }
+    },
+    "ci": {
+      "description": "Continuous integration platform that runs pipelines on commits / PRs.",
+      "providers": [
+        "github_actions",
+        "azure_devops_pipelines",
+        "gitlab_ci",
+        "buildkite"
+      ],
+      "providerPlugins": {
+        "github_actions": "polymath-vcs"
+      }
+    },
+    "cloud": {
+      "description": "Public cloud provider (compute / storage / network primitives).",
+      "providers": [
+        "aws",
+        "gcp",
+        "azure"
+      ],
+      "providerPlugins": {
+        "aws": "polymath-cloud",
+        "gcp": "polymath-cloud",
+        "azure": "polymath-cloud"
+      }
+    },
+    "runtime": {
+      "description": "Workload execution runtime where deployments land.",
+      "providers": [
+        "kubernetes",
+        "ecs",
+        "cloud_run",
+        "aci",
+        "lambda",
+        "app_service"
+      ],
+      "providerPlugins": {
+        "kubernetes": "polymath-kubernetes"
+      }
+    },
+    "vcs": {
+      "description": "Version control platform hosting the source repository.",
+      "providers": [
+        "github",
+        "gitlab",
+        "azure_devops",
+        "bitbucket"
+      ],
+      "providerPlugins": {
+        "github": "polymath-vcs"
+      }
+    },
+    "vulnerability_scanner": {
+      "description": "Software composition analysis / vulnerability database.",
+      "providers": [
+        "snyk",
+        "dependabot",
+        "github_advanced_security"
+      ],
+      "providerPlugins": {
+        "snyk": "polymath-vuln-scan",
+        "dependabot": "polymath-vcs",
+        "github_advanced_security": "polymath-vcs"
+      }
+    }
+  }
+}

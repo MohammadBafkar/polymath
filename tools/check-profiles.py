@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PROFILE-1: validate shared/polymath-profiles.json against the marketplace.
+"""PROFILE-1: validate registry/polymath-profiles.json against the marketplace.
 
 Install profiles (role spines) only help discovery if they never name a plugin
 that does not exist. This checker asserts:
@@ -22,12 +22,12 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 MARKETPLACE = REPO / ".claude-plugin" / "marketplace.json"
-PROFILES = REPO / "shared" / "polymath-profiles.json"
+PROFILES = REPO / "registry" / "polymath-profiles.json"
 
 
 def main() -> int:
     if not PROFILES.exists():
-        print("check-profiles: no shared/polymath-profiles.json (skipped)")
+        print("check-profiles: no registry/polymath-profiles.json (skipped)")
         return 0
     market = {p["name"] for p in json.loads(MARKETPLACE.read_text())["plugins"]}
     doc = json.loads(PROFILES.read_text())

@@ -1,0 +1,13 @@
+{
+  "provider": "github_actions",
+  "capability": "ci",
+  "transport": {
+    "kind": "mcp",
+    "server": "github"
+  },
+  "userConfigKeys": [
+    "githubToken"
+  ],
+  "title": "github actions",
+  "description": "github_actions as ci provider, supplied by polymath-vcs."
+}

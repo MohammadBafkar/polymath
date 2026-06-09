@@ -1,9 +1,0 @@
-{
-  "provider": "gcp",
-  "capability": "cloud",
-  "transport": {
-    "kind": "skill"
-  },
-  "title": "gcp",
-  "description": "gcp as cloud provider, supplied by polymath-infra-cloud."
-}

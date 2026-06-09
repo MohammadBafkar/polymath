@@ -1,7 +1,7 @@
 # Maturity tiers — single source of truth
 
 Every plugin declares a maturity tier in
-[`shared/polymath-catalog.json`](../shared/polymath-catalog.json) via
+[`registry/polymath-catalog.json`](../registry/polymath-catalog.json) via
 the `status` field. The tier is a contract with users about how much to
 trust the plugin. This file is the canonical definition; other docs
 link here.
@@ -16,14 +16,14 @@ plugin's value has been *verified on disk*. A polished `experimental`
 plugin is fine; a `beta` plugin with no fixtures is not.
 
 `tools/conformance.sh` rejects any plugin whose
-`shared/polymath-catalog.json` entry is missing `status` or sets it
+`registry/polymath-catalog.json` entry is missing `status` or sets it
 to an unknown value (rule `MANIFEST-3`).
 
 ## Tiers
 
 | Tier | Meaning |
 | --- | --- |
-| `experimental` | Scaffolded. May change shape, be renamed, be merged into another plugin, or be removed. Default for new plugins and most `polymath-connector-*` / `polymath-infra-*` plugins. |
+| `experimental` | Scaffolded. May change shape, be renamed, be merged into another plugin, or be removed. Default for new plugins and most integration / infra plugins. |
 | `beta` | Structurally proven on disk. Evidence loop is closed, but no live LLM run has been published. Shape is unlikely to change in a breaking way but is not guaranteed. |
 | `stable` | Demonstrated value with live results. Breaking changes go through a deprecation cycle. No plugin in the catalog is `stable` today (see [LIMITATIONS.md](../LIMITATIONS.md)). |
 | `deprecated` | Scheduled for removal. The plugin's README must name the replacement and the removal date. |
@@ -63,7 +63,7 @@ shared schema/template that other plugins consume.
 - Everything from `experimental`, **and**
 - At least one executable unit-test file under `plugins/<plugin>/tests/`, **and**
 - The test suite covers ≥ 20 deterministic assertions (`python3 -m unittest discover -s plugins/<plugin>/tests`), **and**
-- The plugin's primary executable is exercised by at least one end-to-end job in `.github/workflows/golden-tests.yml`.
+- The plugin's primary executable is exercised by at least one end-to-end job in `.github/workflows/golden-deterministic.yml` (the always-on, token-free half of the golden suite).
 
 Live LLM runs are **not** required for `beta`. The bar is on-disk
 evidence that the value loop is closed — that the catalog can prove
@@ -90,10 +90,10 @@ following hold:
    artifact, or documented workflow-shape gap — that Polymath adds
    workflow, critique, safety, or artifact value beyond official docs,
    MCPs, LSPs, or CLIs. The evidence URL is recorded in
-   [`shared/stability-evidence.json`](../shared/stability-evidence.json)
+   [`registry/stability-evidence.json`](../registry/stability-evidence.json)
    as `distinct_value_url`. Connector/infra plugins also need this
    field populated before promoting to `beta`. See
-   [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md).
+   [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md).
 6. A CHANGELOG entry records the promotion and the supporting
    evidence link (PR or artifact run id).
 7. At least one external user beyond the maintainer (a tracked
@@ -104,7 +104,7 @@ Promotion to `stable` is a CHANGELOG entry, not just a status flip.
 ### Stability evidence ledger
 
 The receipts that back every status claim live in
-[`shared/stability-evidence.json`](../shared/stability-evidence.json) —
+[`registry/stability-evidence.json`](../registry/stability-evidence.json) —
 one entry per catalog plugin, with `target_status`, `evidence_state`,
 `live_bakeoff_run`, `live_trigger_run`, `external_user_url`,
 `promotion_pr`, `changelog_entry`, and (for connector/infra) the
@@ -154,6 +154,6 @@ policy and must be demoted to `experimental` at the next release.
 
 - [docs/QUALITY-SCORECARD.md](QUALITY-SCORECARD.md) — gates and the bakeoff-fairness contract.
 - [docs/QUALITY-DASHBOARD.md](QUALITY-DASHBOARD.md) — where measured artifacts land.
-- [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md) — connector / infra disclosure rules.
+- [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md) — connector / infra disclosure rules.
 - [docs/PLUGIN-AUTHORING.md](PLUGIN-AUTHORING.md) — authoring layout and conventions.
 - [LIMITATIONS.md](../LIMITATIONS.md) — what the catalog does NOT prove yet.

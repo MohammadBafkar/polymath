@@ -51,7 +51,7 @@ jobs:
           except ImportError as e:
               print(f"::error::missing dep: {e}")
               sys.exit(1)
-          schema = json.loads(pathlib.Path("shared/schemas/workflow.schema.json").read_text())
+          schema = json.loads(pathlib.Path("registry/schemas/workflow.schema.json").read_text())
           validator = jsonschema.Draft202012Validator(schema)
           fail = 0
           for wf in pathlib.Path("plugins").rglob("workflows/*.yaml"):

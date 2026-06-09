@@ -1,6 +1,6 @@
 # Project localization — `.polymath/project.yaml`
 
-**Schema:** [`shared/schemas/project.schema.json`](../shared/schemas/project.schema.json).
+**Schema:** [`registry/schemas/project.schema.json`](../registry/schemas/project.schema.json).
 **Loader:** [`plugins/polymath-core/hooks/scripts/load-project-context.py`](../plugins/polymath-core/hooks/scripts/load-project-context.py).
 **Skill:** [`polymath-core:project-context`](../plugins/polymath-core/skills/project-context/SKILL.md).
 **Examples:** [`.polymath/examples/`](../.polymath/examples/) — dotnet, python, typescript, java, go.
@@ -178,7 +178,7 @@ mcp_servers:
   ci: "@azure-devops/mcp-server"
 ```
 
-See [the schema](../shared/schemas/project.schema.json) for the full
+See [the schema](../registry/schemas/project.schema.json) for the full
 set of validated fields and constraints.
 
 ## Resolution order
@@ -292,7 +292,7 @@ writes:
   recommendations, and skill overrides.
 - `.polymath/capabilities.yaml` when providers can be inferred with
   confidence.
-- `docs/polymath-onboarding.md` with required tools, environment
+- `docs/POLYMATH-ONBOARDING.md` with required tools, environment
   variable names, recommended plugin install sets, useful workflows,
   portability notes, and open questions.
 

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/registry/schemas/polymath-catalog.schema.json",
+  "title": "Polymath catalog",
+  "description": "Polymath-only catalog metadata. Lives outside .claude-plugin/marketplace.json because Claude Code's plugin validate --strict rejects unknown fields there. Consumed by tools/conformance.sh (MANIFEST-3), tools/build-catalog.py (status badges), tools/sync-integration-policy.py (README disclosure), and tools/check-catalog.py (cross-file consistency).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "plugins"],
+  "properties": {
+    "name": {
+      "const": "polymath",
+      "description": "Marketplace name; must match .claude-plugin/marketplace.json."
+    },
+    "description": {
+      "type": "string"
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX identifier (e.g. MIT)."
+    },
+    "agentSkills": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "interop"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "agentskills.io specification version this marketplace declares conformance with."
+        },
+        "interop": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Harnesses that read SKILL.md per the agentskills.io standard."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "plugins": {
+      "type": "object",
+      "description": "Per-plugin Polymath metadata, keyed by plugin name. Every plugin listed in .claude-plugin/marketplace.json must appear here exactly once (enforced by tools/check-catalog.py).",
+      "propertyNames": {
+        "pattern": "^polymath-[a-z0-9-]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "enum": ["stable", "beta", "experimental", "deprecated"],
+            "description": "Maturity tier. Definitions live in docs/MATURITY.md."
+          }
+        }
+      }
+    }
+  }
+}

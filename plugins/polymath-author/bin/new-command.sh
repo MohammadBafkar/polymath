@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scaffold a new command (thin alias) inside a Polymath plugin.
 #
-# Usage: tools/new-command.sh <plugin-name> <command-name> [description]
+# Usage: /polymath-author:new-command <plugin-name> <command-name> [description]  (bin/new-command.sh)
 set -euo pipefail
 
 if [[ $# -lt 2 ]]; then

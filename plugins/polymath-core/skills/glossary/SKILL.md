@@ -43,3 +43,11 @@ description: Shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustPass, fl
 - **Component** — A skill, command, agent, hook, MCP, or monitor inside a plugin.
 - **Always-on listing cost** — Tokens consumed by component descriptions surfaced to the model every turn.
 - **Token budget** — ≤ 400 per plugin; ≤ 1,500 MVP total. Measured by `tools/token-budget.sh`.
+
+## Capabilities & integrations
+
+- **Capability** — A vendor-neutral need (`issue_tracker`, `vcs`, `observability`, `pager`, …) declared in `registry/schemas/capabilities.json`. Workflows target the capability, not a vendor.
+- **Provider** — A concrete vendor that supplies a capability (e.g. Jira / Linear for `issue_tracker`); listed in the capability's `providers[]`.
+- **Binding** — `bindings/<provider>/binding.json` inside a plugin: wires one provider to a capability plus its MCP server + `userConfig` keys. `providerPlugins{}` is generated from binding paths (`CAPABILITY-INDEX` / `BINDING-1`).
+- **Integration plugin** — A concept plugin (e.g. `polymath-vcs`, `polymath-chat`) that pairs MCP-dependent skills with the `.mcp.json` server(s) that back them. Detected by `.mcp.json` / `bindings/` presence; governed by [`docs/INTEGRATION-POLICY.md`](../../../../docs/INTEGRATION-POLICY.md).
+- **MCP-dependent skill** (informally "MCP-based skill") — A skill whose procedure calls an MCP server's tools. Note the standard Skills↔MCP distinction: the **skill is the recipe** (what to do), the **MCP is the tooling** (data/actions) — complementary, not the same thing. These are the skills `docs/PORTABILITY.md` tags `claude-coupled`: they run fully only where the MCP is configured, unlike a portable, pure-procedure skill.

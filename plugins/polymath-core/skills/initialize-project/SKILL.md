@@ -41,7 +41,7 @@ already exists, so you know up front whether this is a create or an update.
 5. **Write `.polymath/capabilities.yaml` only for confident provider mappings.**
    - Example: GitHub remote plus GitHub Actions means `vcs: github` and `ci: github_actions`.
    - If a provider is unknown, omit it and list the question in the onboarding doc instead of guessing.
-6. **Write `docs/polymath-onboarding.md`** for *this* project — never copy
+6. **Write `docs/POLYMATH-ONBOARDING.md`** for *this* project — never copy
    Polymath's own maintainer commands (`tools/validate-all.sh`, `bakeoff.py`,
    unittest discovery) into it; those exist only in the marketplace repo.
    Include:
@@ -51,7 +51,7 @@ already exists, so you know up front whether this is a create or an update.
      recommended; PyYAML and `jq` are optional (do not mark `jq` required).
    - Environment variables / keys needed, names only, with owner or source if known.
    - The recommended plugin install set for this project. **Start from the
-     closest install profile** in [`shared/polymath-profiles.json`](../../../../shared/polymath-profiles.json)
+     closest install profile** in [`registry/polymath-profiles.json`](../../../../registry/polymath-profiles.json)
      (`backend`, `frontend`, `sre`, `platform`, `pm`, `staff`, `author`) — pick
      the one whose spine matches the inferred stack/role, emit its
      `claude plugin install` line verbatim (every profile already includes the
@@ -71,7 +71,7 @@ already exists, so you know up front whether this is a create or an update.
 
 - `.polymath/project.yaml`.
 - `.polymath/capabilities.yaml` when provider mappings are known.
-- `docs/polymath-onboarding.md`.
+- `docs/POLYMATH-ONBOARDING.md`.
 - A short summary of inferred stack, required setup, recommended plugins, and unresolved questions.
 
 ## Quality bar

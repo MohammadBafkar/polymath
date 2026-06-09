@@ -23,8 +23,8 @@
       ]
     },
     {
-      "name": "polymath-infra-cloud",
-      "source": "./plugins/polymath-infra-cloud",
+      "name": "polymath-cloud",
+      "source": "./plugins/polymath-cloud",
       "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.",
       "version": "0.3.0",
       "category": "infra",
@@ -227,8 +227,8 @@
       ]
     },
     {
-      "name": "polymath-infra-kubernetes",
-      "source": "./plugins/polymath-infra-kubernetes",
+      "name": "polymath-kubernetes",
+      "source": "./plugins/polymath-kubernetes",
       "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.",
       "version": "0.3.0",
       "category": "infra",
@@ -254,7 +254,7 @@
     {
       "name": "polymath-observability",
       "source": "./plugins/polymath-observability",
-      "description": "Observability craft: logging strategy, OTel tracing, RED/USE metrics design.",
+      "description": "Observability concept plugin: RED/USE + logging + tracing design AND Datadog/Grafana/Honeycomb/Elastic/Sentry query integration.",
       "version": "0.3.0",
       "category": "observability",
       "tags": [
@@ -277,9 +277,9 @@
       ]
     },
     {
-      "name": "polymath-connector-github",
-      "source": "./plugins/polymath-connector-github",
-      "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
+      "name": "polymath-vcs",
+      "source": "./plugins/polymath-vcs",
+      "description": "Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -289,9 +289,9 @@
       ]
     },
     {
-      "name": "polymath-connector-pagerduty",
-      "source": "./plugins/polymath-connector-pagerduty",
-      "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
+      "name": "polymath-paging",
+      "source": "./plugins/polymath-paging",
+      "description": "On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -301,9 +301,9 @@
       ]
     },
     {
-      "name": "polymath-connector-snyk",
-      "source": "./plugins/polymath-connector-snyk",
-      "description": "Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.",
+      "name": "polymath-vuln-scan",
+      "source": "./plugins/polymath-vuln-scan",
+      "description": "Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
@@ -425,51 +425,15 @@
       ]
     },
     {
-      "name": "polymath-connector-slack",
-      "source": "./plugins/polymath-connector-slack",
-      "description": "Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.",
+      "name": "polymath-chat",
+      "source": "./plugins/polymath-chat",
+      "description": "Incident-comms integration: Slack channels/threads + Statuspage public updates \u2014 internal + external incident communication.",
       "version": "0.3.0",
       "category": "connector",
       "tags": [
         "connector",
         "slack",
         "comms"
-      ]
-    },
-    {
-      "name": "polymath-connector-sentry",
-      "source": "./plugins/polymath-connector-sentry",
-      "description": "Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "sentry",
-        "errors"
-      ]
-    },
-    {
-      "name": "polymath-connector-statuspage",
-      "source": "./plugins/polymath-connector-statuspage",
-      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "statuspage",
-        "public-comms"
-      ]
-    },
-    {
-      "name": "polymath-connector-terraform",
-      "source": "./plugins/polymath-connector-terraform",
-      "description": "Terraform / OpenTofu connector: plan-review skill that flags destructive changes, drift, and unsafe diffs pre-apply.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "terraform",
-        "iac"
       ]
     },
     {
@@ -485,8 +449,8 @@
       ]
     },
     {
-      "name": "polymath-connector-tracker",
-      "source": "./plugins/polymath-connector-tracker",
+      "name": "polymath-tracker",
+      "source": "./plugins/polymath-tracker",
       "description": "Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.",
       "version": "0.3.0",
       "category": "connector",
@@ -496,21 +460,6 @@
         "jira",
         "linear",
         "atlassian"
-      ]
-    },
-    {
-      "name": "polymath-connector-observability",
-      "source": "./plugins/polymath-connector-observability",
-      "description": "Observability connector: Datadog + Grafana + Honeycomb + Elastic MCP; dashboard snapshot, log search, trace investigate, query-during-incident, monitor authoring.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "observability",
-        "datadog",
-        "grafana",
-        "honeycomb",
-        "elastic"
       ]
     }
   ]

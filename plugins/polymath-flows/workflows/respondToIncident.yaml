@@ -10,6 +10,10 @@ triggers:
   - "prod is down, help"
   - "page just fired, walk me through response"
   - "sev1, what do I do"
+  # Arc phrasing migrated from the retired incidentToReview workflow (the
+  # triggers cap is 5, so one representative phrasing): this workflow
+  # chainsTo incidentRetroToActions, so "response → action items" is covered.
+  - "take this incident from response all the way to action items"
 detectionSignals:
   paths:
     - "docs/postmortems/**"

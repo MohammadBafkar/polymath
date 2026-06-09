@@ -127,15 +127,6 @@
     ]
   },
   {
-    "n": "incidentToReview",
-    "paths": [
-      "docs/postmortems/**"
-    ],
-    "intents": [
-      "incident-to-review"
-    ]
-  },
-  {
     "n": "migrateLanguageVersion",
     "paths": [
       "**/*.csproj",

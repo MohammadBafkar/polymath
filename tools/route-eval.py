@@ -160,7 +160,7 @@ def main() -> int:
     print("  Interpretation: precision/false-positives bound whether a hint, WHEN shown,")
     print("  is trustworthy. Reach bounds how OFTEN a hint appears on real phrasing. Neither")
     print("  measures whether narrowing 149->3 improves the MODEL's pick -- that is Claim B,")
-    print("  which needs a live token (see docs/plans/consolidation-and-dispatch.md).")
+    print("  which needs a live token.")
     return 0
 
 

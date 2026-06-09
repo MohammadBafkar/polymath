@@ -123,6 +123,20 @@ def fixtures() -> list[pathlib.Path]:
     return sorted(TESTS_DIR.glob("*.md"))
 
 
+def _no_fixtures(label: str, glob: str, allow_empty: bool) -> int:
+    """A gate with zero fixtures is a silent no-op, not a pass. Fail by
+    default so a deleted/moved fixture set can't make this gate green."""
+    if allow_empty:
+        print(f"{label}: no fixtures found ({glob}) — allowed by --allow-empty")
+        return 0
+    print(
+        f"{label}: no fixtures found ({glob}) — refusing to pass an empty gate "
+        f"(pass --allow-empty to override)",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def run_hook(prompt: str) -> str:
     payload = json.dumps({"prompt": prompt})
     proc = subprocess.run(
@@ -135,11 +149,10 @@ def run_hook(prompt: str) -> str:
     return proc.stdout
 
 
-def cmd_check() -> int:
+def cmd_check(allow_empty: bool = False) -> int:
     files = fixtures()
     if not files:
-        print("route-triggering: no fixtures found (tests/route-triggering/*.md)")
-        return 0
+        return _no_fixtures("route-triggering check", "tests/route-triggering/*.md", allow_empty)
     errs = []
     for f in files:
         try:
@@ -165,14 +178,13 @@ def cmd_list() -> int:
     return 0
 
 
-def cmd_run() -> int:
+def cmd_run(allow_empty: bool = False) -> int:
     if not HOOK.exists():
         print(f"route-triggering run: hook not found at {HOOK}", file=sys.stderr)
         return 1
     files = fixtures()
     if not files:
-        print("route-triggering run: no fixtures found")
-        return 0
+        return _no_fixtures("route-triggering run", "tests/route-triggering/*.md", allow_empty)
     passed = failed = 0
     for f in files:
         try:
@@ -212,8 +224,12 @@ def _indent(s: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Route-triggering tests (deterministic, no model).")
     ap.add_argument("mode", choices=["check", "list", "run"], nargs="?", default="check")
+    ap.add_argument("--allow-empty", action="store_true",
+                    help="Exit 0 (not 1) when no fixtures are present.")
     args = ap.parse_args()
-    return {"check": cmd_check, "list": cmd_list, "run": cmd_run}[args.mode]()
+    if args.mode == "list":
+        return cmd_list()
+    return {"check": cmd_check, "run": cmd_run}[args.mode](args.allow_empty)
 
 
 if __name__ == "__main__":

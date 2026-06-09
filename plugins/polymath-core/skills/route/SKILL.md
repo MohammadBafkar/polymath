@@ -80,7 +80,7 @@ For `route_type="clarify"`, `target` is `null`, `question` is one short question
 
 - "Review this PR for correctness, security, and missing tests" -> `workflow`, `polymath-flows:run-workflow reviewPR`.
 - "Append a changelog entry for this diff" -> `skill`, `polymath-release:changelog`.
-- "Triage this Jira ticket" -> `connector`, `polymath-connector-tracker:jira-triage`.
+- "Triage this Jira ticket" -> `connector`, `polymath-tracker:jira-triage`.
 - "How do I use this framework API?" -> `external`, official docs or project-declared external skill catalog.
 - "Help me decide between Postgres and DynamoDB" -> `workflow`, `polymath-flows:run-workflow decideUnderAmbiguity`, unless the user only wants a quick comparison.
 

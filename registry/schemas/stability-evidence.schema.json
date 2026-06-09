@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MohammadBafkar/Polymath/registry/schemas/stability-evidence.schema.json",
+  "title": "Polymath stability evidence ledger",
+  "description": "One entry per catalog plugin recording the live-run, adopter, and connector/infra distinct-value evidence that backs promotion. Consumed by tools/check-stability-evidence.py (STABILITY-1 conformance gate) and tools/build-catalog.py (status badge tooltip). The catalog's status field is the user-facing claim; this ledger is the receipt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entries"],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "object",
+      "description": "Per-plugin evidence keyed by plugin name. Every plugin listed in registry/polymath-catalog.json must appear here exactly once (enforced by tools/check-stability-evidence.py).",
+      "propertyNames": {
+        "pattern": "^polymath-[a-z0-9-]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target_status",
+          "evidence_state",
+          "live_bakeoff_run",
+          "live_trigger_run",
+          "external_user_url",
+          "promotion_pr",
+          "changelog_entry",
+          "distinct_value_url"
+        ],
+        "properties": {
+          "target_status": {
+            "enum": ["stable", "beta", "experimental", "deprecated"],
+            "description": "The status this plugin is currently working toward. Equal to or above the catalog's current status."
+          },
+          "evidence_state": {
+            "enum": [
+              "pre-evidence",
+              "on-disk-skill",
+              "on-disk-foundation",
+              "stable-ready",
+              "stable",
+              "deprecated"
+            ],
+            "description": "Where the plugin stands on the evidence ladder. pre-evidence = only golden fixture. on-disk-skill = golden + bakeoff case + skill-triggering test (skill-shaped beta closure). on-disk-foundation = golden + executable unit tests + end-to-end workflow job (foundation beta closure). stable-ready = on-disk closure plus a live bakeoff and live trigger run that meet the stable bar, awaiting only an external adopter and changelog entry. stable = promoted, with all live fields populated."
+          },
+          "live_bakeoff_run": {
+            "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
+            "description": "URL of a published bakeoff run (GitHub Actions artifact or .pdata/bakeoff JSON committed under docs/) where this plugin's primary case scores ≥ 8 with delta ≥ 2 over baseline and the judge agrees. Null until a live run is published."
+          },
+          "live_trigger_run": {
+            "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
+            "description": "URL of a skill-triggering run where every one of three trigger phrasings invoked the expected skill (live, not just parseable). Null until a live run is published."
+          },
+          "external_user_url": {
+            "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
+            "description": "URL of an issue, fork, or PR from a user other than the maintainer that cites the plugin's files. Null until at least one external adopter is observed."
+          },
+          "promotion_pr": {
+            "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
+            "description": "URL of the PR that promoted this plugin to its current catalog status. Null while the plugin has never been promoted (still at experimental)."
+          },
+          "changelog_entry": {
+            "oneOf": [{ "type": "null" }, { "type": "string" }],
+            "description": "Anchor in the plugin's CHANGELOG.md (or repo CHANGELOG.md) recording the most recent promotion. Null until a promotion has been recorded."
+          },
+          "distinct_value_url": {
+            "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
+            "description": "REQUIRED for integration and infra plugins seeking beta or stable. URL of primary-source evidence showing Polymath adds workflow / critique / safety / artifact value beyond the official MCP, CLI, LSP, or docs (a bakeoff case, a side-by-side artifact, or a documented workflow-shape gap). Must be non-null before an integration/infra plugin can promote past experimental under the post-Iteration-0 policy. Null for non-integration/non-infra plugins."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Free-text caveat — what's missing, what the next step is. Optional."
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@
 
 ## The marketplace
 
-**40 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **27 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
+**36 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **26 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
 
@@ -51,18 +51,18 @@ claude
 
 ### Install profiles
 
-Picking a handful of plugins out of ~45 is the real first hurdle. Install
-profiles in [`shared/polymath-profiles.json`](shared/polymath-profiles.json)
+Picking a handful of plugins out of 36 is the real first hurdle. Install
+profiles in [`registry/polymath-profiles.json`](registry/polymath-profiles.json)
 are curated role spines — install one, then add more a-la-carte on top. Every
 profile implicitly includes the `polymath-core` + `polymath-flows` spine.
 
 | Profile | For | Adds (beyond the core+flows spine) |
 | --- | --- | --- |
-| `backend` | API/service devs | engineering, backend, qa, security, release, connector-github |
-| `frontend` | Web/UI devs | engineering, frontend, design, qa, release, connector-github |
-| `sre` | Reliability / on-call | sre, observability, incident, performance, connector-{pagerduty,datadog,slack} |
-| `platform` | Platform / DevOps | platform, devops, infra-cloud, infra-kubernetes, sre, release, connector-terraform |
-| `pm` | Product managers | product, research, planning, communication, decisions, connector-jira |
+| `backend` | API/service devs | engineering, backend, qa, security, release, vcs |
+| `frontend` | Web/UI devs | engineering, frontend, design, qa, release, vcs |
+| `sre` | Reliability / on-call | sre, observability, incident, performance, paging, chat |
+| `platform` | Platform / DevOps | platform, devops, cloud, kubernetes, sre, release |
+| `pm` | Product managers | product, research, planning, communication, decisions, tracker |
 | `staff` | Staff+ / tech leads | thinking, decisions, writing, planning, engineering, communication, leadership |
 | `author` | Plugin authors | author, engineering, writing |
 
@@ -72,15 +72,15 @@ claude plugin install \
   polymath-core@polymath polymath-flows@polymath \
   polymath-engineering@polymath polymath-backend@polymath \
   polymath-qa@polymath polymath-security@polymath \
-  polymath-release@polymath polymath-connector-github@polymath
+  polymath-release@polymath polymath-vcs@polymath
 ```
 
 For a new target repository, run `/polymath-core:init-project` or
 `/polymath-flows:run-workflow activateProject` first. It creates
 `.polymath/project.yaml`, maps known capability providers, and writes
-`docs/polymath-onboarding.md` so agents know the stack, conventions,
+`docs/POLYMATH-ONBOARDING.md` so agents know the stack, conventions,
 required tools, environment variables, recommended plugins, and first
-steps. See [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md).
+steps. See [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md).
 
 The full catalog is published as the marketplace's GitHub Pages site under `docs/site/`.
 
@@ -92,9 +92,9 @@ The full catalog is published as the marketplace's GitHub Pages site under `docs
 - **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
 - **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
 - **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
-- **Infra** — `polymath-infra-kubernetes`, `polymath-infra-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
+- **Infra** — `polymath-kubernetes`, `polymath-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
 - **People & content** — `polymath-communication` (internal + customer-facing prose), `polymath-leadership`.
-- **Connectors (MCP + hooks, by capability)** — `polymath-connector-github`, `-tracker` (Jira + Linear), `-observability` (Datadog + Grafana + Honeycomb + Elastic), `-pagerduty`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`.
+- **Connectors (MCP + hooks, by capability)** — `polymath-vcs`, `-tracker` (Jira + Linear), `-observability` (Datadog + Grafana + Honeycomb + Elastic), `-pagerduty`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`.
 - **Orchestration** — `polymath-flows`.
 - **Authoring** — `polymath-author`.
 
@@ -135,7 +135,7 @@ polymath/
 │       ├── bin/                        # bundled executables (polymath-flow, scaffolders)
 │       ├── README.md, CHANGELOG.md
 │       └── tests/
-├── shared/schemas/                     # workflow + artifact + capability + project + conformance schemas
+├── registry/schemas/                     # workflow + artifact + capability + project + conformance schemas
 ├── tools/                              # scaffolders, validators, conformance, catalog, bakeoff, token analyzer
 ├── tests/
 │   ├── golden/                         # fixtures per plugin / workflow
@@ -154,7 +154,7 @@ Every change runs locally and in CI:
 - `tools/validate-all.sh` — `claude plugin validate --strict` at marketplace root + per plugin; catches version drift between a marketplace entry and its `plugin.json`.
 - `tools/lint-skills.sh` — description ≤ 200 chars, SKILL.md ≤ 500 lines.
 - `tools/token-budget.sh` — per-plugin cap of 400 tokens; total target scales with plugin count.
-- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `shared/polymath-catalog.json`), `CONNECTOR-2` (connector / infra plugins audited in `docs/CONNECTOR-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `shared/polymath-catalog.json`.
+- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `registry/polymath-catalog.json`), `INTEGRATION-2` (connector / infra plugins audited in `docs/INTEGRATION-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `registry/polymath-catalog.json`.
 - `tools/build-catalog.py --check` — verifies the GitHub Pages catalog regenerates reproducibly.
 - `plugins/polymath-flows/bin/polymath-flow validate` — every workflow YAML against the schema.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests` and `-s plugins/polymath-core/tests` — executable unit tests.
@@ -167,8 +167,8 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar and the proof loop.
 - [`docs/QUALITY-DASHBOARD.md`](docs/QUALITY-DASHBOARD.md) — what gets measured, where the artifacts land.
-- [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) — per-plugin audit for every `polymath-connector-*` and `polymath-infra-*` plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
-- [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
+- [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping a `.mcp.json` / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
+- [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 
 ## Contributing
 

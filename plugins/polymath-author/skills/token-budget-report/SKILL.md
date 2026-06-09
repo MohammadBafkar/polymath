@@ -34,11 +34,11 @@ Per-plugin (canonical):
   polymath-core                  194
   polymath-product               187
   …
-  polymath-infra-kubernetes      345  ← heaviest
+  polymath-kubernetes      345  ← heaviest
   polymath-writing               274  ← second heaviest
 
 Plugins approaching cap (≥ 300 tok):
-  polymath-infra-kubernetes  345
+  polymath-kubernetes  345
     Heaviest description:
       write-manifest (skill)  ~80 tok
     Suggested trim: shorten the safe-defaults enumeration; aim ≤ 60 chars.

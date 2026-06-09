@@ -18,7 +18,7 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 
 1. The polymath-core SessionStart hook runs `hooks/scripts/load-project-context.py` at every session start.
 2. The loader reads `.polymath/project.yaml` in the project → user (`${CLAUDE_CONFIG_DIR}/polymath/project.yaml`) → home order. First hit wins.
-3. After validation against [`shared/schemas/project.schema.json`](../../../../shared/schemas/project.schema.json), the loader writes a resolved snapshot to `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json` (plus a `_meta` block recording source path + load time).
+3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json` (plus a `_meta` block recording source path + load time).
 4. Skills read that JSON file directly.
 
 ## Procedure
@@ -71,7 +71,7 @@ If no project file exists, the snapshot is absent and skills fall back to their 
 
 ## Related
 
-- [`shared/schemas/project.schema.json`](../../../../shared/schemas/project.schema.json) — schema.
+- [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json) — schema.
 - [`docs/PROJECT-LOCALIZATION.md`](../../../../docs/PROJECT-LOCALIZATION.md) — full reference.
 - [`docs/CAPABILITIES.md`](../../../../docs/CAPABILITIES.md) — capability mapping (sibling file).
 - [`polymath-core:initialize-project`](../initialize-project/SKILL.md) — creates the first project context package.

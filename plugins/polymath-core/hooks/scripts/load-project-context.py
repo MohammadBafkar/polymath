@@ -19,7 +19,7 @@ Outputs:
   when it was loaded. Skills consume this file to adapt behavior.
 
 Validation:
-  The script enforces a minimal subset of shared/schemas/project.schema.json:
+  The script enforces a minimal subset of registry/schemas/project.schema.json:
   required top-level types, enum-bounded conventions, language list shape.
   Surface-only validation; deep nested validation is the JSON schema's job
   for tooling that has a full validator (CI). The aim here is "block obvious
@@ -212,7 +212,7 @@ except ImportError:
 
 
 # ---------------------------------------------------------------------------
-# Validation (minimal subset of shared/schemas/project.schema.json)
+# Validation (minimal subset of registry/schemas/project.schema.json)
 # ---------------------------------------------------------------------------
 
 KNOWN_TOP_KEYS = {

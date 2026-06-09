@@ -42,7 +42,7 @@ Hooks are deterministic gates. They never block silently — every block produce
 
 ### Workflows
 
-- Schema: `shared/schemas/workflow.schema.json`.
+- Schema: `registry/schemas/workflow.schema.json`.
 - Resolution order: project → user → marketplace.
 - Enforcement: deterministic `mustPass` checks (`fileExists`, `fileMatches`, `commandSucceeds`, `stepSummaryMatches`).
 - AI cross-checks (e.g., `check-doc-alignment`) are advisory, not blocking, in v0.1.

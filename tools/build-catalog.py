@@ -29,7 +29,7 @@ import textwrap
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SITE_DIR = REPO_ROOT / "docs" / "site"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
-CATALOG_JSON = REPO_ROOT / "shared" / "polymath-catalog.json"
+CATALOG_JSON = REPO_ROOT / "registry" / "polymath-catalog.json"
 
 
 CATEGORY_ORDER = [
