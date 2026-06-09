@@ -116,7 +116,7 @@ Placeholders resolved at run time:
 
 - `${capabilities.<cap>.provider}` — provider token (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name (e.g.
-  `polymath-connector-observability`).
+  `polymath-observability`).
 - `${inputs.<name>}` — workflow input value.
 - `${workflow.<slug|id|name>}` — workflow run metadata.
 
@@ -164,7 +164,7 @@ The other workflows declare provider plugins directly via
 2. Add a `providerPlugins.<provider>` entry pointing at the adapter
    plugin name.
 3. Ship the adapter plugin (or point at an existing umbrella plugin
-   like `polymath-connector-observability`).
+   like `polymath-observability`).
 4. Add a row to [`.polymath/capabilities.example.yaml`](../.polymath/capabilities.example.yaml)
    so users discover the option.
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Polymath is an open-source Claude Code marketplace: 39 work-shaped plugins covering the full SDLC, 26 YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format, making them portable across Claude Code, Cursor, Codex, Goose, Gemini CLI, and JetBrains Junie.
+Polymath is an open-source Claude Code marketplace: 36 work-shaped plugins covering the full SDLC, 26 YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format, making them portable across Claude Code, Cursor, Codex, Goose, Gemini CLI, and JetBrains Junie.
 
 ## Local validation commands
 

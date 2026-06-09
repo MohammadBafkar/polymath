@@ -1,10 +1,11 @@
 # Connector and infra plugin policy
 
-This document governs every `polymath-connector-*` and
-`polymath-infra-*` plugin. It exists because the most common
-criticism of any plugin catalog is that connector / infra plugins
-duplicate official MCPs, official docs, or vendor tooling without
-adding distinct value.
+This document governs every **integration** plugin (one that ships a
+`.mcp.json` or capability `bindings/` — e.g. `polymath-vcs`, `polymath-chat`,
+`polymath-observability`) and every **infra** plugin (`polymath-cloud`,
+`polymath-kubernetes`). It exists because the most common criticism of any
+plugin catalog is that such plugins duplicate official MCPs, official docs, or
+vendor tooling without adding distinct value.
 
 The policy:
 
@@ -72,20 +73,22 @@ The table below records the disclosure for each in-scope plugin.
 Empty `polymath_value` columns are flagged for demotion at the next
 release.
 
-### 3.1 `polymath-connector-*`
+### 3.1 Concept (integration) plugins
 
-| Plugin                          | Official MCP / source                                                | Polymath value                                                                              | Sunset trigger                                                                            |
-| ------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `polymath-connector-observability` | Wraps Datadog + Grafana + Honeycomb + Elasticsearch MCPs under one observability capability | Snapshot + trace-walk + bounded-scan + incident-query + monitor-authoring disciplines; single capability mapping for all four | Demote a provider when its upstream MCP ships postmortem-evidence + investigative templates. |
-| `polymath-vcs`     | Wraps official GitHub MCP (incl. GitHub Actions diagnostics)         | Triage + PR-open workflow shape; CI-failure diagnosis on Stop                                | Demote when GitHub MCP grows opinionated triage flow + CI diagnosis.                       |
-| `polymath-tracker`    | Wraps official Jira + Linear MCP servers                            | Triage workflows + provider-agnostic file-bug-from-incident; one `issue_tracker` capability  | Demote a provider if its official MCP ships triage automation covering our flow.           |
-| `polymath-paging`  | Wraps official PagerDuty MCP                                         | `page-context` skill discipline; respondToIncident wiring                                    | Demote when PagerDuty MCP adds first-class incident-context skill.                         |
-| `polymath-connector-sentry`     | Wraps official Sentry MCP                                            | `triage-error` shape: group context + recent-deploy correlation                              | Demote when Sentry MCP ships triage automation covering the four signals.                  |
-| `polymath-chat`      | Wraps official Slack MCP                                             | Incident-comms + async-update templates                                                      | Demote when Slack MCP ships incident-comms templates.                                      |
-| `polymath-vuln-scan`       | Wraps official Snyk MCP                                              | `triage-vulns` classification (exploitable / reachable / dev-only); Stop hook warns on critical findings | Demote when Snyk MCP ships classification + open-criticals surfacing.                     |
-| `polymath-connector-statuspage` | No official MCP yet (Atlassian Statuspage REST API)                  | Incident-comms drafting tied to severity ladder                                              | Demote when Statuspage ships an official MCP and our wrapper has no delta.                 |
+Named by the capability they serve; each maps multiple vendor providers under
+one capability (see `registry/schemas/capabilities.json`). Providers are wired
+incrementally via `bindings/<provider>/binding.json`.
 
-### 3.2 `polymath-infra-*`
+| Plugin                  | Capability / providers                                                                 | Polymath value                                                                                           | Sunset trigger                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `polymath-observability` | `observability` — Datadog, Grafana, Honeycomb, Elastic, Sentry (merged with the observability design discipline) | RED/USE + logging + tracing design **and** snapshot / trace-walk / bounded-scan / incident-query / monitor-authoring / error-triage across providers | Demote a provider when its upstream MCP ships postmortem-evidence + investigative templates. |
+| `polymath-vcs`          | `vcs` (+ `ci`) — GitHub, GitLab, Azure DevOps, Bitbucket                                | Triage + PR-open workflow shape; CI-failure diagnosis on Stop; provider-agnostic across forges           | Demote a provider when its official MCP grows opinionated triage + CI diagnosis.          |
+| `polymath-tracker`      | `issue_tracker` — Jira, Linear, GitHub Issues, Azure Boards                             | Triage workflows + provider-agnostic file-bug-from-incident                                              | Demote a provider if its official MCP ships triage automation covering our flow.          |
+| `polymath-paging`       | `pager` — PagerDuty, Opsgenie, Splunk On-Call                                          | `page-context` skill discipline; respondToIncident wiring                                                | Demote when an official pager MCP adds a first-class incident-context skill.               |
+| `polymath-chat`         | `incident_comms` — Slack, Statuspage (internal team chat + external public status)     | Incident-comms + async-update templates (internal) and severity-mapped public status updates (external)  | Demote when an official MCP ships incident-comms + public-status templates.               |
+| `polymath-vuln-scan`    | `vulnerability_scanner` — Snyk, Dependabot, GitHub Advanced Security                    | `triage-vulns` classification (exploitable / reachable / dev-only); Stop hook warns on critical findings | Demote when an official MCP ships classification + open-criticals surfacing.              |
+
+### 3.2 Infra plugins
 
 | Plugin                      | Official surface                                              | Polymath value                                                              | Sunset trigger                                                                |
 | --------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -111,8 +114,8 @@ Projects then map each capability to the configured provider once in
 ### 4.1 Provider configuration & packaging
 
 A capability plugin may bundle several providers' MCP servers (e.g.
-`polymath-connector-observability` ships Datadog + Grafana + Honeycomb +
-Elastic). Claude Code loads `.mcp.json` statically at session start and cannot
+`polymath-observability` ships Datadog + Grafana + Honeycomb + Elastic +
+Sentry). Claude Code loads `.mcp.json` statically at session start and cannot
 launch only a subset, so:
 
 - **All declared servers register; configure only the provider(s) you use.**
@@ -151,16 +154,16 @@ Verified against npm on 2026-06-08:
 
 | Package | Connector(s) | npm status |
 | --- | --- | --- |
-| `@modelcontextprotocol/server-github` | github | ✅ resolves |
-| `@modelcontextprotocol/server-slack` | slack | ✅ resolves |
-| `@sentry/mcp-server` | sentry | ✅ resolves |
+| `@modelcontextprotocol/server-github` | vcs | ✅ resolves |
+| `@modelcontextprotocol/server-slack` | chat | ✅ resolves |
+| `@sentry/mcp-server` | observability | ✅ resolves |
 | `@datadog/mcp-server` | observability | ⚠️ placeholder — does not resolve |
 | `@grafana/mcp-server` | observability | ⚠️ placeholder — does not resolve |
 | `@honeycomb/mcp-server` | observability | ⚠️ placeholder — does not resolve |
 | `@elastic/mcp-server` | observability | ⚠️ placeholder — does not resolve |
-| `@pagerduty/mcp-server` | pagerduty | ⚠️ placeholder — does not resolve |
-| `@snyk/mcp-server` | snyk | ⚠️ placeholder — does not resolve |
-| `@statuspage/mcp-server` | statuspage | ⚠️ placeholder — does not resolve |
+| `@pagerduty/mcp-server` | paging | ⚠️ placeholder — does not resolve |
+| `@snyk/mcp-server` | vuln-scan | ⚠️ placeholder — does not resolve |
+| `@statuspage/mcp-server` | chat | ⚠️ placeholder — does not resolve |
 | `@modelcontextprotocol/server-atlassian` | tracker (Jira) | ⚠️ placeholder — does not resolve |
 | `@linear/mcp-server` | tracker (Linear) | ⚠️ placeholder — does not resolve |
 

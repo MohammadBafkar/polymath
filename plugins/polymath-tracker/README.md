@@ -4,7 +4,7 @@ Issue-tracker connector for the Polymath marketplace. One install covers the
 `issue_tracker` capability across **Jira and Linear** — supply credentials for
 whichever tracker your project uses (the capability vocabulary resolves
 `provider: jira` and `provider: linear` to this plugin). Mirrors the umbrella
-shape of `polymath-connector-observability`.
+shape of `polymath-observability`.
 
 ## What it ships
 
@@ -56,8 +56,8 @@ Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
 by `tools/sync-connector-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
-- **Official surface:** Wraps official Jira + Linear MCP servers
-- **Polymath value:** Triage workflows + provider-agnostic file-bug-from-incident; one `issue_tracker` capability
+- **Official surface:** `issue_tracker` — Jira, Linear, GitHub Issues, Azure Boards
+- **Polymath value:** Triage workflows + provider-agnostic file-bug-from-incident
 - **Sunset trigger:** Demote a provider if its official MCP ships triage automation covering our flow.
 - **Status:** `experimental`
 <!-- connector-policy:end -->

@@ -32,7 +32,7 @@ the ledger is fully populated.**
 
 | # | Scope                                                                 | Output                                                                                                                |
 | - | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 0 | All 39 plugins                                                        | The ledger, schema, and `STABILITY-1` checker land. No status promotions.                                             |
+| 0 | All 36 plugins                                                        | The ledger, schema, and `STABILITY-1` checker land. No status promotions.                                             |
 | 1 | 9 skill-shaped beta plugins already at `on-disk-skill`                | Live bakeoff + live trigger run on three phrasings. Mark `stable-ready` only when both pass; promote only with adopter.|
 | 2 | `polymath-core`, `polymath-flows` (`on-disk-foundation`)              | Foundation-specific live proof (workflow e2e job + bakeoff coverage where load-bearing). External adopter.            |
 | 3 | 4 near-beta experimental + 14 golden-only experimental skill plugins  | Close on-disk evidence (bakeoff case + 3-phrasing trigger test) for each, then run Iteration 1's live-proof loop.     |
@@ -100,14 +100,14 @@ safety / artifact value beyond the official MCP / CLI / LSP / docs
 surface. The distinct-value field is required before any promotion
 past experimental.
 
-- `polymath-connector-observability`
+- `polymath-observability`
 - `polymath-vcs`
 - `polymath-tracker`
 - `polymath-paging`
-- `polymath-connector-sentry`
+- `polymath-observability`
 - `polymath-chat`
 - `polymath-vuln-scan`
-- `polymath-connector-statuspage`
+- `polymath-chat`
 - `polymath-cloud`
 - `polymath-kubernetes`
 

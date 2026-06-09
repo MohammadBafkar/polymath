@@ -17,15 +17,32 @@
 <pre><code>claude plugin install polymath-chat@polymath</code></pre>
 <h1>polymath-chat</h1>
 
-<p>Slack connector for the Polymath marketplace.</p>
+<p>Incident-communications concept plugin for the Polymath marketplace — internal</p>
+<p>team chat and external public status under the <code>incident_comms</code> capability.</p>
 
 <h2>What it ships</h2>
 
 <ul>
-<li>MCP server: <code>@modelcontextprotocol/server-slack</code> via <code>npx</code>.</li>
-<li>Skills: <code>post-incident-comms</code>, <code>post-async-update</code>.</li>
-<li>Reference: <a href="references/slack-tools.md"><code>references/slack-tools.md</code></a>.</li>
+<li><strong>Skills:</strong> <code>post-incident-comms</code>, <code>post-async-update</code> (internal team chat),</li>
 </ul>
+<p><code>post-statuspage-update</code> (external customer-facing status).</p>
+<ul>
+<li><strong>Providers:</strong> Slack (internal), Statuspage (external) — each via a</li>
+</ul>
+<p><code>bindings/&lt;provider&gt;/binding.json</code> + a <code>.mcp.json</code> server. Teams / Discord /</p>
+<p>Mattermost are recognized <code>incident_comms</code> providers and can be wired the</p>
+<p>same way.</p>
+<ul>
+<li>References: <a href="references/slack-tools.md"><code>references/slack-tools.md</code></a>,</li>
+</ul>
+<p><a href="references/statuspage-tools.md"><code>references/statuspage-tools.md</code></a>.</p>
+
+<p>&lt;!-- mcp-package-status --&gt;</p>
+<p>&gt; ⚠️ <strong>MCP package not yet published.</strong> <code>@statuspage/mcp-server</code> does <strong>not</strong></p>
+<p>&gt; resolve on npm as of 2026-06-08 (Slack&#x27;s official server does). Substitute a</p>
+<p>&gt; real Statuspage MCP command in <code>.mcp.json</code> before relying on it. See</p>
+<p>&gt; <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code> §4.2</a>.</p>
+<p>&lt;!-- /mcp-package-status --&gt;</p>
 
 <h2>Installation</h2>
 
@@ -49,9 +66,9 @@ claude plugin install polymath-chat@polymath \
 <p>edit the policy table and re-run the script.</p>
 
 <ul>
-<li><strong>Official surface:</strong> Wraps official Slack MCP</li>
-<li><strong>Polymath value:</strong> Incident-comms + async-update templates</li>
-<li><strong>Sunset trigger:</strong> Demote when Slack MCP ships incident-comms templates.</li>
+<li><strong>Official surface:</strong> <code>incident_comms</code> — Slack, Statuspage (internal team chat + external public status)</li>
+<li><strong>Polymath value:</strong> Incident-comms + async-update templates (internal) and severity-mapped public status updates (external)</li>
+<li><strong>Sunset trigger:</strong> Demote when an official MCP ships incident-comms + public-status templates.</li>
 <li><strong>Status:</strong> <code>experimental</code></li>
 </ul>
 <p>&lt;!-- connector-policy:end --&gt;</p>

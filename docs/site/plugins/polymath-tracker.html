@@ -21,7 +21,7 @@
 <p><code>issue_tracker</code> capability across <strong>Jira and Linear</strong> — supply credentials for</p>
 <p>whichever tracker your project uses (the capability vocabulary resolves</p>
 <p><code>provider: jira</code> and <code>provider: linear</code> to this plugin). Mirrors the umbrella</p>
-<p>shape of <code>polymath-connector-observability</code>.</p>
+<p>shape of <code>polymath-observability</code>.</p>
 
 <h2>What it ships</h2>
 
@@ -84,8 +84,8 @@ claude plugin install polymath-tracker@polymath
 <p>edit the policy table and re-run the script.</p>
 
 <ul>
-<li><strong>Official surface:</strong> Wraps official Jira + Linear MCP servers</li>
-<li><strong>Polymath value:</strong> Triage workflows + provider-agnostic file-bug-from-incident; one <code>issue_tracker</code> capability</li>
+<li><strong>Official surface:</strong> <code>issue_tracker</code> — Jira, Linear, GitHub Issues, Azure Boards</li>
+<li><strong>Polymath value:</strong> Triage workflows + provider-agnostic file-bug-from-incident</li>
 <li><strong>Sunset trigger:</strong> Demote a provider if its official MCP ships triage automation covering our flow.</li>
 <li><strong>Status:</strong> <code>experimental</code></li>
 </ul>

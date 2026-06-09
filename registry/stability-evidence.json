@@ -67,17 +67,6 @@
       "distinct_value_url": null,
       "notes": "Connector/infra at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCP/CLI/LSP/docs surface (Iteration 4)."
     },
-    "polymath-connector-sentry": {
-      "target_status": "stable",
-      "evidence_state": "pre-evidence",
-      "live_bakeoff_run": null,
-      "live_trigger_run": null,
-      "external_user_url": null,
-      "promotion_pr": null,
-      "changelog_entry": null,
-      "distinct_value_url": null,
-      "notes": "Connector/infra at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCP/CLI/LSP/docs surface (Iteration 4)."
-    },
     "polymath-chat": {
       "target_status": "stable",
       "evidence_state": "pre-evidence",
@@ -90,17 +79,6 @@
       "notes": "Connector/infra at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCP/CLI/LSP/docs surface (Iteration 4)."
     },
     "polymath-vuln-scan": {
-      "target_status": "stable",
-      "evidence_state": "pre-evidence",
-      "live_bakeoff_run": null,
-      "live_trigger_run": null,
-      "external_user_url": null,
-      "promotion_pr": null,
-      "changelog_entry": null,
-      "distinct_value_url": null,
-      "notes": "Connector/infra at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCP/CLI/LSP/docs surface (Iteration 4)."
-    },
-    "polymath-connector-statuspage": {
       "target_status": "stable",
       "evidence_state": "pre-evidence",
       "live_bakeoff_run": null,
@@ -418,17 +396,6 @@
       "changelog_entry": null,
       "distinct_value_url": null,
       "notes": "Issue-tracker umbrella (Jira+Linear) at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCPs (Iteration 4)."
-    },
-    "polymath-connector-observability": {
-      "target_status": "stable",
-      "evidence_state": "pre-evidence",
-      "live_bakeoff_run": null,
-      "live_trigger_run": null,
-      "external_user_url": null,
-      "promotion_pr": null,
-      "changelog_entry": null,
-      "distinct_value_url": null,
-      "notes": "Observability umbrella (Datadog+Grafana+Honeycomb+Elastic) at the experimental floor. Needs a bakeoff case + skill-triggering test and distinct-value evidence beyond the official MCPs (Iteration 4)."
     }
   }
 }

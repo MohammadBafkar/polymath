@@ -17,13 +17,34 @@
 <pre><code>claude plugin install polymath-observability@polymath</code></pre>
 <h1>polymath-observability</h1>
 
-<p>Observability craft for the Polymath marketplace.</p>
+<p>Observability concept plugin for the Polymath marketplace — both the design</p>
+<p><strong>discipline</strong> and the <strong>integration</strong> for querying observability vendors, in</p>
+<p>one plugin (the <code>observability</code> capability).</p>
 
 <h2>What it ships</h2>
 
 <ul>
-<li>Skills: <code>logging-strategy</code>, <code>tracing-strategy-otel</code>, <code>metrics-design</code>.</li>
+<li><strong>Design skills:</strong> <code>logging-strategy</code>, <code>tracing-strategy-otel</code>,</li>
 </ul>
+<p><code>metrics-design</code> (RED/USE) — how to design what you emit.</p>
+<ul>
+<li><strong>Integration skills:</strong> <code>dashboard-snapshot</code>, <code>trace-investigate</code>,</li>
+</ul>
+<p><code>log-search</code>, <code>query-during-incident</code>, <code>author-monitor</code>, <code>triage-error</code> —</p>
+<p>how to investigate what you&#x27;ve emitted, across providers.</p>
+<ul>
+<li><strong>Providers:</strong> Datadog, Grafana, Honeycomb, Elastic, Sentry — each via a</li>
+</ul>
+<p><code>bindings/&lt;provider&gt;/binding.json</code> + a <code>.mcp.json</code> server. Configure only the</p>
+<p>providers you use (<code>.polymath/capabilities.yaml</code>); the rest stay idle.</p>
+
+<p>&lt;!-- mcp-package-status --&gt;</p>
+<p>&gt; ⚠️ <strong>Some MCP packages not yet published.</strong> <code>@datadog/mcp-server</code>,</p>
+<p>&gt; <code>@grafana/mcp-server</code>, <code>@honeycomb/mcp-server</code>, and <code>@elastic/mcp-server</code> do</p>
+<p>&gt; <strong>not</strong> resolve on npm as of 2026-06-08 (Sentry&#x27;s <code>@sentry/mcp-server</code> does).</p>
+<p>&gt; Substitute the real command for the provider(s) you use in <code>.mcp.json</code> before</p>
+<p>&gt; relying on them. See <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code> §4.2</a>.</p>
+<p>&lt;!-- /mcp-package-status --&gt;</p>
 
 <h2>Installation</h2>
 
@@ -36,6 +57,21 @@ claude plugin install polymath-observability@polymath
 <ul>
 <li><code>polymath-core</code></li>
 </ul>
+
+<p>&lt;!-- connector-policy:start --&gt;</p>
+<h2>Connector policy disclosure</h2>
+
+<p>Auto-generated from <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code></a></p>
+<p>by <code>tools/sync-connector-policy.py</code>. Do not edit by hand —</p>
+<p>edit the policy table and re-run the script.</p>
+
+<ul>
+<li><strong>Official surface:</strong> <code>observability</code> — Datadog, Grafana, Honeycomb, Elastic, Sentry (merged with the observability design discipline)</li>
+<li><strong>Polymath value:</strong> RED/USE + logging + tracing design <strong>and</strong> snapshot / trace-walk / bounded-scan / incident-query / monitor-authoring / error-triage across providers</li>
+<li><strong>Sunset trigger:</strong> Demote a provider when its upstream MCP ships postmortem-evidence + investigative templates.</li>
+<li><strong>Status:</strong> <code>experimental</code></li>
+</ul>
+<p>&lt;!-- connector-policy:end --&gt;</p>
 
 <h2>License</h2>
 

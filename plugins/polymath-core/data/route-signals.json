@@ -506,7 +506,7 @@
     {
       "id": "sentry-issue",
       "kind": "tool",
-      "surface": "polymath-connector-sentry:sentry-issue",
+      "surface": "polymath-observability:sentry-issue",
       "url": [
         "https://[A-Za-z0-9.-]*sentry\\.io/(?:organizations/[A-Za-z0-9_-]+/)?issues/[0-9]+",
         "https://[A-Za-z0-9.-]+/organizations/[A-Za-z0-9_-]+/issues/[0-9]+"

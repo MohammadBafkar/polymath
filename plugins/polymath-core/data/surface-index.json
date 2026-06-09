@@ -192,7 +192,7 @@
       "trust": "propose"
     },
     {
-      "surface": "polymath-connector-sentry:sentry-issue",
+      "surface": "polymath-observability:sentry-issue",
       "kind": "tool",
       "capabilities": [
         "observability"

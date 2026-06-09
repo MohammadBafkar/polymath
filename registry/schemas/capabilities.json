@@ -26,11 +26,11 @@
         "sentry"
       ],
       "providerPlugins": {
-        "datadog": "polymath-connector-observability",
-        "honeycomb": "polymath-connector-observability",
-        "grafana": "polymath-connector-observability",
-        "elastic": "polymath-connector-observability",
-        "sentry": "polymath-connector-sentry"
+        "datadog": "polymath-observability",
+        "honeycomb": "polymath-observability",
+        "grafana": "polymath-observability",
+        "elastic": "polymath-observability",
+        "sentry": "polymath-observability"
       }
     },
     "incident_comms": {
@@ -41,7 +41,7 @@
       ],
       "providerPlugins": {
         "slack": "polymath-chat",
-        "statuspage": "polymath-connector-statuspage"
+        "statuspage": "polymath-chat"
       }
     },
     "pager": {

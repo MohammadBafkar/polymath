@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `issue_tracker` umbrella; both MCP servers; the colliding
     `file-bug-from-incident` unified into one provider-agnostic skill).
     `polymath-connector-datadog` + `polymath-connector-monitoring` →
-    **`polymath-connector-observability`** (Datadog/Grafana/Honeycomb/Elastic;
+    **`polymath-observability`** (Datadog/Grafana/Honeycomb/Elastic;
     closes a latent `query-during-incident` resolution gap). The capability
     vocabulary (`registry/schemas/capabilities.json`) now maps those providers to
     the umbrella plugins. `pagerduty`/`slack`/`statuspage` were evaluated and

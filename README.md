@@ -4,7 +4,7 @@
 
 ## The marketplace
 
-**39 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **26 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
+**36 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **26 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
 
@@ -51,7 +51,7 @@ claude
 
 ### Install profiles
 
-Picking a handful of plugins out of 39 is the real first hurdle. Install
+Picking a handful of plugins out of 36 is the real first hurdle. Install
 profiles in [`registry/polymath-profiles.json`](registry/polymath-profiles.json)
 are curated role spines — install one, then add more a-la-carte on top. Every
 profile implicitly includes the `polymath-core` + `polymath-flows` spine.

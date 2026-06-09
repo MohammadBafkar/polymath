@@ -119,19 +119,10 @@
     "polymath-chat": {
       "status": "experimental"
     },
-    "polymath-connector-sentry": {
-      "status": "experimental"
-    },
-    "polymath-connector-statuspage": {
-      "status": "experimental"
-    },
     "polymath-test-automation": {
       "status": "experimental"
     },
     "polymath-tracker": {
-      "status": "experimental"
-    },
-    "polymath-connector-observability": {
       "status": "experimental"
     }
   }

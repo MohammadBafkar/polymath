@@ -3,10 +3,25 @@
     "slack": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-slack"
+      ],
       "env": {
         "SLACK_BOT_TOKEN": "${POLYMATH_CONNECTOR_SLACK_SLACKBOTTOKEN:-}",
         "SLACK_TEAM_ID": "${POLYMATH_CONNECTOR_SLACK_SLACKTEAMID:-}"
+      }
+    },
+    "statuspage": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@statuspage/mcp-server"
+      ],
+      "env": {
+        "STATUSPAGE_API_KEY": "${POLYMATH_CONNECTOR_STATUSPAGE_STATUSPAGEAPIKEY:-}",
+        "STATUSPAGE_PAGE_ID": "${POLYMATH_CONNECTOR_STATUSPAGE_STATUSPAGEPAGEID:-}"
       }
     }
   }

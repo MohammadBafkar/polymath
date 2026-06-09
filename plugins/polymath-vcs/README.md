@@ -33,9 +33,9 @@ Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
 by `tools/sync-connector-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
-- **Official surface:** Wraps official GitHub MCP (incl. GitHub Actions diagnostics)
-- **Polymath value:** Triage + PR-open workflow shape; CI-failure diagnosis on Stop
-- **Sunset trigger:** Demote when GitHub MCP grows opinionated triage flow + CI diagnosis.
+- **Official surface:** `vcs` (+ `ci`) — GitHub, GitLab, Azure DevOps, Bitbucket
+- **Polymath value:** Triage + PR-open workflow shape; CI-failure diagnosis on Stop; provider-agnostic across forges
+- **Sunset trigger:** Demote a provider when its official MCP grows opinionated triage + CI diagnosis.
 - **Status:** `experimental`
 <!-- connector-policy:end -->
 

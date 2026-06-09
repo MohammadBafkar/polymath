@@ -59,9 +59,9 @@ claude plugin install polymath-vuln-scan@polymath
 <p>edit the policy table and re-run the script.</p>
 
 <ul>
-<li><strong>Official surface:</strong> Wraps official Snyk MCP</li>
+<li><strong>Official surface:</strong> <code>vulnerability_scanner</code> — Snyk, Dependabot, GitHub Advanced Security</li>
 <li><strong>Polymath value:</strong> <code>triage-vulns</code> classification (exploitable / reachable / dev-only); Stop hook warns on critical findings</li>
-<li><strong>Sunset trigger:</strong> Demote when Snyk MCP ships classification + open-criticals surfacing.</li>
+<li><strong>Sunset trigger:</strong> Demote when an official MCP ships classification + open-criticals surfacing.</li>
 <li><strong>Status:</strong> <code>experimental</code></li>
 </ul>
 <p>&lt;!-- connector-policy:end --&gt;</p>

@@ -437,30 +437,6 @@
       ]
     },
     {
-      "name": "polymath-connector-sentry",
-      "source": "./plugins/polymath-connector-sentry",
-      "description": "Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "sentry",
-        "errors"
-      ]
-    },
-    {
-      "name": "polymath-connector-statuspage",
-      "source": "./plugins/polymath-connector-statuspage",
-      "description": "Statuspage connector: MCP for incident lifecycle + post-statuspage-update skill (severity\u2192impact + customer-safe body).",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "statuspage",
-        "public-comms"
-      ]
-    },
-    {
       "name": "polymath-test-automation",
       "source": "./plugins/polymath-test-automation",
       "description": "Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.",
@@ -484,21 +460,6 @@
         "jira",
         "linear",
         "atlassian"
-      ]
-    },
-    {
-      "name": "polymath-connector-observability",
-      "source": "./plugins/polymath-connector-observability",
-      "description": "Observability connector: Datadog + Grafana + Honeycomb + Elastic MCP; dashboard snapshot, log search, trace investigate, query-during-incident, monitor authoring.",
-      "version": "0.3.0",
-      "category": "connector",
-      "tags": [
-        "connector",
-        "observability",
-        "datadog",
-        "grafana",
-        "honeycomb",
-        "elastic"
       ]
     }
   ]
