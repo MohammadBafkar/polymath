@@ -53,7 +53,7 @@ Action: FIX NOW.
   - Rollback v0.5.1 → v0.4.7 while investigating; this is sev2 incident
     territory (consider escalating via polymath-incident:incident-triage).
   - Open a tracking ticket for the post-rollback investigation.
-  - Suppress new event burst from the polymath-connector-snyk Stop hook
+  - Suppress new event burst from the polymath-vuln-scan Stop hook
     if it picks the same project up (avoid double-paging).
 ```
 

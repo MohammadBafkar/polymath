@@ -23,8 +23,8 @@
       ]
     },
     {
-      "name": "polymath-infra-cloud",
-      "source": "./plugins/polymath-infra-cloud",
+      "name": "polymath-cloud",
+      "source": "./plugins/polymath-cloud",
       "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.",
       "version": "0.3.0",
       "category": "infra",
@@ -227,8 +227,8 @@
       ]
     },
     {
-      "name": "polymath-infra-kubernetes",
-      "source": "./plugins/polymath-infra-kubernetes",
+      "name": "polymath-kubernetes",
+      "source": "./plugins/polymath-kubernetes",
       "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.",
       "version": "0.3.0",
       "category": "infra",
@@ -277,8 +277,8 @@
       ]
     },
     {
-      "name": "polymath-connector-github",
-      "source": "./plugins/polymath-connector-github",
+      "name": "polymath-vcs",
+      "source": "./plugins/polymath-vcs",
       "description": "GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.",
       "version": "0.3.0",
       "category": "connector",
@@ -289,8 +289,8 @@
       ]
     },
     {
-      "name": "polymath-connector-pagerduty",
-      "source": "./plugins/polymath-connector-pagerduty",
+      "name": "polymath-paging",
+      "source": "./plugins/polymath-paging",
       "description": "PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.",
       "version": "0.3.0",
       "category": "connector",
@@ -301,8 +301,8 @@
       ]
     },
     {
-      "name": "polymath-connector-snyk",
-      "source": "./plugins/polymath-connector-snyk",
+      "name": "polymath-vuln-scan",
+      "source": "./plugins/polymath-vuln-scan",
       "description": "Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.",
       "version": "0.3.0",
       "category": "connector",
@@ -425,8 +425,8 @@
       ]
     },
     {
-      "name": "polymath-connector-slack",
-      "source": "./plugins/polymath-connector-slack",
+      "name": "polymath-chat",
+      "source": "./plugins/polymath-chat",
       "description": "Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.",
       "version": "0.3.0",
       "category": "connector",
@@ -473,8 +473,8 @@
       ]
     },
     {
-      "name": "polymath-connector-tracker",
-      "source": "./plugins/polymath-connector-tracker",
+      "name": "polymath-tracker",
+      "source": "./plugins/polymath-tracker",
       "description": "Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.",
       "version": "0.3.0",
       "category": "connector",

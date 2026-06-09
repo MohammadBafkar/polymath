@@ -1,9 +1,0 @@
-{
-  "provider": "azure",
-  "capability": "cloud",
-  "transport": {
-    "kind": "skill"
-  },
-  "title": "azure",
-  "description": "azure as cloud provider, supplied by polymath-infra-cloud."
-}

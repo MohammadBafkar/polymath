@@ -14,7 +14,7 @@ Nothing.
 
 The plugin code in this repository contains no network calls except those you explicitly trigger through:
 
-- Connector MCP servers (e.g. `polymath-connector-github` calling GitHub on your behalf). Those calls go directly from the MCP server to the vendor's API with credentials you supplied via `userConfig`.
+- Connector MCP servers (e.g. `polymath-vcs` calling GitHub on your behalf). Those calls go directly from the MCP server to the vendor's API with credentials you supplied via `userConfig`.
 - The Claude Code runtime itself, governed by Anthropic's terms.
 
 ## What we may collect later

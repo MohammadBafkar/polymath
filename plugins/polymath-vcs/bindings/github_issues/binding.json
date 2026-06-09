@@ -1,0 +1,13 @@
+{
+  "provider": "github_issues",
+  "capability": "issue_tracker",
+  "transport": {
+    "kind": "mcp",
+    "server": "github"
+  },
+  "userConfigKeys": [
+    "githubToken"
+  ],
+  "title": "github issues",
+  "description": "github_issues as issue_tracker provider, supplied by polymath-vcs."
+}

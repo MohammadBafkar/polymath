@@ -7,7 +7,7 @@ description: Draft a PR description for the current branch following the canonic
 
 > Draft a PR description from the current branch's commits. Writes to
 > `docs/pr/<slug>.md`. **Does not** open a real GitHub PR in v0.1;
-> that's `polymath-connector-github:open-pr`.
+> that's `polymath-vcs:open-pr`.
 
 ## When to use
 
@@ -46,7 +46,7 @@ description: Draft a PR description for the current branch following the canonic
    (artifact: PRDescription).
 
 The PR draft is **a file**, not an opened PR. Pair with
-`polymath-connector-github:open-pr` to open the actual PR via MCP.
+`polymath-vcs:open-pr` to open the actual PR via MCP.
 
 ## Safety
 

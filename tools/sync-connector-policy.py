@@ -39,9 +39,11 @@ def parse_policy_tables() -> dict[str, dict[str, str]]:
     """Return {plugin_name: {official_surface, polymath_value, sunset_trigger}}."""
     text = POLICY.read_text()
     rows: dict[str, dict[str, str]] = {}
-    # Match markdown table rows that start with `| `\`plugin-name\``.
+    # Match markdown table rows that start with `| `\`plugin-name\``. Any
+    # polymath-* plugin name (concept plugins dropped the connector-/infra-
+    # prefix); only the §3.x disclosure tables use this 4-column row shape.
     pattern = re.compile(
-        r"^\|\s*`(polymath-(?:connector|infra)-[a-z0-9-]+)`\s*\|"
+        r"^\|\s*`(polymath-[a-z0-9-]+)`\s*\|"
         r"\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$",
         re.MULTILINE,
     )
@@ -104,13 +106,17 @@ def main() -> int:
     rows = parse_policy_tables()
     statuses = load_statuses()
 
-    # In-scope = every plugin on disk matching polymath-connector-* or
-    # polymath-infra-*. Cross-check against the policy table.
+    # In-scope = every integration/infra plugin on disk, detected by artifact
+    # rather than name prefix (so concept-plugin renames + the observability
+    # merge stay covered): an integration plugin ships a .mcp.json or bindings/;
+    # an infra plugin declares the `infra` keyword. Cross-check against the table.
+    def _is_in_scope(p: pathlib.Path) -> bool:
+        # MCP connector (.mcp.json) or capability-binding/infra plugin (bindings/).
+        return (p / ".mcp.json").exists() or (p / "bindings").is_dir()
+
     in_scope = sorted(
         p.name for p in PLUGINS_DIR.iterdir()
-        if p.is_dir() and (
-            p.name.startswith("polymath-connector-") or p.name.startswith("polymath-infra-")
-        )
+        if p.is_dir() and _is_in_scope(p)
     )
     missing_from_policy = [n for n in in_scope if n not in rows]
     if missing_from_policy:

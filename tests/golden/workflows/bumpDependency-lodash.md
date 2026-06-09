@@ -4,7 +4,7 @@ scenario: bumpDependency-lodash
 expect:
   invoked:
     - polymath-flows:run-workflow
-    - polymath-connector-snyk:triage-vulns
+    - polymath-vuln-scan:triage-vulns
     - polymath-engineering:read-code
     - polymath-engineering:feature-dev
     - polymath-engineering:code-review

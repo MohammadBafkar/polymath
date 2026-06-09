@@ -170,4 +170,4 @@ State transitions are owned by
 - Shell steps that mutate infrastructure.
 - AI-based cross-artifact alignment as a blocking gate.
 - Real PR creation through GitHub (the `pr` skill drafts only;
-  `polymath-connector-github:open-pr` opens the PR through the MCP).
+  `polymath-vcs:open-pr` opens the PR through the MCP).

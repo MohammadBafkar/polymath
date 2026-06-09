@@ -160,12 +160,12 @@
 <h2 id="cat-infra">Infra</h2>
 <div class="cards">
 <div class="card">
-<h3><a href="plugins/polymath-infra-cloud.html">polymath-infra-cloud</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-cloud.html">polymath-cloud</a> <span class="status status-experimental">experimental</span></h3>
 <p>Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.</p>
 <div class="tags"><span>infra</span><span>cloud</span><span>aws</span><span>gcp</span><span>azure</span><span>terraform</span><span>iac</span><span>patterns</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-infra-kubernetes.html">polymath-infra-kubernetes</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-kubernetes.html">polymath-kubernetes</a> <span class="status status-experimental">experimental</span></h3>
 <p>Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.</p>
 <div class="tags"><span>kubernetes</span><span>k8s</span><span>rbac</span><span>pss</span></div>
 </div>
@@ -213,9 +213,9 @@
 <h2 id="cat-connector">Connector</h2>
 <div class="cards">
 <div class="card">
-<h3><a href="plugins/polymath-connector-github.html">polymath-connector-github</a> <span class="status status-experimental">experimental</span></h3>
-<p>GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.</p>
-<div class="tags"><span>connector</span><span>github</span><span>mcp</span></div>
+<h3><a href="plugins/polymath-chat.html">polymath-chat</a> <span class="status status-experimental">experimental</span></h3>
+<p>Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.</p>
+<div class="tags"><span>connector</span><span>slack</span><span>comms</span></div>
 </div>
 <div class="card">
 <h3><a href="plugins/polymath-connector-observability.html">polymath-connector-observability</a> <span class="status status-experimental">experimental</span></h3>
@@ -223,24 +223,9 @@
 <div class="tags"><span>connector</span><span>observability</span><span>datadog</span><span>grafana</span><span>honeycomb</span><span>elastic</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-connector-pagerduty.html">polymath-connector-pagerduty</a> <span class="status status-experimental">experimental</span></h3>
-<p>PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.</p>
-<div class="tags"><span>connector</span><span>pagerduty</span><span>incident</span></div>
-</div>
-<div class="card">
 <h3><a href="plugins/polymath-connector-sentry.html">polymath-connector-sentry</a> <span class="status status-experimental">experimental</span></h3>
 <p>Sentry connector: MCP for errors/events + UserPromptSubmit detect + triage-error skill.</p>
 <div class="tags"><span>connector</span><span>sentry</span><span>errors</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-slack.html">polymath-connector-slack</a> <span class="status status-experimental">experimental</span></h3>
-<p>Slack connector: MCP for channels/messages/threads + incident comms + async standup posting.</p>
-<div class="tags"><span>connector</span><span>slack</span><span>comms</span></div>
-</div>
-<div class="card">
-<h3><a href="plugins/polymath-connector-snyk.html">polymath-connector-snyk</a> <span class="status status-experimental">experimental</span></h3>
-<p>Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.</p>
-<div class="tags"><span>connector</span><span>snyk</span><span>security</span></div>
 </div>
 <div class="card">
 <h3><a href="plugins/polymath-connector-statuspage.html">polymath-connector-statuspage</a> <span class="status status-experimental">experimental</span></h3>
@@ -248,9 +233,24 @@
 <div class="tags"><span>connector</span><span>statuspage</span><span>public-comms</span></div>
 </div>
 <div class="card">
-<h3><a href="plugins/polymath-connector-tracker.html">polymath-connector-tracker</a> <span class="status status-experimental">experimental</span></h3>
+<h3><a href="plugins/polymath-paging.html">polymath-paging</a> <span class="status status-experimental">experimental</span></h3>
+<p>PagerDuty connector: MCP for incidents/oncall + UserPromptSubmit incident-URL detection.</p>
+<div class="tags"><span>connector</span><span>pagerduty</span><span>incident</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-tracker.html">polymath-tracker</a> <span class="status status-experimental">experimental</span></h3>
 <p>Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.</p>
 <div class="tags"><span>connector</span><span>issue-tracker</span><span>jira</span><span>linear</span><span>atlassian</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-vcs.html">polymath-vcs</a> <span class="status status-experimental">experimental</span></h3>
+<p>GitHub connector: MCP for PRs/issues + PR-URL detect + Stop unpushed-commits nudge.</p>
+<div class="tags"><span>connector</span><span>github</span><span>mcp</span></div>
+</div>
+<div class="card">
+<h3><a href="plugins/polymath-vuln-scan.html">polymath-vuln-scan</a> <span class="status status-experimental">experimental</span></h3>
+<p>Snyk connector: MCP for vulnerability test/monitor + Stop hook warning on cached open criticals.</p>
+<div class="tags"><span>connector</span><span>snyk</span><span>security</span></div>
 </div>
 </div>
 <h2 id="cat-author">Author</h2>

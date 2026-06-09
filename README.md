@@ -72,7 +72,7 @@ claude plugin install \
   polymath-core@polymath polymath-flows@polymath \
   polymath-engineering@polymath polymath-backend@polymath \
   polymath-qa@polymath polymath-security@polymath \
-  polymath-release@polymath polymath-connector-github@polymath
+  polymath-release@polymath polymath-vcs@polymath
 ```
 
 For a new target repository, run `/polymath-core:init-project` or
@@ -92,9 +92,9 @@ The full catalog is published as the marketplace's GitHub Pages site under `docs
 - **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
 - **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
 - **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
-- **Infra** — `polymath-infra-kubernetes`, `polymath-infra-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
+- **Infra** — `polymath-kubernetes`, `polymath-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
 - **People & content** — `polymath-communication` (internal + customer-facing prose), `polymath-leadership`.
-- **Connectors (MCP + hooks, by capability)** — `polymath-connector-github`, `-tracker` (Jira + Linear), `-observability` (Datadog + Grafana + Honeycomb + Elastic), `-pagerduty`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`.
+- **Connectors (MCP + hooks, by capability)** — `polymath-vcs`, `-tracker` (Jira + Linear), `-observability` (Datadog + Grafana + Honeycomb + Elastic), `-pagerduty`, `-snyk`, `-slack`, `-sentry`, `-statuspage`, `-terraform`.
 - **Orchestration** — `polymath-flows`.
 - **Authoring** — `polymath-author`.
 

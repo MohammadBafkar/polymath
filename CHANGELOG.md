@@ -14,11 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   capability, to cut install decisions and confusable descriptions (see
   [`docs/plans/consolidation-and-dispatch.md`](docs/plans/consolidation-and-dispatch.md)):
   - **Costume connector:** `polymath-connector-terraform:plan-review` →
-    `polymath-infra-cloud` — it shipped no MCP server or capability binding (a
+    `polymath-cloud` — it shipped no MCP server or capability binding (a
     CLI-only review skill in a connector wrapper), so it belongs with the IaC
     design skills. `statuspage`/`pagerduty`/`slack` were evaluated and **kept**
     as their own connectors.
-  - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-infra-cloud`;
+  - **Fragments:** `polymath-finops:cloud-cost-review` → `polymath-cloud`;
     `polymath-prioritize:prioritize` → `polymath-planning`;
     `polymath-product-strategy:product-strategy` → `polymath-product`;
     `polymath-supply-chain:supply-chain-review` → `polymath-security`;
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `polymath-deprecation` (`deprecation-plan`, `migration-guide`) →
     `polymath-release`, which now spans commit → rollout → sunset.
   - **Connectors by capability (11 → 9):** `polymath-connector-jira` +
-    `polymath-connector-linear` → **`polymath-connector-tracker`** (one
+    `polymath-connector-linear` → **`polymath-tracker`** (one
     `issue_tracker` umbrella; both MCP servers; the colliding
     `file-bug-from-incident` unified into one provider-agnostic skill).
     `polymath-connector-datadog` + `polymath-connector-monitoring` →
@@ -241,7 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `tools/conformance.sh --all` now runs this check after the
   per-plugin pass. Fixed 15 drifts across 6 plugins: `polymath-author`
   (new `new-command`, `new-workflow`, five `bin/` scaffolders),
-  `polymath-connector-github` (added `diagnose-ci-failure`),
+  `polymath-vcs` (added `diagnose-ci-failure`),
   `polymath-core` (added `project-context` plus the SessionStart
   project-yaml loading note), `polymath-devops` (added
   `audit-compose`, `audit-dockerfile` skills and the matching
@@ -323,7 +323,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`claude plugin validate --strict .` now passes at the marketplace
   root.** Two real problems were silently in place: (a) a version drift
   between `.claude-plugin/marketplace.json` (declared `0.1.0`) and
-  `plugins/polymath-connector-github/.claude-plugin/plugin.json`
+  `plugins/polymath-vcs/.claude-plugin/plugin.json`
   (declared `0.2.0`) — at install time Claude takes the plugin.json
   version and silently ignores the marketplace entry, so the catalog
   was advertising a stale version; (b) 46 strict-mode warnings from

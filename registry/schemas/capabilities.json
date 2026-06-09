@@ -11,9 +11,9 @@
         "azure_devops"
       ],
       "providerPlugins": {
-        "jira": "polymath-connector-tracker",
-        "linear": "polymath-connector-tracker",
-        "github_issues": "polymath-connector-github"
+        "jira": "polymath-tracker",
+        "linear": "polymath-tracker",
+        "github_issues": "polymath-vcs"
       }
     },
     "observability": {
@@ -40,7 +40,7 @@
         "statuspage"
       ],
       "providerPlugins": {
-        "slack": "polymath-connector-slack",
+        "slack": "polymath-chat",
         "statuspage": "polymath-connector-statuspage"
       }
     },
@@ -52,7 +52,7 @@
         "splunk_oncall"
       ],
       "providerPlugins": {
-        "pagerduty": "polymath-connector-pagerduty"
+        "pagerduty": "polymath-paging"
       }
     },
     "ci": {
@@ -64,7 +64,7 @@
         "buildkite"
       ],
       "providerPlugins": {
-        "github_actions": "polymath-connector-github"
+        "github_actions": "polymath-vcs"
       }
     },
     "cloud": {
@@ -75,9 +75,9 @@
         "azure"
       ],
       "providerPlugins": {
-        "aws": "polymath-infra-cloud",
-        "gcp": "polymath-infra-cloud",
-        "azure": "polymath-infra-cloud"
+        "aws": "polymath-cloud",
+        "gcp": "polymath-cloud",
+        "azure": "polymath-cloud"
       }
     },
     "runtime": {
@@ -91,7 +91,7 @@
         "app_service"
       ],
       "providerPlugins": {
-        "kubernetes": "polymath-infra-kubernetes"
+        "kubernetes": "polymath-kubernetes"
       }
     },
     "vcs": {
@@ -103,7 +103,7 @@
         "bitbucket"
       ],
       "providerPlugins": {
-        "github": "polymath-connector-github"
+        "github": "polymath-vcs"
       }
     },
     "vulnerability_scanner": {
@@ -114,9 +114,9 @@
         "github_advanced_security"
       ],
       "providerPlugins": {
-        "snyk": "polymath-connector-snyk",
-        "dependabot": "polymath-connector-github",
-        "github_advanced_security": "polymath-connector-github"
+        "snyk": "polymath-vuln-scan",
+        "dependabot": "polymath-vcs",
+        "github_advanced_security": "polymath-vcs"
       }
     }
   }

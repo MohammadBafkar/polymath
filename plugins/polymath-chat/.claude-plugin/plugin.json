@@ -1,0 +1,40 @@
+{
+  "name": "polymath-chat",
+  "version": "0.3.0",
+  "description": "Slack connector: MCP for channels/messages/threads + skill for posting incident comms updates with the right channel + thread routing.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "slack",
+    "mcp",
+    "comms"
+  ],
+  "userConfig": {
+    "slackBotToken": {
+      "type": "string",
+      "title": "Slack bot token",
+      "description": "Bot token (xoxb-\u2026) with chat:write, channels:read, groups:read, im:read, mpim:read scopes.",
+      "sensitive": true,
+      "required": true
+    },
+    "slackTeamId": {
+      "type": "string",
+      "title": "Slack workspace (team) ID",
+      "description": "Workspace ID (starts with T…) that @modelcontextprotocol/server-slack requires to scope API calls.",
+      "required": true
+    },
+    "defaultIncidentChannel": {
+      "type": "string",
+      "title": "Default incident channel",
+      "description": "Channel name (e.g. \"incidents\") used as a fallback when no per-incident channel is supplied.",
+      "required": false
+    }
+  }
+}

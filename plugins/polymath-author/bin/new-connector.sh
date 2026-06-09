@@ -2,7 +2,7 @@
 # Scaffold a new polymath-connector-<service> plugin.
 #
 # Usage: /polymath-author:new-connector <service> [description]  (bin/new-connector.sh)
-#   service is the bare name, e.g. "slack" → polymath-connector-slack.
+#   service is the bare name, e.g. "slack" → polymath-chat.
 #
 # Generates plugin.json (with userConfig.apiKey), .mcp.json (stub),
 # hooks/ directory, references/<service>-tools.md template, plus README

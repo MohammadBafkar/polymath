@@ -1,0 +1,14 @@
+# Routing for tool polymath-tracker:jira. Compiled into route-signals.json by
+# tools/build-surface-index.py. Schema: registry/schemas/surface-routing.schema.json
+# Hard signal is the Atlassian browse URL only. A bare project key (PROJ-123) is
+# syntactically identical to ordinary acronyms (UTF-8, SHA-256, GPT-4) and to
+# Linear keys, so it is NOT used as a deterministic signal — it produced frequent
+# false positives. The `jira issue`/`jira ticket` intents raise the score when a
+# browse URL is also present; bare keys stay silent (correctly ambiguous).
+url:
+- https://[A-Za-z0-9.-]+\.atlassian\.net/browse/[A-Z][A-Z0-9_]+-[0-9]+
+intents:
+- jira issue
+- jira ticket
+capabilities:
+- issue_tracker

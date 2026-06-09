@@ -8,7 +8,7 @@ expect:
     - "SBOM"
     - "license"
   not_invoked:
-    - polymath-connector-snyk:triage-vulns
+    - polymath-vuln-scan:triage-vulns
 timeout_seconds: 90
 ---
 

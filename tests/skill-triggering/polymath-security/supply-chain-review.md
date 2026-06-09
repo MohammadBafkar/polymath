@@ -10,7 +10,7 @@ must_invoke:
 allow_invoke:
   - polymath-security:*
   - polymath-security:*
-  - polymath-connector-snyk:*
+  - polymath-vuln-scan:*
   - polymath-core:*
 forbidden_prompts:
   - "triage this specific CVE in our running service"
@@ -20,5 +20,5 @@ forbidden_prompts:
 # Why this test exists
 
 SBOM/provenance/license/SLSA phrasings route here. Forbidden prompts guard
-against `polymath-connector-snyk:triage-vulns` (runtime CVE) and the
+against `polymath-vuln-scan:triage-vulns` (runtime CVE) and the
 `bumpDependency` workflow.

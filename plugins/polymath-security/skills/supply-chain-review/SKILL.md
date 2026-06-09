@@ -13,7 +13,7 @@ description: Review supply-chain integrity — SBOM, dependency provenance/lockf
 - The user asks about SBOM, provenance, signing, SLSA, license compliance, or supply-chain risk.
 - A workflow invokes `polymath-security:supply-chain-review`.
 
-This reviews *supply-chain posture*. It is not triaging a specific runtime CVE (`polymath-connector-snyk:triage-vulns`), bumping one dependency (the `bumpDependency` workflow), or app-code threat modeling (`polymath-security:stride-threat-model`).
+This reviews *supply-chain posture*. It is not triaging a specific runtime CVE (`polymath-vuln-scan:triage-vulns`), bumping one dependency (the `bumpDependency` workflow), or app-code threat modeling (`polymath-security:stride-threat-model`).
 
 ## What to review
 

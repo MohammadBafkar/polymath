@@ -1,0 +1,13 @@
+{
+  "provider": "github_advanced_security",
+  "capability": "vulnerability_scanner",
+  "transport": {
+    "kind": "mcp",
+    "server": "github"
+  },
+  "userConfigKeys": [
+    "githubToken"
+  ],
+  "title": "github advanced security",
+  "description": "github_advanced_security as vulnerability_scanner provider, supplied by polymath-vcs."
+}

@@ -1,9 +1,0 @@
-{
-  "provider": "kubernetes",
-  "capability": "runtime",
-  "transport": {
-    "kind": "skill"
-  },
-  "title": "kubernetes",
-  "description": "kubernetes as runtime provider, supplied by polymath-infra-kubernetes."
-}

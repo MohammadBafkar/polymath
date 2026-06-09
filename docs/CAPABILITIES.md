@@ -7,9 +7,9 @@
 
 Workflows that talk to external SaaS should describe **what** they need
 (an issue tracker, an observability platform, a pager) rather than
-**which provider** supplies it. Hard-coding `polymath-connector-pagerduty`
+**which provider** supplies it. Hard-coding `polymath-paging`
 into every incident-response workflow forces every team using opsgenie
-to fork. Hard-coding `polymath-connector-tracker` into every ticket-filing
+to fork. Hard-coding `polymath-tracker` into every ticket-filing
 step forces every team on Linear to fork. The capability layer
 separates the two:
 
@@ -69,7 +69,7 @@ capabilities:
     provider: jira
     # Optional `plugin:` override. Omit to use the catalog default for
     # this provider (looked up from registry/schemas/capabilities.json).
-    # plugin: polymath-connector-tracker-internal-fork
+    # plugin: polymath-tracker-internal-fork
   observability:
     provider: datadog
   pager:

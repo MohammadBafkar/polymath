@@ -7,27 +7,27 @@
     "backend": {
       "title": "Backend engineer",
       "for": "API/service developers shipping changes against a server + database.",
-      "plugins": ["polymath-engineering", "polymath-backend", "polymath-qa", "polymath-security", "polymath-release", "polymath-connector-github"]
+      "plugins": ["polymath-engineering", "polymath-backend", "polymath-qa", "polymath-security", "polymath-release", "polymath-vcs"]
     },
     "frontend": {
       "title": "Frontend / web engineer",
       "for": "UI developers who care about components, Web Vitals, bundles, a11y, and i18n.",
-      "plugins": ["polymath-engineering", "polymath-frontend", "polymath-design", "polymath-qa", "polymath-release", "polymath-connector-github"]
+      "plugins": ["polymath-engineering", "polymath-frontend", "polymath-design", "polymath-qa", "polymath-release", "polymath-vcs"]
     },
     "sre": {
       "title": "SRE / on-call",
       "for": "Reliability and incident response — SLOs, observability, live incidents, postmortems.",
-      "plugins": ["polymath-sre", "polymath-observability", "polymath-incident", "polymath-performance", "polymath-connector-pagerduty", "polymath-connector-observability", "polymath-connector-slack"]
+      "plugins": ["polymath-sre", "polymath-observability", "polymath-incident", "polymath-performance", "polymath-paging", "polymath-connector-observability", "polymath-chat"]
     },
     "platform": {
       "title": "Platform / DevOps engineer",
       "for": "Golden paths, CI/CD, containers, cloud and Kubernetes infra.",
-      "plugins": ["polymath-platform", "polymath-devops", "polymath-infra-cloud", "polymath-infra-kubernetes", "polymath-sre", "polymath-release"]
+      "plugins": ["polymath-platform", "polymath-devops", "polymath-cloud", "polymath-kubernetes", "polymath-sre", "polymath-release"]
     },
     "pm": {
       "title": "Product manager",
       "for": "Discovery through delivery — PRDs, prioritization, roadmaps, research, comms.",
-      "plugins": ["polymath-product", "polymath-research", "polymath-planning", "polymath-communication", "polymath-decisions", "polymath-connector-tracker"]
+      "plugins": ["polymath-product", "polymath-research", "polymath-planning", "polymath-communication", "polymath-decisions", "polymath-tracker"]
     },
     "staff": {
       "title": "Staff+ / tech lead",

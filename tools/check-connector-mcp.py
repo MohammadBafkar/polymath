@@ -83,9 +83,12 @@ def package_from_args(args: list[str]) -> str | None:
 
 
 def connector_dirs() -> list[pathlib.Path]:
+    # Detect connectors by the artifact that matters here — a .mcp.json — rather
+    # than a name prefix, so the gate survives concept-plugin renames (vcs, chat,
+    # paging, …) and the observability merge.
     return sorted(
         p for p in PLUGINS_DIR.iterdir()
-        if p.is_dir() and p.name.startswith("polymath-connector-")
+        if p.is_dir() and (p / ".mcp.json").exists()
     )
 
 

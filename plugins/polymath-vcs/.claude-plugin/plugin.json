@@ -1,0 +1,31 @@
+{
+  "name": "polymath-vcs",
+  "version": "0.3.0",
+  "description": "GitHub connector: MCP server for PRs/issues/repo reads + Actions diagnostics + PR-URL fetch hook + end-of-turn nudges for PR + CI status.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "connector",
+    "github",
+    "github-actions",
+    "ci",
+    "mcp",
+    "pr",
+    "issue"
+  ],
+  "userConfig": {
+    "githubToken": {
+      "type": "string",
+      "title": "GitHub Personal Access Token",
+      "description": "Fine-grained PAT recommended; scopes: contents/pull_requests/issues read+write, metadata read.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

@@ -20,7 +20,7 @@
     "polymath-core": {
       "status": "beta"
     },
-    "polymath-infra-cloud": {
+    "polymath-cloud": {
       "status": "experimental"
     },
     "polymath-product": {
@@ -68,7 +68,7 @@
     "polymath-devops": {
       "status": "experimental"
     },
-    "polymath-infra-kubernetes": {
+    "polymath-kubernetes": {
       "status": "experimental"
     },
     "polymath-sre": {
@@ -80,13 +80,13 @@
     "polymath-incident": {
       "status": "beta"
     },
-    "polymath-connector-github": {
+    "polymath-vcs": {
       "status": "experimental"
     },
-    "polymath-connector-pagerduty": {
+    "polymath-paging": {
       "status": "experimental"
     },
-    "polymath-connector-snyk": {
+    "polymath-vuln-scan": {
       "status": "experimental"
     },
     "polymath-author": {
@@ -116,7 +116,7 @@
     "polymath-mobile": {
       "status": "experimental"
     },
-    "polymath-connector-slack": {
+    "polymath-chat": {
       "status": "experimental"
     },
     "polymath-connector-sentry": {
@@ -128,7 +128,7 @@
     "polymath-test-automation": {
       "status": "experimental"
     },
-    "polymath-connector-tracker": {
+    "polymath-tracker": {
       "status": "experimental"
     },
     "polymath-connector-observability": {

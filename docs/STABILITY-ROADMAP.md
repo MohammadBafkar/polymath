@@ -101,15 +101,15 @@ surface. The distinct-value field is required before any promotion
 past experimental.
 
 - `polymath-connector-observability`
-- `polymath-connector-github`
-- `polymath-connector-tracker`
-- `polymath-connector-pagerduty`
+- `polymath-vcs`
+- `polymath-tracker`
+- `polymath-paging`
 - `polymath-connector-sentry`
-- `polymath-connector-slack`
-- `polymath-connector-snyk`
+- `polymath-chat`
+- `polymath-vuln-scan`
 - `polymath-connector-statuspage`
-- `polymath-infra-cloud`
-- `polymath-infra-kubernetes`
+- `polymath-cloud`
+- `polymath-kubernetes`
 
 ### `stable-ready` (0 plugins) and `stable` (0 plugins)
 

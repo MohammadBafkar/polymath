@@ -125,7 +125,17 @@ if s not in allowed:
   # disclosure block (official_surface / polymath_value /
   # sunset_trigger / status) in their README, kept in sync via
   # tools/sync-connector-policy.py.
-  if [[ "$name" == polymath-connector-* || "$name" == polymath-infra-* ]]; then
+  # Detect policy-scoped plugins by artifact, not name prefix, so concept-plugin
+  # renames (vcs / chat / paging / cloud / kubernetes …) and the observability
+  # merge stay covered. An MCP connector ships a .mcp.json; an infra plugin
+  # carries capability bindings/ but no .mcp.json. CONNECTOR-2 (policy
+  # disclosure) covers both; CONNECTOR-1 (.mcp.json/references/userConfig)
+  # covers MCP connectors only.
+  is_connector=0
+  [[ -f "$plugin_dir/.mcp.json" ]] && is_connector=1
+  is_policy_scoped=0
+  [[ -f "$plugin_dir/.mcp.json" || -d "$plugin_dir/bindings" ]] && is_policy_scoped=1
+  if [[ "$is_policy_scoped" -eq 1 ]]; then
     if grep -q "\`$name\`" "$root/docs/CONNECTOR-POLICY.md" 2>/dev/null; then
       echo "  ✓ CONNECTOR-2: audited in docs/CONNECTOR-POLICY.md"
     else
@@ -141,8 +151,9 @@ if s not in allowed:
     fi
   fi
 
-  # CONNECTOR-1
-  if [[ "$name" == polymath-connector-* ]]; then
+  # CONNECTOR-1 — applies to MCP connectors (ship a .mcp.json), detected by
+  # artifact rather than name prefix.
+  if [[ "$is_connector" -eq 1 ]]; then
     # A connector may delegate to another connector for the MCP server
     # via the dependencies array. In that case .mcp.json is allowed to
     # be absent. A connector may also wrap a local CLI rather than a
