@@ -67,7 +67,7 @@
           },
           "distinct_value_url": {
             "oneOf": [{ "type": "null" }, { "type": "string", "format": "uri" }],
-            "description": "REQUIRED for polymath-connector-* and polymath-infra-* plugins seeking beta or stable. URL of primary-source evidence showing Polymath adds workflow / critique / safety / artifact value beyond the official MCP, CLI, LSP, or docs (a bakeoff case, a side-by-side artifact, or a documented workflow-shape gap). Must be non-null before a connector/infra plugin can promote past experimental under the post-Iteration-0 policy. Null for non-connector/non-infra plugins."
+            "description": "REQUIRED for integration and infra plugins seeking beta or stable. URL of primary-source evidence showing Polymath adds workflow / critique / safety / artifact value beyond the official MCP, CLI, LSP, or docs (a bakeoff case, a side-by-side artifact, or a documented workflow-shape gap). Must be non-null before an integration/infra plugin can promote past experimental under the post-Iteration-0 policy. Null for non-integration/non-infra plugins."
           },
           "notes": {
             "type": "string",

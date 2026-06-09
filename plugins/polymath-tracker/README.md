@@ -34,7 +34,7 @@ shape of `polymath-observability`.
 > servers (and there are community npm packages) rather than these names —
 > substitute the real command for your tracker in `.mcp.json` before relying on
 > this connector. This is part of why it is `status: experimental`. See
-> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+> [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
 <!-- /mcp-package-status -->
 
 ## Installation
@@ -49,18 +49,18 @@ claude plugin install polymath-tracker@polymath
 
 - `polymath-core`
 
-<!-- connector-policy:start -->
-## Connector policy disclosure
+<!-- integration-policy:start -->
+## Integration policy disclosure
 
-Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
-by `tools/sync-connector-policy.py`. Do not edit by hand —
+Auto-generated from [`docs/INTEGRATION-POLICY.md`](../../docs/INTEGRATION-POLICY.md)
+by `tools/sync-integration-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
 - **Official surface:** `issue_tracker` — Jira, Linear, GitHub Issues, Azure Boards
 - **Polymath value:** Triage workflows + provider-agnostic file-bug-from-incident
 - **Sunset trigger:** Demote a provider if its official MCP ships triage automation covering our flow.
 - **Status:** `experimental`
-<!-- connector-policy:end -->
+<!-- integration-policy:end -->
 
 ## License
 

@@ -148,7 +148,7 @@ download and the server never starts, so the connector is dead-on-install until
 the user substitutes the real command.
 
 This is disclosed, not hidden: every affected connector README carries an
-`<!-- mcp-package-status -->` callout, and `tools/check-connector-mcp.py`
+`<!-- mcp-package-status -->` callout, and `tools/check-mcp-packages.py`
 (`MCP-PKG`, wired into `tools/conformance.sh`) fails the build if a `.mcp.json`
 package is neither known-resolving nor disclosed-as-placeholder. The check is
 offline (hermetic CI); run it with `--online` to re-verify against npm.
@@ -172,12 +172,12 @@ Verified against npm on 2026-06-08:
 
 When a vendor publishes a resolvable npm package (or the connector is repointed
 at the real distribution), update the package in `.mcp.json`, move it from
-`UNVERIFIED` to `VERIFIED` in `tools/check-connector-mcp.py`, and drop the
+`UNVERIFIED` to `VERIFIED` in `tools/check-mcp-packages.py`, and drop the
 README callout. The placeholder connectors stay `experimental` until then.
 
 ## 5. Enforcement
 
-`tools/conformance.sh` runs `CONNECTOR-2`: any in-scope plugin whose
+`tools/conformance.sh` runs `INTEGRATION-2`: any in-scope plugin whose
 `polymath_value` field is empty in this document fails the check.
 The audit table above is the source of truth.
 

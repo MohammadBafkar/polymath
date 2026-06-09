@@ -51,7 +51,7 @@
       "evidence": "plugins/polymath-flows/bin/polymath-flow validate"
     },
     {
-      "id": "CONNECTOR-1",
+      "id": "INTEGRATION-1",
       "level": "required",
       "description": "Connector plugins ship `.mcp.json`, `userConfig` with `title` + `description` + `sensitive: true` on credentials, and a `references/<service>-tools.md` doc.",
       "evidence": "structural check on plugin tree"

@@ -154,7 +154,7 @@ Every change runs locally and in CI:
 - `tools/validate-all.sh` — `claude plugin validate --strict` at marketplace root + per plugin; catches version drift between a marketplace entry and its `plugin.json`.
 - `tools/lint-skills.sh` — description ≤ 200 chars, SKILL.md ≤ 500 lines.
 - `tools/token-budget.sh` — per-plugin cap of 400 tokens; total target scales with plugin count.
-- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `registry/polymath-catalog.json`), `CONNECTOR-2` (connector / infra plugins audited in `docs/CONNECTOR-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `registry/polymath-catalog.json`.
+- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `registry/polymath-catalog.json`), `INTEGRATION-2` (connector / infra plugins audited in `docs/INTEGRATION-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `registry/polymath-catalog.json`.
 - `tools/build-catalog.py --check` — verifies the GitHub Pages catalog regenerates reproducibly.
 - `plugins/polymath-flows/bin/polymath-flow validate` — every workflow YAML against the schema.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests` and `-s plugins/polymath-core/tests` — executable unit tests.
@@ -167,7 +167,7 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar and the proof loop.
 - [`docs/QUALITY-DASHBOARD.md`](docs/QUALITY-DASHBOARD.md) — what gets measured, where the artifacts land.
-- [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) — per-plugin audit for every `polymath-connector-*` and `polymath-infra-*` plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
+- [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping a `.mcp.json` / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
 - [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 
 ## Contributing

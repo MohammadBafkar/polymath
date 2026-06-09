@@ -1,6 +1,6 @@
 {
   "name": "polymath",
-  "description": "Polymath-only catalog metadata kept out of .claude-plugin/marketplace.json so the marketplace manifest passes `claude plugin validate --strict`. Read by tools/conformance.sh (MANIFEST-3 status gate), tools/build-catalog.py (HTML status badges), and tools/sync-connector-policy.py (connector-policy README disclosure block).",
+  "description": "Polymath-only catalog metadata kept out of .claude-plugin/marketplace.json so the marketplace manifest passes `claude plugin validate --strict`. Read by tools/conformance.sh (MANIFEST-3 status gate), tools/build-catalog.py (HTML status badges), and tools/sync-integration-policy.py (connector-policy README disclosure block).",
   "homepage": "https://github.com/MohammadBafkar/Polymath",
   "license": "MIT",
   "agentSkills": {

@@ -64,7 +64,7 @@ hand-synced instead of declared once and compiled.** Evidence:
   `registry/schemas/capabilities.json` already *lists* those providers, so the
   vocabulary advertises integrations that do not exist (`providers[]` ~30,
   `providerPlugins{}` ~10).
-- **No unit of integration smaller than a plugin.** `CONNECTOR-1` *requires*
+- **No unit of integration smaller than a plugin.** `INTEGRATION-1` *requires*
   `.mcp.json` + per-key `userConfig` on each connector — the schema assumes
   connector == one MCP-wrapper-plugin, which structurally fights "tools added
   like skills."
@@ -198,7 +198,7 @@ documentation alone.
 - **WORKFLOW-2 → SURFACE-2 *(extended)*** — trigger-phrase global uniqueness
   enforced across **all** surfaces (skills + workflows + tools), not just
   workflows. Reuses the `DESC-1` disambiguation floor.
-- **CONNECTOR-1 *(reframed)*** — "must declare ≥1 provider *binding*" replaces
+- **INTEGRATION-1 *(reframed)*** — "must declare ≥1 provider *binding*" replaces
   "must ship `.mcp.json`"; `.mcp.json` may be a generated artifact.
 - **BINDING-1 *(new)*** — each binding's `provider` must appear in
   `capabilities.json` `providers[]`; `providerPlugins{}` is *derived* from
@@ -427,7 +427,7 @@ convention).
   `.mcp.json` and each `userConfigKey` in `plugin.json` `userConfig` (verified: passes today, fires on
   a broken binding), so the binding model and runtime config cannot drift — the seam Option A relies
   on. (3) **Docs** — observability + tracker READMEs (accurate `${VAR:-}` + `/mcp`-disable behaviour),
-  `CONNECTOR-POLICY.md` §4.1 (provider configuration & packaging), and the outdated "hand-edit
+  `INTEGRATION-POLICY.md` §4.1 (provider configuration & packaging), and the outdated "hand-edit
   `providerPlugins`" step replaced by the binding workflow. Option C (one plugin per provider — the
   only design where *only* the configured provider launches) stays a documented future path the
   binding model already supports; not adopted, to preserve the 51→40 consolidation. `conformance: OK`.
@@ -534,4 +534,4 @@ widening reach.
 - `plugins/polymath-flows/bin/polymath-flow` + `data/workflow-detect.json`
 - `tools/build-workflow-index.py` (generalize → `build-surface-index.py`)
 - `registry/schemas/capabilities.json` + `registry/polymath-profiles.json`
-- `docs/CONNECTOR-POLICY.md` — per-connector distinct-value table (`CONNECTOR-2`).
+- `docs/INTEGRATION-POLICY.md` — per-connector distinct-value table (`INTEGRATION-2`).

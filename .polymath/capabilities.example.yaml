@@ -25,7 +25,7 @@ capabilities:
     # `plugin:` is optional. When omitted, polymath-flow looks up the default
     # plugin for this provider from registry/schemas/capabilities.json. Set it
     # to override (e.g. you fork the catalog adapter).
-    # plugin: polymath-connector-jira
+    # plugin: polymath-tracker
 
   # Observability — invoked by perfRegression, respondToIncident.
   observability:

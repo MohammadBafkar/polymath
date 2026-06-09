@@ -20,7 +20,7 @@ one plugin (the `observability` capability).
 > `@grafana/mcp-server`, `@honeycomb/mcp-server`, and `@elastic/mcp-server` do
 > **not** resolve on npm as of 2026-06-08 (Sentry's `@sentry/mcp-server` does).
 > Substitute the real command for the provider(s) you use in `.mcp.json` before
-> relying on them. See [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+> relying on them. See [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
 <!-- /mcp-package-status -->
 
 ## Installation
@@ -33,18 +33,18 @@ claude plugin install polymath-observability@polymath
 
 - `polymath-core`
 
-<!-- connector-policy:start -->
-## Connector policy disclosure
+<!-- integration-policy:start -->
+## Integration policy disclosure
 
-Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
-by `tools/sync-connector-policy.py`. Do not edit by hand —
+Auto-generated from [`docs/INTEGRATION-POLICY.md`](../../docs/INTEGRATION-POLICY.md)
+by `tools/sync-integration-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
 - **Official surface:** `observability` — Datadog, Grafana, Honeycomb, Elastic, Sentry (merged with the observability design discipline)
 - **Polymath value:** RED/USE + logging + tracing design **and** snapshot / trace-walk / bounded-scan / incident-query / monitor-authoring / error-triage across providers
 - **Sunset trigger:** Demote a provider when its upstream MCP ships postmortem-evidence + investigative templates.
 - **Status:** `experimental`
-<!-- connector-policy:end -->
+<!-- integration-policy:end -->
 
 ## License
 

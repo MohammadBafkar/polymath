@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """MCP-PKG gate: every connector .mcp.json package is verified or disclosed.
 
-Several `polymath-connector-*` plugins reference an MCP server package in
+Several integration plugins reference an MCP server package in
 their `.mcp.json` `npx` command. Some of those packages are published on
 npm and resolve on `npx -y <pkg>`; others are placeholder names for a
 vendor's MCP server that does not (yet) ship as that npm package — it may be
@@ -28,8 +28,8 @@ against npm and report any classification that has gone stale.
 Verified against npm on 2026-06-08.
 
 Usage:
-  tools/check-connector-mcp.py            # offline gate (CI)
-  tools/check-connector-mcp.py --online   # refresh classification vs npm
+  tools/check-mcp-packages.py            # offline gate (CI)
+  tools/check-mcp-packages.py --online   # refresh classification vs npm
 """
 from __future__ import annotations
 
@@ -115,7 +115,7 @@ def main() -> int:
     for cdir in connector_dirs():
         mcp = cdir / ".mcp.json"
         if not mcp.exists():
-            continue  # CLI-only connector (e.g. terraform) — CONNECTOR-1 owns that.
+            continue  # not an MCP plugin (no .mcp.json) — nothing for MCP-PKG to check.
         data = json.loads(mcp.read_text())
         for server, spec in data.get("mcpServers", {}).items():
             command = spec.get("command", "")
@@ -155,18 +155,18 @@ def main() -> int:
             continue
         problems.append(
             f"{name}: MCP package '{pkg}' is unclassified — add it to VERIFIED or "
-            f"UNVERIFIED in tools/check-connector-mcp.py (verify with: npm view {pkg} version)"
+            f"UNVERIFIED in tools/check-mcp-packages.py (verify with: npm view {pkg} version)"
         )
 
     if problems:
         for p in problems:
             print(f"  ✗ MCP-PKG: {p}", file=sys.stderr)
-        print(f"\ncheck-connector-mcp: {len(problems)} problem(s)", file=sys.stderr)
+        print(f"\ncheck-mcp-packages: {len(problems)} problem(s)", file=sys.stderr)
         return 1
 
     n_unverified = sum(1 for pkg, _, _ in refs if pkg in UNVERIFIED)
     print(
-        f"check-connector-mcp: {len(refs)} MCP package reference(s) across "
+        f"check-mcp-packages: {len(refs)} MCP package reference(s) across "
         f"{len(connector_dirs())} connector(s) — all verified or disclosed "
         f"({n_unverified} disclosed-unverified)"
     )

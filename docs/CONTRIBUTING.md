@@ -54,7 +54,7 @@ Reviewers check:
 3. Are there at least one golden fixture and one README entry?
 4. Does each artifact-producing skill link the right template under its plugin's `templates/` directory, and is the template's frontmatter backed by a schema?
 5. Does the PR include a CHANGELOG update?
-6. For new connectors / infra plugins: is the `polymath_value` row in [`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md) populated?
+6. For new connectors / infra plugins: is the `polymath_value` row in [`docs/INTEGRATION-POLICY.md`](INTEGRATION-POLICY.md) populated?
 
 ## Reporting bugs
 

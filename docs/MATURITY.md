@@ -23,7 +23,7 @@ to an unknown value (rule `MANIFEST-3`).
 
 | Tier | Meaning |
 | --- | --- |
-| `experimental` | Scaffolded. May change shape, be renamed, be merged into another plugin, or be removed. Default for new plugins and most `polymath-connector-*` / `polymath-infra-*` plugins. |
+| `experimental` | Scaffolded. May change shape, be renamed, be merged into another plugin, or be removed. Default for new plugins and most integration / infra plugins. |
 | `beta` | Structurally proven on disk. Evidence loop is closed, but no live LLM run has been published. Shape is unlikely to change in a breaking way but is not guaranteed. |
 | `stable` | Demonstrated value with live results. Breaking changes go through a deprecation cycle. No plugin in the catalog is `stable` today (see [LIMITATIONS.md](../LIMITATIONS.md)). |
 | `deprecated` | Scheduled for removal. The plugin's README must name the replacement and the removal date. |
@@ -93,7 +93,7 @@ following hold:
    [`registry/stability-evidence.json`](../registry/stability-evidence.json)
    as `distinct_value_url`. Connector/infra plugins also need this
    field populated before promoting to `beta`. See
-   [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md).
+   [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md).
 6. A CHANGELOG entry records the promotion and the supporting
    evidence link (PR or artifact run id).
 7. At least one external user beyond the maintainer (a tracked
@@ -154,6 +154,6 @@ policy and must be demoted to `experimental` at the next release.
 
 - [docs/QUALITY-SCORECARD.md](QUALITY-SCORECARD.md) — gates and the bakeoff-fairness contract.
 - [docs/QUALITY-DASHBOARD.md](QUALITY-DASHBOARD.md) — where measured artifacts land.
-- [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md) — connector / infra disclosure rules.
+- [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md) — connector / infra disclosure rules.
 - [docs/PLUGIN-AUTHORING.md](PLUGIN-AUTHORING.md) — authoring layout and conventions.
 - [LIMITATIONS.md](../LIMITATIONS.md) — what the catalog does NOT prove yet.

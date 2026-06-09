@@ -16,10 +16,8 @@ them up.
 
 What ports:
   - skills/<slug>/SKILL.md → dist/agents-skills/<plugin>-<slug>/SKILL.md
-    (frontmatter `name` rewritten to `<plugin>-<slug>` to avoid
-    collisions; one such collision exists today —
-    file-bug-from-incident is shipped by both polymath-connector-jira
-    and polymath-connector-linear).
+    (frontmatter `name` rewritten to `<plugin>-<slug>` so skills from
+    different plugins never collide in the flat export).
   - The skill's plugin templates/ directory, IF the SKILL.md body
     references it via `../../templates/`. The references are
     rewritten to `templates/` (relative to the exported skill).

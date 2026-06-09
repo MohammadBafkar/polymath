@@ -131,7 +131,7 @@ regex-matching summary).
 - `${capabilities.<cap>.provider}` — provider token resolved from
   `.polymath/capabilities.yaml` (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name resolved from
-  the same file (e.g. `polymath-connector-datadog`).
+  the same file (e.g. `polymath-observability`).
 
 The `invoke` field of a step accepts placeholders as well, so a
 workflow can be provider-agnostic by writing

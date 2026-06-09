@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `polymath-i18n:i18n-audit` → `polymath-frontend`.
   - **Data tier:** `polymath-infra-postgres` (`review-migration`,
     `audit-pg-config` + commands) → `polymath-backend`, next to
-    `db-schema`/`migration-plan` (also dropped from `docs/CONNECTOR-POLICY.md`).
+    `db-schema`/`migration-plan` (also dropped from `docs/INTEGRATION-POLICY.md`).
   - **Comms:** `polymath-content` (`write-release-notes`, `write-advisory`,
     `write-sunset-notice`) → `polymath-communication`.
   - **Delivery:** `polymath-progressive-delivery` (`safe-rollout`) and
@@ -263,20 +263,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   commands), `polymath-performance` (added `design-cache-layer`,
   `audit-redis-config` skills and the matching commands),
   `polymath-writing` (added `editorial-pass`).
-- **`tools/sync-connector-policy.py`** — generates the
+- **`tools/sync-integration-policy.py`** — generates the
   `connector-policy` disclosure block (`official_surface`,
   `polymath_value`, `sunset_trigger`, `status`) for every
   `polymath-connector-*` and `polymath-infra-*` README from a single
-  source: the tables in [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md)
+  source: the tables in [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md)
   § 3.1–3.2 + `marketplace.json` status. Two modes: `--update`
   (write/rewrite blocks) and `--check` (CI: fail if any README's
   block diverges from the policy table).
-- **`tools/conformance.sh CONNECTOR-2` strengthened.** Per-plugin now
+- **`tools/conformance.sh INTEGRATION-2` strengthened.** Per-plugin now
   asserts the policy disclosure block is present in each in-scope
   README; the `--all` mode runs the cross-check via
-  `tools/sync-connector-policy.py --check` so a policy-table edit
+  `tools/sync-integration-policy.py --check` so a policy-table edit
   that's not propagated fails the gate. Resolves the
-  `docs/CONNECTOR-POLICY.md § 1` contract drift where 14/14 in-scope
+  `docs/INTEGRATION-POLICY.md § 1` contract drift where 14/14 in-scope
   READMEs previously violated the disclosure mandate.
 
 ### Changed
@@ -349,7 +349,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `registry/polymath-catalog.json` (the catalog's own schema, not
   governed by Claude's); `tools/conformance.sh` (MANIFEST-3),
   `tools/build-catalog.py` (status badges on the generated site), and
-  `tools/sync-connector-policy.py` (README disclosure block) all read
+  `tools/sync-integration-policy.py` (README disclosure block) all read
   status from there. `tools/validate-all.sh` now invokes
   `claude plugin validate --strict` at the marketplace root and fails
   on non-zero exit, so any future drift is caught in CI before merge.

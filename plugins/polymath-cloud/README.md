@@ -23,9 +23,8 @@ Terraform stack composition.
     choice, so it lives with the cloud-pattern skills.)
   - `plan-review` — read a `terraform plan` (binary or JSON) and surface
     destructive actions, drift, replacements, and unsafe diffs with a
-    go/no-go recommendation before apply. (Folded in from the former
-    `polymath-connector-terraform`, which was a CLI-only skill with no MCP
-    server — it belongs with the IaC design skills.)
+    go/no-go recommendation before apply. (A CLI-only review skill — no MCP
+    server — so it lives with the IaC design skills.)
 - **Commands:** `/design-aws`, `/design-gcp`, `/design-azure`,
   `/design-terraform-stack` (thin aliases).
 
@@ -53,18 +52,18 @@ and a Terraform-stack composition skill — under one plugin. Projects pick
 a cloud once via `.polymath/project.yaml`; the skills adapt rather than
 splitting the surface across multiple plugins.
 
-<!-- connector-policy:start -->
-## Connector policy disclosure
+<!-- integration-policy:start -->
+## Integration policy disclosure
 
-Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
-by `tools/sync-connector-policy.py`. Do not edit by hand —
+Auto-generated from [`docs/INTEGRATION-POLICY.md`](../../docs/INTEGRATION-POLICY.md)
+by `tools/sync-integration-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
 - **Official surface:** AWS / GCP / Azure / Terraform official docs and MCP families
 - **Polymath value:** Cross-cloud pattern selection with named cost drivers + flip conditions
 - **Sunset trigger:** Demote when an official multi-cloud design MCP ships per-provider decision trees.
 - **Status:** `experimental`
-<!-- connector-policy:end -->
+<!-- integration-policy:end -->
 
 ## License
 

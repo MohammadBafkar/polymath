@@ -120,74 +120,47 @@ if s not in allowed:
     done < <(find "$plugin_dir/workflows" -type f -name "*.yaml" -print0)
   fi
 
-  # CONNECTOR-2: connector / lang / infra plugins must be audited in
-  # docs/CONNECTOR-POLICY.md AND must carry the auto-generated
+  # INTEGRATION-2: connector / lang / infra plugins must be audited in
+  # docs/INTEGRATION-POLICY.md AND must carry the auto-generated
   # disclosure block (official_surface / polymath_value /
   # sunset_trigger / status) in their README, kept in sync via
-  # tools/sync-connector-policy.py.
+  # tools/sync-integration-policy.py.
   # Detect policy-scoped plugins by artifact, not name prefix, so concept-plugin
   # renames (vcs / chat / paging / cloud / kubernetes …) and the observability
   # merge stay covered. An MCP connector ships a .mcp.json; an infra plugin
-  # carries capability bindings/ but no .mcp.json. CONNECTOR-2 (policy
-  # disclosure) covers both; CONNECTOR-1 (.mcp.json/references/userConfig)
+  # carries capability bindings/ but no .mcp.json. INTEGRATION-2 (policy
+  # disclosure) covers both; INTEGRATION-1 (.mcp.json/references/userConfig)
   # covers MCP connectors only.
   is_connector=0
   [[ -f "$plugin_dir/.mcp.json" ]] && is_connector=1
   is_policy_scoped=0
   [[ -f "$plugin_dir/.mcp.json" || -d "$plugin_dir/bindings" ]] && is_policy_scoped=1
   if [[ "$is_policy_scoped" -eq 1 ]]; then
-    if grep -q "\`$name\`" "$root/docs/CONNECTOR-POLICY.md" 2>/dev/null; then
-      echo "  ✓ CONNECTOR-2: audited in docs/CONNECTOR-POLICY.md"
+    if grep -q "\`$name\`" "$root/docs/INTEGRATION-POLICY.md" 2>/dev/null; then
+      echo "  ✓ INTEGRATION-2: audited in docs/INTEGRATION-POLICY.md"
     else
-      echo "  ✗ CONNECTOR-2: not audited in docs/CONNECTOR-POLICY.md"
+      echo "  ✗ INTEGRATION-2: not audited in docs/INTEGRATION-POLICY.md"
       fail=1
     fi
-    if grep -q '<!-- connector-policy:start -->' "$plugin_dir/README.md" 2>/dev/null \
-       && grep -q '<!-- connector-policy:end -->' "$plugin_dir/README.md" 2>/dev/null; then
-      echo "  ✓ CONNECTOR-2: README carries the policy disclosure block"
+    if grep -q '<!-- integration-policy:start -->' "$plugin_dir/README.md" 2>/dev/null \
+       && grep -q '<!-- integration-policy:end -->' "$plugin_dir/README.md" 2>/dev/null; then
+      echo "  ✓ INTEGRATION-2: README carries the policy disclosure block"
     else
-      echo "  ✗ CONNECTOR-2: README missing the policy disclosure block (run: python3 tools/sync-connector-policy.py --update)"
+      echo "  ✗ INTEGRATION-2: README missing the policy disclosure block (run: python3 tools/sync-integration-policy.py --update)"
       fail=1
     fi
   fi
 
-  # CONNECTOR-1 — applies to MCP connectors (ship a .mcp.json), detected by
+  # INTEGRATION-1 — applies to MCP connectors (ship a .mcp.json), detected by
   # artifact rather than name prefix.
   if [[ "$is_connector" -eq 1 ]]; then
-    # A connector may delegate to another connector for the MCP server
-    # via the dependencies array. In that case .mcp.json is allowed to
-    # be absent. A connector may also wrap a local CLI rather than a
-    # remote service (it shells out to a local binary instead of an
-    # MCP server); those declare the `polymath-cli-only` keyword.
-    delegates_mcp=0
-    cli_only=0
-    if [[ -f "$manifest" ]]; then
-      delegates_mcp="$(python3 -c "
-import json, sys
-d = json.load(open(sys.argv[1]))
-deps = d.get('dependencies') or []
-print(1 if any(isinstance(x,str) and x.startswith('polymath-connector-') for x in deps) else 0)
-" "$manifest" 2>/dev/null || echo 0)"
-      cli_only="$(python3 -c "
-import json, sys
-d = json.load(open(sys.argv[1]))
-kw = d.get('keywords') or []
-print(1 if 'polymath-cli-only' in kw else 0)
-" "$manifest" 2>/dev/null || echo 0)"
-    fi
-    if [[ -f "$plugin_dir/.mcp.json" ]]; then
-      echo "  ✓ CONNECTOR-1: .mcp.json"
-    elif [[ "$delegates_mcp" -eq 1 ]]; then
-      echo "  ✓ CONNECTOR-1: no .mcp.json — delegates to a connector dependency"
-    elif [[ "$cli_only" -eq 1 ]]; then
-      echo "  ✓ CONNECTOR-1: no .mcp.json — declared 'polymath-cli-only' keyword"
-    else
-      echo "  ✗ CONNECTOR-1: .mcp.json missing (and no connector dependency or cli-only keyword)"
-      fail=1
-    fi
+    # is_connector ⟺ a .mcp.json is present (detected above). An integration
+    # plugin must also ship references/<service>-tools.md and userConfig with
+    # title + description per key.
+    echo "  ✓ INTEGRATION-1: .mcp.json"
     ls "$plugin_dir/references/"*.md >/dev/null 2>&1 \
-      && echo "  ✓ CONNECTOR-1: references/<service>-tools.md" \
-      || { echo "  ✗ CONNECTOR-1: references/*.md missing"; fail=1; }
+      && echo "  ✓ INTEGRATION-1: references/<service>-tools.md" \
+      || { echo "  ✗ INTEGRATION-1: references/*.md missing"; fail=1; }
     if [[ -f "$manifest" ]]; then
       python3 -c "
 import json, sys
@@ -197,8 +170,8 @@ for k, v in uc.items():
     if not v.get('title'):  raise SystemExit(f'missing title on userConfig.{k}')
     if not v.get('description'): raise SystemExit(f'missing description on userConfig.{k}')
 " "$manifest" 2>&1 \
-        && echo "  ✓ CONNECTOR-1: userConfig has title + description per key" \
-        || { echo "  ✗ CONNECTOR-1: userConfig missing title or description"; fail=1; }
+        && echo "  ✓ INTEGRATION-1: userConfig has title + description per key" \
+        || { echo "  ✗ INTEGRATION-1: userConfig missing title or description"; fail=1; }
     fi
   fi
 
@@ -236,8 +209,8 @@ if [[ "$mode" == "--all" ]]; then
   # match the policy table verbatim. Local block presence is checked
   # per-plugin above; this catches divergence after a policy-table edit.
   echo
-  echo "── CONNECTOR-2 cross-check (sync-connector-policy.py)"
-  if python3 "$root/tools/sync-connector-policy.py" --check; then
+  echo "── INTEGRATION-2 cross-check (sync-integration-policy.py)"
+  if python3 "$root/tools/sync-integration-policy.py" --check; then
     :
   else
     overall=1
@@ -246,10 +219,10 @@ if [[ "$mode" == "--all" ]]; then
   # MCP-PKG: every connector .mcp.json package is either confirmed to
   # resolve on npm or explicitly disclosed as a placeholder in its README.
   # Prevents a dead-on-install connector (npx -y <missing> never starts)
-  # from shipping silently. Offline/hermetic; see tools/check-connector-mcp.py.
+  # from shipping silently. Offline/hermetic; see tools/check-mcp-packages.py.
   echo
-  echo "── MCP-PKG cross-check (check-connector-mcp.py)"
-  if python3 "$root/tools/check-connector-mcp.py"; then
+  echo "── MCP-PKG cross-check (check-mcp-packages.py)"
+  if python3 "$root/tools/check-mcp-packages.py"; then
     :
   else
     overall=1

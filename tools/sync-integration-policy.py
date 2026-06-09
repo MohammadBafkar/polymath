@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""Sync the CONNECTOR-POLICY § 1 disclosure block into every
-polymath-connector-* and polymath-infra-* README.
+"""Sync the INTEGRATION-POLICY § 1 disclosure block into every
+integration & infra plugin README.
 
 Single source of truth: the two markdown tables in
-docs/CONNECTOR-POLICY.md (§ 3.1 and § 3.2). The status field comes
+docs/INTEGRATION-POLICY.md (§ 3.1 and § 3.2). The status field comes
 from registry/polymath-catalog.json so demote/promote stays in sync.
 
 Modes:
   --check   Exit 1 if any in-scope README's policy block diverges
             from what would be regenerated. Used by
-            tools/conformance.sh CONNECTOR-2.
+            tools/conformance.sh INTEGRATION-2.
   --update  Insert / rewrite the policy block in every in-scope
             README. Safe to re-run.
 
 Block markers (idempotent):
-  <!-- connector-policy:start -->
+  <!-- integration-policy:start -->
   ...
-  <!-- connector-policy:end -->
+  <!-- integration-policy:end -->
 """
 from __future__ import annotations
 
@@ -27,12 +27,12 @@ import re
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-POLICY = REPO / "docs" / "CONNECTOR-POLICY.md"
+POLICY = REPO / "docs" / "INTEGRATION-POLICY.md"
 CATALOG = REPO / "registry" / "polymath-catalog.json"
 PLUGINS_DIR = REPO / "plugins"
 
-START_MARKER = "<!-- connector-policy:start -->"
-END_MARKER = "<!-- connector-policy:end -->"
+START_MARKER = "<!-- integration-policy:start -->"
+END_MARKER = "<!-- integration-policy:end -->"
 
 
 def parse_policy_tables() -> dict[str, dict[str, str]]:
@@ -65,10 +65,10 @@ def load_statuses() -> dict[str, str]:
 def render_block(name: str, row: dict[str, str], status: str) -> str:
     return (
         f"{START_MARKER}\n"
-        f"## Connector policy disclosure\n"
+        f"## Integration policy disclosure\n"
         f"\n"
-        f"Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)\n"
-        f"by `tools/sync-connector-policy.py`. Do not edit by hand —\n"
+        f"Auto-generated from [`docs/INTEGRATION-POLICY.md`](../../docs/INTEGRATION-POLICY.md)\n"
+        f"by `tools/sync-integration-policy.py`. Do not edit by hand —\n"
         f"edit the policy table and re-run the script.\n"
         f"\n"
         f"- **Official surface:** {row['official_surface']}\n"
@@ -121,7 +121,7 @@ def main() -> int:
     missing_from_policy = [n for n in in_scope if n not in rows]
     if missing_from_policy:
         print(
-            "ERROR: in-scope plugins missing from docs/CONNECTOR-POLICY.md table:",
+            "ERROR: in-scope plugins missing from docs/INTEGRATION-POLICY.md table:",
             file=sys.stderr,
         )
         for n in missing_from_policy:

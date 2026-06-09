@@ -16,7 +16,7 @@ PagerDuty connector for the Polymath marketplace.
 > may ship as a hosted endpoint, a different package name, or a CLI subcommand —
 > substitute the real command in `.mcp.json` before relying on this connector.
 > This is part of why the connector is `status: experimental`. See
-> [`docs/CONNECTOR-POLICY.md` §4.2](../../docs/CONNECTOR-POLICY.md).
+> [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
 <!-- /mcp-package-status -->
 
 ## Installation
@@ -30,18 +30,18 @@ claude plugin install polymath-paging@polymath
 
 - `polymath-core`
 
-<!-- connector-policy:start -->
-## Connector policy disclosure
+<!-- integration-policy:start -->
+## Integration policy disclosure
 
-Auto-generated from [`docs/CONNECTOR-POLICY.md`](../../docs/CONNECTOR-POLICY.md)
-by `tools/sync-connector-policy.py`. Do not edit by hand —
+Auto-generated from [`docs/INTEGRATION-POLICY.md`](../../docs/INTEGRATION-POLICY.md)
+by `tools/sync-integration-policy.py`. Do not edit by hand —
 edit the policy table and re-run the script.
 
 - **Official surface:** `pager` — PagerDuty, Opsgenie, Splunk On-Call
 - **Polymath value:** `page-context` skill discipline; respondToIncident wiring
 - **Sunset trigger:** Demote when an official pager MCP adds a first-class incident-context skill.
 - **Status:** `experimental`
-<!-- connector-policy:end -->
+<!-- integration-policy:end -->
 
 ## License
 

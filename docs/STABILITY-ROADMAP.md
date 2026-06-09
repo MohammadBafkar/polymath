@@ -19,7 +19,7 @@ Every plugin is recorded against the **evidence ladder**:
 
 The promotion gates that read this ledger live in
 [`docs/MATURITY.md`](MATURITY.md) and
-[`docs/CONNECTOR-POLICY.md`](CONNECTOR-POLICY.md). The
+[`docs/INTEGRATION-POLICY.md`](INTEGRATION-POLICY.md). The
 `STABILITY-1` conformance check in
 [`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
 refuses to merge a status flip that the ledger does not back.
@@ -138,7 +138,7 @@ no external users still stands.
 ## See also
 
 - [docs/MATURITY.md](MATURITY.md) — promotion bar definitions.
-- [docs/CONNECTOR-POLICY.md](CONNECTOR-POLICY.md) — connector / infra disclosure rules and distinct-value requirement.
+- [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md) — connector / infra disclosure rules and distinct-value requirement.
 - [docs/QUALITY-DASHBOARD.md](QUALITY-DASHBOARD.md) — where measured artifacts land.
 - [registry/stability-evidence.json](../registry/stability-evidence.json) — machine-readable ledger.
 - [tools/check-stability-evidence.py](../tools/check-stability-evidence.py) — STABILITY-1 enforcement.

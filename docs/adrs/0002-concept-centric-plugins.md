@@ -51,8 +51,8 @@ Renames / merges:
 
 Supporting decisions:
 
-- **Gate detection by artifact, not name.** `CONNECTOR-1`/`CONNECTOR-2`/`MCP-PKG`
-  and `sync-connector-policy.py` now detect integration plugins by `.mcp.json`
+- **Gate detection by artifact, not name.** `INTEGRATION-1`/`INTEGRATION-2`/`MCP-PKG`
+  and `sync-integration-policy.py` now detect integration plugins by `.mcp.json`
   presence and policy-scoped plugins by `.mcp.json` **or** `bindings/` (infra
   plugins have bindings but no `.mcp.json`). The policy-table parser matches any
   `polymath-*` row. This survives the prefix removal and the observability merge.
@@ -81,5 +81,5 @@ Supporting decisions:
 - Conformance, `validate-all`, all index `--check` guards, and the catalog build
   pass against the renamed/merged set (36 plugins).
 - Supersedes the vendor-per-plugin packaging recorded in
-  `docs/CONNECTOR-POLICY.md` §4.1; that section's "kept separate" note for
+  `docs/INTEGRATION-POLICY.md` §4.1; that section's "kept separate" note for
   slack/pagerduty/statuspage is now obsolete (they are concept plugins).

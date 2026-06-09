@@ -52,9 +52,8 @@
 <li><code>plan-review</code> — read a <code>terraform plan</code> (binary or JSON) and surface</li>
 </ul>
 <p>destructive actions, drift, replacements, and unsafe diffs with a</p>
-<p>go/no-go recommendation before apply. (Folded in from the former</p>
-<p><code>polymath-connector-terraform</code>, which was a CLI-only skill with no MCP</p>
-<p>server — it belongs with the IaC design skills.)</p>
+<p>go/no-go recommendation before apply. (A CLI-only review skill — no MCP</p>
+<p>server — so it lives with the IaC design skills.)</p>
 <ul>
 <li><strong>Commands:</strong> <code>/design-aws</code>, <code>/design-gcp</code>, <code>/design-azure</code>,</li>
 </ul>
@@ -90,11 +89,11 @@ claude plugin install polymath-cloud@polymath
 <p>a cloud once via <code>.polymath/project.yaml</code>; the skills adapt rather than</p>
 <p>splitting the surface across multiple plugins.</p>
 
-<p>&lt;!-- connector-policy:start --&gt;</p>
-<h2>Connector policy disclosure</h2>
+<p>&lt;!-- integration-policy:start --&gt;</p>
+<h2>Integration policy disclosure</h2>
 
-<p>Auto-generated from <a href="../../docs/CONNECTOR-POLICY.md"><code>docs/CONNECTOR-POLICY.md</code></a></p>
-<p>by <code>tools/sync-connector-policy.py</code>. Do not edit by hand —</p>
+<p>Auto-generated from <a href="../../docs/INTEGRATION-POLICY.md"><code>docs/INTEGRATION-POLICY.md</code></a></p>
+<p>by <code>tools/sync-integration-policy.py</code>. Do not edit by hand —</p>
 <p>edit the policy table and re-run the script.</p>
 
 <ul>
@@ -103,7 +102,7 @@ claude plugin install polymath-cloud@polymath
 <li><strong>Sunset trigger:</strong> Demote when an official multi-cloud design MCP ships per-provider decision trees.</li>
 <li><strong>Status:</strong> <code>experimental</code></li>
 </ul>
-<p>&lt;!-- connector-policy:end --&gt;</p>
+<p>&lt;!-- integration-policy:end --&gt;</p>
 
 <h2>License</h2>
 

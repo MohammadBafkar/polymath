@@ -38,7 +38,7 @@ elsewhere is intentional.
   the official surface is the source of truth for tool calls. The
   Polymath connector is justified only by the workflow shape, safety
   opinion, or critique it adds, recorded per plugin in
-  [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md). Connectors
+  [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md). Connectors
   are now **eligible for `beta` and `stable`** — but only after
   primary-source distinct-value proof is published in
   [`registry/stability-evidence.json`](registry/stability-evidence.json)
@@ -47,7 +47,7 @@ elsewhere is intentional.
 - **Cloud resource operations.** For one-off operations against AWS /
   GCP / Azure / Kubernetes, the official MCP families plus the vendor
   CLI are faster and safer than any Polymath wrapper.
-  `polymath-infra-*` is justified only when a multi-environment
+  an infra plugin is justified only when a multi-environment
   workflow, RBAC audit, or destructive-action checklist is the actual
   question. Infra plugins follow the same `distinct_value_url`
   evidence gate as connectors before promoting above experimental.
@@ -162,7 +162,7 @@ failing. The hard gate fires only on `push` events to
 - Refuses to claim a plugin is `stable` without a passing bakeoff
   case at score ≥ 8/10 with delta ≥ 2 over baseline.
 - Refuses to promote a connector to `stable` while its `polymath_value`
-  row in [`docs/CONNECTOR-POLICY.md`](docs/CONNECTOR-POLICY.md) is
+  row in [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) is
   empty.
 - Refuses to ship a new agent without a no-agent baseline + a golden
   fixture proving forked context is load-bearing.

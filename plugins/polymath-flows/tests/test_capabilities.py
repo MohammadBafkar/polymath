@@ -40,16 +40,16 @@ _VOCAB = {
             "description": "x",
             "providers": ["jira", "linear"],
             "providerPlugins": {
-                "jira": "polymath-connector-jira",
-                "linear": "polymath-connector-linear",
+                "jira": "polymath-tracker",
+                "linear": "polymath-tracker",
             },
         },
         "observability": {
             "description": "x",
             "providers": ["datadog", "honeycomb"],
             "providerPlugins": {
-                "datadog": "polymath-connector-datadog",
-                "honeycomb": "polymath-connector-monitoring",
+                "datadog": "polymath-observability",
+                "honeycomb": "polymath-observability",
             },
         },
     },
@@ -139,16 +139,16 @@ class CapabilityResolutionTests(unittest.TestCase):
         self.assertEqual(errs, [])
         self.assertEqual(
             resolved["issue_tracker"],
-            {"provider": "jira", "plugin": "polymath-connector-jira"},
+            {"provider": "jira", "plugin": "polymath-tracker"},
         )
         self.assertEqual(
             resolved["observability"],
-            {"provider": "datadog", "plugin": "polymath-connector-datadog"},
+            {"provider": "datadog", "plugin": "polymath-observability"},
         )
         # Plugins list reflects both resolutions, no duplicates, in order.
         self.assertEqual(
             plugins,
-            ["polymath-connector-jira", "polymath-connector-datadog"],
+            ["polymath-tracker", "polymath-observability"],
         )
 
     def test_resolve_workflow_pin_mismatch_fails(self) -> None:
@@ -197,7 +197,7 @@ class CapabilityResolutionTests(unittest.TestCase):
             "capabilities": {
                 "issue_tracker": {
                     "provider": "jira",
-                    "plugin": "polymath-connector-jira-internal-fork",
+                    "plugin": "polymath-tracker-internal-fork",
                 }
             }
         }
@@ -207,9 +207,9 @@ class CapabilityResolutionTests(unittest.TestCase):
         self.assertEqual(errs, [])
         self.assertEqual(
             resolved["issue_tracker"]["plugin"],
-            "polymath-connector-jira-internal-fork",
+            "polymath-tracker-internal-fork",
         )
-        self.assertIn("polymath-connector-jira-internal-fork", plugins)
+        self.assertIn("polymath-tracker-internal-fork", plugins)
 
 
 class CapabilitySubstitutionTests(unittest.TestCase):
@@ -220,7 +220,7 @@ class CapabilitySubstitutionTests(unittest.TestCase):
         caps = {
             "observability": {
                 "provider": "datadog",
-                "plugin": "polymath-connector-datadog",
+                "plugin": "polymath-observability",
             }
         }
         out = self.mod._substitute(
@@ -233,14 +233,14 @@ class CapabilitySubstitutionTests(unittest.TestCase):
         caps = {
             "issue_tracker": {
                 "provider": "jira",
-                "plugin": "polymath-connector-jira",
+                "plugin": "polymath-tracker",
             }
         }
         out = self.mod._substitute(
             "${capabilities.issue_tracker.plugin}:file-bug",
             inputs={}, workflow_meta={}, capabilities=caps,
         )
-        self.assertEqual(out, "polymath-connector-jira:file-bug")
+        self.assertEqual(out, "polymath-tracker:file-bug")
 
     def test_substitute_unknown_capability_leaves_intact(self) -> None:
         out = self.mod._substitute(
@@ -326,7 +326,7 @@ class CapabilityRunIntegrationTests(unittest.TestCase):
             "capabilities:\n"
             "  issue_tracker:\n"
             "    provider: jira\n"
-            "    plugin: polymath-connector-jira\n"
+            "    plugin: polymath-tracker\n"
         )
         code, out, _ = self._capture("start", "capDemo", "--input", "title=demo")
         self.assertEqual(code, 0, msg=out)
@@ -339,15 +339,15 @@ class CapabilityRunIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(
             state["capabilities"]["issue_tracker"]["plugin"],
-            "polymath-connector-jira",
+            "polymath-tracker",
         )
-        self.assertIn("polymath-connector-jira", state["effective_plugins"])
+        self.assertIn("polymath-tracker", state["effective_plugins"])
 
         # `next` must expand placeholders against the resolved capability map.
         code, out, _ = self._capture("next", run_id)
         self.assertEqual(code, 0)
         step = json.loads(out)
-        self.assertEqual(step["invoke"], "polymath-connector-jira:file-bug")
+        self.assertEqual(step["invoke"], "polymath-tracker:file-bug")
         self.assertEqual(step["prompt"], "file a bug in jira")
 
 
