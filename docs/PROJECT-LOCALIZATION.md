@@ -292,7 +292,7 @@ writes:
   recommendations, and skill overrides.
 - `.polymath/capabilities.yaml` when providers can be inferred with
   confidence.
-- `docs/polymath-onboarding.md` with required tools, environment
+- `docs/POLYMATH-ONBOARDING.md` with required tools, environment
   variable names, recommended plugin install sets, useful workflows,
   portability notes, and open questions.
 

@@ -41,7 +41,7 @@ already exists, so you know up front whether this is a create or an update.
 5. **Write `.polymath/capabilities.yaml` only for confident provider mappings.**
    - Example: GitHub remote plus GitHub Actions means `vcs: github` and `ci: github_actions`.
    - If a provider is unknown, omit it and list the question in the onboarding doc instead of guessing.
-6. **Write `docs/polymath-onboarding.md`** for *this* project — never copy
+6. **Write `docs/POLYMATH-ONBOARDING.md`** for *this* project — never copy
    Polymath's own maintainer commands (`tools/validate-all.sh`, `bakeoff.py`,
    unittest discovery) into it; those exist only in the marketplace repo.
    Include:
@@ -71,7 +71,7 @@ already exists, so you know up front whether this is a create or an update.
 
 - `.polymath/project.yaml`.
 - `.polymath/capabilities.yaml` when provider mappings are known.
-- `docs/polymath-onboarding.md`.
+- `docs/POLYMATH-ONBOARDING.md`.
 - A short summary of inferred stack, required setup, recommended plugins, and unresolved questions.
 
 ## Quality bar

@@ -78,9 +78,9 @@ claude plugin install \
 For a new target repository, run `/polymath-core:init-project` or
 `/polymath-flows:run-workflow activateProject` first. It creates
 `.polymath/project.yaml`, maps known capability providers, and writes
-`docs/polymath-onboarding.md` so agents know the stack, conventions,
+`docs/POLYMATH-ONBOARDING.md` so agents know the stack, conventions,
 required tools, environment variables, recommended plugins, and first
-steps. See [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md).
+steps. See [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md).
 
 The full catalog is published as the marketplace's GitHub Pages site under `docs/site/`.
 
@@ -168,7 +168,7 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the explicit promotion bar and the proof loop.
 - [`docs/QUALITY-DASHBOARD.md`](docs/QUALITY-DASHBOARD.md) — what gets measured, where the artifacts land.
 - [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping a `.mcp.json` / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
-- [`docs/polymath-onboarding.md`](docs/polymath-onboarding.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
+- [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 
 ## Contributing
 

@@ -196,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project activation path.** Added `polymath-core:initialize-project`
   and `/polymath-core:init-project` to generate
   `.polymath/project.yaml`, `.polymath/capabilities.yaml` when provider
-  mappings are known, and `docs/polymath-onboarding.md` from an
+  mappings are known, and `docs/POLYMATH-ONBOARDING.md` from an
   existing repository's README, agent instructions, docs, CI, package
   manifests, and deployment files. Added `activateProject` workflow as
   the flow-runner entry point for the same setup.
