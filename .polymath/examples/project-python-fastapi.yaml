@@ -53,3 +53,17 @@ skill_overrides:
 
 prompts:
   pr_description_template: docs/pr-template.md
+
+conventions_docs:
+  backend-stack: docs/conventions/backend-stack.md
+  review-checklist: docs/python-style.md
+
+smoke:
+  python:
+    start: uv run uvicorn app.main:app --port 8000
+    readiness: /health
+    port: 8000
+    timeout_seconds: 60
+
+routing:
+  mode: hint

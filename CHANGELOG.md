@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Localization keys in the project schema** — shipped ahead of their
+  consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
+  (convention docs resolved by role), `smoke` (per-language
+  boot-verification recipes), `tracker` (work-item destination +
+  provenance marking), `routing.mode` (`hint`/`classify`/`enforce`;
+  only `hint` has shipped behavior), `attribution`, `artifact_matrix`,
+  and `prompts` opened to the full 11-artifact template vocabulary.
+  Validated by schema + loader; consumers land in later plan phases.
 - **Machine-local project-config overlay.** `./.polymath/project.local.yaml`
   (gitignored) deep-merges on top of the resolved `project.yaml` — mappings
   merge per key with the overlay winning, lists and scalars replace. The

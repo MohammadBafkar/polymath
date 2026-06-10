@@ -241,10 +241,17 @@ KNOWN_TOP_KEYS = {
     "polymath",
     "skill_overrides",
     "prompts",
+    "conventions_docs",
+    "smoke",
+    "tracker",
+    "routing",
+    "attribution",
+    "artifact_matrix",
 }
 COMMIT_STYLES = {"conventional-commits", "free-form", "ticket-prefixed"}
 BRANCH_STRATEGIES = {"trunk-based", "gitflow", "github-flow", "release-branch"}
 INSTALL_KINDS = {"marketplace", "manual", "submodule"}
+ROUTING_MODES = {"hint", "classify", "enforce"}
 
 
 def _split_unknown(data: dict) -> tuple[dict, list[str]]:
@@ -349,6 +356,23 @@ def _validate(data: Any) -> list[str]:
             for i, plugin in enumerate(poly.get("recommended_plugins") or []):
                 if not isinstance(plugin, dict) or not plugin.get("name"):
                     errs.append(f"polymath.recommended_plugins[{i}] missing `name`")
+    for key in ("conventions_docs", "smoke", "tracker", "routing", "attribution"):
+        value = data.get(key)
+        if value is not None and not isinstance(value, dict):
+            errs.append(f"{key} must be a mapping")
+    am = data.get("artifact_matrix")
+    if am is not None and not isinstance(am, str):
+        errs.append("artifact_matrix must be a string path")
+    routing = data.get("routing")
+    if isinstance(routing, dict):
+        mode = routing.get("mode")
+        if mode is not None and mode not in ROUTING_MODES:
+            errs.append(f"routing.mode {mode!r} not in {sorted(ROUTING_MODES)}")
+    smoke = data.get("smoke")
+    if isinstance(smoke, dict):
+        for lang, recipe in smoke.items():
+            if not isinstance(recipe, dict) or not recipe.get("start"):
+                errs.append(f"smoke.{lang} missing `start`")
     return errs
 
 

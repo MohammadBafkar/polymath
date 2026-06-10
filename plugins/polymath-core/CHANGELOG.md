@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Localization keys in the project schema** — shipped ahead of their
+  consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
+  (convention documents resolved by role, not filename), `smoke`
+  (per-language boot-verification recipes for the planned `appStarts`
+  gate), `tracker` (work-item destination + provenance marking; provider
+  stays in `.polymath/capabilities.yaml`), `routing.mode`
+  (`hint`/`classify`/`enforce`; only `hint` has shipped behavior),
+  `attribution` (chat markers + commit trailer), `artifact_matrix`
+  (path to a work-type × scope artifact-requirements doc), and `prompts`
+  opened to the full 11-artifact template vocabulary. The loader
+  validates surface shape (`routing.mode` enum, `smoke.*.start`
+  required, mapping types) and the drift gate pins it to the schema.
 - **Machine-local config overlay.** `./.polymath/project.local.yaml`
   (gitignored) deep-merges on top of the resolved `project.yaml`: mappings
   merge per key with the overlay winning, lists and scalars are replaced.

@@ -172,10 +172,54 @@ skill_overrides:
 prompts:
   pr_description_template: docs/pr-template.md
   postmortem_template: docs/postmortem-template.md
+
+conventions_docs:
+  backend-stack: docs/conventions/backend-stack.md
+  deployment: docs/conventions/deployment.md
+  review-checklist: docs/code-review-checklist.md
+
+smoke:
+  dotnet:
+    start: dotnet run --project src/Api
+    readiness: /health
+    port: 5000
+    timeout_seconds: 60
+
+tracker:
+  project: Payments
+  area_path: Payments\Platform
+  iteration: "@CurrentIteration"
+  work_item_types:
+    bug: Bug
+    backlog: Task
+  marking:
+    title_prefix: "[Polymath]"
+    tag: polymath-created
+
+routing:
+  mode: hint
+
+attribution:
+  chat_markers: false
+  commit_trailer: ""
+
+artifact_matrix: docs/conventions/artifact-matrix.md
 ```
 
 See [the schema](../registry/schemas/project.schema.json) for the full
 set of validated fields and constraints.
+
+### Localization fields shipped ahead of their consumers
+
+`conventions_docs` (convention documents resolved by role rather than
+filename), `smoke` (per-language boot-verification recipes), `tracker`
+(work-item destination + provenance marking; the provider itself comes
+from `.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
+(`hint` is today's behavior; `classify`/`enforce` are reserved for the
+opt-in pipeline mode), `attribution`, and `artifact_matrix` validate and
+load into the snapshot today; consuming skills and gates land per
+`docs/plans/generalized-localization.md`. Future keys degrade gracefully:
+the loader warns and ignores unknown top-level keys instead of failing.
 
 ## Resolution order
 

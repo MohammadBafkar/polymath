@@ -143,6 +143,65 @@ class ValidationTests(unittest.TestCase):
         )
         self.assertTrue(any("polymath.recommended_plugins[0]" in e for e in errs))
 
+    def test_routing_mode_enum(self) -> None:
+        errs = self.mod._validate(
+            {"schemaVersion": 1, "routing": {"mode": "autopilot"}}
+        )
+        self.assertTrue(any("routing.mode" in e for e in errs))
+
+    def test_routing_valid_modes_accepted(self) -> None:
+        for mode in ("hint", "classify", "enforce"):
+            errs = self.mod._validate({"schemaVersion": 1, "routing": {"mode": mode}})
+            self.assertEqual(errs, [], f"mode {mode} should validate")
+
+    def test_smoke_recipe_requires_start(self) -> None:
+        errs = self.mod._validate(
+            {"schemaVersion": 1, "smoke": {"python": {"port": 8000}}}
+        )
+        self.assertTrue(any("smoke.python missing `start`" in e for e in errs))
+
+    def test_artifact_matrix_must_be_string(self) -> None:
+        errs = self.mod._validate(
+            {"schemaVersion": 1, "artifact_matrix": ["docs/matrix.md"]}
+        )
+        self.assertTrue(any("artifact_matrix" in e for e in errs))
+
+    def test_new_mapping_keys_reject_non_mappings(self) -> None:
+        for key in ("conventions_docs", "smoke", "tracker", "routing", "attribution"):
+            errs = self.mod._validate({"schemaVersion": 1, key: ["not", "a", "map"]})
+            self.assertTrue(
+                any(f"{key} must be a mapping" in e for e in errs), key
+            )
+
+    def test_localization_keys_happy_path(self) -> None:
+        errs = self.mod._validate(
+            {
+                "schemaVersion": 1,
+                "conventions_docs": {
+                    "backend-stack": "docs/conventions/backend.md",
+                    "review-checklist": "docs/QUALITY.md",
+                },
+                "smoke": {
+                    "python": {
+                        "start": "uvicorn app:app",
+                        "readiness": "/health",
+                        "port": 8000,
+                        "timeout_seconds": 60,
+                    }
+                },
+                "tracker": {
+                    "project": "My Project",
+                    "work_item_types": {"bug": "Bug", "backlog": "Task"},
+                    "marking": {"title_prefix": "[Agent]", "tag": "agent-created"},
+                },
+                "routing": {"mode": "hint"},
+                "attribution": {"chat_markers": True, "commit_trailer": "Co-Authored-By: Bot <bot@example.com>"},
+                "artifact_matrix": "docs/conventions/artifact-matrix.md",
+                "prompts": {"plan_template": "docs/plan-template.md"},
+            }
+        )
+        self.assertEqual(errs, [])
+
     def test_happy_path_returns_no_errors(self) -> None:
         errs = self.mod._validate(
             {
