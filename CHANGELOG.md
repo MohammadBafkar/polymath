@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Convention packs (content layer).** Skeleton templates under
+  `plugins/polymath-core/templates/conventions/` (knowledge-base, stack-doc,
+  artifact-matrix, review-checklist) with the `[VERIFY: …]` marker protocol;
+  nine skills now consume project localization — seven read
+  `conventions_docs` by role (code-review, verify-change, feature-dev,
+  api-design-rest, db-schema, dockerize, ci-pipeline-github), two use
+  `prompts` templates (pr, postmortem-blameless). The consumption contract
+  lives in `polymath-core:project-context`, which now resolves the snapshot
+  by glob across the namespaced plugin data dirs.
 - **`${project.*}` workflow placeholders.** flows-lite steps and gates can
   reference the project-context snapshot
   (`${project.stack.languages.0.lang}`), frozen into run state at `start`.

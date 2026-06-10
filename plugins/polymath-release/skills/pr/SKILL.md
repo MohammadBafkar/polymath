@@ -20,6 +20,16 @@ description: Draft a PR description for the current branch following the canonic
 - Optional: PRD path at `docs/prds/<slug>.md` (anchors motivation).
 - Optional: target base branch (default `main`).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `prompts.pr_description_template`: when set, use that file as the PR
+  body template instead of the catalog default.
+
 ## Procedure
 
 1. Run `git log <base>..HEAD --oneline` to see commits on the branch.

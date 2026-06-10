@@ -13,6 +13,17 @@ description: Design or review a relational schema — tables, columns, types, in
 - An existing schema is being refactored and you want a second look.
 - Migration planning needs a target shape.
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read role `database` — naming conventions,
+  migration tooling/process, and tenant-isolation rules there are
+  guardrails for every schema decision below.
+
 ## Procedure
 
 1. **Naming** — match the repo's convention (`snake_case` is the safe default for SQL). Tables plural, columns singular, foreign keys `<other_table_singular>_id`.

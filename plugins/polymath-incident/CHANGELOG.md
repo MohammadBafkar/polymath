@@ -1,5 +1,11 @@
 # Changelog — polymath-incident
 
+## [Unreleased]
+
+### Added
+
+- `postmortem-blameless` uses the project's `prompts.postmortem_template` from the project-context snapshot when set.
+
 ## [0.1.0]
 
 ### Added

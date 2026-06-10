@@ -1,5 +1,11 @@
 # Changelog — polymath-engineering
 
+## [Unreleased]
+
+### Added
+
+- `code-review`, `verify-change`, and `feature-dev` consume project localization: `conventions_docs` roles and `skill_overrides` from the project-context snapshot (contract: `polymath-core:project-context`).
+
 ## [0.1.0]
 
 ### Added

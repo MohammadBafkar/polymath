@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `api-design-rest` and `db-schema` consume project localization: `conventions_docs` roles `api-style`/`backend-stack`/`database` from the project-context snapshot.
+
 ### Changed
 
 - Added Postgres migration-safety skills `review-migration` and

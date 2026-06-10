@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Convention-pack templates** under `templates/conventions/`
+  (`knowledge-base`, `stack-doc`, `artifact-matrix`, `review-checklist`) —
+  vendor-neutral skeletons any project or org pack fills in, including the
+  `[VERIFY: …]` inferred-not-confirmed marker protocol. The
+  `project-context` skill now defines the consumption contract
+  (conventions_docs roles → wired consumer skills) and resolves the
+  snapshot by glob, covering the per-plugin+marketplace data-dir layout.
 - **Localization keys in the project schema** — shipped ahead of their
   consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
   (convention documents resolved by role, not filename), `smoke`

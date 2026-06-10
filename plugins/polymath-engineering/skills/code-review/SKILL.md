@@ -18,6 +18,22 @@ description: Review a code change for correctness, simplification, and missing t
 - PRD + acceptance criteria for the change (preferred).
 - Project conventions.
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read roles `review-checklist` plus the stack docs
+  (`backend-stack`, `frontend-stack`, `database`) that match the diff;
+  treat their Hard rules as review axes; surface `[VERIFY: …]` items only
+  when they affect a finding.
+- `skill_overrides["polymath-engineering:code-review"]`: read each
+  `additional_context` file; apply each `additional_axes` entry as an
+  extra review axis. Cite `conventions.code_review_checklist` in the
+  review summary when set.
+
 ## Procedure
 
 1. **Read the PRD's acceptance criteria.** Each criterion is a checkpoint the code must satisfy.

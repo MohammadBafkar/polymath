@@ -18,6 +18,17 @@ description: Design a REST endpoint or resource — URL, method, status codes, r
 - Resource and operation in plain English.
 - Existing API conventions in the repo (read the most recent endpoint).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read roles `api-style` and `backend-stack`; follow
+  `conventions.api_style_guide` when set. Project rules win over the
+  generic defaults below.
+
 ## Procedure
 
 1. **Resource shape** — name the resource (noun, plural) and its identifier scheme. URLs operate on resources, not actions: `POST /orders/:id/refund` ≫ `POST /refundOrder`.

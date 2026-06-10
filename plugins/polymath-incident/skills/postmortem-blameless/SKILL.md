@@ -18,6 +18,16 @@ description: Write a blameless postmortem to docs/postmortems/<incident-id>.md; 
 - Impact data (affected users, duration, revenue if known).
 - The triage record (`incident-triage` output).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `prompts.postmortem_template`: when set, use that file as the
+  postmortem template instead of the catalog default.
+
 ## Procedure
 
 1. Read [`Postmortem.md`](../../templates/Postmortem.md).

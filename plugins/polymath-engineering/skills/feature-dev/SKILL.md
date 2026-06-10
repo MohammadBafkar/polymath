@@ -19,6 +19,18 @@ description: Implement the smallest safe change satisfying a PRD/acceptance crit
 - Existing acceptance criteria (preferred). If absent, surface that gap and pause.
 - Repository conventions (loaded from `polymath-core:conventions` if installed).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read roles `backend-stack` / `frontend-stack` /
+  `shared-libraries` as relevant; the Architecture directive
+  (target-vs-legacy) constrains where new code lands; Hard rules are
+  guardrails, not suggestions.
+
 ## Procedure
 
 1. **Orient.** Read the PRD and the surrounding code area. If unfamiliar, invoke the `read-code` skill first.

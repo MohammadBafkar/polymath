@@ -18,6 +18,17 @@ description: Author a GitHub Actions workflow — lint/test/build/deploy with ca
 - Deploy target (registry, k8s, serverless, …).
 - Existing convention (other workflows in the repo to mirror).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read role `deployment` — pipeline standards and
+  branch-to-environment mapping there override the generic layout
+  below.
+
 ## Procedure
 
 1. **Scope per workflow** — separate files for separate triggers. `ci.yml` for PRs + main, `deploy.yml` for tags, `nightly.yml` for cron. Don't shove everything into one workflow with branchy `if`s.

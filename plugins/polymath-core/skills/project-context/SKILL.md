@@ -17,28 +17,46 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 ## How it works
 
 1. The polymath-core SessionStart hook runs `hooks/scripts/load-project-context.py` at every session start.
-2. The loader reads `.polymath/project.yaml` in the project → user (`${CLAUDE_CONFIG_DIR}/polymath/project.yaml`) → home order. First hit wins.
-3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json` (plus a `_meta` block recording source path + load time).
+2. The loader reads `.polymath/project.yaml` in the project → user (`${CLAUDE_CONFIG_DIR}/polymath/project.yaml`) → home order (first hit wins), then deep-merges the machine-local `./.polymath/project.local.yaml` overlay on top when one exists.
+3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time).
 4. Skills read that JSON file directly.
 
 ## Procedure
 
-To consume the context inside a skill:
+To consume the context inside a skill. The data dir is namespaced per
+plugin+marketplace when harness-managed, so resolve the snapshot by glob
+(newest wins), never by a single hardcoded path:
 
 ```bash
-ctx="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}/polymath-core/project-context.json"
-if [[ -f "$ctx" ]]; then
+ctx="$(ls -t "$HOME"/.claude/plugins/data/*/polymath-core/project-context.json \
+            "$HOME"/.claude/plugins/data/polymath-core/project-context.json 2>/dev/null | head -1)"
+if [[ -n "$ctx" ]]; then
   primary_lang="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); s=d.get('stack',{}).get('languages',[]); print(s[0]['lang'] if s else '')" "$ctx")"
   # ...
 fi
 ```
 
-Inside a markdown skill (no shell), use the same JSON file path and read it as the procedure's first step. Examples:
+Inside a markdown skill (no shell), Read the same glob-resolved JSON file as the procedure's first step; if it is absent, skip silently and use built-in defaults.
 
-- **`polymath-engineering:code-review`** — apply additional context files declared under `skill_overrides["polymath-engineering:code-review"].additional_context`. Run additional review axes from `additional_axes`. Cite the project's `conventions.code_review_checklist` file in the review summary.
-- **`polymath-engineering:verify-change`** — pick the test command from `skill_overrides["polymath-engineering:verify-change"].test_commands` matching the project's primary language.
-- **`polymath-release:pr`** — when `prompts.pr_description_template` is set, use that as the template instead of the catalog default.
-- **`polymath-incident:postmortem-blameless`** — when `prompts.postmortem_template` is set, use that.
+### The consumption contract
+
+A localizing skill applies, in this order, whichever of these exist in the snapshot:
+
+1. **`conventions_docs` (by role)** — read the docs whose role keys are relevant to the skill and treat their Hard rules as guardrails. Conventional role names: `knowledge-base`, `backend-stack`, `frontend-stack`, `database`, `auth`, `deployment`, `shared-libraries`, `review-checklist`, `artifact-matrix`, `api-style` (keys are free-form; these are the names skills look for). Content marked `[VERIFY: …]` is inferred-not-confirmed — never treat it as authoritative, and surface relevant markers when they affect a decision.
+2. **`skill_overrides["<plugin>:<skill>"]`** — `additional_context` files to read, `additional_axes` to apply, `test_commands` matched by the project's primary language.
+3. **`prompts.<artifact>_template`** — use the project's template instead of the catalog default.
+
+Wired consumers and their roles:
+
+- **`polymath-engineering:code-review`** — roles `review-checklist` + the stack docs; plus `additional_context`/`additional_axes`; cite `conventions.code_review_checklist` in the review summary.
+- **`polymath-engineering:verify-change`** — `test_commands` matching the primary language.
+- **`polymath-engineering:feature-dev`** — roles `backend-stack`/`frontend-stack`/`shared-libraries`.
+- **`polymath-backend:api-design-rest`** — roles `api-style`/`backend-stack`.
+- **`polymath-backend:db-schema`** — role `database`.
+- **`polymath-devops:dockerize`** — role `deployment`.
+- **`polymath-devops:ci-pipeline-github`** — role `deployment`.
+- **`polymath-release:pr`** — `prompts.pr_description_template`.
+- **`polymath-incident:postmortem-blameless`** — `prompts.postmortem_template`.
 
 ## What's in the snapshot
 
@@ -56,6 +74,9 @@ The file mirrors `.polymath/project.yaml` with the original keys preserved plus 
   "polymath": { "recommended_plugins": [...], "recommended_workflows": [...] },
   "skill_overrides": { "polymath-engineering:code-review": { ... } },
   "prompts": { "pr_description_template": "docs/pr-template.md" },
+  "conventions_docs": { "backend-stack": "docs/conventions/backend-stack.md", ... },
+  "smoke": { "dotnet": { "start": "...", "readiness": "/health" } },
+  "routing": { "mode": "hint" },
   "_meta": { "source": "...", "loaded_at": "...", "schemaVersion": 1 }
 }
 ```

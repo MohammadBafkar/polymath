@@ -18,6 +18,17 @@ description: Write a multi-stage Dockerfile — distroless or minimal base, buil
 - Build artifact shape (compiled binary, JS bundle, Python module).
 - Runtime needs (does it need `bash`, `curl`, `ca-certificates`? Often: no.).
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `conventions_docs`: read role `deployment` — approved base images,
+  registries, and hosting targets there override the generic choices
+  below.
+
 ## Procedure
 
 1. **Multi-stage** always. Stage 1 builds; stage 2 runs.

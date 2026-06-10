@@ -24,6 +24,17 @@ description: Run repository-appropriate verification (build, lint, type-check, t
   5. `*.csproj` / `*.sln` → `dotnet build`, `dotnet test`.
   6. `Makefile` → `make test` if defined.
 
+## Project localization
+
+Before the procedure, resolve the project snapshot — glob
+`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+wins; absent → skip and use built-in defaults). Then apply (contract:
+`polymath-core:project-context`):
+
+- `skill_overrides["polymath-engineering:verify-change"].test_commands`:
+  use the entry matching the project's primary language as the
+  verification command, ahead of the detection order below.
+
 ## Procedure
 
 1. Identify the verification commands the repo supports.

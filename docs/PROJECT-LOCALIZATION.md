@@ -209,17 +209,57 @@ artifact_matrix: docs/conventions/artifact-matrix.md
 See [the schema](../registry/schemas/project.schema.json) for the full
 set of validated fields and constraints.
 
-### Localization fields shipped ahead of their consumers
+### Localization fields and their consumers
 
-`conventions_docs` (convention documents resolved by role rather than
-filename), `smoke` (per-language boot-verification recipes), `tracker`
-(work-item destination + provenance marking; the provider itself comes
-from `.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
+`conventions_docs` is consumed today by seven skills (code-review,
+verify-change, feature-dev, api-design-rest, db-schema, dockerize,
+ci-pipeline-github — the contract lives in
+`polymath-core:project-context`); `prompts` templates by
+`polymath-release:pr` and `polymath-incident:postmortem-blameless`.
+`smoke` (per-language boot-verification recipes), `tracker` (work-item
+destination + provenance marking; the provider itself comes from
+`.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
 (`hint` is today's behavior; `classify`/`enforce` are reserved for the
 opt-in pipeline mode), `attribution`, and `artifact_matrix` validate and
-load into the snapshot today; consuming skills and gates land per
+load into the snapshot today; their consumers land per
 `docs/plans/generalized-localization.md`. Future keys degrade gracefully:
 the loader warns and ignores unknown top-level keys instead of failing.
+
+## Convention packs
+
+A project (or an org pack) encodes its house reality as a small corpus of
+convention documents that skills resolve **by role** through
+`conventions_docs` — so the catalog stays generic and the project supplies
+the specifics. Skeleton templates ship in
+`plugins/polymath-core/templates/conventions/`: `knowledge-base.md`
+(canonical-source registry + domain map), `stack-doc.md` (one per area:
+backend, frontend, database, auth, deployment, shared-libraries),
+`review-checklist.md`, and `artifact-matrix.md` (work-type × scope →
+required artifacts).
+
+Conventional role names skills look for: `knowledge-base`, `backend-stack`,
+`frontend-stack`, `database`, `auth`, `deployment`, `shared-libraries`,
+`review-checklist`, `artifact-matrix`, `api-style`. Keys are free-form —
+declare any role; only the names above have wired consumers today.
+
+### The `[VERIFY: …]` marker protocol
+
+Convention corpora are working derivations of canonical sources (wikis,
+ADRs, the team's heads). Any statement that was inferred — by
+`init-project` scanning code, or by an author writing from memory — and
+not confirmed against its canonical source carries an inline
+`[VERIFY: <question>]` marker. The contract:
+
+- A consuming skill must not treat a marked item as authoritative.
+- When a marked item affects a decision the skill is making, it surfaces
+  the marker to the user at that decision point instead of silently
+  relying on it.
+- Confirming an item removes the marker; each doc collects its open
+  markers in a trailing "Open questions" section so teams can burn them
+  down deliberately.
+- An obsolete convention doc gets a `[DEPRECATED: <date> — see <url>]`
+  header and stays in place. This applies to project/org convention
+  corpora only — Polymath's own docs stay stateless.
 
 ## Resolution order
 

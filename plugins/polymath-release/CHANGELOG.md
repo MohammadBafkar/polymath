@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `pr` uses the project's `prompts.pr_description_template` from the project-context snapshot when set.
+
 ### Changed
 
 - Absorbed two adjacent lifecycle plugins so shipping → rolling out → retiring a
