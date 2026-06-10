@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Org packs (one-command company localization).**
+  `polymath-author:/new-org-pack` scaffolds a standalone company
+  marketplace with an `<org>-conventions` plugin: `org-defaults` copy-in
+  skill, starter `.polymath/` config + role map, conventions corpus seeded
+  from the polymath-core skeletons. `init-project` now detects installed
+  org packs (the `org-defaults` skill-name convention), proposes their
+  copy-in first, offers to scaffold `.polymath/conventions/` from the
+  templates, and registers docs in `conventions_docs` by role.
 - **Convention packs (content layer).** Skeleton templates under
   `plugins/polymath-core/templates/conventions/` (knowledge-base, stack-doc,
   artifact-matrix, review-checklist) with the `[VERIFY: …]` marker protocol;
