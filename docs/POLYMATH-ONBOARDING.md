@@ -191,6 +191,12 @@ tools/token-budget.sh
 tools/conformance.sh --all
 tools/bakeoff.py check
 tools/skill-triggering.py check
+tools/workflow-triggering.py check
+tools/build-workflow-index.py --check
+tools/build-surface-index.py --check
+tools/build-capability-index.py --check
+tools/lint-descriptions.py --strict
+tools/check-description-confusion.py check
 python3 -m unittest discover -s plugins/polymath-core/tests
 python3 -m unittest discover -s plugins/polymath-flows/tests
 ```
