@@ -29,7 +29,6 @@ language it had no way to know about.
   agent. Secret values never belong here.
 - **Polymath activation** — recommended Polymath plugins, useful
   workflows, and compatible agent surfaces for this repo.
-- **MCP servers** — capability → MCP server overrides.
 - **Capabilities** — pointer to `.polymath/capabilities.yaml`
   (separate file, separate schema; see
   [`docs/CAPABILITIES.md`](CAPABILITIES.md)).
@@ -227,7 +226,7 @@ the loader warns and ignores unknown top-level keys instead of failing.
 
 ## Convention packs
 
-A project (or an org pack) encodes its house reality as a small corpus of
+A project (or a defaults pack — org, team, or project-archetype scope) encodes its house reality as a small corpus of
 convention documents that skills resolve **by role** through
 `conventions_docs` — so the catalog stays generic and the project supplies
 the specifics. Skeleton templates ship in

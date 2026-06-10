@@ -21,13 +21,15 @@ tool is missing, stop and relay the fix — the inference and validation steps
 below need `python3`. The doctor also reports whether a `.polymath/project.yaml`
 already exists, so you know up front whether this is a create or an update.
 
-**Org packs.** Check the available-skills list for a skill named
-`<anything>:org-defaults` — that is the convention for an installed
-organization pack that ships starter `.polymath/` config and a conventions
-corpus. If one is present and the repo has no `.polymath/project.yaml` yet,
-propose running it FIRST (it copies the org's defaults in), then run this
-skill to refine on top — inference must preserve the copied org intent the
-same way it preserves user intent.
+**Defaults packs.** Check the available-skills list for skills named
+`<anything>:apply-defaults` — the convention for installed defaults packs
+that ship starter `.polymath/` config and a conventions corpus at some
+scope (organization, team, product line, project archetype). If any are
+present and the repo has no `.polymath/project.yaml` yet, propose running
+them FIRST — narrowest scope first (project archetype → team → org), since
+apply-defaults never overwrites and broader packs should only fill gaps —
+then run this skill to refine on top. Inference must preserve the copied
+pack intent the same way it preserves user intent.
 
 ## Procedure
 

@@ -6,7 +6,7 @@
 
 - **Convention-pack templates** under `templates/conventions/`
   (`knowledge-base`, `stack-doc`, `artifact-matrix`, `review-checklist`) —
-  vendor-neutral skeletons any project or org pack fills in, including the
+  vendor-neutral skeletons any project or defaults pack fills in, including the
   `[VERIFY: …]` inferred-not-confirmed marker protocol. The
   `project-context` skill now defines the consumption contract
   (conventions_docs roles → wired consumer skills) and resolves the

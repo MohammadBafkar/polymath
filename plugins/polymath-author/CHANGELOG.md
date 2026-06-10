@@ -4,13 +4,16 @@
 
 ### Added
 
-- `/new-org-pack` command + `bin/new-org-pack.sh`: scaffold a standalone
-  organization pack — a company-side marketplace with one
-  `<org>-conventions` plugin carrying an `org-defaults` copy-in skill
-  (detected by `polymath-core:init-project`), a starter `.polymath/`
-  config with a `conventions_docs` role map, and a conventions corpus
-  seeded from polymath-core's skeletons (same-marketplace symlink,
-  dereferenced at install). Nothing org-specific ships in this catalog.
+- `/new-pack` command + `bin/new-pack.sh`: scaffold a defaults pack — a
+  standalone marketplace of per-scope conventions plugins (organization,
+  team, product line, or project archetype). Each plugin carries an
+  `apply-defaults` copy-in skill (detected by
+  `polymath-core:init-project`), a starter `.polymath/` config with a
+  `conventions_docs` role map, and a conventions corpus seeded from
+  polymath-core's skeletons (same-marketplace symlink, dereferenced at
+  install). Re-running against an existing pack ADDS a scope plugin;
+  stacking rule: narrowest scope first, since apply-defaults never
+  overwrites. Nothing scope-specific ships in this catalog.
 
 ## [0.1.0]
 
