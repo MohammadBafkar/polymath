@@ -720,6 +720,47 @@ def _strong_gate_warning(workflow: dict) -> str | None:
     )
 
 
+def _bare_project_placeholder_warning(workflow: dict) -> str | None:
+    """Return a warning when any step/check string uses a bare
+    `${project.*}` placeholder (no `:-fallback`). In a repo with no
+    .polymath/project.yaml there is no snapshot, so the bare form stays a
+    literal in the prompt. Marketplace workflows must use the fallback
+    form; the bare form is for project/org-layer workflows where the
+    config is known to exist."""
+    bare = re.compile(r"\$\{project\.[^}]*\}")
+    offenders: list[str] = []
+
+    def scan(label: str, value: object) -> None:
+        if isinstance(value, str):
+            for m in bare.finditer(value):
+                if ":-" not in m.group(0):
+                    offenders.append(f"{label}: {m.group(0)}")
+
+    for s in workflow.get("steps") or []:
+        if not isinstance(s, dict):
+            continue
+        sid = s.get("id", "?")
+        scan(f"steps.{sid}.prompt", s.get("prompt"))
+        for a in s.get("artifacts") or []:
+            scan(f"steps.{sid}.artifacts", a)
+    for c in workflow.get("mustPass") or []:
+        if not isinstance(c, dict):
+            continue
+        cid = c.get("id", "?")
+        scan(f"mustPass.{cid}.path", c.get("path"))
+        scan(f"mustPass.{cid}.command", c.get("command"))
+    if not offenders:
+        return None
+    return (
+        "bare ${project.*} placeholder(s) without a `:-fallback`: "
+        + "; ".join(offenders[:5])
+        + (" …" if len(offenders) > 5 else "")
+        + ". The bare form stays a literal when no project snapshot exists; "
+        "use ${project.<path>:-fallback} unless this workflow only ships in "
+        "repos with .polymath/project.yaml."
+    )
+
+
 # ---------------------------------------------------------------------------
 # Placeholder substitution
 # ---------------------------------------------------------------------------
@@ -731,17 +772,109 @@ def _slugify(text: str) -> str:
     return text or "untitled"
 
 
+def _project_context_snapshot() -> dict | None:
+    """Locate and parse polymath-core's project-context.json snapshot.
+
+    The snapshot is written by polymath-core's SessionStart hook into ITS
+    data dir — which, when CLAUDE_PLUGIN_DATA is harness-provided, is
+    namespaced per plugin AND marketplace (data/polymath-core-<mkt>/...),
+    a different directory from this binary's own data root. Candidates:
+
+    With CLAUDE_PLUGIN_DATA set (the harness-provided, per-plugin data root):
+      1. ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json
+      2. sibling dirs: ${CLAUDE_PLUGIN_DATA}/../*/polymath-core/project-context.json
+    With it unset (e.g. invoked via the Bash tool):
+      3. ~/.claude/plugins/data/polymath-core/project-context.json
+      4. ~/.claude/plugins/data/polymath-core-*/polymath-core/project-context.json
+
+    The two groups never mix — when the env var is set it defines the data
+    root and the home layout is irrelevant (this also keeps tests hermetic).
+    Newest mtime wins when several exist (a stale legacy file must not shadow
+    the live namespaced one). Degrade quiet: unreadable/missing → None.
+    """
+    candidates: list[pathlib.Path] = []
+    env = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if env:
+        env_path = pathlib.Path(env)
+        candidates.append(env_path / "polymath-core" / "project-context.json")
+        try:
+            candidates.extend(
+                sorted(env_path.parent.glob("*/polymath-core/project-context.json"))
+            )
+        except OSError:
+            pass
+    else:
+        home_data = pathlib.Path.home() / ".claude" / "plugins" / "data"
+        candidates.append(home_data / "polymath-core" / "project-context.json")
+        try:
+            candidates.extend(
+                sorted(home_data.glob("polymath-core-*/polymath-core/project-context.json"))
+            )
+        except OSError:
+            pass
+
+    existing: list[pathlib.Path] = []
+    seen: set[str] = set()
+    for c in candidates:
+        key = str(c)
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            if c.is_file():
+                existing.append(c)
+        except OSError:
+            continue
+    if not existing:
+        return None
+    newest = max(existing, key=lambda p: p.stat().st_mtime)
+    try:
+        parsed = json.loads(newest.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _project_lookup(snapshot: dict, dotted: str) -> str | None:
+    """Resolve a dotted path (numeric segments index lists) against the
+    project snapshot. Scalars stringify; mappings/lists JSON-encode; a miss
+    returns None."""
+    cur: object = snapshot
+    for seg in dotted.split("."):
+        if isinstance(cur, dict):
+            if seg not in cur:
+                return None
+            cur = cur[seg]
+        elif isinstance(cur, list):
+            try:
+                cur = cur[int(seg)]
+            except (ValueError, IndexError):
+                return None
+        else:
+            return None
+    if cur is None:
+        return None
+    if isinstance(cur, (dict, list)):
+        return json.dumps(cur, separators=(",", ":"))
+    return str(cur)
+
+
 def _substitute(
     text: str,
     *,
     inputs: dict,
     workflow_meta: dict,
     capabilities: dict | None = None,
+    project: dict | None = None,
 ) -> str:
-    """Substitute `${inputs.x}`, `${workflow.x}`, and (when capability
-    resolution has run) `${capabilities.<cap>.<field>}` placeholders. Unknown
-    expressions are left intact so a typo surfaces as a literal in the prompt
-    rather than silently expanding to empty."""
+    """Substitute `${inputs.x}`, `${workflow.x}`, (when capability
+    resolution has run) `${capabilities.<cap>.<field>}`, and (when a
+    project-context snapshot was frozen at start) `${project.<dotted.path>}`
+    placeholders. `${project.<path>:-fallback}` uses the fallback when the
+    path misses or no snapshot exists — the only form safe in marketplace
+    workflows, since zero-config repos have no snapshot. Unknown expressions
+    are left intact so a typo surfaces as a literal in the prompt rather
+    than silently expanding to empty."""
 
     caps = capabilities or {}
 
@@ -762,6 +895,15 @@ def _substitute(
             cap_name, field = parts
             entry = caps.get(cap_name) or {}
             return str(entry.get(field, ""))
+        if expr.startswith("project."):
+            rest = expr[len("project.") :]
+            path, sep, fallback = rest.partition(":-")
+            value = _project_lookup(project, path.strip()) if project else None
+            if value is not None:
+                return value
+            if sep:
+                return fallback
+            return match.group(0)
         return match.group(0)
 
     return re.sub(r"\$\{([^}]+)\}", repl, text)
@@ -787,6 +929,9 @@ def cmd_validate(args: argparse.Namespace) -> int:
     warn = _strong_gate_warning(workflow)
     if warn:
         print(f"  ⚠ {warn}", file=sys.stderr)
+    proj_warn = _bare_project_placeholder_warning(workflow)
+    if proj_warn:
+        print(f"  ⚠ {proj_warn}", file=sys.stderr)
     print(f"OK: {path}")
     return 0
 
@@ -862,6 +1007,9 @@ def cmd_start(args: argparse.Namespace) -> int:
         ],
         "capabilities": resolved_caps,
         "effective_plugins": effective_plugins,
+        # Frozen at start (like the capability map) so mid-run edits to
+        # .polymath/project.yaml don't change an in-flight run.
+        "project_context": _project_context_snapshot(),
     }
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
 
@@ -878,6 +1026,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     inputs = json.loads((run_dir / "inputs.json").read_text())
     capabilities = state.get("capabilities") or {}
+    project = state.get("project_context")
     title = inputs.get("title", state["workflow"])
     workflow_meta = {
         "id": state["run_id"],
@@ -898,7 +1047,7 @@ def cmd_next(args: argparse.Namespace) -> int:
         # All steps complete; clear the in-flight marker and assert mustPass.
         state["in_flight"] = None
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-        result = _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities)
+        result = _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities, project=project)
         return 0 if result == 0 else 2
 
     step = steps[idx]
@@ -912,10 +1061,10 @@ def cmd_next(args: argparse.Namespace) -> int:
     payload = {
         "run_id": state["run_id"],
         "step_id": step["id"],
-        "invoke": _substitute(step["invoke"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities),
-        "prompt": _substitute(step["prompt"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities),
+        "invoke": _substitute(step["invoke"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project),
+        "prompt": _substitute(step["prompt"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project),
         "artifacts": [
-            _substitute(a, inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+            _substitute(a, inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
             for a in step.get("artifacts", [])
         ],
         "topology": topology,
@@ -1041,12 +1190,13 @@ def cmd_assert(args: argparse.Namespace) -> int:
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     inputs = json.loads((run_dir / "inputs.json").read_text())
     capabilities = state.get("capabilities") or {}
+    project = state.get("project_context")
     workflow_meta = {
         "id": state["run_id"],
         "slug": _slugify(str(inputs.get("title", state["workflow"]))),
         "name": state["workflow"],
     }
-    return _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities)
+    return _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities, project=project)
 
 
 def cmd_list(args: argparse.Namespace) -> int:
@@ -1118,6 +1268,7 @@ def _assert(
     workflow_meta: dict,
     *,
     capabilities: dict | None = None,
+    project: dict | None = None,
 ) -> int:
     checks = workflow.get("mustPass", []) or []
     if not checks:
@@ -1133,7 +1284,7 @@ def _assert(
     blocking_failures: list[dict] = []
     advisory_failures: list[dict] = []
     for check in checks:
-        ok, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities)
+        ok, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities, project=project)
         if ok:
             continue
         record = {
@@ -1192,14 +1343,15 @@ def _run_check(
     workflow_meta: dict,
     *,
     capabilities: dict | None = None,
+    project: dict | None = None,
 ) -> tuple[bool, str]:
     t = check["type"]
     if t == "fileExists":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
         ok = pathlib.Path(path).exists()
         return ok, f"path={path} exists={ok}"
     if t == "fileMatches":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
         p = pathlib.Path(path)
         if not p.exists():
             return False, f"path={path} not found"
@@ -1207,7 +1359,7 @@ def _run_check(
         ok = bool(re.search(pattern, p.read_text(errors="ignore")))
         return ok, f"path={path} pattern={pattern!r} match={ok}"
     if t in {"commandSucceeds", "command"}:
-        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         ok = proc.returncode == 0
         return ok, f"exit={proc.returncode}"
@@ -1220,12 +1372,12 @@ def _run_check(
         ok = bool(re.search(pattern, sp.read_text(errors="ignore")))
         return ok, f"step={step} pattern={pattern!r} match={ok}"
     if t == "artifactValid":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
         artifact_name = check["artifact"]
         ok, detail = _validate_artifact_frontmatter(path, artifact_name)
         return ok, detail
     if t == "artifactSchemaStrict":
-        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities)
+        path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
         artifact_name = check["artifact"]
         min_body = int(check.get("minBodyChars", 200))
         reject_extra = bool(check.get("rejectAdditionalProperties", True))

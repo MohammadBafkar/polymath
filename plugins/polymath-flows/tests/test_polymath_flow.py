@@ -705,5 +705,144 @@ class ResumabilityTests(unittest.TestCase):
         self.assertEqual(out["chainsTo"], ["incidentRetroToActions"])
 
 
+class ProjectPlaceholderTests(unittest.TestCase):
+    """${project.*} placeholders: lookup, fallback form, snapshot resolution,
+    freeze-at-start, and the bare-form validate warning."""
+
+    SNAPSHOT = {
+        "schemaVersion": 1,
+        "project": {"name": "demo"},
+        "stack": {"languages": [{"lang": "go", "version": "1.22"}]},
+        "conventions": {"commit_style": "conventional-commits"},
+    }
+
+    def setUp(self) -> None:
+        self.mod = _import_flow()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.work = pathlib.Path(self._tmp.name)
+        self._prev_data = os.environ.get("CLAUDE_PLUGIN_DATA")
+        os.environ["CLAUDE_PLUGIN_DATA"] = str(self.work / ".pdata")
+
+    def tearDown(self) -> None:
+        if self._prev_data is None:
+            os.environ.pop("CLAUDE_PLUGIN_DATA", None)
+        else:
+            os.environ["CLAUDE_PLUGIN_DATA"] = self._prev_data
+        self._tmp.cleanup()
+
+    def _sub(self, text: str, project: dict | None) -> str:
+        return self.mod._substitute(
+            text, inputs={}, workflow_meta={}, project=project
+        )
+
+    def test_dotted_path_with_list_index(self) -> None:
+        out = self._sub("lang=${project.stack.languages.0.lang}", self.SNAPSHOT)
+        self.assertEqual(out, "lang=go")
+
+    def test_mapping_value_json_encodes(self) -> None:
+        out = self._sub("${project.project}", self.SNAPSHOT)
+        self.assertEqual(out, '{"name":"demo"}')
+
+    def test_bare_miss_stays_literal(self) -> None:
+        out = self._sub("x ${project.nope.deep} y", self.SNAPSHOT)
+        self.assertEqual(out, "x ${project.nope.deep} y")
+
+    def test_bare_form_without_snapshot_stays_literal(self) -> None:
+        out = self._sub("x ${project.project.name} y", None)
+        self.assertEqual(out, "x ${project.project.name} y")
+
+    def test_fallback_used_on_miss_and_when_no_snapshot(self) -> None:
+        self.assertEqual(self._sub("${project.nope:-deft}", self.SNAPSHOT), "deft")
+        self.assertEqual(self._sub("${project.project.name:-deft}", None), "deft")
+
+    def test_fallback_ignored_on_hit(self) -> None:
+        out = self._sub("${project.project.name:-deft}", self.SNAPSHOT)
+        self.assertEqual(out, "demo")
+
+    def _write_snapshot(self, rel: str, payload: dict) -> pathlib.Path:
+        p = self.work / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(payload))
+        return p
+
+    def test_snapshot_resolved_from_env_data_dir(self) -> None:
+        self._write_snapshot(".pdata/polymath-core/project-context.json", self.SNAPSHOT)
+        snap = self.mod._project_context_snapshot()
+        self.assertIsNotNone(snap)
+        self.assertEqual(snap["project"]["name"], "demo")
+
+    def test_snapshot_resolved_from_marketplace_namespaced_sibling(self) -> None:
+        # polymath-core's data dir is a SIBLING of this plugin's data dir
+        # (per-plugin+marketplace namespacing): data/<plugin>-<marketplace>/.
+        self._write_snapshot(
+            "polymath-core-somemkt/polymath-core/project-context.json", self.SNAPSHOT
+        )
+        snap = self.mod._project_context_snapshot()
+        self.assertIsNotNone(snap)
+        self.assertEqual(snap["project"]["name"], "demo")
+
+    def test_newest_snapshot_wins(self) -> None:
+        old = self._write_snapshot(
+            ".pdata/polymath-core/project-context.json",
+            {**self.SNAPSHOT, "project": {"name": "stale"}},
+        )
+        os.utime(old, (1, 1))
+        self._write_snapshot(
+            "polymath-core-somemkt/polymath-core/project-context.json", self.SNAPSHOT
+        )
+        snap = self.mod._project_context_snapshot()
+        self.assertEqual(snap["project"]["name"], "demo")
+
+    def test_missing_snapshot_returns_none(self) -> None:
+        self.assertIsNone(self.mod._project_context_snapshot())
+
+    def test_start_freezes_snapshot_into_state(self) -> None:
+        self._write_snapshot(".pdata/polymath-core/project-context.json", self.SNAPSHOT)
+        prev_cwd = pathlib.Path.cwd()
+        os.chdir(self.work)
+        try:
+            from io import StringIO
+            from contextlib import redirect_stdout
+
+            buf = StringIO()
+            with redirect_stdout(buf):
+                code = self.mod.main(
+                    ["start", "shipFeature", "--input", "title=Freeze test",
+                     "--input", "scope=small"]
+                )
+            self.assertEqual(code, 0)
+            run_id = json.loads(buf.getvalue())["run_id"]
+            state = json.loads(
+                (self.mod._workflow_runs_dir() / run_id / "state.json").read_text()
+            )
+            self.assertEqual(
+                state["project_context"]["project"]["name"], "demo"
+            )
+        finally:
+            os.chdir(prev_cwd)
+
+    def test_bare_placeholder_warning(self) -> None:
+        wf = {
+            "steps": [
+                {"id": "a", "prompt": "use ${project.stack.languages.0.lang}",
+                 "artifacts": []}
+            ],
+            "mustPass": [],
+        }
+        warn = self.mod._bare_project_placeholder_warning(wf)
+        self.assertIsNotNone(warn)
+        self.assertIn("steps.a.prompt", warn)
+
+    def test_fallback_form_produces_no_warning(self) -> None:
+        wf = {
+            "steps": [
+                {"id": "a", "prompt": "use ${project.x:-none}", "artifacts": []}
+            ],
+            "mustPass": [{"id": "c", "type": "fileExists",
+                          "path": "${project.y:-docs/out.md}"}],
+        }
+        self.assertIsNone(self.mod._bare_project_placeholder_warning(wf))
+
+
 if __name__ == "__main__":
     unittest.main()

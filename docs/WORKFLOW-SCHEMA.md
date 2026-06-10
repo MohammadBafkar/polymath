@@ -132,12 +132,25 @@ regex-matching summary).
   `.polymath/capabilities.yaml` (e.g. `datadog`).
 - `${capabilities.<cap>.plugin}` — adapter plugin name resolved from
   the same file (e.g. `polymath-observability`).
+- `${project.<dotted.path>}` — value from the project-context snapshot
+  (`.polymath/project.yaml` as loaded by polymath-core), e.g.
+  `${project.stack.languages.0.lang}`. Numeric segments index lists;
+  mappings/lists render as compact JSON. The snapshot is frozen into
+  the run state at `start`, like the capability map.
+- `${project.<dotted.path>:-fallback}` — same, with a fallback used
+  when the path misses or no snapshot exists. **Marketplace workflows
+  must use this form** — a repo without `.polymath/project.yaml` has no
+  snapshot, and the bare form stays in the prompt as a literal.
+  `polymath-flow validate` warns on bare `${project.*}`; the bare form
+  is for project/org-layer workflows where the config is known to
+  exist. The fallback text cannot contain `}`.
 
-The `invoke` field of a step accepts placeholders as well, so a
-workflow can be provider-agnostic by writing
+The `invoke` field of a step accepts capability placeholders as well,
+so a workflow can be provider-agnostic by writing
 `${capabilities.observability.plugin}:query-during-incident` instead
 of a hard-coded connector plugin name. See
-[`docs/CAPABILITIES.md`](CAPABILITIES.md).
+[`docs/CAPABILITIES.md`](CAPABILITIES.md). `${project.*}` expands in
+`prompt`, `artifacts`, and mustPass `path`/`command` — not in `invoke`.
 
 ## 6. State
 

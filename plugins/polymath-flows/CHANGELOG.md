@@ -4,6 +4,16 @@
 
 ### Added
 
+- **`${project.*}` placeholders.** Step `prompt`/`artifacts` and mustPass
+  `path`/`command` can reference the project-context snapshot
+  (`${project.stack.languages.0.lang}`); numeric segments index lists,
+  mappings render as compact JSON. The snapshot is frozen into
+  `state.json` at `start` (like the capability map), resolved from
+  polymath-core's data dir including the per-plugin+marketplace
+  namespaced layout, newest mtime wins, degrade-quiet when absent.
+  `${project.<path>:-fallback}` uses the fallback on a miss or when no
+  snapshot exists — the only form safe in marketplace workflows;
+  `polymath-flow validate` warns on the bare form.
 - Four composed workflow arcs: `prdToShip` (ship from an existing PRD),
   `estimateAndPlan` (clear goal → WBS + estimate + plan), `requirementsToBacklog`
   (PRD → decomposed/groomed/estimated backlog), and `progressiveRollout` (staged

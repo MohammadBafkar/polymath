@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`${project.*}` workflow placeholders.** flows-lite steps and gates can
+  reference the project-context snapshot
+  (`${project.stack.languages.0.lang}`), frozen into run state at `start`.
+  The `${project.<path>:-fallback}` form degrades for repos with no
+  `.polymath/project.yaml`; `polymath-flow validate` warns on the bare
+  form, which is reserved for project/org-layer workflows.
 - **Localization keys in the project schema** — shipped ahead of their
   consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
   (convention docs resolved by role), `smoke` (per-language
