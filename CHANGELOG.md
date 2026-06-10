@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Machine-local project-config overlay.** `./.polymath/project.local.yaml`
+  (gitignored) deep-merges on top of the resolved `project.yaml` — mappings
+  merge per key with the overlay winning, lists and scalars replace. The
+  overlay is fail-open (warned and skipped on any problem) and may serve as
+  the sole source when no base file resolves. First step of the
+  generalized-localization plan (`docs/plans/generalized-localization.md`).
+
 ### Changed
+
+- **Project-config loader tolerates unknown top-level keys.** Unknown keys
+  in `project.yaml` are warned and dropped (recorded in
+  `_meta.ignored_keys`) instead of failing the session with exit 2 — so a
+  config written for a newer schema degrades gracefully on an older
+  polymath-core. A drift-gate test pins the loader's key whitelist to
+  `registry/schemas/project.schema.json`.
 
 - **Stateless docs.** Documentation describes current behaviour only —
   change narration, "as of" dates, and point-in-time snapshots are removed;
@@ -66,6 +82,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   absorb-into-incumbent (preserving the `polymath-release`/`polymath-communication`
   names and their workflow refs) rather than the doc's aspirational
   `polymath-delivery`/`polymath-comms` rename — lower-risk, same consolidation.
+
+### Removed
+
+- **`mcp_servers` key in `project.yaml`.** It was declared in the schema but
+  consumed by nothing; capability → provider/plugin selection is owned by
+  `.polymath/capabilities.yaml` and duplicating that ownership invited
+  drift. Files still declaring it get a warning and the key is ignored.
 
 ### Added
 

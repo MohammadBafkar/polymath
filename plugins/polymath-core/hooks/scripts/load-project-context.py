@@ -12,22 +12,31 @@ Inputs:
     1. ./.polymath/project.yaml (project, repo-root)
     2. ${CLAUDE_CONFIG_DIR}/polymath/project.yaml (user/team default)
     3. ~/.polymath/project.yaml (last-resort user default)
+  Overlay (optional, machine-local, gitignored):
+    ./.polymath/project.local.yaml — deep-merged on top of the winning file
+    (mappings merge per key with the overlay winning; lists and scalars are
+    replaced). Overlay problems never fail the session: a malformed or
+    invalid overlay is warned to stderr and skipped.
 
 Outputs:
   ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json — full snapshot
   the file plus a `_meta` block describing where the source file lives and
-  when it was loaded. Skills consume this file to adapt behavior.
+  when it was loaded (plus `overlay` when one applied and `ignored_keys`
+  when unknown top-level keys were dropped). Skills consume this file to
+  adapt behavior.
 
 Validation:
   The script enforces a minimal subset of registry/schemas/project.schema.json:
   required top-level types, enum-bounded conventions, language list shape.
+  Unknown top-level keys are warned and dropped (never fatal) so a config
+  written for a newer schema degrades gracefully on an older loader.
   Surface-only validation; deep nested validation is the JSON schema's job
   for tooling that has a full validator (CI). The aim here is "block obvious
   typos that would corrupt the context snapshot" not full schema enforcement.
 
 Exit codes:
   0 — success (with or without a project file)
-  2 — project file present but invalid
+  2 — project file present but invalid (overlay-only problems never exit 2)
 
 Quiet by default. Verbose with POLYMATH_PROJECT_DEBUG=1.
 """
@@ -56,6 +65,10 @@ def _project_candidates() -> list[pathlib.Path]:
         out.append(pathlib.Path(cfg) / "polymath" / "project.yaml")
     out.append(pathlib.Path.home() / ".polymath" / "project.yaml")
     return out
+
+
+def _overlay_candidate() -> pathlib.Path:
+    return pathlib.Path.cwd() / ".polymath" / "project.local.yaml"
 
 
 def _data_root() -> pathlib.Path:
@@ -215,6 +228,8 @@ except ImportError:
 # Validation (minimal subset of registry/schemas/project.schema.json)
 # ---------------------------------------------------------------------------
 
+# Kept in sync with registry/schemas/project.schema.json `properties` — the
+# pair is drift-guarded by a unit test in tests/test_project_context.py.
 KNOWN_TOP_KEYS = {
     "schemaVersion",
     "project",
@@ -226,11 +241,36 @@ KNOWN_TOP_KEYS = {
     "polymath",
     "skill_overrides",
     "prompts",
-    "mcp_servers",
 }
 COMMIT_STYLES = {"conventional-commits", "free-form", "ticket-prefixed"}
 BRANCH_STRATEGIES = {"trunk-based", "gitflow", "github-flow", "release-branch"}
 INSTALL_KINDS = {"marketplace", "manual", "submodule"}
+
+
+def _split_unknown(data: dict) -> tuple[dict, list[str]]:
+    """Drop top-level keys outside the known schema, returning (clean, dropped).
+
+    Unknown keys warn instead of failing so a project file written for a
+    newer schema (or carrying a typo) degrades gracefully on this loader.
+    """
+    unknown = sorted(set(data.keys()) - KNOWN_TOP_KEYS)
+    if not unknown:
+        return data, []
+    return {k: v for k, v in data.items() if k in KNOWN_TOP_KEYS}, unknown
+
+
+def _deep_merge(base: Any, overlay: Any) -> Any:
+    """Merge overlay into base: mappings merge per key (overlay wins),
+    lists and scalars are replaced by the overlay value."""
+    if isinstance(base, dict) and isinstance(overlay, dict):
+        merged = dict(base)
+        for key, value in overlay.items():
+            if key in merged:
+                merged[key] = _deep_merge(merged[key], value)
+            else:
+                merged[key] = value
+        return merged
+    return overlay
 
 
 def _validate(data: Any) -> list[str]:
@@ -240,9 +280,6 @@ def _validate(data: Any) -> list[str]:
     sv = data.get("schemaVersion")
     if sv != 1:
         errs.append(f"schemaVersion must be 1 (got {sv!r})")
-    unknown = set(data.keys()) - KNOWN_TOP_KEYS
-    if unknown:
-        errs.append(f"unknown top-level keys: {sorted(unknown)}")
     stack = data.get("stack")
     if stack is not None:
         if not isinstance(stack, dict):
@@ -387,6 +424,26 @@ def _summary_line(ctx: dict) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _read_overlay(path: pathlib.Path) -> dict | None:
+    """Parse the machine-local overlay. Fail-open: any problem warns and
+    returns None — a personal overlay must never break the session."""
+    try:
+        parsed = _load_yaml(path.read_text())
+    except Exception as e:  # OSError or YAML error alike
+        print(
+            f"polymath-core: ignoring overlay {path}: {e}",
+            file=sys.stderr,
+        )
+        return None
+    if not isinstance(parsed, dict):
+        print(
+            f"polymath-core: ignoring overlay {path}: root must be a mapping",
+            file=sys.stderr,
+        )
+        return None
+    return parsed
+
+
 def main() -> int:
     source: pathlib.Path | None = None
     for cand in _project_candidates():
@@ -394,54 +451,99 @@ def main() -> int:
             source = cand
             break
 
+    overlay_path = _overlay_candidate()
+    overlay: dict | None = None
+    if overlay_path.exists():
+        overlay = _read_overlay(overlay_path)
+
     out_dir = _data_root()
     out_dir.mkdir(parents=True, exist_ok=True)
     out_file = out_dir / "project-context.json"
 
-    if source is None:
+    if source is None and overlay is None:
         # Clear any stale snapshot so downstream skills don't act on it.
         if out_file.exists():
             out_file.unlink()
         _debug("no .polymath/project.yaml found; cleared snapshot")
         return 0
 
-    try:
-        text = source.read_text()
-    except OSError as e:
-        print(
-            f"polymath-core: could not read project file {source}: {e}",
-            file=sys.stderr,
-        )
-        return 2
+    data: dict = {}
+    if source is not None:
+        try:
+            text = source.read_text()
+        except OSError as e:
+            print(
+                f"polymath-core: could not read project file {source}: {e}",
+                file=sys.stderr,
+            )
+            return 2
 
-    try:
-        data = _load_yaml(text)
-    except Exception as e:
-        print(
-            f"polymath-core: project file {source} is not valid YAML: {e}",
-            file=sys.stderr,
-        )
-        return 2
+        try:
+            data = _load_yaml(text)
+        except Exception as e:
+            print(
+                f"polymath-core: project file {source} is not valid YAML: {e}",
+                file=sys.stderr,
+            )
+            return 2
 
-    errs = _validate(data)
-    if errs:
+        errs = _validate(data)
+        if errs:
+            print(
+                f"polymath-core: project file {source} has {len(errs)} validation error(s):",
+                file=sys.stderr,
+            )
+            for e in errs:
+                print(f"  ✗ {e}", file=sys.stderr)
+            return 2
+
+    applied_overlay: pathlib.Path | None = None
+    if overlay is not None:
+        merged = _deep_merge(data, overlay) if source is not None else overlay
+        merge_errs = _validate(merged)
+        if merge_errs:
+            # Fail-open: a bad overlay is skipped, never fatal.
+            print(
+                f"polymath-core: ignoring overlay {overlay_path} "
+                f"({len(merge_errs)} validation error(s) after merge):",
+                file=sys.stderr,
+            )
+            for e in merge_errs:
+                print(f"  ✗ {e}", file=sys.stderr)
+        else:
+            data = merged
+            applied_overlay = overlay_path
+
+    if source is None and applied_overlay is None:
+        # Overlay was the only candidate and it was skipped.
+        if out_file.exists():
+            out_file.unlink()
+        _debug("only an invalid overlay found; cleared snapshot")
+        return 0
+
+    data, ignored_keys = _split_unknown(data)
+    if ignored_keys:
         print(
-            f"polymath-core: project file {source} has {len(errs)} validation error(s):",
+            "polymath-core: ignoring unknown top-level key(s): "
+            + ", ".join(ignored_keys)
+            + " (not in the project schema — update polymath-core or fix typos)",
             file=sys.stderr,
         )
-        for e in errs:
-            print(f"  ✗ {e}", file=sys.stderr)
-        return 2
 
     snapshot = dict(data)
-    snapshot["_meta"] = {
-        "source": str(source),
+    meta = {
+        "source": str(source if source is not None else overlay_path),
         "loaded_at": datetime.datetime.now(datetime.timezone.utc)
         .replace(tzinfo=None)
         .isoformat(timespec="seconds")
         + "Z",
         "schemaVersion": data.get("schemaVersion", 1),
     }
+    if applied_overlay is not None and source is not None:
+        meta["overlay"] = str(applied_overlay)
+    if ignored_keys:
+        meta["ignored_keys"] = ignored_keys
+    snapshot["_meta"] = meta
     out_file.write_text(json.dumps(snapshot, indent=2))
 
     summary = _summary_line(snapshot)

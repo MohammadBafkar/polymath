@@ -2,10 +2,16 @@
 
 Covers:
   - YAML subset parser fallback (PyYAML present or absent — both should work)
-  - Validation rejects: missing/wrong schemaVersion, unknown top-level keys,
+  - Validation rejects: missing/wrong schemaVersion,
     bad commit_style/branch_strategy enums, malformed stack.languages,
     external_skills missing source, malformed setup / polymath activation keys.
+  - Unknown top-level keys are warned and dropped, never fatal.
+  - KNOWN_TOP_KEYS stays in sync with registry/schemas/project.schema.json
+    (drift gate for the hand-written pair).
   - Resolution order: project → CLAUDE_CONFIG_DIR → home (first hit wins).
+  - Machine-local overlay (.polymath/project.local.yaml): deep-merged above
+    the winning file; fail-open on parse/validation problems; may serve as
+    the sole source when no base file exists.
   - Snapshot is written with `_meta` and matches the input.
   - Stale snapshot is cleared when no project file exists.
   - Summary line shape contains language + test framework + runtime + external
@@ -51,9 +57,32 @@ class ValidationTests(unittest.TestCase):
         errs = self.mod._validate({"schemaVersion": 2})
         self.assertTrue(any("schemaVersion must be 1" in e for e in errs))
 
-    def test_unknown_top_level_key_rejected(self) -> None:
+    def test_unknown_top_level_key_is_not_a_validation_error(self) -> None:
         errs = self.mod._validate({"schemaVersion": 1, "bogus": True})
-        self.assertTrue(any("unknown top-level keys" in e for e in errs))
+        self.assertEqual(errs, [])
+
+    def test_split_unknown_drops_and_reports(self) -> None:
+        clean, dropped = self.mod._split_unknown(
+            {"schemaVersion": 1, "bogus": True, "zz_later_key": {}}
+        )
+        self.assertEqual(dropped, ["bogus", "zz_later_key"])
+        self.assertEqual(set(clean.keys()), {"schemaVersion"})
+
+    def test_split_unknown_no_op_on_clean_input(self) -> None:
+        data = {"schemaVersion": 1, "project": {"name": "x"}}
+        clean, dropped = self.mod._split_unknown(data)
+        self.assertEqual(dropped, [])
+        self.assertIs(clean, data)
+
+    def test_known_top_keys_match_schema_properties(self) -> None:
+        schema = json.loads(
+            (REPO_ROOT / "registry" / "schemas" / "project.schema.json").read_text()
+        )
+        self.assertEqual(
+            self.mod.KNOWN_TOP_KEYS,
+            set(schema["properties"].keys()),
+            "loader KNOWN_TOP_KEYS drifted from project.schema.json properties",
+        )
 
     def test_root_must_be_mapping(self) -> None:
         errs = self.mod._validate(["just", "a", "list"])
@@ -141,6 +170,47 @@ class ValidationTests(unittest.TestCase):
             }
         )
         self.assertEqual(errs, [])
+
+
+class DeepMergeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.mod = _import_loader()
+
+    def test_mappings_merge_per_key_overlay_wins(self) -> None:
+        merged = self.mod._deep_merge(
+            {"project": {"name": "a", "description": "keep"}},
+            {"project": {"name": "b"}},
+        )
+        self.assertEqual(merged["project"], {"name": "b", "description": "keep"})
+
+    def test_lists_are_replaced_not_appended(self) -> None:
+        merged = self.mod._deep_merge(
+            {"stack": {"languages": [{"lang": "python"}]}},
+            {"stack": {"languages": [{"lang": "go"}]}},
+        )
+        self.assertEqual(merged["stack"]["languages"], [{"lang": "go"}])
+
+    def test_scalars_are_replaced(self) -> None:
+        merged = self.mod._deep_merge(
+            {"conventions": {"commit_style": "free-form"}},
+            {"conventions": {"commit_style": "conventional-commits"}},
+        )
+        self.assertEqual(
+            merged["conventions"]["commit_style"], "conventional-commits"
+        )
+
+    def test_new_keys_are_added(self) -> None:
+        merged = self.mod._deep_merge(
+            {"schemaVersion": 1},
+            {"prompts": {"adr_template": "docs/adr-template.md"}},
+        )
+        self.assertEqual(merged["schemaVersion"], 1)
+        self.assertEqual(merged["prompts"]["adr_template"], "docs/adr-template.md")
+
+    def test_base_is_not_mutated(self) -> None:
+        base = {"project": {"name": "a"}}
+        self.mod._deep_merge(base, {"project": {"name": "b"}})
+        self.assertEqual(base["project"]["name"], "a")
 
 
 class SummaryTests(unittest.TestCase):
@@ -311,6 +381,108 @@ class LoaderEndToEndTests(unittest.TestCase):
         (self.data / "polymath-core").mkdir(parents=True)
         (self.data / "polymath-core" / "project-context.json").write_text(
             '{"old": true}'
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0)
+        self.assertFalse(
+            (self.data / "polymath-core" / "project-context.json").exists()
+        )
+
+    def test_unknown_top_key_warns_and_is_dropped_from_snapshot(self) -> None:
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\n"
+            "project:\n"
+            "  name: demo\n"
+            "zz_future_key:\n"
+            "  anything: true\n"
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        self.assertIn("ignoring unknown top-level key(s): zz_future_key", cp.stderr)
+        out = json.loads(
+            (self.data / "polymath-core" / "project-context.json").read_text()
+        )
+        self.assertNotIn("zz_future_key", out)
+        self.assertEqual(out["_meta"]["ignored_keys"], ["zz_future_key"])
+
+    def test_local_overlay_merges_above_project_file(self) -> None:
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\n"
+            "project:\n"
+            "  name: demo\n"
+            "  description: team description\n"
+            "stack:\n"
+            "  languages:\n"
+            "    - lang: python\n"
+            "conventions:\n"
+            "  commit_style: conventional-commits\n"
+        )
+        (self.work / ".polymath" / "project.local.yaml").write_text(
+            "conventions:\n"
+            "  commit_style: free-form\n"
+            "prompts:\n"
+            "  adr_template: docs/my-adr.md\n"
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        out = json.loads(
+            (self.data / "polymath-core" / "project-context.json").read_text()
+        )
+        # Overlay leaf wins; untouched base keys survive; new keys are added.
+        self.assertEqual(out["conventions"]["commit_style"], "free-form")
+        self.assertEqual(out["project"]["description"], "team description")
+        self.assertEqual(out["prompts"]["adr_template"], "docs/my-adr.md")
+        self.assertTrue(out["_meta"]["source"].endswith("project.yaml"))
+        self.assertTrue(out["_meta"]["overlay"].endswith("project.local.yaml"))
+
+    def test_invalid_overlay_is_skipped_fail_open(self) -> None:
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\n"
+            "project:\n"
+            "  name: demo\n"
+        )
+        (self.work / ".polymath" / "project.local.yaml").write_text(
+            "conventions:\n"
+            "  commit_style: not-a-real-style\n"
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        self.assertIn("ignoring overlay", cp.stderr)
+        out = json.loads(
+            (self.data / "polymath-core" / "project-context.json").read_text()
+        )
+        self.assertNotIn("conventions", out)
+        self.assertNotIn("overlay", out["_meta"])
+
+    def test_overlay_alone_serves_as_source(self) -> None:
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.local.yaml").write_text(
+            "schemaVersion: 1\n"
+            "stack:\n"
+            "  languages:\n"
+            "    - lang: rust\n"
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        self.assertIn("rust", cp.stdout)
+        out = json.loads(
+            (self.data / "polymath-core" / "project-context.json").read_text()
+        )
+        self.assertTrue(out["_meta"]["source"].endswith("project.local.yaml"))
+        self.assertNotIn("overlay", out["_meta"])
+
+    def test_invalid_overlay_alone_clears_snapshot_quietly(self) -> None:
+        (self.data / "polymath-core").mkdir(parents=True)
+        (self.data / "polymath-core" / "project-context.json").write_text(
+            '{"old": true}'
+        )
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.local.yaml").write_text(
+            "conventions:\n"
+            "  commit_style: nope\n"
         )
         cp = self._run()
         self.assertEqual(cp.returncode, 0)

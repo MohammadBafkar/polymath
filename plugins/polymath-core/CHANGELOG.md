@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Machine-local config overlay.** `./.polymath/project.local.yaml`
+  (gitignored) deep-merges on top of the resolved `project.yaml`: mappings
+  merge per key with the overlay winning, lists and scalars are replaced.
+  Fail-open — a malformed or invalid overlay is warned and skipped, never
+  failing the session; a valid overlay can serve as the sole source when no
+  base file resolves. `_meta.overlay` records the applied path.
 - **Ambient routing hint** (`UserPromptSubmit` hook). `route-hint.sh` /
   `route-hint.py` extract deterministic signals from the prompt (URLs,
   CVE/GHSA keys, mentioned paths, inline diffs, intent phrasings), score them
@@ -24,6 +30,21 @@
 - Project-context schema support for `setup:` and `polymath:` activation
   metadata, including required tools, environment variable names,
   recommended plugins, workflows, and compatible agent surfaces.
+
+### Changed
+
+- **Unknown top-level keys in `project.yaml` warn instead of failing.**
+  The loader drops unrecognized keys (recorded in `_meta.ignored_keys`)
+  rather than exiting 2 and withholding the snapshot, so a config written
+  for a newer schema degrades gracefully on an older loader. A drift-gate
+  unit test now pins the loader's key list to
+  `registry/schemas/project.schema.json`.
+
+### Removed
+
+- **`mcp_servers` project key.** Declared-but-never-consumed; capability →
+  provider/plugin selection is owned by `.polymath/capabilities.yaml`.
+  Existing files declaring it now get a warning and the key is ignored.
 
 ## [0.1.0]
 

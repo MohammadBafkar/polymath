@@ -172,10 +172,6 @@ skill_overrides:
 prompts:
   pr_description_template: docs/pr-template.md
   postmortem_template: docs/postmortem-template.md
-
-mcp_servers:
-  vcs: "@azure-devops/mcp-server"
-  ci: "@azure-devops/mcp-server"
 ```
 
 See [the schema](../registry/schemas/project.schema.json) for the full
@@ -189,7 +185,18 @@ The loader looks for `project.yaml` in this order, first hit wins:
 2. `${CLAUDE_CONFIG_DIR}/polymath/project.yaml` (user / team default)
 3. `~/.polymath/project.yaml` (last-resort user default)
 
-There is no merge between layers.
+There is no merge between these layers — the winning file is used whole.
+
+### Machine-local overlay
+
+`./.polymath/project.local.yaml` (repo-root, gitignored — add it to the
+repo's `.gitignore`) is deep-merged on top of the winning file: mappings
+merge per key with the overlay winning, lists and scalars are replaced.
+It carries personal, this-machine-only tweaks; never secrets. The overlay
+is fail-open: a malformed or invalid overlay is warned on stderr and
+skipped, never failing the session. When no base file resolves at all, a
+valid overlay serves as the sole source. `_meta.overlay` in the snapshot
+records the overlay path when one applied.
 
 ## Validation
 
@@ -197,7 +204,9 @@ The loader enforces a minimal subset of the JSON schema at session
 start:
 
 - `schemaVersion: 1` (required).
-- Unknown top-level keys are rejected.
+- Unknown top-level keys are warned and dropped — recorded in
+  `_meta.ignored_keys` — so a file written for a newer schema (or
+  carrying a typo) degrades gracefully instead of failing the session.
 - `stack.languages` must be a non-empty list of objects each
   containing `lang`.
 - `conventions.commit_style` ∈ `{conventional-commits, free-form,

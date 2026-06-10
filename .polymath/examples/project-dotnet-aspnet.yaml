@@ -73,6 +73,3 @@ prompts:
   pr_description_template: docs/pr-template.md
   postmortem_template: docs/postmortem-template.md
 
-mcp_servers:
-  vcs: "@azure-devops/mcp-server"
-  ci: "@azure-devops/mcp-server"

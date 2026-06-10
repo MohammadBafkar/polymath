@@ -56,7 +56,6 @@ The file mirrors `.polymath/project.yaml` with the original keys preserved plus 
   "polymath": { "recommended_plugins": [...], "recommended_workflows": [...] },
   "skill_overrides": { "polymath-engineering:code-review": { ... } },
   "prompts": { "pr_description_template": "docs/pr-template.md" },
-  "mcp_servers": { "vcs": "@azure-devops/mcp-server" },
   "_meta": { "source": "...", "loaded_at": "...", "schemaVersion": 1 }
 }
 ```
