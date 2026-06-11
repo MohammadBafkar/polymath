@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Opt-in visibility markers (`attribution` consumed).** The
+  `project-context` contract now defines: `chat_markers: true` makes
+  localizing skills prefix their primary chat-visible output with an
+  origin marker (`[polymath:<plugin>:<skill>]`); default off keeps
+  today's unmarked output. `commit_trailer` is consumed by
+  `polymath-release:commit`.
 - **`provenance` project.yaml key** (`runs: true|false`, default off) —
   schema + loader (KNOWN_TOP_KEYS) for the runner's opt-in run
   provenance; drift-gated like every other key.

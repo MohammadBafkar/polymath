@@ -21,6 +21,14 @@ The motivation. Link the PRD or ADR.
 
 The chosen approach, in 3–5 bullets. Each bullet is a phase, not a task.
 
+## Locked decisions
+
+Decisions already made — by a spike, an ADR, or the owner — that this plan
+builds on. The plan must not relitigate them; reopening one is an explicit
+act with the decision's owner, not a drive-by edit.
+
+- Decision: … (source: ADR/spike/owner, link)
+
 ## Work breakdown
 
 Numbered steps from start to "done". Each step is independently completable
@@ -42,6 +50,14 @@ Known unknowns and their proposed mitigations.
 How we know the plan worked. Specific signals or artifacts.
 
 - …
+
+## Deferral registry
+
+Work consciously pushed past this plan, each with the condition that
+reopens it — never a bare "later". (Different from Out of scope: deferred
+work is wanted, pending its condition.)
+
+- Deferred: … Revisit when: …
 
 ## Out of scope
 

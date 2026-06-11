@@ -4,6 +4,10 @@
 
 ### Added
 
+- **`attribution.commit_trailer` consumed.** The `commit` skill appends
+  the project-configured trailer verbatim as the final line when the
+  snapshot declares a non-empty `attribution.commit_trailer`; absent or
+  empty means no trailer — never invented.
 - `pr` uses the project's `prompts.pr_description_template` from the project-context snapshot when set.
 
 ### Changed

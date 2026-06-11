@@ -42,8 +42,11 @@ description: Stage and craft a Conventional Commits message for the current diff
    - First line: `type(scope): summary` ≤ 72 chars, imperative mood
      ("add" not "added").
    - Body (optional): paragraph explaining the **why**, not the what.
-   - Trailer: per the project's authoring conventions
-     (`polymath-core/skills/conventions/SKILL.md`).
+   - Trailer: from the project snapshot's `attribution.commit_trailer`
+     (`polymath-core:project-context`) when it is a non-empty string —
+     append it verbatim as the final line. Absent or empty = NO trailer;
+     never invent one. Catalog-authoring work follows
+     `polymath-core/skills/conventions/SKILL.md`.
 5. **Show the user** the staged files and the proposed message.
    **Do not commit yet.**
 6. **On explicit approval**, stage the agreed files and run

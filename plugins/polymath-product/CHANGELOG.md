@@ -8,6 +8,11 @@
 
 ### Added
 
+- **PRD template upgrades.** `templates/PRD.md` gains **Locked
+  decisions** (with sources; never relitigated silently) and a
+  **Deferral registry** (deferred scope with revisit conditions;
+  distinct from non-goals). The `prd` skill fills both and adds a
+  summary-first checkpoint before drafting the full document.
 - `roadmap` skill — sequence a Now/Next/Later roadmap grouped by outcome, with
   confidence, dependencies, and explicit non-commitments per horizon.
 - `groom-backlog` skill — refine backlog items to a Definition of Ready

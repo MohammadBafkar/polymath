@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Plan/spec template upgrades, visibility markers, summary-first
+  checkpoints (Phase 6).** The Plan and PRD templates gain **Locked
+  decisions** and a **Deferral registry** (every deferral names its
+  revisit condition); `attribution` is consumed — opt-in chat origin
+  markers via the project-context contract and `commit_trailer` in
+  `polymath-release:commit` (absent = no trailer); six heavyweight doc
+  skills (write-plan, prd, architecture-doc, rfc, six-pager,
+  stride-threat-model) confirm a one-screen skeleton before writing the
+  full document. (polymath-planning/product/writing/communication/
+  security/release 0.4.0)
 - **Generic scaffolder + prerequisites checklist; deployer as pattern
   doc (Phase 5).** `polymath-author:scaffold-component` scaffolds a
   component in the user's repo convention-first (native generator

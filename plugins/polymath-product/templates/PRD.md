@@ -29,6 +29,14 @@ testable. Avoid implementation language.
 - Goal 2
 - Goal 3
 
+## Locked decisions
+
+Decisions already made — by discovery, an ADR, or the owner — that this spec
+builds on. The PRD must not relitigate them; reopening one is an explicit act
+with the decision's owner.
+
+- Decision: … (source, link)
+
 ## Non-goals
 
 What is explicitly out of scope? Listing what we are not doing now prevents scope
@@ -36,6 +44,14 @@ creep and helps reviewers calibrate expectations.
 
 - Non-goal 1
 - Non-goal 2
+
+## Deferral registry
+
+Wanted-but-deferred scope, each with the condition that reopens it — never a
+bare "later". (Different from non-goals: deferred scope is intended, pending
+its condition.)
+
+- Deferred: … Revisit when: …
 
 ## Requirements
 

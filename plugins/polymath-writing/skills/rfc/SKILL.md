@@ -16,7 +16,10 @@ description: Draft a lightweight design RFC to docs/rfcs/<slug>.md; Summary, Mot
 
 1. Read [`RFC.md`](../../templates/RFC.md).
 2. Compute slug from the title.
-3. Draft `docs/rfcs/<slug>.md`:
+3. **Summary-first checkpoint.** Show a one-screen skeleton — the
+   change in one sentence, the motivation evidence, the alternatives
+   you'll compare — and confirm direction before the full draft.
+4. Draft `docs/rfcs/<slug>.md`:
    - **Summary** — one paragraph; what changes for callers.
    - **Motivation** — concrete evidence, not "we should probably".
    - **Detailed design** — enough that an implementer can build from it.

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Summary-first checkpoint.** `six-pager` confirms a one-screen
+  skeleton (question, tenets, recommendation) before writing six pages.
 ### Changed
 
 - `write-release-notes`, `write-advisory`, and `write-sunset-notice` skills

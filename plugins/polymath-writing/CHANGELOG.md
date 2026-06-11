@@ -1,5 +1,13 @@
 # Changelog — polymath-writing
 
+## [Unreleased]
+
+### Added
+
+- **Summary-first checkpoints.** `architecture-doc` and `rfc` confirm a
+  one-screen skeleton (purpose/containers/decisions; change/motivation/
+  alternatives) before writing the full document.
+
 ## [0.1.0]
 
 ### Added

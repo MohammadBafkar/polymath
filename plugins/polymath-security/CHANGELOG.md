@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Summary-first checkpoint.** `stride-threat-model` confirms scope,
+  trust boundaries, and the highest-risk STRIDE candidates on one screen
+  before drafting the full model.
 ### Changed
 
 - `supply-chain-review` skill folded in from the former `polymath-supply-chain` plugin — SBOM/SLSA/provenance are appsec.

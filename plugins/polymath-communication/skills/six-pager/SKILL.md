@@ -24,7 +24,10 @@ description: Author an Amazon-style six-page narrative — prose not bullets, te
 
 1. Read [`Six-pager.md`](../../templates/Six-pager.md).
 2. Compute slug.
-3. Draft `docs/six-pagers/<slug>.md`:
+3. **Summary-first checkpoint.** Show a one-screen skeleton — the
+   question being decided, the tenets, the recommendation in one
+   sentence — and confirm direction before writing six pages.
+4. Draft `docs/six-pagers/<slug>.md`:
    - **Introduction** — 1–2 paragraphs framing the question.
    - **Tenets** — 3–5 short sentences naming what's load-bearing. Tenets bind the rest of the doc.
    - **Current state** — evidence-based. Numbers, screenshots, customer quotes.
@@ -34,7 +37,7 @@ description: Author an Amazon-style six-page narrative — prose not bullets, te
    - **Success measure** — one metric per 30 / 90 / 180-day window.
    - **What we need to decide today** — the concrete ask.
    - **Appendix: FAQ** — 5–8 hardest questions with paragraph answers. This is where the doc earns its keep.
-4. Length target: 1,500–2,000 words.
+5. Length target: 1,500–2,000 words.
 
 ## Quality bar
 

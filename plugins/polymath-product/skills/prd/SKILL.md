@@ -24,12 +24,20 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
 
 1. Read [`PRD.md`](../../templates/PRD.md).
 2. Compute a slug from the title: lowercase, kebab-case, no special characters.
-3. Create `docs/prds/<slug>.md` if it does not exist; otherwise update in place after surfacing the diff.
-4. Fill each section:
+3. **Summary-first checkpoint.** Before writing the document, show a
+   one-screen skeleton — problem in one sentence, primary user, the three
+   goals, any locked decisions — and confirm direction before the full
+   draft.
+4. Create `docs/prds/<slug>.md` if it does not exist; otherwise update in place after surfacing the diff.
+5. Fill each section:
    - **Problem** — restate the user's pain in their words first, then in product terms.
    - **Users / customers** — name the primary user type plus secondary if known.
    - **Goals** — three or fewer; each testable.
+   - **Locked decisions** — decisions already made (discovery/ADR/owner,
+     with source) the spec must not relitigate.
    - **Non-goals** — at least one; prevents scope creep.
+   - **Deferral registry** — wanted-but-deferred scope, each entry with
+     the condition that reopens it.
    - **Requirements** — enumerated, testable behaviors.
    - **Acceptance criteria** — Given / When / Then statements that map to test cases.
    - **Metrics** — adoption, quality, performance. Reference North Star if known.
@@ -37,7 +45,7 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
    - **Out of scope** — explicit future work list.
    - **Rollout plan** — single paragraph; reference feature flags if applicable.
    - **References** — link related ADRs, RFCs, prior conversations.
-5. After writing, surface a one-paragraph summary plus the file path.
+6. After writing, surface a one-paragraph summary plus the file path.
 
 ## Quality bar
 

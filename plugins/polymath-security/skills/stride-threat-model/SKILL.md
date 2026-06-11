@@ -23,12 +23,15 @@ description: Produce a STRIDE threat model for a system/scope; writes docs/threa
 
 1. Read [`Threat-model.md`](../../templates/Threat-model.md).
 2. Compute slug from system name (kebab-case).
-3. Draft `docs/threat-models/<slug>.md`:
+3. **Summary-first checkpoint.** Show a one-screen skeleton — the
+   scope boundary, the trust boundaries found, the 2–3 highest-risk
+   STRIDE candidates — and confirm scope before the full model.
+4. Draft `docs/threat-models/<slug>.md`:
    - **Scope** — explicit boundary; what is and isn't covered.
    - **Data flow** — mermaid or ASCII diagram showing every trust boundary the system spans (user → API → DB, internal → external, etc).
    - **Assumptions** — what the platform already protects.
    - **Threats by STRIDE** — one table per category. For each: threat description, mitigation, owner.
-4. Frontmatter must satisfy the `ThreatModel` artifact schema (`registry/schemas/artifacts/Threat-model.schema.json`): `artifact: ThreatModel`, `system`, `scope`, `owner`, `created`, `stride_categories` (subset of the six STRIDE values).
+5. Frontmatter must satisfy the `ThreatModel` artifact schema (`registry/schemas/artifacts/Threat-model.schema.json`): `artifact: ThreatModel`, `system`, `scope`, `owner`, `created`, `stride_categories` (subset of the six STRIDE values).
 
 ## Quality bar
 

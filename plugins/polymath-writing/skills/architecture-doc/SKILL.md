@@ -16,13 +16,17 @@ description: Write a C4-style architecture document; System Context + Containers
 ## Procedure
 
 1. Read [`Architecture-doc.md`](../../templates/Architecture-doc.md).
-2. Draft `docs/architecture/<system>.md`:
+2. **Summary-first checkpoint.** Show a one-screen skeleton — the
+   system's purpose in one sentence, the L2 container list, the 2–3
+   architectural decisions the doc will defend — and confirm direction
+   before drafting six sections of prose.
+3. Draft `docs/architecture/<system>.md`:
    - **Purpose** — who reads this, what decisions it grounds.
    - **System context (L1)** — the system in relation to users + external systems. Mermaid diagram.
    - **Containers (L2)** — deployable units (services, databases, queues, frontends). Table + diagram.
    - **Components (L3)** — only if the most interesting container has enough internal structure to warrant it.
    - **Cross-cutting concerns** — AuthN/Z, observability, data classification, failure modes.
-3. Link related ADRs and the originating PRD.
+4. Link related ADRs and the originating PRD.
 
 ## Quality bar
 
