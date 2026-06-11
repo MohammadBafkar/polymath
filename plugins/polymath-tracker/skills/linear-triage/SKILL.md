@@ -32,6 +32,16 @@ description: Triage a Linear issue — classify type/priority/state, ask for mis
 6. **Cycle** — Linear's sprint analog. Assign to the current cycle for high-priority items; backlog for lower priority. Don't bulk-move; cycles work best with team capacity in mind.
 7. **Assignee** — a person, not a team. (Linear assigns to people, not groups; surface the team via labels.)
 
+## Project localization
+
+If the project-context snapshot has a `tracker` block
+(`polymath-core:project-context`), use its `project`/`area_path`/`iteration`
+as the destination vocabulary, and any NEW issue you create during triage
+(e.g. a split-out) gets the 3-layer provenance marking —
+`marking.title_prefix`, `marking.tag`, traceability footer — is created only
+after explicit confirmation (HITL), and is read back to verify the marking
+landed.
+
 ## Output
 
 ```text

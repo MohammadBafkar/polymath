@@ -362,6 +362,189 @@ GATED_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 
 
 # ---------------------------------------------------------------------------
+# Feedback loop — capture (conservative, 180d TTL) → evaluate → resolve
+# ---------------------------------------------------------------------------
+
+FEEDBACK_TTL_DAYS = 180
+FEEDBACK_KINDS = {"correction", "gap", "friction", "praise"}
+FEEDBACK_VERDICTS = {"valid-constructive", "valid-not-actionable", "invalid"}
+FEEDBACK_OUTCOMES = {"applied", "rejected", "proposed-catalog-patch"}
+
+
+def _feedback_path() -> pathlib.Path:
+    return data_root() / "feedback.jsonl"
+
+
+def _feedback_append(record: dict) -> bool:
+    try:
+        path = _feedback_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return True
+    except Exception:
+        return False
+
+
+def _feedback_events() -> list[dict]:
+    try:
+        out = []
+        for line in _feedback_path().read_text(errors="ignore").splitlines():
+            try:
+                doc = json.loads(line)
+            except Exception:
+                continue
+            if isinstance(doc, dict):
+                out.append(doc)
+        return out
+    except OSError:
+        return []
+
+
+def feedback_items(now: datetime.datetime | None = None) -> list[dict]:
+    """Event-sourced view: one item per capture id with its latest verdict
+    and resolution folded in. Items captured more than FEEDBACK_TTL_DAYS
+    ago are excluded — feedback is a perishable signal, not an archive."""
+    now = now or _now()
+    cutoff = now - datetime.timedelta(days=FEEDBACK_TTL_DAYS)
+    items: dict[str, dict] = {}
+    for ev in _feedback_events():
+        event, fid = ev.get("event"), ev.get("id")
+        if not fid:
+            continue
+        if event == "capture":
+            ts = _parse_iso(ev.get("ts"))
+            if ts is None or ts < cutoff:
+                continue
+            items[fid] = {
+                "id": fid,
+                "ts": ev.get("ts"),
+                "surface": ev.get("surface"),
+                "kind": ev.get("kind"),
+                "note": ev.get("note"),
+                "evidence": ev.get("evidence"),
+                "root": ev.get("root"),
+                "state": "captured",
+            }
+        elif event == "evaluate" and fid in items:
+            items[fid]["verdict"] = ev.get("verdict")
+            items[fid]["verdict_evidence"] = ev.get("evidence")
+            items[fid]["state"] = "evaluated"
+        elif event == "resolve" and fid in items:
+            items[fid]["outcome"] = ev.get("outcome")
+            items[fid]["outcome_detail"] = ev.get("detail")
+            items[fid]["state"] = "resolved"
+    return sorted(items.values(), key=lambda i: str(i.get("ts")))
+
+
+def feedback_sweep() -> int:
+    """Drop all events belonging to captures older than the TTL. Returns
+    the number of items removed."""
+    events = _feedback_events()
+    cutoff = _now() - datetime.timedelta(days=FEEDBACK_TTL_DAYS)
+    live_ids = set()
+    expired_ids = set()
+    for ev in events:
+        if ev.get("event") == "capture" and ev.get("id"):
+            ts = _parse_iso(ev.get("ts"))
+            (live_ids if (ts is not None and ts >= cutoff) else expired_ids).add(ev["id"])
+    if not expired_ids:
+        return 0
+    kept = [ev for ev in events if ev.get("id") in live_ids]
+    try:
+        _feedback_path().write_text(
+            "".join(json.dumps(ev, ensure_ascii=False) + "\n" for ev in kept)
+        )
+    except OSError:
+        return 0
+    return len(expired_ids)
+
+
+def cmd_feedback_capture(args: argparse.Namespace) -> int:
+    import hashlib
+
+    if args.kind not in FEEDBACK_KINDS:
+        print(json.dumps({"captured": False, "reason": f"kind must be one of {sorted(FEEDBACK_KINDS)}"}))
+        return 2
+    note = (args.note or "").strip()
+    if not note:
+        print(json.dumps({"captured": False, "reason": "a non-empty --note is required"}))
+        return 2
+    root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
+    ts = _now_iso()
+    fid = hashlib.sha256(f"{ts}|{args.surface}|{note}".encode()).hexdigest()[:10]
+    ok = _feedback_append({
+        "ts": ts,
+        "event": "capture",
+        "id": fid,
+        "surface": args.surface,
+        "kind": args.kind,
+        "note": note[:500],
+        "evidence": (args.evidence or "")[:500] or None,
+        "root": str(root) if root else None,
+    })
+    print(json.dumps({"captured": ok, "id": fid if ok else None, "ttl_days": FEEDBACK_TTL_DAYS}))
+    return 0 if ok else 1
+
+
+def cmd_feedback_digest(args: argparse.Namespace) -> int:
+    swept = feedback_sweep()
+    items = feedback_items()
+    pending = [i for i in items if i["state"] == "captured"]
+    evaluated = [i for i in items if i["state"] == "evaluated"]
+    print(json.dumps({
+        "swept_expired": swept,
+        "pending_evaluation": pending,
+        "evaluated_unresolved": evaluated,
+        "resolved": sum(1 for i in items if i["state"] == "resolved"),
+        "ttl_days": FEEDBACK_TTL_DAYS,
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
+def cmd_feedback_evaluate(args: argparse.Namespace) -> int:
+    if args.verdict not in FEEDBACK_VERDICTS:
+        print(json.dumps({"evaluated": False, "reason": f"verdict must be one of {sorted(FEEDBACK_VERDICTS)}"}))
+        return 2
+    evidence = (args.evidence or "").strip()
+    if not evidence:
+        print(json.dumps({"evaluated": False, "reason": "a verdict needs --evidence (what was checked, what it showed)"}))
+        return 2
+    known = {i["id"] for i in feedback_items()}
+    if args.id not in known:
+        print(json.dumps({"evaluated": False, "reason": f"unknown or expired id {args.id!r}"}))
+        return 2
+    ok = _feedback_append({
+        "ts": _now_iso(),
+        "event": "evaluate",
+        "id": args.id,
+        "verdict": args.verdict,
+        "evidence": evidence[:500],
+    })
+    print(json.dumps({"evaluated": ok, "id": args.id, "verdict": args.verdict}))
+    return 0 if ok else 1
+
+
+def cmd_feedback_resolve(args: argparse.Namespace) -> int:
+    if args.outcome not in FEEDBACK_OUTCOMES:
+        print(json.dumps({"resolved": False, "reason": f"outcome must be one of {sorted(FEEDBACK_OUTCOMES)}"}))
+        return 2
+    known = {i["id"] for i in feedback_items()}
+    if args.id not in known:
+        print(json.dumps({"resolved": False, "reason": f"unknown or expired id {args.id!r}"}))
+        return 2
+    ok = _feedback_append({
+        "ts": _now_iso(),
+        "event": "resolve",
+        "id": args.id,
+        "outcome": args.outcome,
+        "detail": (args.detail or "")[:500] or None,
+    })
+    print(json.dumps({"resolved": ok, "id": args.id, "outcome": args.outcome}))
+    return 0 if ok else 1
+
+
+# ---------------------------------------------------------------------------
 # Hook entrypoints
 # ---------------------------------------------------------------------------
 
@@ -603,6 +786,32 @@ def build_parser() -> argparse.ArgumentParser:
 
     pw = sub.add_parser("sweep", help="run the retention sweep now")
     pw.set_defaults(func=cmd_sweep)
+
+    pf = sub.add_parser("feedback", help="capture → evaluate → resolve localization feedback")
+    fsub = pf.add_subparsers(dest="feedback_cmd", required=True)
+
+    fc = fsub.add_parser("capture", help="record one feedback item (conservative; 180d TTL)")
+    fc.add_argument("--surface", required=True, help="<plugin>:<skill>, workflow name, or 'direct'")
+    fc.add_argument("--kind", required=True, help="correction | gap | friction | praise")
+    fc.add_argument("--note", required=True, help="what happened, one screen max")
+    fc.add_argument("--evidence", help="pointer to the artifact/run that shows it")
+    fc.add_argument("--cwd")
+    fc.set_defaults(func=cmd_feedback_capture)
+
+    fd = fsub.add_parser("digest", help="sweep expired items and print the evaluation queue")
+    fd.set_defaults(func=cmd_feedback_digest)
+
+    fe = fsub.add_parser("evaluate", help="record a verdict for one item")
+    fe.add_argument("id")
+    fe.add_argument("--verdict", required=True, help="valid-constructive | valid-not-actionable | invalid")
+    fe.add_argument("--evidence", required=True, help="what was checked and what it showed")
+    fe.set_defaults(func=cmd_feedback_evaluate)
+
+    fr = fsub.add_parser("resolve", help="record the final outcome for one item")
+    fr.add_argument("id")
+    fr.add_argument("--outcome", required=True, help="applied | rejected | proposed-catalog-patch")
+    fr.add_argument("--detail", help="what was changed / why rejected / patch path")
+    fr.set_defaults(func=cmd_feedback_resolve)
 
     for name, fn in (
         ("hook-session-start", cmd_hook_session_start),

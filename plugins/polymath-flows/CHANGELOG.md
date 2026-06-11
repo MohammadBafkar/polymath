@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Opt-in run provenance.** `provenance.runs: true` in
+  `.polymath/project.yaml` makes the runner whole-copy each COMPLETED run
+  record (state, inputs, trace, step summaries, artifacts) into
+  `.polymath/runs/<run_id>/` — versionable with the repo. Whole-copy,
+  never sliced; fail-open (a copy failure never fails the run); the
+  assert output reports the destination as `provenance`.
+- **Opt-in local-only telemetry.** With exactly `POLYMATH_TELEMETRY=1`,
+  every runner invocation appends command + workflow name + duration +
+  exit code to `telemetry.jsonl` in the plugin data dir. No run ids, no
+  content, no network — the complete payload is documented in
+  `docs/TELEMETRY.md`; unset or any other value writes nothing
+  (unit-gated).
 - **Build-time `extends` flattening.** `polymath-flow flatten
   <partial.yaml> [--out <file>] [--check]` composes a partial (extends +
   override/insertAfter/steps/mustPass/guards) with its catalog parent
@@ -44,15 +56,6 @@
   be indexed; repos with no project/user workflows keep a byte-identical
   injection.
 
-### Fixed
-
-- `incidentRetroToActions`'s `postmortem-readable` guard referenced
-  `${POLYMATH_INPUT_POSTMORTEMPATH}`, a convention nothing sets — inert
-  while guards were unexecuted, but a permanent start-refusal once they
-  run. It now uses `${inputs.postmortemPath}` like the rest of the
-  workflow.
-- `stepSummaryMatches` is rejected in `guards:` (schema + runner): no
-  step summaries exist before any step has run, so it could never pass.
 - **`${project.*}` placeholders.** Step `prompt`/`artifacts` and mustPass
   `path`/`command` can reference the project-context snapshot
   (`${project.stack.languages.0.lang}`); numeric segments index lists,
@@ -95,6 +98,16 @@
   capability mappings, and onboarding notes for a repository.
 - `deliberationLoop` workflow to observe, frame, compare options,
   red-team the recommendation, and write a revised plan.
+
+### Fixed
+
+- `incidentRetroToActions`'s `postmortem-readable` guard referenced
+  `${POLYMATH_INPUT_POSTMORTEMPATH}`, a convention nothing sets — inert
+  while guards were unexecuted, but a permanent start-refusal once they
+  run. It now uses `${inputs.postmortemPath}` like the rest of the
+  workflow.
+- `stepSummaryMatches` is rejected in `guards:` (schema + runner): no
+  step summaries exist before any step has run, so it could never pass.
 
 ## [0.1.0]
 

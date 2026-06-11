@@ -26,6 +26,16 @@ description: Triage a Jira issue — fetch via MCP, classify type/priority/compo
 5. **Transition** — move to the right column (`To Do` / `In Progress` / `Blocked` / `Done`) via `jira_transition_issue` only when you're confident in the state.
 6. **Assign** — team handle if your Jira uses team accounts, otherwise an explicit person from the rotation.
 
+## Project localization
+
+If the project-context snapshot has a `tracker` block
+(`polymath-core:project-context`), use its `project`/`area_path`/`iteration`
+as the destination vocabulary, and any NEW item you create during triage
+(e.g. a split-out ticket) gets the 3-layer provenance marking —
+`marking.title_prefix`, `marking.tag`, traceability footer — is created only
+after explicit confirmation (HITL), and is read back to verify the marking
+landed.
+
 ## Output
 
 ```text

@@ -247,6 +247,7 @@ KNOWN_TOP_KEYS = {
     "routing",
     "attribution",
     "artifact_matrix",
+    "provenance",
 }
 COMMIT_STYLES = {"conventional-commits", "free-form", "ticket-prefixed"}
 BRANCH_STRATEGIES = {"trunk-based", "gitflow", "github-flow", "release-branch"}

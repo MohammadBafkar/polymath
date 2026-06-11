@@ -198,6 +198,9 @@ tracker:
 routing:
   mode: hint
 
+provenance:
+  runs: false   # true = completed workflow runs whole-copied to .polymath/runs/
+
 attribution:
   chat_markers: false
   commit_trailer: ""
@@ -221,13 +224,18 @@ from the frozen snapshot's recipe and verifies readiness, resolving
 non-blocking `not-applicable` when the repo declares no recipe (see
 [WORKFLOW-SCHEMA § 4](WORKFLOW-SCHEMA.md)). `tracker` (work-item
 destination + provenance marking; the provider itself comes from
-`.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
-(`hint` is the default ambient behavior; `classify`/`enforce` activate
-the opt-in `polymath-pipeline` plugin — classify directive, intake
-skill, and the enforce gate that blocks mutating tool calls until the
-request is classified), `attribution`, and `artifact_matrix` validate
-and load into the snapshot today; `tracker`/`attribution`/
-`artifact_matrix` consumers land per
+`.polymath/capabilities.yaml`, secrets never live here) is consumed by
+the polymath-tracker skills: destination defaults plus 3-layer
+provenance marking (title prefix, tag, traceability footer), readback
+verification after create, and HITL-only pushes — the contract lives in
+`polymath-core:project-context`. `routing.mode` (`hint` is the default
+ambient behavior; `classify`/`enforce` activate the opt-in
+`polymath-pipeline` plugin — classify directive, intake skill, and the
+enforce gate that blocks mutating tool calls until the request is
+classified). `provenance.runs: true` makes `polymath-flow` whole-copy
+each completed run record into `.polymath/runs/<run_id>/` (fail-open,
+default off). `attribution` and `artifact_matrix` validate and load
+into the snapshot today; their consumers land per
 `docs/plans/generalized-localization.md`. Future keys degrade
 gracefully: the loader warns and ignores unknown top-level keys instead
 of failing.

@@ -50,9 +50,24 @@ If neither set of credentials is present, stop and say which to configure.
    - Owner/assignee: a specific person from the team named in the postmortem
      (not a team name); if "TBD", file to the on-call rotation and add a
      "@owner please confirm ownership" comment.
-3. **Create** one ticket per action via the provider's create tool, capturing
+3. **Apply the project's tracker block** (`tracker` in the project-context
+   snapshot — see `polymath-core:project-context`): destination
+   (`organization`/`project`/`area_path`/`iteration`, `work_item_types`
+   mapping the `bug` category to the tracker's type name) and the 3-layer
+   provenance marking on every ticket: (1) `marking.title_prefix` prepended
+   to the title, (2) `marking.tag` as a label/tag, (3) a traceability footer
+   in the body — creating surface (`polymath-tracker:file-bug-from-incident`),
+   date, and the postmortem link. No snapshot or no `tracker` block → skip
+   silently and file unmarked.
+4. **Confirm before pushing (HITL).** Present the full ticket set — titles,
+   destinations, assignees, due dates — and get one explicit confirmation.
+   Never create silently.
+5. **Create** one ticket per action via the provider's create tool, capturing
    the returned key/identifier (e.g. `PROJ-481`, `ENG-89`).
-4. **Link back:** update the postmortem's action-items table with each key + URL
+6. **Read back and verify marking.** Fetch each created item and check all
+   three marking layers landed (some trackers strip labels on create);
+   re-apply whatever is missing via the provider's update tool.
+7. **Link back:** update the postmortem's action-items table with each key + URL
    so the trail is bidirectional.
 
 ## Quality bar
@@ -61,6 +76,8 @@ If neither set of credentials is present, stop and say which to configure.
 - Severity/priority maps consistently from incident sev — no silent downgrades.
 - Due date is set; "TBD" is not acceptable for post-incident action items.
 - Postmortem updated with the resulting keys.
+- Every created item carries all three marking layers (verified by readback),
+  and creation happened only after the one explicit confirmation.
 - Linear only: file into the action-item owner's team; cross-team work needs an
   explicit handoff (Linear is team-scoped).
 

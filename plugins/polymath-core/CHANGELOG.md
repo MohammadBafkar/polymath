@@ -4,6 +4,13 @@
 
 ### Added
 
+- **`provenance` project.yaml key** (`runs: true|false`, default off) —
+  schema + loader (KNOWN_TOP_KEYS) for the runner's opt-in run
+  provenance; drift-gated like every other key.
+- **Tracker consumption contract.** `project-context` now documents how
+  item-creating skills consume the `tracker` block: destination
+  defaults, 3-layer provenance marking (title prefix, tag, traceability
+  footer), post-create readback verification, and HITL-only pushes.
 - **Project routing overlay.** The route-hint hook reads
   `.polymath/route-signals.project.json` (found by the same cwd→repo-root
   walk as the mute marker) and scores its rules together with the bundled

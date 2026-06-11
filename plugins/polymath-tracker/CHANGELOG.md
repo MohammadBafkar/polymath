@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- All three skills consume the project's `tracker` block
+  (`polymath-core:project-context` contract): destination defaults
+  (`project`/`area_path`/`iteration`, `work_item_types`), 3-layer
+  provenance marking on every created item (title prefix, tag,
+  traceability footer), post-create readback verification, and HITL-only
+  pushes — `file-bug-from-incident` presents the full ticket set for one
+  explicit confirmation before any create call.
+
 ### Changed
 
 - One `issue_tracker` umbrella plugin: ships both the Jira and Linear MCP

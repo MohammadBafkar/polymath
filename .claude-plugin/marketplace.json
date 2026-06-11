@@ -14,7 +14,7 @@
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
       "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "category": "foundation",
       "tags": [
         "foundation",
@@ -79,7 +79,7 @@
       "name": "polymath-flows",
       "source": "./plugins/polymath-flows",
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "category": "orchestration",
       "tags": [
         "orchestration",
@@ -92,7 +92,7 @@
       "name": "polymath-pipeline",
       "source": "./plugins/polymath-pipeline",
       "description": "Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "foundation",
       "tags": [
         "routing",
@@ -465,7 +465,7 @@
       "name": "polymath-tracker",
       "source": "./plugins/polymath-tracker",
       "description": "Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "connector",
       "tags": [
         "connector",

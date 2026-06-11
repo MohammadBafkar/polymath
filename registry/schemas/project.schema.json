@@ -379,6 +379,14 @@
         }
       }
     },
+    "provenance": {
+      "description": "Run-provenance persistence. With `runs: true`, polymath-flow whole-copies each COMPLETED workflow run record (state, inputs, trace, step summaries, artifacts) into `.polymath/runs/<run_id>/` so the record is versionable and shareable with the repo. Whole-copy, never sliced; fail-open \u2014 a copy failure never fails the run. Default off.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runs": { "type": "boolean", "default": false }
+      }
+    },
     "attribution": {
       "description": "Output attribution preferences: whether plugin components prefix chat-visible output with origin markers, and an optional Co-Authored-By trailer for agent-assisted commits (absent = no trailer).",
       "type": "object",

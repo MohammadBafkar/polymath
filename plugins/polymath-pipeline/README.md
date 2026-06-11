@@ -10,15 +10,25 @@ exactly polymath-core's ambient route-hint behavior.
 
 ## What it ships
 
-- Skills: `intake` — classify an ambiguous or multi-step request: score 4
-  confidence dimensions (intent, scope, constraints, acceptance), ask only
-  what the repo can't answer (never-ask list), stop at plateau, record the
-  route.
+- Skills:
+  - `intake` — classify an ambiguous or multi-step request: score 4
+    confidence dimensions (intent, scope, constraints, acceptance), ask only
+    what the repo can't answer (never-ask list), stop at plateau, record the
+    route.
+  - `feedback-capture` — conservatively record one localization-feedback
+    item (user-confirmed correction/gap/friction tied to a named surface;
+    180-day TTL; never secrets).
+  - `feedback-digest` — evaluate captured items (verdict with evidence),
+    apply project-local fixes behind ONE confirmation, emit catalog-level
+    findings only as proposed patch files under
+    `.polymath/feedback/catalog-proposals/` — never auto-committed.
 - Executable: `bin/polymath-pipeline` — the engine: shared project-root
   resolver (refuses `$HOME` and `${CLAUDE_CONFIG_DIR}` as roots),
   `routing.mode` reader (overlay-aware line-scan, no PyYAML dependency),
   session-namespaced markers, append-only decision log + retention sweep,
-  and the `mode` / `mark` / `status` / `sweep` CLI.
+  the `mode` / `mark` / `status` / `sweep` CLI, and the feedback store
+  (`feedback capture|digest|evaluate|resolve`, event-sourced JSONL,
+  180-day TTL).
 - Hooks:
   - `SessionStart` — announces the active mode for the repo and runs the
     retention sweep (markers > 7 days pruned; decision log truncated to its
@@ -61,6 +71,8 @@ ${CLAUDE_PLUGIN_DATA}/
   markers/<session>.json   # per-invocation stamps + classified_at
   decisions.jsonl          # audit: classify-directive, classified,
                            # enforce-deny, kill-switch, fail-open, sweep
+  feedback.jsonl           # event-sourced feedback store (capture /
+                           # evaluate / resolve; 180d TTL)
 ```
 
 ## Limitations

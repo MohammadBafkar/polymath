@@ -4,6 +4,17 @@
 
 ### Added
 
+- **Feedback loop (capture → evaluate → apply).**
+  `polymath-pipeline feedback capture|digest|evaluate|resolve`: an
+  event-sourced JSONL store with a 180-day TTL (digest sweeps expired
+  items). `feedback-capture` skill: conservative criteria — named
+  surface, user-confirmed, localization fix conceivable, never secrets.
+  `feedback-digest` skill: every item gets a verdict with evidence
+  (valid-constructive / valid-not-actionable / invalid); project-local
+  fixes (conventions docs, `skill_overrides`,
+  `route-signals.project.json`) are applied behind ONE confirmation;
+  catalog-level findings are emitted only as proposed patch files under
+  `.polymath/feedback/catalog-proposals/` — never auto-committed.
 - Initial plugin (Phase 3 of `docs/plans/generalized-localization.md`).
   Opt-in on `routing.mode: classify|enforce`:
   - `bin/polymath-pipeline` engine: shared root resolver (refusing `$HOME`

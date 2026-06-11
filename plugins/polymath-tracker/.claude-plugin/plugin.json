@@ -1,6 +1,6 @@
 {
   "name": "polymath-tracker",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Issue-tracker connector: Jira + Linear MCP servers, ticket-key detection hooks, and triage / file-bug-from-incident skills. Supply credentials for whichever tracker you use.",
   "license": "MIT",
   "author": {

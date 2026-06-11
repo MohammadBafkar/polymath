@@ -1679,6 +1679,52 @@ def cmd_gc(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Run provenance — whole-copy completed runs into the repo (opt-in)
+# ---------------------------------------------------------------------------
+
+
+def _provenance_dest_root() -> pathlib.Path | None:
+    """The repo's .polymath dir, found by walking cwd upward (stop at the
+    .git boundary). Provenance only ever lands next to the config that
+    opted in — never in a directory without a .polymath/."""
+    here = pathlib.Path.cwd()
+    for d in (here, *here.parents):
+        try:
+            if (d / ".polymath").is_dir():
+                return d / ".polymath"
+            if (d / ".git").exists():
+                return None
+        except OSError:
+            return None
+    return None
+
+
+def _persist_run_provenance(run_dir: pathlib.Path, project: dict | None) -> str | None:
+    """Whole-copy a COMPLETED run record into `.polymath/runs/<run_id>/`
+    when the frozen project snapshot opts in (`provenance.runs: true`).
+    Whole copy, never sliced (a partial record is worse than none) — a
+    re-run replaces any previous copy of the same run id. Fail-open: a
+    copy failure never fails the run."""
+    try:
+        if not isinstance(project, dict):
+            return None
+        prov = project.get("provenance") or {}
+        if not (isinstance(prov, dict) and prov.get("runs") is True):
+            return None
+        poly_dir = _provenance_dest_root()
+        if poly_dir is None:
+            return None
+        dest = poly_dir / "runs" / run_dir.name
+        if dest.exists():
+            shutil.rmtree(dest, ignore_errors=True)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(run_dir, dest)
+        return str(dest)
+    except Exception:
+        return None
+
+
+# ---------------------------------------------------------------------------
 # mustPass check engine
 # ---------------------------------------------------------------------------
 
@@ -1697,6 +1743,9 @@ def _assert(
         state["status"] = "completed"
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
         out = {"status": "completed", "checks": 0}
+        prov_dest = _persist_run_provenance(run_dir, project)
+        if prov_dest:
+            out["provenance"] = prov_dest
         if workflow.get("chainsTo"):
             out["chainsTo"] = workflow["chainsTo"]  # arc hand-off; agent proposes, never auto-runs
         print(json.dumps(out, indent=2))
@@ -1760,6 +1809,9 @@ def _assert(
         trace_data["not_applicable"] = not_applicable
         out["not_applicable"] = not_applicable
     _trace(run_dir, "complete", trace_data)
+    prov_dest = _persist_run_provenance(run_dir, project)
+    if prov_dest:
+        out["provenance"] = prov_dest
     if workflow.get("chainsTo"):
         out["chainsTo"] = workflow["chainsTo"]  # arc hand-off; agent proposes, never auto-runs
     print(json.dumps(out, indent=2))
@@ -2487,10 +2539,54 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _emit_telemetry(cmd: str, exit_code: int | None, duration_ms: int, workflow: str | None) -> None:
+    """Local-only, opt-in runner telemetry (docs/TELEMETRY.md). Requires
+    POLYMATH_TELEMETRY=1 exactly; anything else (unset, "0", other values)
+    disables it — the docs/PRIVACY.md contract. Payload is capped at
+    command + workflow name + duration + outcome: no run ids (their slug
+    derives from user input), no prompts, no file contents. Appends to
+    telemetry.jsonl in this plugin's data dir; never leaves the machine;
+    fail-open."""
+    if os.environ.get("POLYMATH_TELEMETRY") != "1":
+        return
+    try:
+        record = {
+            "ts": _now_iso(),
+            "tool": "polymath-flow",
+            "cmd": cmd,
+            "exit": exit_code,
+            "duration_ms": duration_ms,
+        }
+        if workflow:
+            record["workflow"] = workflow
+        path = _data_root() / "telemetry.jsonl"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a") as f:
+            f.write(json.dumps(record) + "\n")
+    except Exception:
+        pass
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.func(args)
+    import time
+
+    started = time.monotonic()
+    code: int | None = None
+    try:
+        code = args.func(args)
+        return code
+    except SystemExit as e:
+        code = e.code if isinstance(e.code, int) else 1
+        raise
+    finally:
+        _emit_telemetry(
+            getattr(args, "cmd", "?"),
+            code,
+            int((time.monotonic() - started) * 1000),
+            getattr(args, "name", None),
+        )
 
 
 if __name__ == "__main__":

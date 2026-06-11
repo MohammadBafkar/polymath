@@ -45,6 +45,7 @@ A localizing skill applies, in this order, whichever of these exist in the snaps
 1. **`conventions_docs` (by role)** — read the docs whose role keys are relevant to the skill and treat their Hard rules as guardrails. Conventional role names: `knowledge-base`, `backend-stack`, `frontend-stack`, `database`, `auth`, `deployment`, `shared-libraries`, `review-checklist`, `artifact-matrix`, `api-style` (keys are free-form; these are the names skills look for). Content marked `[VERIFY: …]` is inferred-not-confirmed — never treat it as authoritative, and surface relevant markers when they affect a decision.
 2. **`skill_overrides["<plugin>:<skill>"]`** — `additional_context` files to read, `additional_axes` to apply, `test_commands` matched by the project's primary language.
 3. **`prompts.<artifact>_template`** — use the project's template instead of the catalog default.
+4. **`tracker`** — any skill that CREATES work items applies the project's destination (`organization`/`project`/`area_path`/`iteration`, `work_item_types` category map) and the 3-layer provenance marking: (1) `marking.title_prefix` prepended to the title, (2) `marking.tag` as a tag/label, (3) a traceability footer in the body (creating surface, date, link to the source artifact). After creating: **read the item back** and verify all three layers landed — re-apply whatever is missing. Items are pushed **HITL only**: present the full ticket set and get one explicit confirmation in-conversation before any create call; never push silently.
 
 Wired consumers and their roles:
 
@@ -57,6 +58,7 @@ Wired consumers and their roles:
 - **`polymath-devops:ci-pipeline-github`** — role `deployment`.
 - **`polymath-release:pr`** — `prompts.pr_description_template`.
 - **`polymath-incident:postmortem-blameless`** — `prompts.postmortem_template`.
+- **`polymath-tracker:file-bug-from-incident` / `jira-triage` / `linear-triage`** — the `tracker` block (destination + 3-layer marking + readback + HITL push).
 
 ## What's in the snapshot
 
