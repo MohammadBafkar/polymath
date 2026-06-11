@@ -89,6 +89,19 @@
       ]
     },
     {
+      "name": "polymath-pipeline",
+      "source": "./plugins/polymath-pipeline",
+      "description": "Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.",
+      "version": "0.1.0",
+      "category": "foundation",
+      "tags": [
+        "routing",
+        "pipeline",
+        "classify",
+        "enforce"
+      ]
+    },
+    {
       "name": "polymath-thinking",
       "source": "./plugins/polymath-thinking",
       "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.",

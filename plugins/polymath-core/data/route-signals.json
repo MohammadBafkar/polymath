@@ -333,6 +333,20 @@
       ]
     },
     {
+      "id": "intake",
+      "kind": "skill",
+      "surface": "polymath-pipeline:intake",
+      "alt": "polymath-core:route",
+      "paths": [
+        ".polymath/project.yaml"
+      ],
+      "intents": [
+        "intake this request",
+        "classify this request first",
+        "clarify the requirements before starting"
+      ]
+    },
+    {
       "id": "postmortem-blameless",
       "kind": "skill",
       "surface": "polymath-incident:postmortem-blameless",

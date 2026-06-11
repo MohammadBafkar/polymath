@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   executable-unit:
-    name: bin/polymath-flow + polymath-core unit tests
+    name: bin/polymath-flow + polymath-core + polymath-pipeline unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,8 @@ jobs:
         run: python3 -m unittest discover -s plugins/polymath-flows/tests -v
       - name: Run polymath-core unit tests
         run: python3 -m unittest discover -s plugins/polymath-core/tests -v
+      - name: Run polymath-pipeline unit tests
+        run: python3 -m unittest discover -s plugins/polymath-pipeline/tests -v
 
   executable-e2e:
     name: shipFeature scratch-repo e2e

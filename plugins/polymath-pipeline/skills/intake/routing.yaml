@@ -1,0 +1,10 @@
+# Routing declaration for polymath-pipeline:intake (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- .polymath/project.yaml
+intents:
+- intake this request
+- classify this request first
+- clarify the requirements before starting
+alt: polymath-core:route

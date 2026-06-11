@@ -368,7 +368,7 @@
       }
     },
     "routing": {
-      "description": "How Polymath engages with prompts in this project. `hint` (default) is the propose-first routing hint shipping today; `classify` and `enforce` are reserved for the opt-in pipeline mode — declaring them is valid but no shipped component consumes them yet.",
+      "description": "How Polymath engages with prompts in this project. `hint` (default) is the propose-first routing hint shipping today; `classify` and `enforce` activate the opt-in polymath-pipeline plugin — a per-prompt classify directive, and (enforce) a gate that blocks mutating tool calls until the request is classified. Without that plugin installed the values are inert.",
       "type": "object",
       "additionalProperties": false,
       "properties": {

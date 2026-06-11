@@ -1,0 +1,624 @@
+#!/usr/bin/env python3
+"""polymath-pipeline — opt-in routing pipeline engine.
+
+Activates ONLY when the project's `.polymath/project.yaml` (or its
+`project.local.yaml` overlay) declares `routing.mode: classify` or
+`enforce`. A repo without that declaration costs three constant-time
+early-exits per session (one per hook) and nothing else; `hint` mode is
+exactly today's polymath-core behavior, owned by polymath-core.
+
+Owns:
+  - the shared root resolver: the nearest ancestor of cwd carrying
+    `.polymath/project.yaml`, stopping at the repo boundary (`.git`) and
+    REFUSING `$HOME` and `${CLAUDE_CONFIG_DIR}` as roots — a user-layer
+    default must never flip every shell into pipeline mode
+  - per-invocation, session-namespaced markers under
+    `${CLAUDE_PLUGIN_DATA}/markers/<session>.json`: the prompt hook stamps
+    `directive-issued`; `mark` upgrades the newest marker for the root to
+    `classified` (1h validity)
+  - the decision log `${CLAUDE_PLUGIN_DATA}/decisions.jsonl` (append-only
+    audit: classify-directive, classified, enforce-deny, kill-switch,
+    fail-open, sweep) + a deterministic retention sweep (markers > 7 days
+    pruned; log truncated to its newest 1000 lines past 512 KiB)
+  - the three hook entrypoints (hook-session-start, hook-prompt,
+    hook-pretool) — see hooks/hooks.json
+
+Trust contract: in classify/enforce mode the directive HONORS
+`trust: auto-headless` for read-only surfaces (minimum intervention) —
+the first consumer of the declared trust axis. Everything else keeps the
+propose-first contract.
+
+Exit codes: hooks exit 0 (fail-open) except an enforce-gate DENY, which
+exits 2 with the reason on stderr (the PreToolUse blocking contract).
+Every fail-open and every kill-switch use is audited to the decision log.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import os
+import pathlib
+import re
+import sys
+from typing import Any
+
+CLASSIFIED_TTL_SECONDS = 3600       # 1h: how long a classification stays fresh
+MARKER_RETENTION_DAYS = 7           # markers older than this are swept
+LOG_SWEEP_BYTES = 512 * 1024        # sweep decisions.jsonl past this size
+LOG_KEEP_LINES = 1000               # ...down to its newest N lines
+MODES = {"hint", "classify", "enforce"}
+
+
+def _now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+def _now_iso() -> str:
+    return _now().replace(microsecond=0).isoformat()
+
+
+def _parse_iso(ts: str | None) -> datetime.datetime | None:
+    if not ts:
+        return None
+    try:
+        d = datetime.datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=datetime.timezone.utc)
+    except Exception:
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Shared root resolver + mode reader
+# ---------------------------------------------------------------------------
+
+
+def _excluded_roots() -> set[pathlib.Path]:
+    excluded = {pathlib.Path.home()}
+    cfg = os.environ.get("CLAUDE_CONFIG_DIR")
+    if cfg:
+        excluded.add(pathlib.Path(cfg))
+    return {p.resolve() for p in excluded}
+
+
+def resolve_root(start: pathlib.Path | None = None) -> pathlib.Path | None:
+    """Nearest ancestor of `start` (default cwd) with .polymath/project.yaml.
+    Stops after the first `.git` boundary; $HOME and ${CLAUDE_CONFIG_DIR}
+    are never acceptable roots."""
+    here = (start or pathlib.Path.cwd()).resolve()
+    excluded = _excluded_roots()
+    for d in (here, *here.parents):
+        if d in excluded:
+            return None
+        try:
+            if (d / ".polymath" / "project.yaml").is_file():
+                return d
+            if (d / ".git").exists():
+                return None  # repo boundary without a project file
+        except OSError:
+            return None
+    return None
+
+
+_MODE_RE = re.compile(r"^[ \t]+mode:[ \t]*['\"]?(hint|classify|enforce)['\"]?[ \t]*$")
+_ROUTING_RE = re.compile(r"^routing:[ \t]*$")
+_TOP_KEY_RE = re.compile(r"^[A-Za-z_]")
+
+
+def _scan_mode(path: pathlib.Path) -> str | None:
+    """Line-scan one YAML file for the routing.mode value. No PyYAML —
+    a hook must not depend on the environment having it."""
+    try:
+        text = path.read_text(errors="ignore")
+    except OSError:
+        return None
+    in_routing = False
+    for line in text.splitlines():
+        if _ROUTING_RE.match(line):
+            in_routing = True
+            continue
+        if in_routing:
+            m = _MODE_RE.match(line)
+            if m:
+                return m.group(1)
+            if _TOP_KEY_RE.match(line):
+                in_routing = False  # left the routing block
+    return None
+
+
+def read_mode(root: pathlib.Path) -> str:
+    """routing.mode for the project, overlay-aware (the gitignored
+    project.local.yaml wins per key, matching the loader's merge policy).
+    Absent or unknown → 'hint' (the pipeline stays dormant)."""
+    for name in ("project.local.yaml", "project.yaml"):
+        mode = _scan_mode(root / ".polymath" / name)
+        if mode in MODES:
+            return mode
+    return "hint"
+
+
+# ---------------------------------------------------------------------------
+# Kill switch (audited by callers)
+# ---------------------------------------------------------------------------
+
+
+def kill_switch(root: pathlib.Path | None) -> str | None:
+    """Return a short reason when the pipeline is switched off, else None."""
+    if os.environ.get("POLYMATH_PIPELINE_OFF"):
+        return "env POLYMATH_PIPELINE_OFF"
+    if root is not None and (root / ".polymath" / "pipeline-off").exists():
+        return ".polymath/pipeline-off marker"
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Data root, markers, decision log, sweep
+# ---------------------------------------------------------------------------
+
+
+def data_root() -> pathlib.Path:
+    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if base:
+        return pathlib.Path(base)
+    return pathlib.Path.home() / ".claude" / "plugins" / "data" / "polymath-pipeline"
+
+
+def _markers_dir() -> pathlib.Path:
+    return data_root() / "markers"
+
+
+def _log_path() -> pathlib.Path:
+    return data_root() / "decisions.jsonl"
+
+
+_SESSION_SAFE_RE = re.compile(r"[^A-Za-z0-9._-]")
+
+
+def _marker_path(session: str) -> pathlib.Path:
+    return _markers_dir() / f"{_SESSION_SAFE_RE.sub('_', session)[:128]}.json"
+
+
+def log_decision(event: str, **fields: Any) -> None:
+    """Append one audit line. Fail-open: an unwritable log never blocks."""
+    try:
+        path = _log_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        line = json.dumps({"ts": _now_iso(), "event": event, **fields}, ensure_ascii=False)
+        with path.open("a") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
+
+
+def read_marker(session: str) -> dict | None:
+    try:
+        doc = json.loads(_marker_path(session).read_text())
+        return doc if isinstance(doc, dict) else None
+    except Exception:
+        return None
+
+
+def touch_marker(session: str, root: pathlib.Path, mode: str) -> dict:
+    """Per-invocation stamp from the prompt hook. Preserves an existing
+    fresh classification; a root change invalidates it (new project,
+    new classification)."""
+    marker = read_marker(session) or {}
+    if marker.get("root") != str(root):
+        marker = {}
+    marker.setdefault("session", session)
+    marker.setdefault("first_seen", _now_iso())
+    marker["root"] = str(root)
+    marker["mode"] = mode
+    marker["last_prompt"] = _now_iso()
+    marker["prompts"] = int(marker.get("prompts", 0)) + 1
+    try:
+        _markers_dir().mkdir(parents=True, exist_ok=True)
+        _marker_path(session).write_text(json.dumps(marker, indent=2))
+    except Exception:
+        pass
+    return marker
+
+
+def _classified_fresh(marker: dict | None) -> bool:
+    if not marker:
+        return False
+    ts = _parse_iso(marker.get("classified_at"))
+    if ts is None:
+        return False
+    return (_now() - ts).total_seconds() <= CLASSIFIED_TTL_SECONDS
+
+
+def fresh_classification(session: str, root: pathlib.Path) -> dict | None:
+    """The session's own fresh classified marker, else any fresh classified
+    marker for the same root. Markers are stored session-namespaced, but
+    acceptance is root-scoped within the 1h TTL: `mark` runs through the
+    Bash tool, which cannot know the harness session id."""
+    own = read_marker(session)
+    if own and own.get("root") == str(root) and _classified_fresh(own):
+        return own
+    try:
+        candidates = sorted(
+            _markers_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        )
+    except OSError:
+        return None
+    for path in candidates:
+        try:
+            doc = json.loads(path.read_text())
+        except Exception:
+            continue
+        if isinstance(doc, dict) and doc.get("root") == str(root) and _classified_fresh(doc):
+            return doc
+    return None
+
+
+def mark_classified(root: pathlib.Path, surface: str | None) -> dict | None:
+    """Upgrade the NEWEST marker for this root to classified. When no
+    marker exists (hook missed, headless run), create a root-scoped one."""
+    newest: pathlib.Path | None = None
+    try:
+        for path in sorted(
+            _markers_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        ):
+            try:
+                doc = json.loads(path.read_text())
+            except Exception:
+                continue
+            if isinstance(doc, dict) and doc.get("root") == str(root):
+                newest = path
+                marker = doc
+                break
+    except OSError:
+        pass
+    if newest is None:
+        marker = {
+            "session": f"cli-{os.getpid()}",
+            "root": str(root),
+            "first_seen": _now_iso(),
+            "prompts": 0,
+        }
+        newest = _marker_path(marker["session"])
+    marker["classified_at"] = _now_iso()
+    if surface:
+        marker["classified_surface"] = surface
+    try:
+        _markers_dir().mkdir(parents=True, exist_ok=True)
+        newest.write_text(json.dumps(marker, indent=2))
+    except Exception:
+        return None
+    return marker
+
+
+def sweep() -> dict:
+    """Retention: prune markers older than MARKER_RETENTION_DAYS; truncate
+    the decision log to its newest LOG_KEEP_LINES once past LOG_SWEEP_BYTES."""
+    removed = 0
+    cutoff = _now() - datetime.timedelta(days=MARKER_RETENTION_DAYS)
+    try:
+        for path in _markers_dir().glob("*.json"):
+            try:
+                mtime = datetime.datetime.fromtimestamp(
+                    path.stat().st_mtime, tz=datetime.timezone.utc
+                )
+                if mtime < cutoff:
+                    path.unlink()
+                    removed += 1
+            except OSError:
+                continue
+    except OSError:
+        pass
+    truncated = False
+    try:
+        log = _log_path()
+        if log.is_file() and log.stat().st_size > LOG_SWEEP_BYTES:
+            lines = log.read_text(errors="ignore").splitlines()[-LOG_KEEP_LINES:]
+            log.write_text("\n".join(lines) + "\n")
+            truncated = True
+    except OSError:
+        pass
+    if removed or truncated:
+        log_decision("sweep", markers_removed=removed, log_truncated=truncated)
+    return {"markers_removed": removed, "log_truncated": truncated}
+
+
+# ---------------------------------------------------------------------------
+# Read-only Bash exemption (enforce gate)
+# ---------------------------------------------------------------------------
+
+# Modify-pattern BLACKLIST: a Bash command matching any of these is treated
+# as mutating and requires a fresh classification in enforce mode. The
+# inverse (a read-only whitelist) is unwinnable; false positives — a
+# read-only command matching a pattern — are accepted by design and only
+# cost one classify round-trip.
+MODIFY_PATTERNS = [
+    r"[^<>]>{1,2}",                          # redirection (>, >>) but not <<heredoc / 2>&1 handled below
+    r"\btee\b",
+    r"\b(rm|mv|cp|mkdir|rmdir|touch|ln|chmod|chown|truncate|dd|install)\b",
+    r"\b(sed|perl)\b[^|;&]*\s-[a-zA-Z]*i",   # in-place edit flags
+    r"\bgit\b[^|;&]*\b(commit|push|merge|rebase|reset|checkout|switch|restore|cherry-pick|revert|tag|stash|clean|am|apply|rm|mv|init|clone|fetch|pull|remote|submodule|worktree|branch\s+(-d|-D|-m|-M))\b",
+    r"\b(npm|yarn|pnpm|pip3?|uv|poetry|cargo|gem|brew|apt(-get)?|dnf|yum|composer)\b[^|;&]*\b(install|add|remove|rm|uninstall|update|upgrade|publish)\b",
+    r"\bgo\b[^|;&]*\b(install|get|mod)\b",
+    r"\b(curl|wget)\b[^|;&]*\s(-o|-O|--output|--remote-name)\b",
+    r"\b(kill|pkill|killall)\b",
+    r"\b(docker|podman|kubectl|helm|terraform|pulumi)\b[^|;&]*\b(run|apply|delete|create|scale|patch|edit|exec|up|destroy|push|build|rm|prune)\b",
+    r"\b(systemctl|service|launchctl)\b",
+    r"\beval\b|\bexec\b|\bsource\b|^\s*\.\s",
+    r"\bcrontab\b",
+]
+_MODIFY_RE = [re.compile(p) for p in MODIFY_PATTERNS]
+# `2>&1`, `&>`, `>/dev/null` style noise that the redirection pattern would
+# otherwise flag — stripped before matching so plain inspection commands
+# (`grep x f 2>/dev/null`) stay exempt.
+_HARMLESS_REDIRECT_RE = re.compile(r"\d?>{1,2}\s*(&\d|/dev/null|/dev/stderr|/dev/stdout)")
+
+
+def bash_is_mutating(command: str) -> bool:
+    cleaned = _HARMLESS_REDIRECT_RE.sub(" ", command)
+    return any(rx.search(cleaned) for rx in _MODIFY_RE)
+
+
+GATED_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
+
+
+# ---------------------------------------------------------------------------
+# Hook entrypoints
+# ---------------------------------------------------------------------------
+
+
+def _read_payload() -> dict:
+    try:
+        doc = json.load(sys.stdin)
+        return doc if isinstance(doc, dict) else {}
+    except Exception:
+        return {}
+
+
+def _payload_cwd(payload: dict) -> pathlib.Path:
+    cwd = payload.get("cwd")
+    if isinstance(cwd, str) and cwd:
+        return pathlib.Path(cwd)
+    return pathlib.Path.cwd()
+
+
+def _directive(mode: str, plugin_root: str) -> str:
+    enforce_line = (
+        " Mutating tool calls (Edit/Write and modify-pattern Bash) are GATED "
+        "until that mark exists (fresh within the last hour)."
+        if mode == "enforce"
+        else ""
+    )
+    return (
+        f"[polymath-pipeline] routing.mode={mode} for this repo. Before "
+        f"substantial or mutating work on this request: (1) if a "
+        f"[polymath-core route] hint appears above, it has precedence — "
+        f"confirm and use that surface; (2) otherwise classify the request: "
+        f"run polymath-pipeline:intake for an ambiguous or multi-step ask, "
+        f"or just answer a trivial/conversational turn (that counts as "
+        f"classified). (3) Record the classification: "
+        f"\"{plugin_root}/bin/polymath-pipeline\" mark --surface "
+        f"<skill-or-workflow-or-'direct'>.{enforce_line} Surfaces declared "
+        f"`trust: auto-headless` that are read-only may be run directly "
+        f"without propose-confirm in this mode (minimum intervention). "
+        f"Kill switch (audited): POLYMATH_PIPELINE_OFF=1 or touch "
+        f".polymath/pipeline-off."
+    )
+
+
+def cmd_hook_session_start(args: argparse.Namespace) -> int:
+    try:
+        payload = _read_payload()
+        root = resolve_root(_payload_cwd(payload))
+        if root is None:
+            return 0
+        mode = read_mode(root)
+        if mode == "hint":
+            return 0
+        off = kill_switch(root)
+        session = str(payload.get("session_id") or "")
+        if off:
+            log_decision("kill-switch", session=session, root=str(root), via=off, at="session-start")
+            return 0
+        sweep()
+        print(
+            f"polymath-pipeline: routing.mode={mode} active for {root} "
+            f"(kill switch, audited: POLYMATH_PIPELINE_OFF=1 or "
+            f".polymath/pipeline-off)."
+        )
+        return 0
+    except Exception:
+        log_decision("fail-open", at="session-start")
+        return 0
+
+
+def cmd_hook_prompt(args: argparse.Namespace) -> int:
+    try:
+        payload = _read_payload()
+        root = resolve_root(_payload_cwd(payload))
+        if root is None:
+            return 0
+        mode = read_mode(root)
+        if mode == "hint":
+            return 0
+        session = str(payload.get("session_id") or "unknown")
+        off = kill_switch(root)
+        if off:
+            log_decision("kill-switch", session=session, root=str(root), via=off, at="prompt")
+            return 0
+        touch_marker(session, root, mode)
+        if fresh_classification(session, root):
+            return 0  # already classified within the TTL — stay quiet
+        plugin_root = os.environ.get(
+            "CLAUDE_PLUGIN_ROOT",
+            str(pathlib.Path(__file__).resolve().parent.parent),
+        )
+        print(_directive(mode, plugin_root))
+        log_decision("classify-directive", session=session, root=str(root), mode=mode)
+        return 0
+    except Exception:
+        log_decision("fail-open", at="prompt")
+        return 0
+
+
+def cmd_hook_pretool(args: argparse.Namespace) -> int:
+    try:
+        payload = _read_payload()
+        root = resolve_root(_payload_cwd(payload))
+        if root is None:
+            return 0
+        mode = read_mode(root)
+        if mode != "enforce":
+            return 0
+        session = str(payload.get("session_id") or "unknown")
+        off = kill_switch(root)
+        if off:
+            log_decision("kill-switch", session=session, root=str(root), via=off, at="pretool")
+            return 0
+        tool = str(payload.get("tool_name") or "")
+        tool_input = payload.get("tool_input") or {}
+        if tool == "Bash":
+            command = str(tool_input.get("command") or "") if isinstance(tool_input, dict) else ""
+            if not bash_is_mutating(command):
+                return 0  # read-only Bash is exempt (modify-pattern blacklist)
+        elif tool not in GATED_TOOLS:
+            return 0
+        if fresh_classification(session, root):
+            return 0
+        plugin_root = os.environ.get(
+            "CLAUDE_PLUGIN_ROOT",
+            str(pathlib.Path(__file__).resolve().parent.parent),
+        )
+        log_decision(
+            "enforce-deny", session=session, root=str(root), tool=tool,
+            detail=(str(tool_input.get("command", ""))[:200] if isinstance(tool_input, dict) else ""),
+        )
+        print(
+            f"polymath-pipeline enforce: this repo gates mutating tool calls "
+            f"behind classification (routing.mode=enforce). Classify first — "
+            f"run polymath-pipeline:intake (ambiguous/multi-step) or decide "
+            f"the surface yourself — then record it: "
+            f"\"{plugin_root}/bin/polymath-pipeline\" mark --surface "
+            f"<skill-or-workflow-or-'direct'> and retry. Read-only commands "
+            f"are exempt. Kill switch (audited): POLYMATH_PIPELINE_OFF=1 or "
+            f"touch .polymath/pipeline-off.",
+            file=sys.stderr,
+        )
+        return 2  # PreToolUse blocking contract
+    except Exception:
+        log_decision("fail-open", at="pretool")
+        return 0
+
+
+# ---------------------------------------------------------------------------
+# CLI commands (model- and doctor-facing)
+# ---------------------------------------------------------------------------
+
+
+def cmd_mode(args: argparse.Namespace) -> int:
+    root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
+    mode = read_mode(root) if root else "hint"
+    print(json.dumps({"root": str(root) if root else None, "mode": mode}))
+    return 0
+
+
+def cmd_mark(args: argparse.Namespace) -> int:
+    root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
+    if root is None:
+        print(json.dumps({"marked": False, "reason": "no project root (.polymath/project.yaml) here"}))
+        return 0
+    mode = read_mode(root)
+    if mode == "hint":
+        print(json.dumps({"marked": False, "reason": "routing.mode is hint — nothing to mark"}))
+        return 0
+    marker = mark_classified(root, args.surface)
+    if marker is None:
+        print(json.dumps({"marked": False, "reason": "marker store unwritable"}))
+        return 0
+    log_decision(
+        "classified", session=marker.get("session"), root=str(root),
+        surface=args.surface or "", mode=mode,
+    )
+    print(json.dumps({
+        "marked": True,
+        "root": str(root),
+        "surface": args.surface or None,
+        "valid_for_seconds": CLASSIFIED_TTL_SECONDS,
+    }))
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
+    markers = []
+    try:
+        for path in sorted(_markers_dir().glob("*.json")):
+            try:
+                doc = json.loads(path.read_text())
+                if isinstance(doc, dict):
+                    markers.append(doc)
+            except Exception:
+                continue
+    except OSError:
+        pass
+    log_lines = 0
+    try:
+        log_lines = sum(1 for _ in _log_path().open())
+    except OSError:
+        pass
+    print(json.dumps({
+        "root": str(root) if root else None,
+        "mode": read_mode(root) if root else "hint",
+        "kill_switch": kill_switch(root),
+        "markers": markers,
+        "decision_log_lines": log_lines,
+        "data_root": str(data_root()),
+    }, indent=2))
+    return 0
+
+
+def cmd_sweep(args: argparse.Namespace) -> int:
+    print(json.dumps(sweep()))
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="polymath-pipeline",
+        description="Opt-in routing pipeline engine (classify/enforce).",
+    )
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    pm = sub.add_parser("mode", help="print the resolved project root and routing.mode")
+    pm.add_argument("--cwd")
+    pm.set_defaults(func=cmd_mode)
+
+    pk = sub.add_parser("mark", help="record that this request was classified (1h validity)")
+    pk.add_argument("--surface", help="chosen surface: <plugin>:<skill>, workflow name, or 'direct'")
+    pk.add_argument("--cwd")
+    pk.set_defaults(func=cmd_mark)
+
+    ps = sub.add_parser("status", help="markers + decision-log summary (doctor)")
+    ps.add_argument("--cwd")
+    ps.set_defaults(func=cmd_status)
+
+    pw = sub.add_parser("sweep", help="run the retention sweep now")
+    pw.set_defaults(func=cmd_sweep)
+
+    for name, fn in (
+        ("hook-session-start", cmd_hook_session_start),
+        ("hook-prompt", cmd_hook_prompt),
+        ("hook-pretool", cmd_hook_pretool),
+    ):
+        ph = sub.add_parser(name)
+        ph.set_defaults(func=fn)
+
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

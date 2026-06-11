@@ -222,11 +222,15 @@ non-blocking `not-applicable` when the repo declares no recipe (see
 [WORKFLOW-SCHEMA § 4](WORKFLOW-SCHEMA.md)). `tracker` (work-item
 destination + provenance marking; the provider itself comes from
 `.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
-(`hint` is today's behavior; `classify`/`enforce` are reserved for the
-opt-in pipeline mode), `attribution`, and `artifact_matrix` validate and
-load into the snapshot today; their consumers land per
-`docs/plans/generalized-localization.md`. Future keys degrade gracefully:
-the loader warns and ignores unknown top-level keys instead of failing.
+(`hint` is the default ambient behavior; `classify`/`enforce` activate
+the opt-in `polymath-pipeline` plugin — classify directive, intake
+skill, and the enforce gate that blocks mutating tool calls until the
+request is classified), `attribution`, and `artifact_matrix` validate
+and load into the snapshot today; `tracker`/`attribution`/
+`artifact_matrix` consumers land per
+`docs/plans/generalized-localization.md`. Future keys degrade
+gracefully: the loader warns and ignores unknown top-level keys instead
+of failing.
 
 ## Convention packs
 

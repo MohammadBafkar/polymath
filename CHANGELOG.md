@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`polymath-pipeline` (new plugin, experimental): opt-in routing
+  pipeline.** A repo declaring `routing.mode: classify|enforce` gets a
+  per-prompt classify directive (route-hint precedence; honors
+  `trust: auto-headless` for read-only surfaces — the first consumer of
+  the declared trust axis), an `intake` skill (4 confidence dimensions,
+  plateau stop, never-ask list), and in `enforce` a PreToolUse gate that
+  blocks mutating tool calls (read-only Bash exempt via a modify-pattern
+  blacklist) until `polymath-pipeline mark` records a classification
+  (1 h validity). Session-namespaced markers, append-only decision log
+  with retention sweep, audited kill switch
+  (`POLYMATH_PIPELINE_OFF=1` / `.polymath/pipeline-off`), audited
+  fail-open; the shared root resolver refuses `$HOME` and
+  `${CLAUDE_CONFIG_DIR}` so user-layer defaults can't flip every shell
+  into pipeline mode. Zero-config repos: three constant-time early-exits
+  per session, no other cost. (polymath-pipeline 0.1.0)
 - **Workflow `extends` is real — as build-time flattening.**
   `polymath-flow flatten <partial> [--out <file>] [--check]` composes an
   extends partial with its catalog parent into a standalone workflow

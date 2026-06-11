@@ -247,14 +247,14 @@ def main() -> int:
     alt = top[0][1].get("alt")
     if alt and all(alt != r["surface"] for _, r, _ in top):
         print(f"    alternative: {alt}")
-    # Trust: DECLARED metadata only. No executor consumes this yet, so it
-    # is surfaced descriptively and must NOT read as permission to skip the
-    # propose-first contract (run-workflow SKILL.md still owns "never auto-start").
-    # Reconciled 2026-06-08 after review flagged the permissive wording as a
-    # contradiction with the executor and with reality (0 surfaces flipped).
+    # Trust: in hint mode (this hook) the declaration is surfaced
+    # descriptively and must NOT read as permission to skip the
+    # propose-first contract (run-workflow SKILL.md still owns "never
+    # auto-start"). polymath-pipeline honors auto-headless for read-only
+    # surfaces when the project declares routing.mode classify|enforce.
     top_trust = top[0][1].get("trust")
     if top_trust == "auto-headless":
-        print("    trust: auto-headless (declared) — eligible for non-interactive auto-run once an executor honors the axis; today still propose-first.")
+        print("    trust: auto-headless (declared) — honored for read-only use by polymath-pipeline when routing.mode != hint; in hint mode still propose-first.")
     print("Detect-only; nothing was run. Confirm with /polymath-core:route, or proceed.")
     print("Silence: POLYMATH_ROUTE_MUTE=1 or touch .polymath/route-muted")
     return 0

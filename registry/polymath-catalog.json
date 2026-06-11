@@ -113,6 +113,9 @@
     "polymath-performance": {
       "status": "experimental"
     },
+    "polymath-pipeline": {
+      "status": "experimental"
+    },
     "polymath-mobile": {
       "status": "experimental"
     },

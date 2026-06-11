@@ -1,0 +1,20 @@
+{
+  "name": "polymath-pipeline",
+  "version": "0.1.0",
+  "description": "Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "routing",
+    "pipeline",
+    "classify",
+    "enforce",
+    "intake"
+  ]
+}
