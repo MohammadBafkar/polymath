@@ -122,6 +122,12 @@ elsewhere is intentional.
   PyYAML is absent, the SessionStart fragment builder falls back to a
   line-scan; a block-scalar `whenToUse` is skipped (the workflow stays
   runnable by name, it is just not proposed).
+- **No autonomous deployer.** Deployment mutates infrastructure, which
+  flows-lite's contract excludes. Polymath ships the composition as a
+  pattern doc
+  ([`plugins/polymath-devops/references/deployer-pattern.md`](plugins/polymath-devops/references/deployer-pattern.md)):
+  agents plan, verify, and draft the pipeline files; the team's own
+  CI/CD executes the mutation.
 
 ### 4.1 Providing the Claude Code auth secret
 

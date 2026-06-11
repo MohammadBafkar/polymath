@@ -231,7 +231,7 @@
       "name": "polymath-devops",
       "source": "./plugins/polymath-devops",
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "devops",
       "tags": [
         "devops",
@@ -329,7 +329,7 @@
       "name": "polymath-author",
       "source": "./plugins/polymath-author",
       "description": "Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "author",
       "tags": [
         "author",

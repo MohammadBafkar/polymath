@@ -428,6 +428,21 @@
       ]
     },
     {
+      "id": "scaffold-component",
+      "kind": "skill",
+      "surface": "polymath-author:scaffold-component",
+      "alt": "polymath-engineering:feature-dev",
+      "paths": [
+        ".polymath/project.yaml"
+      ],
+      "intents": [
+        "scaffold a new service",
+        "scaffold a new component",
+        "add a new module like the existing ones",
+        "create a new service following our conventions"
+      ]
+    },
+    {
       "id": "slo-design",
       "kind": "skill",
       "surface": "polymath-sre:slo-design",

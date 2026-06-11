@@ -1,0 +1,11 @@
+# Routing declaration for polymath-author:scaffold-component (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- .polymath/project.yaml
+intents:
+- scaffold a new service
+- scaffold a new component
+- add a new module like the existing ones
+- create a new service following our conventions
+alt: polymath-engineering:feature-dev

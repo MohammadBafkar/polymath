@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Generic scaffolder + prerequisites checklist; deployer as pattern
+  doc (Phase 5).** `polymath-author:scaffold-component` scaffolds a
+  component in the user's repo convention-first (native generator
+  handoff, canonical infra bodies from the owning skills, never
+  overwrite); `bin/gen-prerequisites.py` generates the onboarding
+  checklist from the `setup` block with a CI-able `--check` mode; the
+  deployer ships as a pattern doc
+  (`plugins/polymath-devops/references/deployer-pattern.md`) — no
+  autonomous deployer, tracked in LIMITATIONS. (polymath-author 0.4.0,
+  polymath-devops 0.4.0)
 - **Run provenance, feedback loop, runner telemetry, tracker marking
   (Phase 4).** `provenance.runs: true` whole-copies completed workflow
   runs to `.polymath/runs/` (fail-open). polymath-pipeline gains the

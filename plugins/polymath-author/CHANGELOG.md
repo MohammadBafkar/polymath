@@ -4,6 +4,18 @@
 
 ### Added
 
+- **`scaffold-component` skill** — scaffold a new component/service/module
+  in the user's repo, convention-driven: read the `conventions_docs` shape
+  docs, hand off to the stack's native generator (tool-spec handoff:
+  compose and run `dotnet new` / `npm create` / `cargo new` / a repo-local
+  generator instead of freehanding boilerplate), pull infra bodies from
+  the owning skills (dockerize, ci-pipeline-github, write-manifest),
+  never overwrite, finish with a regenerated prerequisites checklist.
+- **`bin/gen-prerequisites.py`** — prerequisites-checklist generator: turns
+  the project's `setup` block (context_sources, required_tools,
+  environment, first_steps) into a markdown onboarding checklist;
+  `--check` runs each tool's check command and exits 1 when a REQUIRED
+  tool fails. Env var values are never read or printed.
 - `/new-pack` command + `bin/new-pack.sh`: scaffold a defaults pack — a
   standalone marketplace of per-scope conventions plugins (organization,
   team, product line, or project archetype). Each plugin carries an

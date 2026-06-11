@@ -1,6 +1,6 @@
 {
   "name": "polymath-devops",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "DevOps craft: multi-stage Dockerfile authoring, GitHub Actions pipelines, env-promotion strategy.",
   "license": "MIT",
   "author": {

@@ -33,6 +33,8 @@ jobs:
         run: python3 -m unittest discover -s plugins/polymath-core/tests -v
       - name: Run polymath-pipeline unit tests
         run: python3 -m unittest discover -s plugins/polymath-pipeline/tests -v
+      - name: Run polymath-author unit tests
+        run: python3 -m unittest discover -s plugins/polymath-author/tests -v
 
   executable-e2e:
     name: shipFeature scratch-repo e2e
