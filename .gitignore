@@ -3,3 +3,4 @@ __pycache__/
 .pdata/
 dist/
 .DS_Store
+docs/site/
