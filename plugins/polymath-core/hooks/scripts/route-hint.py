@@ -71,6 +71,92 @@ def load_rules() -> list[dict]:
     return rules if isinstance(rules, list) else []
 
 
+# Project overlays are intentionally small: the table is scanned per prompt,
+# and a project should add a handful of company-specific signals, not a
+# second catalog.
+MAX_PROJECT_RULES = 50
+
+
+def load_project_rules() -> list[dict]:
+    """Project routing overlay: `.polymath/route-signals.project.json`,
+    found by walking cwd up to the repo root (same walk as the mute marker).
+    Same `rules` shape as the bundled table. Lenient by design — a rule
+    missing `surface` or carrying no signal is skipped, a malformed file is
+    ignored entirely; project config must never break a turn. The SURFACE-2
+    uniqueness gate stays marketplace-internal: an overlay may duplicate a
+    catalog intent, and scoring (with project rules sorted first on ties)
+    resolves it at runtime."""
+    here = Path.cwd()
+    path = None
+    for d in (here, *here.parents):
+        cand = d / ".polymath" / "route-signals.project.json"
+        if cand.exists():
+            path = cand
+            break
+        if (d / ".git").exists():  # stop at repo root
+            break
+    if path is None:
+        return []
+    try:
+        doc = json.loads(path.read_text())
+    except Exception:
+        return []
+    rules = doc.get("rules", []) if isinstance(doc, dict) else []
+    if not isinstance(rules, list):
+        return []
+    out: list[dict] = []
+    for rule in rules:
+        if not isinstance(rule, dict) or not isinstance(rule.get("surface"), str):
+            continue
+        sane = _sanitize_project_rule(rule)
+        if sane is None:
+            continue
+        out.append(sane)
+        if len(out) >= MAX_PROJECT_RULES:
+            break
+    return out
+
+
+def _sanitize_project_rule(rule: dict) -> dict | None:
+    """Normalise one overlay rule to exactly what score_rule expects.
+    Signal fields must be lists of strings (a bare string would iterate
+    per-character and false-fire on nearly every prompt); url/regex
+    patterns must compile (one bad pattern must not take down the whole
+    hook); `trust` is stripped — a project file can never claim an
+    elevated trust axis. Returns None when nothing scoreable survives."""
+    sane: dict = {"surface": rule["surface"], "_project": True}
+    if isinstance(rule.get("kind"), str):
+        sane["kind"] = rule["kind"]
+    if isinstance(rule.get("alt"), str):
+        sane["alt"] = rule["alt"]
+    for key in ("url", "regex"):
+        patterns = rule.get(key)
+        if not isinstance(patterns, list):
+            continue
+        kept = []
+        for pat in patterns:
+            if not isinstance(pat, str):
+                continue
+            try:
+                re.compile(pat)
+            except re.error:
+                continue
+            kept.append(pat)
+        if kept:
+            sane[key] = kept
+    for key in ("paths", "intents"):
+        values = rule.get(key)
+        if isinstance(values, list):
+            kept = [v for v in values if isinstance(v, str) and v]
+            if kept:
+                sane[key] = kept
+    if rule.get("diff") is True:
+        sane["diff"] = True
+    if not any(sane.get(k) for k in ("url", "regex", "paths", "diff", "intents")):
+        return None
+    return sane
+
+
 def score_rule(rule: dict, text: str, low: str, urls: list[str], has_diff: bool) -> tuple[int, list[str]]:
     """Return (score, evidence-categories-that-fired)."""
     score = 0
@@ -122,7 +208,9 @@ def main() -> int:
     if not prompt or muted():
         return 0
 
-    rules = load_rules()
+    # Project overlay rules come FIRST: the sort below is stable on table
+    # order, so at equal score the project's localization wins the tie.
+    rules = load_project_rules() + load_rules()
     if not rules:
         return 0
 
@@ -152,6 +240,8 @@ def main() -> int:
     print("[polymath-core route] Prompt signals suggest a Polymath surface:")
     for score, rule, fired in top:
         kind = rule.get("kind", "skill")
+        if rule.get("_project"):
+            kind = f"{kind}, project overlay"
         print(f"  - {rule['surface']}  ({kind} — {why(fired)})")
     # Surface a named alternative from the top rule if it adds a distinct option.
     alt = top[0][1].get("alt")

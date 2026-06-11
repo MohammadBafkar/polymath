@@ -5,9 +5,9 @@ flows-lite: a deterministic serial workflow runner for the Polymath marketplace.
 ## What it ships
 
 - Skills: `run-workflow`, `resume-workflow`, `list-workflows`.
-- Executable: `bin/polymath-flow` — owns YAML validation, state, mustPass checks.
+- Executable: `bin/polymath-flow` — owns YAML validation, guard preconditions, state, mustPass checks (including the `appStarts` boot-verification and `connectorAvailable` presence gates), and build-time `extends` flattening (`flatten` / `flatten --check` drift lint; the runner hard-errors on runtime `extends`).
 - Workflows: YAML files under `workflows/`, including `activateProject`, `deliberationLoop`, `shipFeature`, `reviewPlan`, and the thinking/design family `decideUnderAmbiguity`, `rootCauseAnalysis`, `fuzzyGoalToPlan`, and `designSystem`.
-- Routing surface: a SessionStart hook (`hooks/`) injects a compact `name: whenToUse` index of every workflow so the agent can **detect** a matching arc and **propose** it before running, instead of only running one by name. The index is built by `tools/build-workflow-index.py` into `data/` (the single producer; a conformance diff-guard keeps it from drifting). Each workflow declares `whenToUse` / `triggers` / `detectionSignals`; mute the surface with `touch "$CLAUDE_PLUGIN_DATA/polymath-flows/index-muted"`.
+- Routing surface: a SessionStart hook (`hooks/`) injects a compact `name: whenToUse` index of every workflow so the agent can **detect** a matching arc and **propose** it before running, instead of only running one by name. The catalog index is built by `tools/build-workflow-index.py` into `data/` (the single producer; a conformance diff-guard keeps it from drifting); the hook additionally indexes project-layer (`./.claude/polymath/workflows/`) and user-layer workflows into a machine-local fragment (`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflow-index.project.json`, trigger collisions with the catalog dropped) and appends them as a "Project workflows" block. Each workflow declares `whenToUse` / `triggers` / `detectionSignals`; mute the surface with `touch "$CLAUDE_PLUGIN_DATA/polymath-flows/index-muted"`.
 
 ## Why two layers (skill + executable)?
 

@@ -113,6 +113,15 @@ elsewhere is intentional.
 - **No multi-version workflow-schema migration tooling.** When the
   workflow schema bumps from `0.1` to `0.2`, the migration will need
   to be coordinated by hand.
+- **`polymath-flow flatten` resolves parents from the local install
+  only.** An `extends` ref is looked up in the installed marketplace
+  plugin tree (`<plugin>/workflows/`). A partial cannot extend a
+  workflow from a pack that is not installed on the machine running
+  the flatten, and there is no registry fetch.
+- **Project workflow indexing needs a one-line `whenToUse`.** When
+  PyYAML is absent, the SessionStart fragment builder falls back to a
+  line-scan; a block-scalar `whenToUse` is skipped (the workflow stays
+  runnable by name, it is just not proposed).
 
 ### 4.1 Providing the Claude Code auth secret
 

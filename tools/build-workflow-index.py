@@ -39,8 +39,10 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 WORKFLOWS_DIR = REPO / "plugins" / "polymath-flows" / "workflows"
 DATA_DIR = REPO / "plugins" / "polymath-flows" / "data"
 
-# Injection framing — kept byte-identical to the SessionStart hook so the
-# token assertion measures what is actually surfaced.
+# Injection framing — kept byte-identical to the SessionStart renderer
+# (plugins/polymath-flows/hooks/scripts/project-index.py) so the token
+# assertion measures what is actually surfaced. The machine-local project
+# fragment that renderer may append is deliberately OUTSIDE this assertion.
 INJECTION_HEADER = "Polymath workflows available (multi-step arcs you can run):"
 INJECTION_FOOTER = (
     "Before starting substantial multi-step work that matches one of these, first "
@@ -49,10 +51,11 @@ INJECTION_FOOTER = (
 )
 # Ceiling on the always-on routing surface. The full catalog is one consolidated
 # block of ~18 tokens per workflow (name + terse whenToUse) plus framing. The
-# flat list is acceptable up to ~30 workflows; 560 fits the current 27 with
-# headroom. This is the LAST recalibration of the flat surface — at ~30
-# workflows, switch to a collapsed/tiered injection (group by phase, names with
-# on-demand whenToUse) rather than raising this again. See the audit roadmap Q2.
+# flat list is acceptable up to ~30 workflows; 560 fits the current 26 with
+# near-zero headroom. This is the LAST recalibration of the flat surface — at
+# ~30 workflows, switch to a collapsed/tiered injection (group by phase, names
+# with on-demand whenToUse) rather than raising this again. See the audit
+# roadmap Q2.
 MAX_INJECTION_TOKENS = 560
 
 

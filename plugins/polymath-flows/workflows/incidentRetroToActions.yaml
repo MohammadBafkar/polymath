@@ -35,7 +35,7 @@ inputs:
 guards:
   - id: postmortem-readable
     type: command
-    command: test -f "${POLYMATH_INPUT_POSTMORTEMPATH}" && test -s "${POLYMATH_INPUT_POSTMORTEMPATH}"
+    command: test -f "${inputs.postmortemPath}" && test -s "${inputs.postmortemPath}"
   - id: retros-dir
     type: command
     command: mkdir -p docs/retros && [ -w docs/retros ]

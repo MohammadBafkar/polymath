@@ -595,6 +595,9 @@ class ResumabilityTests(unittest.TestCase):
         self.runs = self.work / ".pdata" / "workflows"
         self._prev_cwd = pathlib.Path.cwd()
         os.chdir(self.work)  # isolate from the repo's own .polymath/
+        # Guards run at start since Phase 2; shipFeature's git-worktree
+        # guard needs a real repo.
+        _git("init", "-q", cwd=self.work)
 
     def tearDown(self) -> None:
         os.chdir(self._prev_cwd)
@@ -800,6 +803,9 @@ class ProjectPlaceholderTests(unittest.TestCase):
         self._write_snapshot(".pdata/polymath-core/project-context.json", self.SNAPSHOT)
         prev_cwd = pathlib.Path.cwd()
         os.chdir(self.work)
+        # Guards run at start since Phase 2; shipFeature's git-worktree
+        # guard needs a real repo.
+        _git("init", "-q", cwd=self.work)
         try:
             from io import StringIO
             from contextlib import redirect_stdout

@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Workflow `extends` is real — as build-time flattening.**
+  `polymath-flow flatten <partial> [--out <file>] [--check]` composes an
+  extends partial with its catalog parent into a standalone workflow
+  carrying a `provenance` block (extends ref, parent version, sha256
+  over both sources); `--check` is the drift lint. The runner
+  hard-errors on runtime `extends`/`override`/`insertAfter`, and the
+  workflow schema gained the missing top-level if/then so partials
+  validate without name/version/steps. (polymath-flows 0.4.0)
+- **`appStarts` + `connectorAvailable` workflow gates, and guards now
+  execute.** `appStarts` boot-verifies the app from the project
+  snapshot's `smoke.<lang>` recipe and resolves non-blocking
+  `not-applicable` when no recipe matches; `connectorAvailable` requires
+  a configured provider in `.polymath/capabilities.yaml`. `guards:` run
+  at `start` before any run state is created — a blocking guard failure
+  refuses the run. (polymath-flows 0.4.0)
+- **Project workflows are discoverable.** The polymath-flows
+  SessionStart hook indexes project- and user-layer workflows into a
+  machine-local tiered fragment under `${CLAUDE_PLUGIN_DATA}` and
+  appends them to the injected index; triggers colliding with catalog
+  triggers are dropped (recorded, never an error), and zero-config repos
+  keep a byte-identical injection. (polymath-flows 0.4.0)
+- **Project routing overlay.** `.polymath/route-signals.project.json`
+  adds project-specific signals to the ambient route hint; project rules
+  win score ties and are labeled, malformed overlays are ignored, and
+  SURFACE-2 uniqueness stays marketplace-internal. The ROUTE-TRIGGER
+  harness now runs the hook in a scratch cwd with a scrubbed
+  environment, with overlay fixtures. (polymath-core 0.4.0)
 - **Defaults packs (one-command scope localization).**
   `polymath-author:/new-pack` scaffolds a standalone marketplace of
   per-scope conventions plugins — organization, team, product line, or

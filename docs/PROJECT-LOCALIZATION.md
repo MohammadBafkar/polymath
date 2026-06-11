@@ -215,7 +215,11 @@ verify-change, feature-dev, api-design-rest, db-schema, dockerize,
 ci-pipeline-github — the contract lives in
 `polymath-core:project-context`); `prompts` templates by
 `polymath-release:pr` and `polymath-incident:postmortem-blameless`.
-`smoke` (per-language boot-verification recipes), `tracker` (work-item
+`smoke` (per-language boot-verification recipes) is consumed by the
+workflow runner's `appStarts` gate: a workflow check that starts the app
+from the frozen snapshot's recipe and verifies readiness, resolving
+non-blocking `not-applicable` when the repo declares no recipe (see
+[WORKFLOW-SCHEMA § 4](WORKFLOW-SCHEMA.md)). `tracker` (work-item
 destination + provenance marking; the provider itself comes from
 `.polymath/capabilities.yaml`, secrets never live here), `routing.mode`
 (`hint` is today's behavior; `classify`/`enforce` are reserved for the
@@ -280,6 +284,70 @@ is fail-open: a malformed or invalid overlay is warned on stderr and
 skipped, never failing the session. When no base file resolves at all, a
 valid overlay serves as the sole source. `_meta.overlay` in the snapshot
 records the overlay path when one applied.
+
+## Project workflows and routing
+
+Two more project-local surfaces localize *routing*, not just skill
+behavior. Both are fail-open: malformed files are ignored and can never
+break a session.
+
+### Workflow discoverability
+
+Workflows in `./.claude/polymath/workflows/` (project layer) and
+`${CLAUDE_CONFIG_DIR}/polymath/workflows/` (user layer) have always been
+*runnable* — `polymath-flow start` resolves project → user → marketplace.
+The polymath-flows SessionStart hook also makes them *proposable*: it
+indexes both tiers into a machine-local fragment
+(`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflow-index.project.json`) and
+appends a "Project workflows" block to the injected catalog index. Rules:
+
+- A workflow needs a one-line `whenToUse` to be indexed (same grace rule
+  as the catalog index); unindexed workflows stay runnable by name.
+- The injected name is the **file stem** — the handle `polymath-flow
+  start` actually resolves. When the YAML `name:` differs from the stem,
+  the stem wins and the divergence is recorded in the fragment
+  (`declaredName`); `flatten --out` warns when it writes such a file.
+- The project tier shadows the user tier on a name collision; a name
+  matching a catalog workflow is annotated as overriding it (that is the
+  localization use-case — `polymath-flow flatten` a partial over the
+  catalog parent into this layer, see
+  [WORKFLOW-SCHEMA § 3](WORKFLOW-SCHEMA.md)).
+- A trigger phrase colliding with a catalog trigger (or an
+  earlier-tier entry) is **dropped** from the fragment — recorded in its
+  `dropped_triggers`, never an error. The catalog keeps the phrase;
+  WORKFLOW-2's marketplace-wide trigger uniqueness is unaffected.
+
+### Routing-signal overlay
+
+`./.polymath/route-signals.project.json` (checked in — it encodes team
+reality, not machine state) adds project-specific rules to the ambient
+route-hint hook, same shape as the bundled table:
+
+```json
+{
+  "rules": [
+    {
+      "id": "acmeDeploy",
+      "kind": "skill",
+      "surface": "acme:deploy-runbook",
+      "regex": ["\\bACME-\\d+\\b"],
+      "intents": ["deploy the acme stack"]
+    }
+  ]
+}
+```
+
+Overlay rules are scored together with the catalog's; on an equal score
+the project rule wins the tie and is labeled `project overlay` in the
+hint. Each rule is sanitized on load: signal fields must be **lists of
+strings** (a bare string is dropped, never iterated per-character),
+`url`/`regex` patterns that do not compile are dropped (one bad pattern
+cannot take the hook down), `trust` is stripped (a project file can
+never claim an elevated trust axis), and a rule left with no `surface`
+or no signal (`url`/`regex`/`paths`/`diff`/`intents`) is skipped. The
+overlay is capped at 50 rules. The SURFACE-2 uniqueness gate stays
+marketplace-internal — an overlay may deliberately duplicate a catalog
+intent and the scorer resolves it at runtime.
 
 ## Validation
 

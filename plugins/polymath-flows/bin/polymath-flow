@@ -4,8 +4,13 @@
 Owns:
   - workflow YAML validation against registry/schemas/workflow.schema.json
   - workflow state (start, next, complete, fail, resume, list)
+  - guard preconditions (run at `start`, before any run state is created)
   - mustPass deterministic checks (fileExists, fileMatches, commandSucceeds,
-    stepSummaryMatches, command guards)
+    stepSummaryMatches, command, artifactValid, artifactSchemaStrict,
+    diffConstraint, appStarts, connectorAvailable)
+  - build-time flattening of `extends` partials (`flatten`, `flatten --check`).
+    `extends` is BUILD-TIME ONLY: validate/start/next/assert hard-error on a
+    workflow that still carries extends/override/insertAfter at runtime.
 
 Does NOT own (those live in the skill / lead model context):
   - performing the actual work for a step
@@ -21,9 +26,9 @@ State layout:
 
 Exit codes:
   0  — success
+  1  — flatten --check drift (flattened file is stale vs its sources)
   2  — validation or assertion failure (caller should display reason)
   3  — workflow not found / state corrupt
-  4  — unsupported schema or unknown field
 
 This script ships with the polymath-flows plugin and uses only the Python
 standard library plus PyYAML when available. If PyYAML is missing and the
@@ -489,6 +494,7 @@ ALLOWED_TOP_LEVEL = {
     "detectionSignals",
     "chainsTo",
     "extends",
+    "provenance",
     "requires",
     "inputs",
     "guards",
@@ -497,6 +503,10 @@ ALLOWED_TOP_LEVEL = {
     "insertAfter",
     "mustPass",
 }
+# Keys legal only in an extends partial — flattened away at build time. A
+# workflow carrying any of these at runtime is rejected by _validate (and by
+# the next/assert reload guard) with a pointer to `flatten`.
+BUILD_TIME_ONLY_KEYS = ("extends", "override", "insertAfter")
 ALLOWED_STEP_KEYS = {"id", "invoke", "prompt", "needs", "artifacts", "topology"}
 ALLOWED_CHECK_TYPES = {
     "fileExists",
@@ -507,23 +517,31 @@ ALLOWED_CHECK_TYPES = {
     "artifactValid",
     "artifactSchemaStrict",
     "diffConstraint",
+    "appStarts",
+    "connectorAvailable",
 }
 # Checks that count as "strong deterministic" — they prove work happened by
 # running code, validating a structured artifact, or observing a real diff.
 # fileExists / fileMatches / stepSummaryMatches do not count, because a hollow
 # stub file or a regex-matching summary string can satisfy them without any
-# real work.
+# real work. appStarts counts: it observes a real boot. connectorAvailable
+# does not — it proves configuration presence, not work.
 STRONG_CHECK_TYPES = {
     "commandSucceeds",
     "command",
     "artifactValid",
     "artifactSchemaStrict",
     "diffConstraint",
+    "appStarts",
 }
 # Check types that default to advisory (run + report, but do not block on
 # failure unless severity is explicitly set to "blocking"). Everything else
 # defaults to blocking.
 ADVISORY_BY_DEFAULT = {"stepSummaryMatches"}
+
+
+EXTENDS_REF_RE = re.compile(r"^([a-z0-9-]+):([a-zA-Z][a-zA-Z0-9-]*)@(\d+)\.(\d+)$")
+PROVENANCE_HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def _check_severity(check: dict) -> str:
@@ -545,6 +563,31 @@ def _validate(workflow: dict) -> list[str]:
         errs.append(
             f"unsupported schemaVersion: {schema_version} (this executor supports {sorted(SUPPORTED_SCHEMA_VERSIONS)})"
         )
+    # extends is build-time only. A partial must be flattened into a
+    # standalone workflow before the runner will touch it; merging at run
+    # time would make a run's behavior depend on a parent file that can
+    # change underneath it.
+    build_keys = [k for k in BUILD_TIME_ONLY_KEYS if k in workflow]
+    if build_keys:
+        errs.append(
+            f"{'/'.join(build_keys)} are build-time only — flatten this partial "
+            f"first: polymath-flow flatten <partial.yaml> --out <workflow.yaml> "
+            f"(the runner never merges extends at runtime)"
+        )
+    prov = workflow.get("provenance")
+    if prov is not None:
+        if not isinstance(prov, dict):
+            errs.append("provenance must be a mapping")
+        else:
+            if not EXTENDS_REF_RE.match(str(prov.get("extends", ""))):
+                errs.append(
+                    "provenance.extends must be '<plugin>:<workflow>@<major.minor>'"
+                )
+            if not PROVENANCE_HASH_RE.match(str(prov.get("hash", ""))):
+                errs.append("provenance.hash must be 'sha256:<64 hex chars>'")
+            extras = set(prov.keys()) - {"extends", "hash", "parentVersion"}
+            if extras:
+                errs.append(f"provenance: unknown keys {sorted(extras)}")
     # Capability vocabulary check — purely structural; provider configuration
     # is asserted later at start time (see _resolve_capability_requirements).
     requires = workflow.get("requires") or {}
@@ -632,7 +675,7 @@ def _validate(workflow: dict) -> list[str]:
 
     steps = workflow.get("steps")
     if steps is None and "extends" not in workflow:
-        errs.append("non-extending workflows must declare steps")
+        errs.append("workflow must declare steps")
     if isinstance(steps, list):
         seen = set()
         for i, step in enumerate(steps):
@@ -676,6 +719,11 @@ def _validate(workflow: dict) -> list[str]:
             t = check.get("type")
             if t not in ALLOWED_CHECK_TYPES:
                 errs.append(f"{section}[{i}] unknown check type: {t!r}")
+            if section == "guards" and t == "stepSummaryMatches":
+                errs.append(
+                    f"{section}[{i}] stepSummaryMatches cannot be a guard — "
+                    f"no step summaries exist before any step has run"
+                )
             if not re.match(r"^[a-z][a-z0-9-]*$", str(check.get("id", ""))):
                 errs.append(f"{section}[{i}] missing or invalid id")
             sev = check.get("severity")
@@ -684,6 +732,26 @@ def _validate(workflow: dict) -> list[str]:
             if t == "artifactSchemaStrict":
                 if "path" not in check or "artifact" not in check:
                     errs.append(f"{section}[{i}] artifactSchemaStrict requires path and artifact")
+            if t == "connectorAvailable":
+                cap = check.get("capability")
+                if cap not in KNOWN_CAPABILITIES:
+                    errs.append(
+                        f"{section}[{i}] connectorAvailable requires a known "
+                        f"capability (got {cap!r}; allowed: {sorted(KNOWN_CAPABILITIES)})"
+                    )
+                pin = check.get("provider")
+                if pin is not None and not re.match(r"^[a-z][a-z0-9_]*$", str(pin)):
+                    errs.append(
+                        f"{section}[{i}] connectorAvailable provider must be "
+                        f"lower_snake_case (got {pin!r})"
+                    )
+            if t == "appStarts":
+                lang = check.get("lang")
+                if lang is not None and not re.match(r"^[a-z][a-z0-9_+-]*$", str(lang)):
+                    errs.append(
+                        f"{section}[{i}] appStarts lang must be a smoke-recipe "
+                        f"key like 'python' (got {lang!r})"
+                    )
             if t == "diffConstraint":
                 bounds = (
                     "filesChanged" in check
@@ -910,6 +978,299 @@ def _substitute(
 
 
 # ---------------------------------------------------------------------------
+# Build-time flattening of `extends` partials
+# ---------------------------------------------------------------------------
+
+def _validate_partial(partial: dict) -> list[str]:
+    """Structural validation of an extends partial (the flatten INPUT).
+    Deliberately narrower than _validate: a partial inherits name/version/
+    steps from its parent, but must name a parent and contribute at least
+    one composition section."""
+    errs: list[str] = []
+    if partial.get("schemaVersion") not in SUPPORTED_SCHEMA_VERSIONS:
+        errs.append(
+            f"unsupported schemaVersion: {partial.get('schemaVersion')!r} "
+            f"(this executor supports {sorted(SUPPORTED_SCHEMA_VERSIONS)})"
+        )
+    ref = partial.get("extends")
+    if not isinstance(ref, str) or not EXTENDS_REF_RE.match(ref):
+        errs.append(
+            f"extends must be '<plugin>:<workflow>@<major.minor>' (got {ref!r})"
+        )
+    if not any(k in partial for k in ("override", "insertAfter", "steps", "mustPass", "guards")):
+        errs.append(
+            "partial contributes nothing: declare at least one of "
+            "override / insertAfter / steps / mustPass / guards"
+        )
+    unknown = set(partial.keys()) - ALLOWED_TOP_LEVEL
+    if unknown:
+        errs.append(f"unknown top-level keys: {sorted(unknown)}")
+    if "provenance" in partial:
+        errs.append("provenance is stamped by flatten; remove it from the partial")
+    name = partial.get("name")
+    if name is not None and (
+        not isinstance(name, str) or not re.match(r"^[a-z][a-zA-Z0-9]*$", name)
+    ):
+        errs.append(f"name must be camelCase (got {name!r})")
+    version = partial.get("version")
+    if version is not None and (
+        not isinstance(version, str) or not re.match(r"^\d+\.\d+\.\d+$", version)
+    ):
+        errs.append(f"version must be semver (got {version!r})")
+    override = partial.get("override")
+    if override is not None:
+        if not isinstance(override, dict) or set(override.keys()) - {"steps"}:
+            errs.append("override must be a mapping with only a 'steps' list")
+        elif not isinstance(override.get("steps"), list):
+            errs.append("override.steps must be a list")
+    insert = partial.get("insertAfter")
+    if insert is not None:
+        if not isinstance(insert, dict):
+            errs.append("insertAfter must be a mapping of anchor step id -> steps list")
+        else:
+            for anchor, new_steps in insert.items():
+                if not isinstance(new_steps, list):
+                    errs.append(f"insertAfter.{anchor} must be a list of steps")
+    return errs
+
+
+def _resolve_parent_path(plugin: str, workflow: str) -> pathlib.Path | None:
+    """Locate the parent workflow YAML for an extends ref. polymath-flows'
+    own workflows ship with this plugin; any other plugin is looked up as a
+    sibling install (marketplace checkout or installed plugin tree)."""
+    if plugin in ("polymath-flows", PLUGIN_ROOT.name):
+        cand = PLUGIN_ROOT / "workflows" / f"{workflow}.yaml"
+        return cand if cand.exists() else None
+    cand = PLUGIN_ROOT.parent / plugin / "workflows" / f"{workflow}.yaml"
+    return cand if cand.exists() else None
+
+
+def _flatten_hash(parent: dict, partial: dict) -> str:
+    """Content hash over the canonical JSON of both SOURCES. flatten --check
+    re-derives everything from the sources, so the hash's job is to make a
+    flattened file self-describing about what it was built from."""
+    import hashlib
+
+    blob = json.dumps(
+        {"parent": parent, "partial": partial},
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    return "sha256:" + hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+# Canonical top-level key order for flattened output, so the same sources
+# always serialize to the same YAML (drift lints byte-compare downstream).
+_FLATTEN_KEY_ORDER = [
+    "schemaVersion",
+    "name",
+    "version",
+    "description",
+    "whenToUse",
+    "triggers",
+    "detectionSignals",
+    "chainsTo",
+    "provenance",
+    "requires",
+    "inputs",
+    "guards",
+    "steps",
+    "mustPass",
+]
+
+
+def _flatten(partial: dict, parent: dict, ref: str) -> tuple[dict | None, list[str]]:
+    """Compose parent + partial into a standalone workflow dict.
+    Semantics (docs/WORKFLOW-SCHEMA.md § 3): override.steps replaces parent
+    steps by id; insertAfter.<anchor> inserts after the named anchor;
+    partial steps append; mustPass/guards append to the parent's; any other
+    key present on the partial replaces the parent's value wholesale."""
+    errs: list[str] = []
+    m = EXTENDS_REF_RE.match(ref)
+    if m is None:
+        return None, [f"extends ref {ref!r} is malformed"]
+    _, _, major, minor = m.groups()
+    parent_version = str(parent.get("version", ""))
+    if not parent_version.startswith(f"{major}.{minor}."):
+        errs.append(
+            f"extends pins @{major}.{minor} but the parent's version is "
+            f"{parent_version or '(missing)'} — update the pin or the parent"
+        )
+    parent_errs = _validate(parent)
+    if parent_errs:
+        errs.extend(f"parent: {e}" for e in parent_errs)
+    if errs:
+        return None, errs
+
+    out = json.loads(json.dumps(parent))  # deep copy via round-trip
+    for key in (
+        "name", "version", "description", "whenToUse", "triggers",
+        "detectionSignals", "chainsTo", "requires", "inputs",
+    ):
+        if key in partial:
+            out[key] = partial[key]
+
+    steps = list(out.get("steps") or [])
+    ids = [s.get("id") for s in steps if isinstance(s, dict)]
+    for st in (partial.get("override") or {}).get("steps") or []:
+        sid = st.get("id") if isinstance(st, dict) else None
+        if sid not in ids:
+            errs.append(f"override step {sid!r} does not exist in the parent")
+            continue
+        steps[ids.index(sid)] = st
+    for anchor, new_steps in (partial.get("insertAfter") or {}).items():
+        ids = [s.get("id") for s in steps if isinstance(s, dict)]
+        if anchor not in ids:
+            errs.append(f"insertAfter anchor {anchor!r} does not exist in the parent")
+            continue
+        pos = ids.index(anchor) + 1
+        for st in new_steps or []:
+            sid = st.get("id") if isinstance(st, dict) else None
+            if sid in ids:
+                errs.append(
+                    f"insertAfter step id {sid!r} collides with an existing step"
+                )
+                continue
+            steps.insert(pos, st)
+            ids.insert(pos, sid)
+            pos += 1
+    if "steps" in partial:
+        ids = [s.get("id") for s in steps if isinstance(s, dict)]
+        for st in partial["steps"] or []:
+            sid = st.get("id") if isinstance(st, dict) else None
+            if sid in ids:
+                errs.append(
+                    f"steps entry {sid!r} collides with an existing step "
+                    f"(use override to replace it)"
+                )
+                continue
+            steps.append(st)
+            ids.append(sid)
+    out["steps"] = steps
+    for section in ("mustPass", "guards"):
+        if section in partial:
+            out[section] = list(parent.get(section) or []) + list(partial[section] or [])
+    out["provenance"] = {
+        "extends": ref,
+        "parentVersion": parent_version,
+        "hash": _flatten_hash(parent, partial),
+    }
+    for key in BUILD_TIME_ONLY_KEYS:
+        out.pop(key, None)
+    if errs:
+        return None, errs
+    ordered = {k: out[k] for k in _FLATTEN_KEY_ORDER if k in out}
+    for k in out:
+        if k not in ordered:
+            ordered[k] = out[k]
+    full_errs = _validate(ordered)
+    if full_errs:
+        return None, [f"flattened result invalid: {e}" for e in full_errs]
+    return ordered, []
+
+
+def _dump_workflow_yaml(doc: dict) -> str:
+    try:
+        import yaml as _yaml
+    except ImportError:
+        _yaml = None
+    if _yaml is None or not hasattr(_yaml, "safe_dump"):
+        _err(
+            "flatten needs PyYAML to write faithful YAML "
+            "(the fallback parser folds block scalars): pip install pyyaml",
+            code=2,
+        )
+    # width=4096: keep one-line scalars (whenToUse is ≤160 chars) on one
+    # line, so the project-index hook's no-PyYAML fallback can still read
+    # name/whenToUse/triggers out of flattened output.
+    return _yaml.safe_dump(doc, sort_keys=False, allow_unicode=True, width=4096)
+
+
+def cmd_flatten(args: argparse.Namespace) -> int:
+    src = pathlib.Path(args.partial)
+    if not src.exists():
+        _err(f"partial not found: {src}", code=3)
+    partial = _load_yaml(src.read_text())
+    if not isinstance(partial, dict):
+        _err("partial root must be a mapping", code=2)
+    errs = _validate_partial(partial)
+    if errs:
+        for e in errs:
+            print(f"  ✗ {e}")
+        print(f"FAIL: {len(errs)} error(s)")
+        return 2
+    ref = partial["extends"]
+    m = EXTENDS_REF_RE.match(ref)
+    plugin, parent_name = m.group(1), m.group(2)
+    parent_path = _resolve_parent_path(plugin, parent_name)
+    if parent_path is None:
+        _err(
+            f"parent workflow {plugin}:{parent_name} not found in the "
+            f"installed marketplace plugins",
+            code=3,
+        )
+    parent = _load_yaml(parent_path.read_text())
+    if not isinstance(parent, dict):
+        _err(f"parent root must be a mapping: {parent_path}", code=2)
+    flattened, errs = _flatten(partial, parent, ref)
+    if errs:
+        for e in errs:
+            print(f"  ✗ {e}")
+        print(f"FAIL: {len(errs)} error(s)")
+        return 2
+
+    if args.check:
+        if not args.out:
+            _err("--check needs --out <flattened.yaml> to compare against", code=2)
+        disk = pathlib.Path(args.out)
+        if not disk.exists():
+            print(
+                f"polymath-flow: flatten --check: {disk} missing "
+                f"(run flatten without --check first)",
+                file=sys.stderr,
+            )
+            return 1
+        on_disk = _load_yaml(disk.read_text())
+        if on_disk != flattened:
+            print(
+                f"polymath-flow: flatten --check: {disk} is stale vs {src} + "
+                f"{parent_path} (re-run: polymath-flow flatten {src} --out {disk})",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"flatten OK: {disk} matches its sources")
+        return 0
+
+    text = _dump_workflow_yaml(flattened)
+    if args.out:
+        outp = pathlib.Path(args.out)
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        outp.write_text(text)
+        if outp.stem != flattened.get("name"):
+            print(
+                f"polymath-flow: note: file stem {outp.stem!r} != workflow name "
+                f"{flattened.get('name')!r} — `start` resolves by FILE STEM, so "
+                f"this runs as '{outp.stem}' (rename the file to shadow "
+                f"'{flattened.get('name')}')",
+                file=sys.stderr,
+            )
+        print(
+            json.dumps(
+                {
+                    "flattened": str(outp),
+                    "parent": str(parent_path),
+                    "provenance": flattened["provenance"],
+                },
+                indent=2,
+            )
+        )
+    else:
+        sys.stdout.write(text)
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
 
@@ -985,8 +1346,51 @@ def cmd_start(args: argparse.Namespace) -> int:
     slug = _slugify(str(title))
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%dT%H-%M")
     run_id = f"{now}-{workflow['name']}-{slug}"
-
     run_dir = _workflow_runs_dir() / run_id
+
+    # Frozen at start (like the capability map) so mid-run edits to
+    # .polymath/project.yaml don't change an in-flight run.
+    project_snapshot = _project_context_snapshot()
+
+    # Guards: declared preconditions, run BEFORE any run state is created so
+    # a failing precondition doesn't litter the store with stillborn runs.
+    # Blocking guard failure refuses the start; advisory failures and
+    # not-applicable outcomes are reported on the start payload.
+    workflow_meta = {"id": run_id, "slug": slug, "name": workflow["name"]}
+    guard_blocking: list[dict] = []
+    guard_advisories: list[dict] = []
+    guard_na: list[dict] = []
+    for check in workflow.get("guards", []) or []:
+        outcome, detail = _run_check(
+            check, run_dir, inputs, workflow_meta,
+            capabilities=resolved_caps, project=project_snapshot,
+        )
+        if outcome is True:
+            continue
+        if outcome == "not-applicable":
+            guard_na.append({"id": check["id"], "type": check["type"], "detail": detail})
+            continue
+        record = {
+            "id": check["id"],
+            "type": check["type"],
+            "severity": _check_severity(check),
+            "detail": detail,
+        }
+        if record["severity"] == "advisory":
+            guard_advisories.append(record)
+        else:
+            guard_blocking.append(record)
+    if guard_blocking:
+        out: dict[str, Any] = {
+            "status": "guard-failed",
+            "failures": guard_blocking,
+            "advisories": guard_advisories,
+        }
+        if guard_na:
+            out["not_applicable"] = guard_na
+        print(json.dumps(out, indent=2))
+        return 2
+
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "step-summaries").mkdir(exist_ok=True)
     (run_dir / "artifacts").mkdir(exist_ok=True)
@@ -1007,14 +1411,17 @@ def cmd_start(args: argparse.Namespace) -> int:
         ],
         "capabilities": resolved_caps,
         "effective_plugins": effective_plugins,
-        # Frozen at start (like the capability map) so mid-run edits to
-        # .polymath/project.yaml don't change an in-flight run.
-        "project_context": _project_context_snapshot(),
+        "project_context": project_snapshot,
     }
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
 
     _trace(run_dir, "start", {"inputs": inputs, "workflow": workflow["name"]})
-    print(json.dumps({"run_id": run_id, "status": "active"}, indent=2))
+    out = {"run_id": run_id, "status": "active"}
+    if guard_advisories:
+        out["guard_advisories"] = guard_advisories
+    if guard_na:
+        out["not_applicable"] = guard_na
+    print(json.dumps(out, indent=2))
     return 0
 
 
@@ -1024,6 +1431,14 @@ def cmd_next(args: argparse.Namespace) -> int:
         _err(f"unknown run: {args.run_id}", code=3)
     state = json.loads((run_dir / "state.json").read_text())
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
+    # The source YAML is re-read on every call; refuse to continue a run
+    # whose source gained build-time-only keys after start.
+    if isinstance(workflow, dict) and any(k in workflow for k in BUILD_TIME_ONLY_KEYS):
+        _err(
+            "workflow source now carries extends/override/insertAfter — "
+            "extends is build-time only; re-flatten and start a new run",
+            code=2,
+        )
     inputs = json.loads((run_dir / "inputs.json").read_text())
     capabilities = state.get("capabilities") or {}
     project = state.get("project_context")
@@ -1188,6 +1603,12 @@ def cmd_assert(args: argparse.Namespace) -> int:
         _err(f"unknown run: {args.run_id}", code=3)
     state = json.loads((run_dir / "state.json").read_text())
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
+    if isinstance(workflow, dict) and any(k in workflow for k in BUILD_TIME_ONLY_KEYS):
+        _err(
+            "workflow source now carries extends/override/insertAfter — "
+            "extends is build-time only; re-flatten and start a new run",
+            code=2,
+        )
     inputs = json.loads((run_dir / "inputs.json").read_text())
     capabilities = state.get("capabilities") or {}
     project = state.get("project_context")
@@ -1283,9 +1704,18 @@ def _assert(
 
     blocking_failures: list[dict] = []
     advisory_failures: list[dict] = []
+    not_applicable: list[dict] = []
     for check in checks:
-        ok, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities, project=project)
-        if ok:
+        outcome, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities, project=project)
+        if outcome is True:
+            continue
+        if outcome == "not-applicable":
+            # A third, non-blocking OUTCOME (not a severity): the gate had
+            # nothing to verify here (e.g. appStarts with no smoke recipe).
+            # Reported so the absence is visible, but never pauses the run.
+            not_applicable.append(
+                {"id": check["id"], "type": check["type"], "detail": detail}
+            )
             continue
         record = {
             "id": check["id"],
@@ -1305,31 +1735,31 @@ def _assert(
             f"{len(blocking_failures)} blocking mustPass check(s) failed"
         )
         (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-        _trace(
-            run_dir,
-            "assert-fail",
-            {"failures": blocking_failures, "advisories": advisory_failures},
-        )
-        print(
-            json.dumps(
-                {
-                    "status": "paused",
-                    "failures": blocking_failures,
-                    "advisories": advisory_failures,
-                },
-                indent=2,
-            )
-        )
+        trace_data = {"failures": blocking_failures, "advisories": advisory_failures}
+        out = {
+            "status": "paused",
+            "failures": blocking_failures,
+            "advisories": advisory_failures,
+        }
+        if not_applicable:
+            trace_data["not_applicable"] = not_applicable
+            out["not_applicable"] = not_applicable
+        _trace(run_dir, "assert-fail", trace_data)
+        print(json.dumps(out, indent=2))
         return 2
 
     state["status"] = "completed"
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-    _trace(run_dir, "complete", {"checks": len(checks), "advisories": advisory_failures})
+    trace_data = {"checks": len(checks), "advisories": advisory_failures}
     out = {
         "status": "completed",
         "checks": len(checks),
         "advisories": advisory_failures,
     }
+    if not_applicable:
+        trace_data["not_applicable"] = not_applicable
+        out["not_applicable"] = not_applicable
+    _trace(run_dir, "complete", trace_data)
     if workflow.get("chainsTo"):
         out["chainsTo"] = workflow["chainsTo"]  # arc hand-off; agent proposes, never auto-runs
     print(json.dumps(out, indent=2))
@@ -1344,7 +1774,10 @@ def _run_check(
     *,
     capabilities: dict | None = None,
     project: dict | None = None,
-) -> tuple[bool, str]:
+) -> tuple[bool | str, str]:
+    """Run one check. Returns (outcome, detail) where outcome is True
+    (pass), False (fail — severity decides whether it blocks), or the
+    string "not-applicable" (the gate had nothing to verify; never blocks)."""
     t = check["type"]
     if t == "fileExists":
         path = _substitute(check["path"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
@@ -1387,7 +1820,253 @@ def _run_check(
         return ok, detail
     if t == "diffConstraint":
         return _run_diff_constraint(check)
+    if t == "connectorAvailable":
+        return _run_connector_available(check)
+    if t == "appStarts":
+        return _run_app_starts(check, project)
     return False, f"unknown check type: {t}"
+
+
+# ---------------------------------------------------------------------------
+# connectorAvailable — capability/connector presence gate
+# ---------------------------------------------------------------------------
+
+
+def _run_connector_available(check: dict) -> tuple[bool, str]:
+    """Pass iff the named capability has a provider configured in
+    `.polymath/capabilities.yaml` and an adapter plugin is resolvable
+    (project `plugin:` override or the vocabulary's providerPlugins map).
+    Pass/fail only — an unconfigured connector is exactly what this gate
+    exists to catch; use it in `guards` to stop a connector-dependent
+    workflow before any work. Distinct from the out-of-scope connector
+    EVENTS (wait-for-event): this is a static presence probe, not a
+    subscription."""
+    cap = check.get("capability")
+    if cap not in KNOWN_CAPABILITIES:
+        return False, f"unknown capability {cap!r} (allowed: {sorted(KNOWN_CAPABILITIES)})"
+    project_caps, source = _load_project_capabilities()
+    project_map = (project_caps.get("capabilities") or {}) if project_caps else {}
+    entry = project_map.get(cap)
+    if not isinstance(entry, dict) or not entry.get("provider"):
+        return False, (
+            f"capability {cap}: no provider configured "
+            f"(config: {source or '.polymath/capabilities.yaml — none found'})"
+        )
+    provider = str(entry["provider"])
+    wanted = check.get("provider")
+    if wanted and wanted != provider:
+        return False, (
+            f"capability {cap}: configured provider {provider!r} "
+            f"does not match required {wanted!r}"
+        )
+    vocab = _load_capability_vocabulary()
+    vocab_entry = (vocab.get("capabilities") or {}).get(cap) or {}
+    plugin = entry.get("plugin") or (vocab_entry.get("providerPlugins") or {}).get(provider)
+    if not plugin:
+        return False, (
+            f"capability {cap}: provider {provider!r} has no adapter plugin "
+            f"mapping (set `plugin:` in capabilities.yaml or add a binding)"
+        )
+    return True, f"capability {cap}: provider={provider} plugin={plugin}"
+
+
+# ---------------------------------------------------------------------------
+# appStarts — boot-verification gate driven by the project smoke recipes
+# ---------------------------------------------------------------------------
+
+
+def _run_app_starts(check: dict, project: dict | None) -> tuple[bool | str, str]:
+    """Boot-verify the app using the frozen project snapshot's
+    `smoke.<lang>` recipe (tests passing does not imply the app runs).
+    Resolves "not-applicable" — non-blocking — when the repo declares no
+    matching recipe: absence of boot-verification config is not a failure."""
+    smoke = (project or {}).get("smoke")
+    if not isinstance(smoke, dict) or not smoke:
+        return "not-applicable", "no smoke recipes in the project snapshot (gate skipped)"
+    lang = check.get("lang")
+    if lang is None:
+        if len(smoke) == 1:
+            lang = next(iter(smoke))
+        else:
+            return False, (
+                f"appStarts needs 'lang' when several smoke recipes exist "
+                f"(have: {sorted(smoke)})"
+            )
+    recipe = smoke.get(lang)
+    if not isinstance(recipe, dict) or not recipe.get("start"):
+        return "not-applicable", f"no smoke recipe for lang={lang!r} (gate skipped)"
+    return _boot_verify(recipe)
+
+
+def _boot_verify(recipe: dict) -> tuple[bool | str, str]:
+    """Start the app per the recipe and wait for its readiness signal.
+
+    Readiness resolution order:
+      - `readiness` starting with http(s):// — HTTP probe of that URL
+      - `readiness` starting with "/"        — HTTP probe of 127.0.0.1:<port><path>
+      - any other `readiness` string         — regex over the captured boot log
+      - no `readiness`, `port` declared      — TCP connect to 127.0.0.1:<port>
+      - neither                              — clean exit (one-shot starter) or
+                                               surviving a short grace window
+    The started process group is always torn down afterwards; what the start
+    command detaches (e.g. containers) is the recipe author's to clean up.
+    `credentials_file` values are loaded into the environment and never logged."""
+    import signal
+    import socket
+    import tempfile
+    import time
+    import urllib.error
+    import urllib.request
+
+    start_cmd = str(recipe["start"])
+    # The loader only guarantees `start`; everything else in the recipe is
+    # best-effort config that must not crash the gate engine.
+    try:
+        timeout = int(recipe.get("timeout_seconds") or 60)
+    except (TypeError, ValueError):
+        timeout = 60
+    if timeout <= 0:
+        timeout = 60
+    port = recipe.get("port")
+    if port is not None:
+        try:
+            port = int(port)
+        except (TypeError, ValueError):
+            return False, f"smoke recipe port {recipe.get('port')!r} is not an integer"
+    readiness = recipe.get("readiness")
+
+    env = os.environ.copy()
+    cred = recipe.get("credentials_file")
+    if cred:
+        cred_path = pathlib.Path(str(cred)).expanduser()
+        if not cred_path.is_file():
+            return "not-applicable", (
+                f"credentials_file {cred} not present on this machine (gate skipped)"
+            )
+        try:
+            for line in cred_path.read_text().splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip()  # values intentionally never logged
+        except (OSError, UnicodeDecodeError):
+            return "not-applicable", f"credentials_file {cred} unreadable (gate skipped)"
+
+    def http_ready(probe_url: str) -> bool:
+        try:
+            with urllib.request.urlopen(probe_url, timeout=2) as resp:
+                return resp.status < 500
+        except urllib.error.HTTPError as e:
+            return e.code < 500
+        except Exception:
+            return False
+
+    def tcp_ready(p: int) -> bool:
+        try:
+            with socket.create_connection(("127.0.0.1", p), timeout=2):
+                return True
+        except OSError:
+            return False
+
+    url: str | None = None
+    pattern: str | None = None
+    if isinstance(readiness, str) and readiness:
+        if readiness.startswith(("http://", "https://")):
+            url = readiness
+        elif readiness.startswith("/"):
+            if not port:
+                return False, (
+                    "smoke recipe declares a readiness path but no port — "
+                    "add `port:` or use a full http:// readiness URL"
+                )
+            url = f"http://127.0.0.1:{port}{readiness}"
+        else:
+            pattern = readiness
+            try:
+                re.compile(pattern)
+            except re.error as e:
+                return False, f"invalid readiness pattern {pattern!r}: {e}"
+
+    fd, log_name = tempfile.mkstemp(prefix="polymath-appstarts-")
+    os.close(fd)
+    log_path = pathlib.Path(log_name)
+    proc: subprocess.Popen | None = None
+    started = time.monotonic()
+    deadline = started + timeout
+    grace = min(timeout, 5)
+    try:
+        with log_path.open("wb") as log:
+            proc = subprocess.Popen(
+                start_cmd,
+                shell=True,
+                start_new_session=True,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                env=env,
+            )
+        while True:
+            exited = proc.poll() is not None
+            if url is not None:
+                if http_ready(url):
+                    return True, f"app ready: GET {url} answered"
+            elif pattern is not None:
+                if re.search(pattern, log_path.read_text(errors="ignore")):
+                    return True, f"app ready: boot log matched {pattern!r}"
+                if exited:
+                    # Log is final once the starter is gone; no point polling.
+                    return False, (
+                        f"start command exited rc={proc.returncode} without the "
+                        f"boot log matching {pattern!r}"
+                    )
+            elif port:
+                if tcp_ready(int(port)):
+                    return True, f"app ready: port {port} accepting connections"
+            else:
+                if exited:
+                    ok = proc.returncode == 0
+                    return ok, (
+                        f"start command exited rc={proc.returncode} "
+                        f"(no readiness signal declared)"
+                    )
+                if time.monotonic() - started >= grace:
+                    return True, (
+                        f"app still running after {grace}s "
+                        f"(no readiness signal declared)"
+                    )
+            if exited and proc.returncode != 0:
+                return False, f"start command exited rc={proc.returncode} before readiness"
+            if time.monotonic() >= deadline:
+                return False, f"app not ready within {timeout}s (start: {start_cmd})"
+            time.sleep(0.5)
+    finally:
+        if proc is not None:
+            # start_new_session makes pgid == proc.pid for the whole group,
+            # so signal the GROUP unconditionally: backgrounded survivors
+            # outlive the shell leader, and a leaked server would make the
+            # NEXT appStarts run false-positive against the stale instance.
+            try:
+                os.killpg(proc.pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError, OSError):
+                pass
+            if proc.poll() is None:
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError, OSError):
+                pass
+            if proc.poll() is None:
+                try:
+                    proc.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+        try:
+            log_path.unlink()
+        except OSError:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -1728,8 +2407,11 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=textwrap.dedent(
             """\
             commands:
-              validate <workflow.yaml>       validate schema
-              start <name> [--input k=v ...] create workflow run
+              validate <workflow.yaml>       validate schema (hard-errors on extends)
+              flatten <partial.yaml> [--out <file>] [--check]
+                                             compose an extends partial at build time
+                                             (--check: drift lint, exit 1 when stale)
+              start <name> [--input k=v ...] run guards, then create workflow run
               next <run_id>                  print JSON for next runnable step
               complete <run_id> <step> [--summary <file>]
               fail <run_id> <step> [--summary <file>]
@@ -1744,6 +2426,18 @@ def build_parser() -> argparse.ArgumentParser:
     pv = sub.add_parser("validate")
     pv.add_argument("workflow")
     pv.set_defaults(func=cmd_validate)
+
+    pfl = sub.add_parser(
+        "flatten", help="compose an extends partial into a standalone workflow"
+    )
+    pfl.add_argument("partial", help="path to the extends-bearing partial YAML")
+    pfl.add_argument("--out", help="write the flattened workflow here (default: stdout)")
+    pfl.add_argument(
+        "--check",
+        action="store_true",
+        help="drift lint: verify --out matches a fresh flatten; exit 1 when stale",
+    )
+    pfl.set_defaults(func=cmd_flatten)
 
     ps = sub.add_parser("start")
     ps.add_argument("name")

@@ -59,7 +59,18 @@ A workflow by `name` resolves in this order (highest priority first):
    (fallback `~/.claude/polymath/workflows/`)
 3. Marketplace: installed `polymath-flows/workflows/<name>.yaml`
 
-## 3. Inheritance
+## 3. Inheritance — build-time flattening
+
+`extends` is **build-time only**. A partial workflow names a parent and
+contributes overrides; `polymath-flow flatten` composes them into a
+standalone workflow that the runner executes. The runner **hard-errors**
+on any workflow still carrying `extends` / `override` / `insertAfter` at
+`validate`, `start`, `next`, or `assert` time — runtime merging would
+make a run's behavior depend on a parent file that can change underneath
+it.
+
+A partial (e.g. `.claude/polymath/partials/shipFeatureAcme.yaml` —
+anywhere outside the runner's workflow resolution directories):
 
 ```yaml
 schemaVersion: 0.1
@@ -81,11 +92,38 @@ mustPass:
     pattern: "(risk|rollback|test)"
 ```
 
-Override semantics:
+Flatten it into the project workflow layer, and keep it fresh with the
+drift lint:
 
-- `override.steps`: replace parent steps with the same `id`.
-- `insertAfter.<id>`: insert new steps after the named anchor.
-- `mustPass`: appended to parent checks.
+```bash
+polymath-flow flatten .claude/polymath/partials/shipFeatureAcme.yaml \
+  --out .claude/polymath/workflows/shipFeature.yaml
+polymath-flow flatten .claude/polymath/partials/shipFeatureAcme.yaml \
+  --out .claude/polymath/workflows/shipFeature.yaml --check   # exit 1 when stale
+```
+
+Composition semantics:
+
+- `override.steps`: replace parent steps with the same `id` (unknown id
+  errors).
+- `insertAfter.<id>`: insert new steps after the named anchor (unknown
+  anchor or colliding step id errors).
+- `steps`: appended after the parent's steps.
+- `mustPass` / `guards`: appended to the parent's checks.
+- Any other key present on the partial (`name`, `version`, `description`,
+  `whenToUse`, `triggers`, `requires`, `inputs`, …) replaces the parent's
+  value wholesale; absent keys are inherited. A partial without `name`
+  produces a workflow that shadows its parent by name in the project
+  layer (§ 2).
+- The `@major.minor` pin must prefix-match the parent's semver, or
+  flatten refuses.
+
+The flattened output carries a `provenance` block (`extends` ref, the
+parent's full version, and a `sha256:` hash over both sources) stamped by
+the flattener. `flatten --check` recomputes the composition from the
+sources and exits 1 when the on-disk flattened file no longer matches —
+wire it wherever the project lints. Hand-authored workflows must not
+declare `provenance`.
 
 ## 4. `mustPass` check types
 
@@ -98,7 +136,9 @@ Override semantics:
 | `artifactValid` | `path`, `artifact` | blocking | **Strong.** Pass if frontmatter parses and satisfies the named artifact schema. |
 | `artifactSchemaStrict` | `path`, `artifact`, optional `minBodyChars`, `rejectAdditionalProperties` | blocking | **Strong.** Like `artifactValid` plus: requires `minBodyChars` (default 200) of substantive non-heading content and (by default) rejects frontmatter fields not declared in the schema. Catches hollow stub artifacts. |
 | `diffConstraint` | at least one of `filesChanged`, `linesChanged`, `pathAllowlist`, `pathBlocklist`; optional `since` ref | blocking | **Strong.** Bounds the worktree (or ranged-diff) effect of the workflow. `filesChanged.min` proves *something* changed; `.max` and `pathAllowlist` prove the agent did not run away. Untracked files are counted. |
-| `command` (in guards) | `command` | blocking | Used in `guards:` only. Pre-step precondition. |
+| `appStarts` | optional `lang` (which `smoke.<lang>` recipe; required when several exist) | blocking | **Strong.** Boot-verifies the app from the frozen project snapshot's `smoke.<lang>` recipe (start command, then HTTP path / boot-log pattern / TCP port readiness, within `timeout_seconds`). Resolves **`not-applicable`** — reported in the result's `not_applicable` array, never pausing — when the repo declares no matching recipe or the recipe's `credentials_file` is absent on this machine. Tests passing does not imply the app runs; this gate closes that gap. |
+| `connectorAvailable` | `capability`; optional `provider` pin | blocking | Pass iff the capability has a provider configured in `.polymath/capabilities.yaml` (and an adapter plugin resolves). Pass/fail only — use it in `guards:` to stop a connector-dependent workflow before any work. A static presence probe; not the out-of-scope connector *events* (§ 7). |
+| `command` (in guards) | `command` | blocking | Pre-step precondition (any check type except `stepSummaryMatches` is legal in `guards:` — no step summaries exist before any step has run; `command` is the common one). |
 
 Recognised artifact names for `artifactValid` / `artifactSchemaStrict`:
 
@@ -117,11 +157,21 @@ result, but do **not** pause.
 
 A workflow should have at least one strong-deterministic blocking
 gate — one of `commandSucceeds`, `artifactValid`,
-`artifactSchemaStrict`, or `diffConstraint`. `polymath-flow validate`
-emits a warning when this is missing, because a workflow whose only
-blockers are `fileExists` / `fileMatches` / advisory
+`artifactSchemaStrict`, `diffConstraint`, or `appStarts`.
+`polymath-flow validate` emits a warning when this is missing, because a
+workflow whose only blockers are `fileExists` / `fileMatches` / advisory
 `stepSummaryMatches` can pass on a hollow run (stub files plus a
 regex-matching summary).
+
+### 4.2 Guards
+
+`guards:` run at `start`, after validation and capability resolution but
+**before any run state is created**. A failing blocking guard prints
+`{"status": "guard-failed", "failures": [...]}` and exits 2 without
+creating a run directory; advisory guard failures are reported on the
+start payload (`guard_advisories`) and the run proceeds.
+`not-applicable` guard outcomes (e.g. `appStarts` with no smoke recipe)
+are reported (`not_applicable`) and never block.
 
 ## 5. Placeholders
 
@@ -179,7 +229,9 @@ State transitions are owned by
 
 - Parallel steps.
 - Agent panels.
-- Connector events (`wait-for-event`).
+- Connector events (`wait-for-event`) — *waiting on* a connector is out of
+  scope; checking that a connector is *configured* is the supported
+  `connectorAvailable` gate (§ 4).
 - Shell steps that mutate infrastructure.
 - AI-based cross-artifact alignment as a blocking gate.
 - Real PR creation through GitHub (the `pr` skill drafts only;

@@ -33,6 +33,25 @@ expect_silent: true
 ---
 ```
 
+Project-overlay fixture: an optional `overlay` key (a single-line JSON string,
+so the no-PyYAML shim can parse the frontmatter) is written to
+`.polymath/route-signals.project.json` inside the fixture's scratch cwd before
+the hook runs. The string is written verbatim — fixtures may carry junk on
+purpose to assert the hook degrades quiet on a malformed overlay.
+
+```markdown
+---
+prompt: "Deploy the acme stack for ACME-123"
+overlay: '{"rules": [{"id": "acmeDeploy", "surface": "acme:deploy-runbook", "regex": ["ACME-\\d+"], "intents": ["deploy the acme stack"]}]}'
+must_appear:
+  - "acme:deploy-runbook"
+---
+```
+
+Every `run` executes the hook in a fresh scratch cwd with
+POLYMATH_ROUTE_MUTE scrubbed from the environment, so neither this repo's own
+`.polymath/` nor developer-machine state can flip the ROUTE-TRIGGER gate.
+
 Run modes:
 
   check  — validate every fixture's frontmatter (no execution).
@@ -108,12 +127,16 @@ def parse_fixture(path: pathlib.Path) -> dict:
     not_must = fm.get("must_not_appear") or []
     if isinstance(not_must, str):
         not_must = [not_must]
+    overlay = fm.get("overlay")
+    if overlay is not None and not isinstance(overlay, str):
+        raise ValueError(f"{path.name}: `overlay` must be a single-line JSON string")
     return {
         "id": path.stem,
         "prompt": fm["prompt"],
         "expect_silent": silent,
         "must_appear": must,
         "must_not_appear": not_must,
+        "overlay": overlay,
     }
 
 
@@ -137,15 +160,35 @@ def _no_fixtures(label: str, glob: str, allow_empty: bool) -> int:
     return 1
 
 
-def run_hook(prompt: str) -> str:
+def run_hook(prompt: str, overlay: str | None = None) -> str:
+    """Run the hook hermetically: a fresh scratch cwd (so this repo's own
+    .polymath/ and any developer overlay can't leak into the gate) and a
+    scrubbed environment. `overlay` is written verbatim to the scratch
+    .polymath/route-signals.project.json — including deliberately broken
+    content, to assert the hook degrades quiet."""
+    import os
+    import tempfile
+
     payload = json.dumps({"prompt": prompt})
-    proc = subprocess.run(
-        [sys.executable, str(HOOK)],
-        input=payload,
-        capture_output=True,
-        text=True,
-        timeout=15,
-    )
+    env = {k: v for k, v in os.environ.items() if k != "POLYMATH_ROUTE_MUTE"}
+    with tempfile.TemporaryDirectory(prefix="route-trigger-") as scratch:
+        # .git sentinel: the hook's mute/overlay walks stop at a repo root,
+        # so without one they would escape the scratch dir and could pick up
+        # developer-machine state (e.g. a TMPDIR under $HOME).
+        (pathlib.Path(scratch) / ".git").mkdir()
+        if overlay is not None:
+            overlay_dir = pathlib.Path(scratch) / ".polymath"
+            overlay_dir.mkdir()
+            (overlay_dir / "route-signals.project.json").write_text(overlay)
+        proc = subprocess.run(
+            [sys.executable, str(HOOK)],
+            input=payload,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            cwd=scratch,
+            env=env,
+        )
     return proc.stdout
 
 
@@ -193,7 +236,7 @@ def cmd_run(allow_empty: bool = False) -> int:
             print(f"  FAIL  {f.name}: {e}")
             failed += 1
             continue
-        out = run_hook(fx["prompt"])
+        out = run_hook(fx["prompt"], fx.get("overlay"))
         problems = []
         if fx["expect_silent"]:
             if out.strip():

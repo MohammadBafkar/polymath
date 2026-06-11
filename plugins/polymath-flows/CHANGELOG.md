@@ -4,6 +4,55 @@
 
 ### Added
 
+- **Build-time `extends` flattening.** `polymath-flow flatten
+  <partial.yaml> [--out <file>] [--check]` composes a partial (extends +
+  override/insertAfter/steps/mustPass/guards) with its catalog parent
+  into a standalone workflow, stamps a `provenance` block (extends ref,
+  parent version, sha256 over both sources), and `--check` is a drift
+  lint that exits 1 when the flattened file is stale. The runner now
+  **hard-errors** on `extends`/`override`/`insertAfter` at
+  validate/start and on the next/assert reload path — runtime merging
+  never happens. The workflow schema gained the missing top-level
+  if/then: partials validate without name/version/steps; extends-free
+  workflows keep the full contract.
+- **`appStarts` gate type.** Boot-verifies the app from the frozen
+  project snapshot's `smoke.<lang>` recipe (HTTP path, boot-log pattern,
+  or TCP-port readiness within `timeout_seconds`; `credentials_file`
+  values are injected, never logged). Counts as a strong gate. Resolves
+  a third, non-blocking outcome — `not-applicable`, reported in the
+  result's `not_applicable` array — when the repo declares no matching
+  recipe or the credentials file is absent on this machine.
+- **`connectorAvailable` gate type.** Pass iff the named capability has
+  a provider configured in `.polymath/capabilities.yaml` and an adapter
+  plugin resolves; optional `provider` pin. Built for `guards:`.
+- **Guards now execute.** `guards:` run at `start` after validation and
+  capability resolution, before any run state is created: a blocking
+  guard failure prints `{"status": "guard-failed", …}` and exits 2
+  without littering the run store; advisory failures and not-applicable
+  outcomes are reported on the start payload.
+- **Project workflows are discoverable.** The SessionStart hook indexes
+  project-layer (`./.claude/polymath/workflows/`) and user-layer
+  workflows into a machine-local tiered fragment
+  (`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflow-index.project.json`)
+  and appends a "Project workflows" block to the injected catalog index.
+  Entries are keyed by **file stem** — the handle `start` resolves — with
+  a diverging YAML `name:` recorded as `declaredName` (and `flatten
+  --out` warns on the mismatch). Project tier shadows user tier;
+  catalog-name shadowing is annotated; trigger phrases colliding with
+  catalog triggers (or an earlier tier) are dropped and recorded in the
+  fragment — never an error. A workflow needs a one-line `whenToUse` to
+  be indexed; repos with no project/user workflows keep a byte-identical
+  injection.
+
+### Fixed
+
+- `incidentRetroToActions`'s `postmortem-readable` guard referenced
+  `${POLYMATH_INPUT_POSTMORTEMPATH}`, a convention nothing sets — inert
+  while guards were unexecuted, but a permanent start-refusal once they
+  run. It now uses `${inputs.postmortemPath}` like the rest of the
+  workflow.
+- `stepSummaryMatches` is rejected in `guards:` (schema + runner): no
+  step summaries exist before any step has run, so it could never pass.
 - **`${project.*}` placeholders.** Step `prompt`/`artifacts` and mustPass
   `path`/`command` can reference the project-context snapshot
   (`${project.stack.languages.0.lang}`); numeric segments index lists,

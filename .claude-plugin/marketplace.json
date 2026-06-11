@@ -14,7 +14,7 @@
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
       "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "foundation",
       "tags": [
         "foundation",
@@ -79,7 +79,7 @@
       "name": "polymath-flows",
       "source": "./plugins/polymath-flows",
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "orchestration",
       "tags": [
         "orchestration",

@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Project routing overlay.** The route-hint hook reads
+  `.polymath/route-signals.project.json` (found by the same cwd→repo-root
+  walk as the mute marker) and scores its rules together with the bundled
+  table: project rules win score ties and are labeled `project overlay`
+  in the hint. Rules are sanitized on load — signal fields must be lists
+  of strings, non-compiling `url`/`regex` patterns are dropped, `trust`
+  is stripped (a project file can never claim auto-headless), rules
+  without a `surface` or a signal are skipped — the overlay is capped at
+  50 rules, and a malformed file is ignored entirely; project config can
+  never break a turn. The SURFACE-2 uniqueness gate stays
+  marketplace-internal; overlays may duplicate catalog intents and the
+  scorer resolves them at runtime.
 - **Convention-pack templates** under `templates/conventions/`
   (`knowledge-base`, `stack-doc`, `artifact-matrix`, `review-checklist`) —
   vendor-neutral skeletons any project or defaults pack fills in, including the

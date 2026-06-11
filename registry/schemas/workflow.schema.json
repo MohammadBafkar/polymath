@@ -5,7 +5,19 @@
   "description": "Workflow YAML schema for polymath-flows v0.1. Serial step replacement / insertion only. Unsupported keys must fail closed.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "name", "version", "steps"],
+  "required": ["schemaVersion"],
+  "if": { "required": ["extends"] },
+  "then": {
+    "description": "Partial workflow: composes a parent at build time via `polymath-flow flatten`. Must contribute at least one composition section; name/version/steps are optional (inherited from the parent when absent).",
+    "anyOf": [
+      { "required": ["override"] },
+      { "required": ["insertAfter"] },
+      { "required": ["steps"] },
+      { "required": ["mustPass"] },
+      { "required": ["guards"] }
+    ]
+  },
+  "else": { "required": ["name", "version", "steps"] },
   "properties": {
     "schemaVersion": {
       "description": "Schema version. v0.1 accepts 0.1 only.",
@@ -67,9 +79,29 @@
       "uniqueItems": true
     },
     "extends": {
-      "description": "Parent workflow reference in the form '<plugin>:<workflow>@<version>'. v0.1 supports serial step replacement and named-anchor insertion only.",
+      "description": "Parent workflow reference in the form '<plugin>:<workflow>@<major.minor>'. BUILD-TIME ONLY: a partial declaring extends is composed into a standalone workflow by `polymath-flow flatten`; the runner hard-errors on any workflow that still carries extends/override/insertAfter at validate/start/next/assert time. The @major.minor pin must prefix-match the parent's semver. v0.1 supports serial step replacement and named-anchor insertion only.",
       "type": "string",
       "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*@\\d+\\.\\d+$"
+    },
+    "provenance": {
+      "description": "Stamped by `polymath-flow flatten` on flattened output: the extends ref the file was built from, the parent's full version at flatten time, and a content hash over the canonical parent+partial sources. `polymath-flow flatten --check` recomputes the flatten and fails on drift. Hand-authored workflows must not declare this key.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["extends", "hash"],
+      "properties": {
+        "extends": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+:[a-zA-Z][a-zA-Z0-9-]*@\\d+\\.\\d+$"
+        },
+        "parentVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
     },
     "requires": {
       "description": "Hard dependencies. Workflow validation fails if any required plugin is not installed, or if a required capability has no provider configured in `.polymath/capabilities.yaml`. Either or both of `plugins` and `capabilities` may be declared; capabilities are the recommended shape for cross-provider work (issue tracker, observability, pager, etc.) and capability resolution adds the resolved adapter plugins to the effective plugin set transparently.",
@@ -138,9 +170,18 @@
       }
     },
     "guards": {
-      "description": "Preconditions checked before the first step. Failing guard pauses workflow before any work.",
+      "description": "Preconditions run at `start`, before any run state is created. A failing blocking guard refuses the start (status guard-failed, exit 2, no run directory); advisory failures and not-applicable outcomes are reported on the start payload and the run proceeds. stepSummaryMatches is not legal here — no step summaries exist before any step has run.",
       "type": "array",
-      "items": { "$ref": "#/$defs/check" }
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/check" },
+          {
+            "properties": {
+              "type": { "not": { "const": "stepSummaryMatches" } }
+            }
+          }
+        ]
+      }
     },
     "steps": {
       "description": "Ordered serial steps. v0.1: each step runs after the prior step completes successfully.",
@@ -224,11 +265,13 @@
             "command",
             "artifactValid",
             "artifactSchemaStrict",
-            "diffConstraint"
+            "diffConstraint",
+            "appStarts",
+            "connectorAvailable"
           ]
         },
         "severity": {
-          "description": "advisory checks run and report but cannot fail the workflow on their own. blocking checks halt the workflow on failure. If omitted, defaults are: stepSummaryMatches→advisory; everything else→blocking.",
+          "description": "advisory checks run and report but cannot fail the workflow on their own. blocking checks halt the workflow on failure. If omitted, defaults are: stepSummaryMatches→advisory; everything else→blocking. Independent of severity, appStarts may resolve 'not-applicable' — a non-blocking OUTCOME (not a severity) reported in the result's not_applicable array when the project declares no matching smoke recipe.",
           "type": "string",
           "enum": ["advisory", "blocking"]
         },
@@ -284,6 +327,31 @@
           "description": "For diffConstraint: git ref to diff against. Defaults to the working tree vs HEAD.",
           "type": "string",
           "minLength": 1
+        },
+        "lang": {
+          "description": "For appStarts: which `smoke.<lang>` recipe from the frozen project-context snapshot to run (key matches `stack.languages[].lang`). Optional when the snapshot declares exactly one recipe. appStarts resolves 'not-applicable' (non-blocking, reported but never pausing) when no snapshot, no smoke block, or no recipe for this lang exists — a repo without boot-verification config is not penalised.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_+-]*$"
+        },
+        "capability": {
+          "description": "For connectorAvailable: capability that must have a provider configured in `.polymath/capabilities.yaml` (and a resolvable adapter plugin). Pass/fail only — an unconfigured connector fails the check; use it in `guards` to stop a connector-dependent workflow before any work.",
+          "type": "string",
+          "enum": [
+            "issue_tracker",
+            "observability",
+            "incident_comms",
+            "pager",
+            "ci",
+            "cloud",
+            "runtime",
+            "vcs",
+            "vulnerability_scanner"
+          ]
+        },
+        "provider": {
+          "description": "For connectorAvailable: additionally require the configured provider to be exactly this one.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
         }
       },
       "allOf": [
@@ -325,6 +393,10 @@
               { "required": ["pathBlocklist"] }
             ]
           }
+        },
+        {
+          "if": { "properties": { "type": { "const": "connectorAvailable" } }, "required": ["type"] },
+          "then": { "required": ["capability"] }
         }
       ]
     }
