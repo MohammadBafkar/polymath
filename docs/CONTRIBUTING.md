@@ -6,11 +6,9 @@ open-source Claude Code marketplace.
 ## Ground rules
 
 1. **One plugin per concern.** Roles, lifecycle stages, target platforms, and external services each get their own plugin.
-2. **Per-plugin always-on listing cost ≤ 400 tokens.** Measured by `tools/token-budget.sh`. CI enforces.
-3. **Skill body ≤ 500 lines.** Reference material spills to `references/`.
-4. **Description ≤ 200 chars**, trigger phrase first.
-5. **Each plugin owns its templates** in `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Plan, RFC, Runbook, ArchitectureDoc, DACIDecision, TradeoffMatrix, Postmortem, ThreatModel, PRDescription) is validated against the corresponding JSON schema in `registry/schemas/artifacts/`.
-6. **No secrets** in commits. The `polymath-engineering` secret-scan hook is a backstop, not a permission slip.
+2. **Budgets and limits** (always-on token cost, skill body length, description shape) — the canonical numbers live in [`PLUGIN-AUTHORING.md` §8](PLUGIN-AUTHORING.md#8-token-budget-discipline) and §4. CI enforces them; don't memorize them from here.
+3. **Each plugin owns its templates** in `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Plan, RFC, Runbook, ArchitectureDoc, DACIDecision, TradeoffMatrix, Postmortem, ThreatModel, PRDescription) is validated against the corresponding JSON schema in `registry/schemas/artifacts/`.
+4. **No secrets** in commits. The `polymath-engineering` secret-scan hook is a backstop, not a permission slip.
 
 ## Workflow
 
@@ -19,13 +17,9 @@ open-source Claude Code marketplace.
    `polymath-author:new-skill <plugin> <skill>` (the bundled scripts at
    `plugins/polymath-author/bin/` walk up to find the caller's marketplace root).
 3. Author components. Keep them small. Match the SDLC stage that motivated the issue.
-4. Run all local checks:
-   - `tools/validate-all.sh`
-   - `tools/lint-skills.sh`
-   - `tools/token-budget.sh`
-   - `tools/conformance.sh --all`
-   - `tools/bakeoff.py check`
-   - `tools/skill-triggering.py check`
+4. Run the local check sequence in
+   [`PLUGIN-AUTHORING.md` §11](PLUGIN-AUTHORING.md#11-submitting-a-plugin)
+   (the canonical list; `tools/conformance.sh --all` is the umbrella gate).
 5. Add at least one golden fixture under `tests/golden/<plugin>/<scenario>.md`.
 6. Update `.claude-plugin/marketplace.json` if you added or renamed a plugin.
 7. Open a PR. CI runs validate / lint / token-budget / link-check / golden-tests / evaluation.

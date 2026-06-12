@@ -84,15 +84,13 @@ following hold:
 4. At least one skill-triggering test passes on three different
    trigger phrasings (live run, not just parseable).
 5. Connector and infra plugins are **eligible for `stable` only after
-   distinct-value proof plus the normal stable gates.** Eligibility
-   requires primary-source evidence — a bakeoff case, side-by-side
-   artifact, or documented workflow-shape gap — that Polymath adds
-   workflow, critique, safety, or artifact value beyond official docs,
-   MCPs, LSPs, or CLIs. The evidence URL is recorded in
+   distinct-value proof plus the normal stable gates.** What counts as
+   distinct-value evidence — and the matching `beta` prerequisite — is
+   defined canonically in
+   [docs/INTEGRATION-POLICY.md §2](INTEGRATION-POLICY.md); the evidence
+   URL is recorded in
    [`registry/stability-evidence.json`](../registry/stability-evidence.json)
-   as `distinct_value_url`. Connector/infra plugins also need this
-   field populated before promoting to `beta`. See
-   [docs/INTEGRATION-POLICY.md](INTEGRATION-POLICY.md).
+   as `distinct_value_url`.
 6. A CHANGELOG entry records the promotion and the supporting
    evidence link (PR or artifact run id).
 7. At least one external user beyond the maintainer (a tracked

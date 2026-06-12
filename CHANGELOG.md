@@ -36,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   verdicts → one-confirm project-local fixes, catalog findings only as
   proposed patch files. `polymath-flow` gains opt-in LOCAL-ONLY
   telemetry (`POLYMATH_TELEMETRY=1`, payload capped per
-  `docs/PRIVACY.md`, documented field-by-field in `docs/TELEMETRY.md`).
+  `docs/PRIVACY.md`, documented field-by-field in `docs/TELEMETRY.md`,
+  since merged into `docs/PRIVACY.md`).
   The `tracker` block is now consumed: 3-layer provenance marking +
   readback verification + HITL-only pushes across the polymath-tracker
   skills. (polymath-flows 0.5.0, polymath-pipeline 0.2.0, polymath-core

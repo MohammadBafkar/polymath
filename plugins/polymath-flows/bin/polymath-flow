@@ -2540,7 +2540,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _emit_telemetry(cmd: str, exit_code: int | None, duration_ms: int, workflow: str | None) -> None:
-    """Local-only, opt-in runner telemetry (docs/TELEMETRY.md). Requires
+    """Local-only, opt-in runner telemetry (docs/PRIVACY.md, "The
+    telemetry surface"). Requires
     POLYMATH_TELEMETRY=1 exactly; anything else (unset, "0", other values)
     disables it — the docs/PRIVACY.md contract. Payload is capped at
     command + workflow name + duration + outcome: no run ids (their slug

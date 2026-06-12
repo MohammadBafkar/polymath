@@ -14,8 +14,8 @@
   every runner invocation appends command + workflow name + duration +
   exit code to `telemetry.jsonl` in the plugin data dir. No run ids, no
   content, no network — the complete payload is documented in
-  `docs/TELEMETRY.md`; unset or any other value writes nothing
-  (unit-gated).
+  `docs/TELEMETRY.md` (since merged into `docs/PRIVACY.md`); unset or
+  any other value writes nothing (unit-gated).
 - **Build-time `extends` flattening.** `polymath-flow flatten
   <partial.yaml> [--out <file>] [--check]` composes a partial (extends +
   override/insertAfter/steps/mustPass/guards) with its catalog parent
