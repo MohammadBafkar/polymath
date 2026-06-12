@@ -8,10 +8,13 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
 
 ## Required gates (every PR)
 
-- **Structural conformance** — `tools/conformance.sh --all`. The full
-  rule table (MANIFEST, SKILL, TEMPLATE, WORKFLOW, SURFACE,
-  CAPABILITY, TOOL, TRUST, DESC, INTEGRATION, MCP-PKG, AGENT, FIXTURE,
-  DOCS, STABILITY) is in [AGENTS.md](../AGENTS.md).
+- **Structural conformance** — `tools/conformance.sh --all`. The
+  machine-readable gate registry is
+  [`registry/gates.json`](../registry/gates.json) (GATES-1 enforces
+  bijectivity with the script and runs every registered `--self-test`);
+  the narrative rule table (MANIFEST, SKILL, TEMPLATE, WORKFLOW,
+  SURFACE, CAPABILITY, TOOL, TRUST, DESC, INTEGRATION, MCP-PKG, AGENT,
+  FIXTURE, DOCS, STABILITY) is in [AGENTS.md](../AGENTS.md).
 - **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
   SKILL.md ≤ 500 lines) plus markdownlint.
 - **Token budget** — `tools/token-report.py budget` (≤ 400 tokens per plugin

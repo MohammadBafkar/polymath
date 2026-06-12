@@ -400,6 +400,17 @@ if [[ "$mode" == "--all" ]]; then
     fi
   done
 
+  # GATES-1: registry/gates.json is the machine-readable source of truth for
+  # gate IDs — bijective with the IDs in this script, and every entry marked
+  # verification=selftest has its registered --self-test executed here.
+  echo
+  echo "── GATES-1 cross-check (check-registry.py gates)"
+  if python3 "$root/tools/check-registry.py" gates; then
+    :
+  else
+    overall=1
+  fi
+
   # ROUTE-EVAL-1: the held-out routing eval's two invariants — token precision
   # 1.0 and zero false positives — gate the build; reach is reported, never
   # floored. Also drift-guards the committed route-metrics.json against a

@@ -587,6 +587,113 @@ def docpaths_self_test() -> int:
     return _self_test_verdict("docpaths", checks)
 
 
+# ---------------------------------------------------------------------------
+# gates — GATES-1
+# ---------------------------------------------------------------------------
+
+GATES_REGISTRY = ROOT / "registry" / "gates.json"
+CONFORMANCE = ROOT / "tools" / "conformance.sh"
+# Numbered IDs (FOO-1, FOO-BAR-2) plus the established non-numbered gate names.
+GATE_ID_RE = re.compile(r"\b[A-Z][A-Z]+(?:-[A-Z0-9]+)*-[0-9]+\b")
+GATE_ID_LITERALS = {
+    "MCP-PKG", "ROUTE-TRIGGER", "WORKFLOW-TRIGGER",
+    "WORKFLOW-INDEX", "SURFACE-INDEX", "CAPABILITY-INDEX",
+}
+
+
+def _script_gate_ids(text: str) -> set[str]:
+    ids = set(GATE_ID_RE.findall(text))
+    ids |= {lit for lit in GATE_ID_LITERALS if lit in text}
+    return ids
+
+
+def _gates_diff(script_ids: set[str], registry_ids: set[str]) -> list[str]:
+    errors: list[str] = []
+    for gid in sorted(script_ids - registry_ids):
+        errors.append(
+            f"gate `{gid}` appears in tools/conformance.sh but has no "
+            f"registry/gates.json entry — register it (with a --self-test "
+            f"for new gates)"
+        )
+    for gid in sorted(registry_ids - script_ids):
+        errors.append(
+            f"gate `{gid}` is registered in registry/gates.json but appears "
+            f"nowhere in tools/conformance.sh — stale entry or unwired gate"
+        )
+    return errors
+
+
+def gates_check() -> int:
+    import shlex
+    import subprocess
+
+    errors: list[str] = []
+    doc = json.loads(GATES_REGISTRY.read_text(encoding="utf-8"))
+    if doc.get("schemaVersion") != 1:
+        errors.append(f"registry/gates.json: unsupported schemaVersion {doc.get('schemaVersion')!r}")
+    entries = doc.get("gates", [])
+    ids = [g.get("id") for g in entries]
+    for gid, n in {i: ids.count(i) for i in ids}.items():
+        if n > 1:
+            errors.append(f"registry/gates.json: duplicate gate id `{gid}`")
+    for g in entries:
+        for field in ("id", "tool", "invocation", "tier", "verification", "description"):
+            if not g.get(field):
+                errors.append(f"registry/gates.json: `{g.get('id', '?')}` missing `{field}`")
+        if g.get("verification") == "selftest" and not g.get("selftest"):
+            errors.append(
+                f"registry/gates.json: `{g.get('id')}` claims verification=selftest "
+                f"but registers no selftest invocation"
+            )
+
+    errors.extend(_gates_diff(_script_gate_ids(CONFORMANCE.read_text(encoding="utf-8")), set(ids)))
+
+    ran = 0
+    for g in entries:
+        if g.get("verification") != "selftest" or not g.get("selftest"):
+            continue
+        if g.get("id") == "GATES-1":
+            continue  # don't recurse into our own self-test
+        proc = subprocess.run(
+            shlex.split(g["selftest"]), cwd=ROOT,
+            capture_output=True, text=True,
+        )
+        ran += 1
+        if proc.returncode != 0:
+            errors.append(
+                f"`{g['id']}` self-test failed (exit {proc.returncode}): "
+                f"{(proc.stderr or proc.stdout).strip().splitlines()[-1] if (proc.stderr or proc.stdout).strip() else 'no output'}"
+            )
+
+    for e in errors:
+        print(f"  FAIL  {e}")
+    if errors:
+        print(f"check-gates: FAILED ({len(errors)} error(s))")
+        return 1
+    print(
+        f"check-gates: OK — {len(entries)} gates registered, bijective with "
+        f"conformance.sh; {ran} self-test(s) executed and passing"
+    )
+    return 0
+
+
+def gates_self_test() -> int:
+    script = "echo MANIFEST-1; echo MCP-PKG; echo NEWGATE-7"
+    registry_ok = {"MANIFEST-1", "MCP-PKG", "NEWGATE-7"}
+    registry_missing = {"MANIFEST-1", "MCP-PKG"}
+    registry_stale = registry_ok | {"GHOST-9"}
+    ids = _script_gate_ids(script)
+    checks = [
+        ("script IDs extracted", ids == {"MANIFEST-1", "MCP-PKG", "NEWGATE-7"}),
+        ("unregistered script gate rejected",
+         any("no registry/gates.json entry" in e for e in _gates_diff(ids, registry_missing))),
+        ("stale registry entry rejected",
+         any("appears nowhere" in e for e in _gates_diff(ids, registry_stale))),
+        ("bijective sets accepted", not _gates_diff(ids, registry_ok)),
+    ]
+    return _self_test_verdict("gates", checks)
+
+
 def _self_test_verdict(name: str, checks: list[tuple[str, bool]]) -> int:
     failures = 0
     for label, ok in checks:
@@ -626,6 +733,7 @@ def main() -> int:
         ("aggregates", "README aggregate counts match the tree (COUNT-1)"),
         ("testdirs", "fixture dirs name real plugins (TESTDIR-1)"),
         ("docpaths", "relative doc links resolve (DOCPATH-1)"),
+        ("gates", "gates.json bijective with conformance.sh; selftests run (GATES-1)"),
     ):
         p = sub.add_parser(name, help=help_text)
         p.add_argument(
@@ -648,6 +756,8 @@ def main() -> int:
         return testdirs_self_test() if self_test else testdirs_check()
     if args.cmd == "docpaths":
         return docpaths_self_test() if self_test else docpaths_check()
+    if args.cmd == "gates":
+        return gates_self_test() if self_test else gates_check()
     raise AssertionError(args.cmd)
 
 

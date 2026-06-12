@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GATES-1 — registry/gates.json is the machine-readable source of
+  truth for conformance gates.** 31 gate entries (id, tool, invocation,
+  tier, verification); `check-registry.py gates` enforces bijectivity
+  between the registry and the IDs appearing in `conformance.sh`, and
+  executes the registered `--self-test` for every entry marked
+  `verification: selftest` (ROUTE-EVAL-1, COUNT-1, TESTDIR-1,
+  DOCPATH-1). Pre-existing gates are `grandfathered` — the
+  falsifiability-fixture backfill is deliberately deferred per the
+  solidify plan.
 - **CI hardening — MANIFEST-1 made real, SECRET-1 implemented,
   markdownlint gates.** `validate.yml` installs a pinned
   `@anthropic-ai/claude-code@2.1.175` so `claude plugin validate
