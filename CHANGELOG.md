@@ -31,6 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Surface-routing schema v1 — tier, vetoes, declarative events,
+  repo-state evidence.** Sidecars may now declare an optional
+  `schemaVersion: 1` (const), `tier: hard|soft` (feeds the future
+  coverage ratchet; compiled into both outputs), `not_intents` (veto
+  phrases that remove the surface from scoring — fixture-pinned),
+  `events[]` (declarative PostToolUse triggers compiled into
+  route-signals.json; `event-trigger.py`'s hardcoded table is deleted
+  and the failed-tests rule now lives in
+  `plugins/polymath-flows/routing/bugTriage.yaml`), and `repo_state`
+  (path probes cached at SessionStart by `write-repo-evidence.py` —
+  ≤64 probes, 200ms, fail-open — giving a +1 SOFT boost at prompt
+  time; can never satisfy the hard-signal firing requirement, pinned
+  by fixtures). The builder validates event regexes compile, rejects
+  self-vetoing declarations, and caps the probe union; `triggering.py`
+  route fixtures gain an `evidence` key and a hermetic
+  `CLAUDE_PLUGIN_DATA`. Precision invariants (MIN_SCORE=3, hard-signal
+  firing, 0 misroutes / 0 FP) are unchanged — ROUTE-EVAL-1 green.
 - **polymath-core 0.6.0 — doctor + init wired to the pipeline.**
   `doctor.sh` gains a *Routing pipeline* section (resolved mode, config
   errors, kill switch, recent enforce denials / fail-opens for this

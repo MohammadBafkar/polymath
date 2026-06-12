@@ -18,6 +18,17 @@ set -euo pipefail
 data_root="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}"
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
+# The hook payload arrives once on stdin; capture it for the consumers below.
+hook_payload="$(cat 2>/dev/null || true)"
+
+# --- repo evidence (routing repo_state probes) ---
+# Cache declared repo-state probes (route-signals.json `repo_probes` +
+# project overlay) as booleans for route-hint's +1 soft boost. Bounded
+# (≤64 probes / 200ms) and fail-open: never blocks, never prints.
+if command -v python3 >/dev/null 2>&1 && [[ -f "${script_dir}/write-repo-evidence.py" ]]; then
+  printf '%s' "$hook_payload" | python3 "${script_dir}/write-repo-evidence.py" >/dev/null 2>&1 || true
+fi
+
 # --- project context ---
 # Refresh the project-context snapshot under
 # ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json from

@@ -79,7 +79,7 @@
       "name": "polymath-flows",
       "source": "./plugins/polymath-flows",
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "category": "orchestration",
       "tags": [
         "orchestration",

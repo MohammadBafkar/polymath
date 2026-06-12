@@ -1,6 +1,6 @@
 {
   "name": "polymath-flows",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
   "license": "MIT",
   "author": {

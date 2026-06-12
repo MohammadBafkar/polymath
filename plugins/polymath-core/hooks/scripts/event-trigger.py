@@ -9,16 +9,21 @@ data-driven version of the per-connector end-of-turn nudges (github suggest-pr,
 snyk check-criticals): those remain as connector-specific instances of this same
 pattern.
 
+Rules are DATA, not code: each routable surface declares its event triggers in
+its routing.yaml sidecar (`events:` — see
+registry/schemas/surface-routing.schema.json); tools/build-surface-index.py
+compiles them into the `events` list of data/route-signals.json, which this
+hook reads. Add a rule by editing the surface's sidecar and rebuilding — never
+by editing this file.
+
 Design contract (mirrors route-hint.py):
 * Detect -> propose. NEVER auto-runs anything.
 * High precision over recall: a rule fires only when ALL of its required signals
-  are present (e.g. a test *command* AND a failure marker in the output), so a
-  passing run or an unrelated command stays silent.
+  are present (the `command` regex against the tool command AND the `output`
+  regex against the tool output), so a passing run or an unrelated command
+  stays silent.
 * Quiet by default; suppressible via POLYMATH_ROUTE_MUTE / .polymath/route-muted.
 * Degrade quiet: any error -> exit 0, no output. A nudge must never break a turn.
-
-v1 ships one rule (failed test run -> bugTriage). The RULES table is the
-extension point; add a rule, not a new hook.
 """
 from __future__ import annotations
 
@@ -27,21 +32,6 @@ import os
 import re
 import sys
 from pathlib import Path
-
-# Each rule: all `require` patterns must match the payload haystack to fire.
-RULES = [
-    {
-        "id": "failed-tests",
-        # The runner must appear in the COMMAND, and a failure marker in the OUTPUT
-        # (matched separately so a benign command that merely names a runner, or a
-        # passing run whose output mentions "failed" elsewhere, does not fire).
-        "command": r"\b(pytest|go test|cargo test|jest|vitest|npm (run )?test|yarn test|dotnet test|mvn test|gradle test|rspec|phpunit|unittest)\b",
-        "output": r"(=+ ?\d+ failed|--- FAIL|\bFAILED\b|Tests?:[^\n]*\bfailed\b|Failed!|Failures:\s*[1-9]|\b[1-9]\d* failed\b|\b[1-9]\d* failures?\b)",
-        "surface": "polymath-flows:run-workflow bugTriage",
-        "why": "test failures after a test run",
-        "note": "root-cause the failure and plan the fix",
-    },
-]
 
 
 def muted() -> bool:
@@ -56,6 +46,18 @@ def muted() -> bool:
     return False
 
 
+def load_events() -> list[dict]:
+    table = Path(__file__).resolve().parent.parent.parent / "data" / "route-signals.json"
+    try:
+        doc = json.loads(table.read_text())
+    except Exception:
+        return []
+    events = doc.get("events", [])
+    if not isinstance(events, list):
+        return []
+    return [e for e in events if isinstance(e, dict)]
+
+
 def main() -> int:
     if muted():
         return 0
@@ -65,18 +67,29 @@ def main() -> int:
         return 0
     if not isinstance(payload, dict):
         return 0
-    # Match the runner against the COMMAND and the failure marker against the
-    # OUTPUT separately, so the failure signal must come from real test output —
-    # not from the command text merely naming a runner. tool_response shape varies
+    rules = load_events()
+    if not rules:
+        return 0
+    # Match the trigger against the COMMAND and the marker against the OUTPUT
+    # separately, so the output signal must come from real tool output — not
+    # from the command text merely naming a runner. tool_response shape varies
     # (str or {stdout,stderr,...}); json.dumps captures it either way.
     tool_input = payload.get("tool_input")
     command = tool_input.get("command", "") if isinstance(tool_input, dict) else ""
     output = json.dumps(payload.get("tool_response", ""), ensure_ascii=False)
 
-    for rule in RULES:
-        if re.search(rule["command"], command, re.IGNORECASE) and re.search(rule["output"], output, re.IGNORECASE):
+    for rule in rules:
+        try:
+            cmd_rx = re.compile(str(rule.get("command") or ""), re.IGNORECASE)
+            out_rx = re.compile(str(rule.get("output") or ""), re.IGNORECASE)
+        except re.error:
+            continue  # a bad compiled pattern must not take down the hook
+        if not rule.get("surface") or not rule.get("why"):
+            continue
+        if cmd_rx.search(command) and out_rx.search(output):
+            note = rule.get("note") or "see the proposed surface"
             print(f"[polymath-core event] Detected {rule['why']}.")
-            print(f"Consider: /{rule['surface']}  ({rule['note']})")
+            print(f"Consider: /{rule['surface']}  ({note})")
             print("Detect-only; nothing was run. Silence: POLYMATH_ROUTE_MUTE=1.")
             return 0
     return 0

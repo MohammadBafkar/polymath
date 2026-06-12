@@ -4,6 +4,11 @@
 
 ### Added
 
+- **bugTriage routing sidecar (event-only).** The failed-test-run nudge
+  moved out of event-trigger.py's hardcoded table into
+  `routing/bugTriage.yaml` as a declarative `events:` rule (routing
+  schema v1) — compiled into route-signals.json like every other
+  surface declaration. Regexes byte-identical to the previous code.
 - **Opt-in run provenance.** `provenance.runs: true` in
   `.polymath/project.yaml` makes the runner whole-copy each COMPLETED run
   record (state, inputs, trace, step summaries, artifacts) into

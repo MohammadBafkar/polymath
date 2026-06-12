@@ -1,0 +1,15 @@
+# Routing declaration for the bugTriage workflow. Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+#
+# Event-only surface: bugTriage is proposed at event time (a test run that
+# just failed), not from prompt text — prompt-time bug reports route through
+# rootCauseAnalysis/respondToIncident signals instead.
+schemaVersion: 1
+events:
+- command: \b(pytest|go test|cargo test|jest|vitest|npm (run )?test|yarn test|dotnet
+    test|mvn test|gradle test|rspec|phpunit|unittest)\b
+  output: (=+ ?\d+ failed|--- FAIL|\bFAILED\b|Tests?:[^\n]*\bfailed\b|Failed!|Failures:\s*[1-9]|\b[1-9]\d*
+    failed\b|\b[1-9]\d* failures?\b)
+  why: test failures after a test run
+  note: root-cause the failure and plan the fix

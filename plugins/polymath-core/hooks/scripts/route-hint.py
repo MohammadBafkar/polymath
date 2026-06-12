@@ -31,12 +31,44 @@ import sys
 from pathlib import Path
 
 HARD_KINDS = ("url", "regex", "path", "diff")
-SCORE = {"url": 3, "regex": 3, "path": 2, "diff": 2, "intent": 1}
+SCORE = {"url": 3, "regex": 3, "path": 2, "diff": 2, "intent": 1, "repo": 1}
 MIN_SCORE = 3          # best candidate must clear this to emit
 MAX_CANDIDATES = 3     # never show the user more than a 1-of-3 choice
 
 DIFF_RE = re.compile(r"(?m)^(?:diff --git |@@ .*@@|\+\+\+ |--- |index [0-9a-f]{7,})")
 URL_RE = re.compile(r"https?://[^\s)>\]\"']+")
+
+
+def repo_root() -> Path | None:
+    here = Path.cwd()
+    for d in (here, *here.parents):
+        if (d / ".git").exists() or (d / ".polymath").is_dir():
+            return d
+    return None
+
+
+def load_evidence() -> dict:
+    """Repo-state booleans cached by write-repo-evidence.py at SessionStart.
+    Only honored when the cache was written for THIS repo root — stale
+    evidence from another repo must never boost anything (and that root
+    guard is also what keeps hermetic fixture runs inert)."""
+    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if base:
+        root = Path(base)
+        if root.name != "polymath-core":
+            root = root / "polymath-core"
+        cache = root / "repo-evidence.json"
+    else:
+        cache = Path.home() / ".claude" / "plugins" / "data" / "polymath-core" / "repo-evidence.json"
+    try:
+        doc = json.loads(cache.read_text())
+    except Exception:
+        return {}
+    here = repo_root()
+    if here is None or doc.get("root") != str(here):
+        return {}
+    evidence = doc.get("evidence")
+    return evidence if isinstance(evidence, dict) else {}
 
 
 def read_prompt() -> str:
@@ -144,7 +176,7 @@ def _sanitize_project_rule(rule: dict) -> dict | None:
             kept.append(pat)
         if kept:
             sane[key] = kept
-    for key in ("paths", "intents"):
+    for key in ("paths", "intents", "not_intents", "repo_state"):
         values = rule.get(key)
         if isinstance(values, list):
             kept = [v for v in values if isinstance(v, str) and v]
@@ -157,8 +189,16 @@ def _sanitize_project_rule(rule: dict) -> dict | None:
     return sane
 
 
-def score_rule(rule: dict, text: str, low: str, urls: list[str], has_diff: bool) -> tuple[int, list[str]]:
+def score_rule(
+    rule: dict, text: str, low: str, urls: list[str], has_diff: bool, evidence: dict
+) -> tuple[int, list[str]]:
     """Return (score, evidence-categories-that-fired)."""
+    # Veto first: a matching not_intent removes the surface from scoring
+    # entirely, regardless of what its positive signals would say.
+    for phrase in rule.get("not_intents", []):
+        if phrase.lower() in low:
+            return 0, []
+
     score = 0
     fired: list[str] = []
 
@@ -191,11 +231,19 @@ def score_rule(rule: dict, text: str, low: str, urls: list[str], has_diff: bool)
             fired.append("intent")
             break
 
+    # Repo-state boost (soft): cached evidence sharpens scoring but can
+    # never satisfy the hard-signal firing requirement.
+    for probe in rule.get("repo_state", []):
+        if evidence.get(probe):
+            score += SCORE["repo"]
+            fired.append("repo")
+            break
+
     return score, fired
 
 
 def why(fired: list[str]) -> str:
-    label = {"url": "URL", "regex": "id key", "path": "path", "diff": "inline diff", "intent": "phrasing"}
+    label = {"url": "URL", "regex": "id key", "path": "path", "diff": "inline diff", "intent": "phrasing", "repo": "repo state"}
     seen: list[str] = []
     for f in fired:  # preserve order, dedupe
         if label[f] not in seen:
@@ -217,10 +265,11 @@ def main() -> int:
     low = prompt.lower()
     urls = URL_RE.findall(prompt)
     has_diff = bool(DIFF_RE.search(prompt))
+    evidence = load_evidence()
 
     candidates = []
     for rule in rules:
-        score, fired = score_rule(rule, prompt, low, urls, has_diff)
+        score, fired = score_rule(rule, prompt, low, urls, has_diff, evidence)
         if score <= 0:
             continue
         if not any(f in HARD_KINDS for f in fired):

@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Routing schema v1 consumed end-to-end.** `route-hint.py` honors
+  `not_intents` (a matching phrase vetoes the surface before scoring)
+  and `repo_state` (+1 soft boost from cached repo evidence — never
+  satisfies the hard-signal firing requirement; the why-line names
+  "repo state"); project overlay rules may carry both.
+  `event-trigger.py` is now data-driven: rules come from the compiled
+  `events` list in `data/route-signals.json` (declared per surface in
+  routing.yaml sidecars) — the hardcoded table is gone. New
+  `write-repo-evidence.py` SessionStart step caches declared repo-state
+  probes (≤64, 200ms budget, fail-open; exact path / `dir/` / glob
+  semantics) into `repo-evidence.json`, honored only when its recorded
+  root matches the current repo.
 - **Doctor reports the routing pipeline.** `doctor.sh` gains a
   *Routing pipeline* section: resolved `routing.mode`, routing config
   errors (flow-style / unknown values), an engaged kill switch, and

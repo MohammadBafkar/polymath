@@ -595,6 +595,15 @@ def _route_parse_fixture(path: pathlib.Path) -> dict:
     overlay = fm.get("overlay")
     if overlay is not None and not isinstance(overlay, str):
         raise ValueError(f"{path.name}: `overlay` must be a single-line JSON string")
+    evidence = fm.get("evidence")
+    if evidence is not None:
+        if not isinstance(evidence, str):
+            raise ValueError(f"{path.name}: `evidence` must be a single-line JSON string")
+        try:
+            if not isinstance(json.loads(evidence), dict):
+                raise ValueError
+        except ValueError:
+            raise ValueError(f"{path.name}: `evidence` must be a JSON object of probe->bool")
     return {
         "id": path.stem,
         "prompt": fm["prompt"],
@@ -602,6 +611,7 @@ def _route_parse_fixture(path: pathlib.Path) -> dict:
         "must_appear": must,
         "must_not_appear": not_must,
         "overlay": overlay,
+        "evidence": evidence,
     }
 
 
@@ -611,23 +621,39 @@ def _route_fixtures() -> list[pathlib.Path]:
     return sorted(ROUTE_TESTS_DIR.glob("*.md"))
 
 
-def _route_run_hook(prompt: str, overlay: str | None = None) -> str:
+def _route_run_hook(prompt: str, overlay: str | None = None, evidence: str | None = None) -> str:
     """Run the hook hermetically: a fresh scratch cwd (so this repo's own
     .polymath/ and any developer overlay can't leak into the gate) and a
-    scrubbed environment. `overlay` is written verbatim to the scratch
-    .polymath/route-signals.project.json — including deliberately broken
-    content, to assert the hook degrades quiet."""
+    scrubbed environment — CLAUDE_PLUGIN_DATA always points into the scratch
+    dir so developer-machine repo evidence can't leak either. `overlay` is
+    written verbatim to the scratch .polymath/route-signals.project.json —
+    including deliberately broken content, to assert the hook degrades
+    quiet. `evidence` (JSON object of probe->bool) is cached the way
+    write-repo-evidence.py would have at SessionStart, rooted at the
+    scratch repo."""
     payload = json.dumps({"prompt": prompt})
     env = {k: v for k, v in os.environ.items() if k != "POLYMATH_ROUTE_MUTE"}
     with tempfile.TemporaryDirectory(prefix="route-trigger-") as scratch:
         # .git sentinel: the hook's mute/overlay walks stop at a repo root,
         # so without one they would escape the scratch dir and could pick up
         # developer-machine state (e.g. a TMPDIR under $HOME).
-        (pathlib.Path(scratch) / ".git").mkdir()
+        scratch_path = pathlib.Path(scratch)
+        (scratch_path / ".git").mkdir()
+        pdata = scratch_path / "pdata"
+        env["CLAUDE_PLUGIN_DATA"] = str(pdata)
         if overlay is not None:
-            overlay_dir = pathlib.Path(scratch) / ".polymath"
+            overlay_dir = scratch_path / ".polymath"
             overlay_dir.mkdir()
             (overlay_dir / "route-signals.project.json").write_text(overlay)
+        if evidence is not None:
+            cache_dir = pdata / "polymath-core"
+            cache_dir.mkdir(parents=True)
+            (cache_dir / "repo-evidence.json").write_text(json.dumps({
+                # The hook resolves the scratch root via its own walk; macOS
+                # tempdirs resolve through /private, so mirror that.
+                "root": str(scratch_path.resolve()),
+                "evidence": json.loads(evidence),
+            }))
         proc = subprocess.run(
             [sys.executable, str(HOOK)],
             input=payload,
@@ -692,7 +718,7 @@ def route_run(allow_empty: bool = False) -> int:
             print(f"  FAIL  {f.name}: {e}")
             failed += 1
             continue
-        out = _route_run_hook(fx["prompt"], fx.get("overlay"))
+        out = _route_run_hook(fx["prompt"], fx.get("overlay"), fx.get("evidence"))
         problems = []
         if fx["expect_silent"]:
             if out.strip():

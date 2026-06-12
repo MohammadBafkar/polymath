@@ -9,9 +9,48 @@
     { "required": ["url"] },
     { "required": ["regex"] },
     { "required": ["paths"] },
-    { "required": ["diff"] }
+    { "required": ["diff"] },
+    { "required": ["events"] }
   ],
   "properties": {
+    "schemaVersion": {
+      "description": "Optional declaration-schema version. The only accepted value is 1; bumping it is a deliberate, gated act.",
+      "const": 1
+    },
+    "tier": {
+      "description": "Routing-coverage tier. 'hard' = this surface commits to deterministic routability (a route-triggering fixture exists and the coverage ratchet counts it); 'soft' (default) = best-effort signals, no fixture obligation. Runtime scoring is identical — the tier feeds the SURFACE-1 declare-or-exempt ratchet, not the scorer.",
+      "type": "string",
+      "enum": ["hard", "soft"],
+      "default": "soft"
+    },
+    "not_intents": {
+      "description": "Veto phrasings: when any of these appears (case-insensitive) in the prompt, this surface is removed from scoring entirely — even if its positive signals also fired. Use to separate near-collision siblings (e.g. a deploy surface vetoing 'rollback').",
+      "type": "array",
+      "items": { "type": "string", "minLength": 2 },
+      "uniqueItems": true
+    },
+    "repo_state": {
+      "description": "Repo-evidence probes that contextually boost this surface (+1, soft — never satisfies the hard-signal firing requirement). Each entry is a path probe evaluated against the repo root at SessionStart by write-repo-evidence.py (exact path, 'dir/' suffix for directories, or a glob like '*.tf'), cached in repo-evidence.json. The union of all declared probes is capped at 64 across the catalog.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "maxItems": 16
+    },
+    "events": {
+      "description": "Declarative event-time triggers (PostToolUse), compiled into route-signals.json `events` and evaluated by event-trigger.py — the data-driven replacement for that hook's hardcoded table. A rule fires only when BOTH regexes match: `command` against the tool command and `output` against the tool output (high precision: a passing run or a command merely naming a runner stays silent).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "output", "why"],
+        "properties": {
+          "command": { "type": "string", "minLength": 1, "description": "Regex the tool COMMAND must match (case-insensitive)." },
+          "output": { "type": "string", "minLength": 1, "description": "Regex the tool OUTPUT must match (case-insensitive)." },
+          "why": { "type": "string", "minLength": 1, "description": "Short human reason shown in the nudge ('Detected <why>')." },
+          "note": { "type": "string", "description": "One-line hint appended to the proposal." }
+        }
+      }
+    },
     "url": {
       "description": "Regex patterns matched (case-insensitive) against URLs found in the prompt. Hard signal (score 3).",
       "type": "array",
