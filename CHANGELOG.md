@@ -11,6 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **polymath-pipeline 0.3.0 — enforce-gate hole closure.** The
+  PreToolUse matcher extends to `Task` and `mcp__.*`: MCP tools default
+  to gated unless their name classifies as read-only (first verb
+  segment wins — `get_file_contents` passes, `push_files` and unknown
+  names are gated), and `Task` requires a fresh classification. The
+  Bash modify-pattern blacklist gains nine patterns covering the eleven
+  sampled mutators it missed (`make`, interpreter-runs-script, `npx`,
+  `gh`/`az`/`gcloud`/`aws` mutating subcommands, database CLIs,
+  `rsync`/`scp`/`sftp`/`unzip`, command-position `patch`, `tar`
+  create/extract), each pinned by a fixture. Base policy is
+  data-driven (`data/tool-policy.json`, code-mirrored with a drift
+  test); projects can strengthen — never weaken — it via
+  `.polymath/tool-policy.json` (weakening keys ignored and audited).
 - **GATES-1 — registry/gates.json is the machine-readable source of
   truth for conformance gates.** 31 gate entries (id, tool, invocation,
   tier, verification); `check-registry.py gates` enforces bijectivity

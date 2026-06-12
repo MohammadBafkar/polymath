@@ -18,8 +18,15 @@ Owns:
     `classified` (1h validity)
   - the decision log `${CLAUDE_PLUGIN_DATA}/decisions.jsonl` (append-only
     audit: classify-directive, classified, enforce-deny, kill-switch,
-    fail-open, sweep) + a deterministic retention sweep (markers > 7 days
-    pruned; log truncated to its newest 1000 lines past 512 KiB)
+    fail-open, policy-overlay events, sweep) + a deterministic retention
+    sweep (markers > 7 days pruned; log truncated to its newest 1000 lines
+    past 512 KiB)
+  - the enforce-gate tool policy: gated tools (Edit/Write/MultiEdit/
+    NotebookEdit/Task), the Bash modify-pattern blacklist, and MCP tool
+    classification (default gated; read-only verb names exempt). Base
+    policy ships in data/tool-policy.json (mirrored by code constants);
+    a project may STRENGTHEN it via .polymath/tool-policy.json — never
+    weaken it
   - the three hook entrypoints (hook-session-start, hook-prompt,
     hook-pretool) — see hooks/hooks.json
 
@@ -323,7 +330,7 @@ def sweep() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Read-only Bash exemption (enforce gate)
+# Tool policy (enforce gate): Bash blacklist, gated tools, MCP classification
 # ---------------------------------------------------------------------------
 
 # Modify-pattern BLACKLIST: a Bash command matching any of these is treated
@@ -345,6 +352,18 @@ MODIFY_PATTERNS = [
     r"\b(systemctl|service|launchctl)\b",
     r"\beval\b|\bexec\b|\bsource\b|^\s*\.\s",
     r"\bcrontab\b",
+    # Build/exec wrappers and transfer tools — each can write through a
+    # name the patterns above never see. Command-position anchors keep
+    # words like `make` in arguments exempt.
+    r"(?:^|[|;&\n])\s*make\b",
+    r"(?:^|[|;&\n])\s*(?:python3?|node|deno|bun|ruby|perl|bash|sh|zsh)\b[^|;&\n]*\s\S+\.(?:py|js|mjs|cjs|ts|rb|pl|sh|bash)\b",
+    r"(?:^|[|;&\n])\s*npx\b",
+    r"\bgh\b[^|;&\n]*\s(?:create|merge|close|reopen|edit|delete|comment|review|fork|sync|enable|disable|rerun|cancel|deploy|ready|lock|unlock|transfer|api|clone|set|workflow\s+run)\b",
+    r"\b(?:az|gcloud|aws)\b[^|;&\n]*\s(?:create|delete|update|set|put|add|remove|start|stop|restart|deploy|scale|import|upload|purge|patch|assign|attach|detach|enable|disable|cp|mv|rm|sync|invoke|register|flush)\b",
+    r"\b(?:psql|mysql|sqlite3|mongosh?|redis-cli)\b",
+    r"\b(?:rsync|scp|sftp|unzip)\b",
+    r"(?:^|[|;&\n])\s*patch\b",
+    r"\btar\b\s+-{0,2}[A-Za-z]*[xcur]",
 ]
 _MODIFY_RE = [re.compile(p) for p in MODIFY_PATTERNS]
 # `2>&1`, `&>`, `>/dev/null` style noise that the redirection pattern would
@@ -353,12 +372,126 @@ _MODIFY_RE = [re.compile(p) for p in MODIFY_PATTERNS]
 _HARMLESS_REDIRECT_RE = re.compile(r"\d?>{1,2}\s*(&\d|/dev/null|/dev/stderr|/dev/stdout)")
 
 
-def bash_is_mutating(command: str) -> bool:
+def bash_is_mutating(command: str, compiled: list[re.Pattern] | None = None) -> bool:
     cleaned = _HARMLESS_REDIRECT_RE.sub(" ", command)
-    return any(rx.search(cleaned) for rx in _MODIFY_RE)
+    return any(rx.search(cleaned) for rx in (compiled if compiled is not None else _MODIFY_RE))
 
 
-GATED_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
+GATED_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit", "Task"}
+
+# MCP tools default to GATED — an MCP tool is an arbitrary external action
+# behind an unbounded namespace. A tool passes only when its name
+# classifies as read-only: take the segment after the last `__`, split on
+# underscores / hyphens / camelCase, walk segments left to right; the
+# FIRST segment that is a known verb decides. No known verb → gated
+# (false positives cost one classify round-trip; false negatives are the
+# failure mode this gate exists to close).
+MCP_MUTATING_VERBS = {
+    "accept", "add", "apply", "approve", "archive", "assign", "ban",
+    "cancel", "clone", "close", "comment", "complete", "create", "delete",
+    "deploy", "destroy", "disable", "dismiss", "download", "edit",
+    "enable", "execute", "fork", "generate", "grant", "import", "insert",
+    "install", "invite", "kill", "link", "lock", "mark", "merge", "move",
+    "mute", "patch", "post", "publish", "purge", "push", "put", "reject",
+    "remove", "rename", "reopen", "reorder", "reply", "rerun", "resolve",
+    "restore", "retry", "revoke", "run", "scale", "send", "set", "start",
+    "stop", "submit", "sync", "transfer", "trigger", "unassign",
+    "uninstall", "unlink", "unlock", "update", "upload", "upsert", "use",
+    "vote", "write",
+}
+MCP_READONLY_VERBS = {
+    "browse", "check", "count", "describe", "explore", "fetch", "find",
+    "get", "info", "list", "lookup", "preview", "query", "read", "render",
+    "search", "show", "status", "summary", "validate", "view", "watch",
+    "whoami",
+}
+_CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+
+
+def _mcp_segments(tool_name: str) -> list[str]:
+    leaf = tool_name.rsplit("__", 1)[-1]
+    leaf = _CAMEL_BOUNDARY_RE.sub("_", leaf).replace("-", "_").lower()
+    return [s for s in leaf.split("_") if s]
+
+
+def mcp_is_gated(tool_name: str, policy: dict) -> bool:
+    for rx in policy["mcp_gated_res"]:
+        if rx.search(tool_name):
+            return True
+    for seg in _mcp_segments(tool_name):
+        if seg in policy["mcp_mutating_verbs"]:
+            return True
+        if seg in policy["mcp_readonly_verbs"]:
+            return False
+    return True
+
+
+# Canonical BASE policy. data/tool-policy.json ships the same values as a
+# machine-readable mirror (a unit test pins the two equal); the JSON file
+# is read first so an org fork can edit policy without touching code, and
+# these constants are the fail-safe when that file is unreadable.
+TOOL_POLICY_FALLBACK = {
+    "gatedTools": sorted(GATED_TOOLS),
+    "bashModifyPatterns": list(MODIFY_PATTERNS),
+    "mcpGatedPatterns": [],
+    "mcpMutatingVerbs": sorted(MCP_MUTATING_VERBS),
+    "mcpReadOnlyVerbs": sorted(MCP_READONLY_VERBS),
+}
+# A project overlay (.polymath/tool-policy.json) is STRENGTHEN-ONLY: it can
+# add gated tools, add Bash modify patterns, add MCP gated patterns or
+# mutating verbs — never exempt anything. Keys outside this set (e.g. an
+# attempt to extend mcpReadOnlyVerbs) are ignored and audited.
+OVERLAY_KEYS = {"gatedTools", "bashModifyPatterns", "mcpGatedPatterns", "mcpMutatingVerbs"}
+
+
+def _base_policy_path() -> pathlib.Path:
+    return pathlib.Path(__file__).resolve().parent.parent / "data" / "tool-policy.json"
+
+
+def load_tool_policy(root: pathlib.Path | None) -> dict:
+    raw: dict | None = None
+    try:
+        doc = json.loads(_base_policy_path().read_text())
+        if isinstance(doc, dict) and doc.get("gatedTools"):
+            raw = doc
+    except Exception:
+        pass
+    if raw is None:
+        raw = TOOL_POLICY_FALLBACK
+    policy: dict = {
+        "gated_tools": {str(x) for x in raw.get("gatedTools") or []},
+        "bash_patterns": [str(x) for x in raw.get("bashModifyPatterns") or []],
+        "mcp_gated_patterns": [str(x) for x in raw.get("mcpGatedPatterns") or []],
+        "mcp_mutating_verbs": {str(x).lower() for x in raw.get("mcpMutatingVerbs") or []},
+        "mcp_readonly_verbs": {str(x).lower() for x in raw.get("mcpReadOnlyVerbs") or []},
+    }
+    if root is not None:
+        overlay_path = root / ".polymath" / "tool-policy.json"
+        if overlay_path.is_file():
+            try:
+                doc = json.loads(overlay_path.read_text())
+                if not isinstance(doc, dict):
+                    raise ValueError("overlay must be a JSON object")
+                ignored = sorted(set(doc) - OVERLAY_KEYS - {"schemaVersion", "description"})
+                policy["gated_tools"] |= {str(x) for x in doc.get("gatedTools") or []}
+                policy["bash_patterns"] += [str(x) for x in doc.get("bashModifyPatterns") or []]
+                policy["mcp_gated_patterns"] += [str(x) for x in doc.get("mcpGatedPatterns") or []]
+                policy["mcp_mutating_verbs"] |= {
+                    str(x).lower() for x in doc.get("mcpMutatingVerbs") or []
+                }
+                if ignored:
+                    log_decision("policy-overlay-ignored", root=str(root), keys=ignored)
+            except Exception:
+                log_decision("policy-overlay-invalid", root=str(root))
+    for src_key, dst_key in (("bash_patterns", "bash_res"), ("mcp_gated_patterns", "mcp_gated_res")):
+        compiled = []
+        for pat in policy[src_key]:
+            try:
+                compiled.append(re.compile(pat))
+            except re.error:
+                log_decision("policy-bad-pattern", pattern=pat[:100])
+        policy[dst_key] = compiled
+    return policy
 
 
 # ---------------------------------------------------------------------------
@@ -566,8 +699,9 @@ def _payload_cwd(payload: dict) -> pathlib.Path:
 
 def _directive(mode: str, plugin_root: str) -> str:
     enforce_line = (
-        " Mutating tool calls (Edit/Write and modify-pattern Bash) are GATED "
-        "until that mark exists (fresh within the last hour)."
+        " Mutating tool calls (Edit/Write, modify-pattern Bash, mutating "
+        "MCP tools, Task) are GATED until that mark exists (fresh within "
+        "the last hour)."
         if mode == "enforce"
         else ""
     )
@@ -659,11 +793,15 @@ def cmd_hook_pretool(args: argparse.Namespace) -> int:
             return 0
         tool = str(payload.get("tool_name") or "")
         tool_input = payload.get("tool_input") or {}
+        policy = load_tool_policy(root)
         if tool == "Bash":
             command = str(tool_input.get("command") or "") if isinstance(tool_input, dict) else ""
-            if not bash_is_mutating(command):
+            if not bash_is_mutating(command, policy["bash_res"]):
                 return 0  # read-only Bash is exempt (modify-pattern blacklist)
-        elif tool not in GATED_TOOLS:
+        elif tool.startswith("mcp__"):
+            if not mcp_is_gated(tool, policy):
+                return 0  # read-only MCP tool names are exempt
+        elif tool not in policy["gated_tools"]:
             return 0
         if fresh_classification(session, root):
             return 0
@@ -676,14 +814,15 @@ def cmd_hook_pretool(args: argparse.Namespace) -> int:
             detail=(str(tool_input.get("command", ""))[:200] if isinstance(tool_input, dict) else ""),
         )
         print(
-            f"polymath-pipeline enforce: this repo gates mutating tool calls "
-            f"behind classification (routing.mode=enforce). Classify first — "
-            f"run polymath-pipeline:intake (ambiguous/multi-step) or decide "
-            f"the surface yourself — then record it: "
-            f"\"{plugin_root}/bin/polymath-pipeline\" mark --surface "
-            f"<skill-or-workflow-or-'direct'> and retry. Read-only commands "
-            f"are exempt. Kill switch (audited): POLYMATH_PIPELINE_OFF=1 or "
-            f"touch .polymath/pipeline-off.",
+            f"polymath-pipeline enforce: blocked {tool} — this repo gates "
+            f"mutating tool calls (Edit/Write, modify-pattern Bash, mutating "
+            f"MCP tools, Task) behind classification (routing.mode=enforce). "
+            f"Classify first — run polymath-pipeline:intake "
+            f"(ambiguous/multi-step) or decide the surface yourself — then "
+            f"record it: \"{plugin_root}/bin/polymath-pipeline\" mark "
+            f"--surface <skill-or-workflow-or-'direct'> and retry. Read-only "
+            f"commands are exempt. Kill switch (audited): "
+            f"POLYMATH_PIPELINE_OFF=1 or touch .polymath/pipeline-off.",
             file=sys.stderr,
         )
         return 2  # PreToolUse blocking contract

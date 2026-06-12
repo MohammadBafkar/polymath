@@ -4,6 +4,25 @@
 
 ### Added
 
+- **Enforce-gate hole closure.** The PreToolUse matcher now also covers
+  `Task` and `mcp__.*`. MCP tools default to gated unless their name
+  classifies as read-only (first verb segment wins; `get_file_contents`
+  passes, `push_files` and unknown names are gated). `Task` requires a
+  fresh classification. The Bash modify-pattern blacklist gains nine
+  patterns covering the eleven sampled mutators it previously missed
+  (`make`, interpreter-runs-script, `npx`, `gh`/`az`/`gcloud`/`aws`
+  mutating subcommands, database CLIs, `rsync`/`scp`/`sftp`/`unzip`,
+  command-position `patch`, `tar` create/extract) — each pinned by a
+  fixture, with command-position anchors keeping argument words exempt
+  and a deadlock-guard test pinning that the `mark` recovery command
+  itself always passes.
+- **Data-driven tool policy.** Base policy ships in
+  `data/tool-policy.json` (mirrored by engine constants as the
+  fail-safe; a unit test pins the two equal). Projects can strengthen it
+  via `.polymath/tool-policy.json` (`gatedTools`, `bashModifyPatterns`,
+  `mcpGatedPatterns`, `mcpMutatingVerbs`); weakening keys are ignored
+  and audited (`policy-overlay-ignored`, `policy-overlay-invalid`,
+  `policy-bad-pattern` decision events).
 - **Feedback loop (capture → evaluate → apply).**
   `polymath-pipeline feedback capture|digest|evaluate|resolve`: an
   event-sourced JSONL store with a 180-day TTL (digest sweeps expired

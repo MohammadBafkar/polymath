@@ -39,11 +39,36 @@ exactly polymath-core's ambient route-hint behavior.
     precedence (a `[polymath-core route]` hint wins) and honors
     `trust: auto-headless` for read-only surfaces — the first consumer of
     the declared trust axis.
-  - `PreToolUse` (`Bash|Edit|Write|MultiEdit|NotebookEdit`) — the enforce
-    gate, active only when `routing.mode: enforce`: read-only Bash is
-    exempt via a modify-pattern blacklist (false positives accepted — they
-    cost one classify round-trip), everything mutating needs a fresh
+  - `PreToolUse` (`Bash|Edit|Write|MultiEdit|NotebookEdit|Task|mcp__.*`) —
+    the enforce gate, active only when `routing.mode: enforce`: read-only
+    Bash is exempt via a modify-pattern blacklist (false positives
+    accepted — they cost one classify round-trip); MCP tools default to
+    gated unless their name classifies as read-only (first verb segment
+    wins: `get_file_contents` passes, `push_files` and unknown names are
+    gated); `Task` is gated; everything mutating needs a fresh
     classification; deny = exit 2 with the recovery instruction.
+
+## Tool policy
+
+The gate's policy — gated tools, the Bash modify-pattern blacklist, and
+the MCP verb classification — ships in
+[`data/tool-policy.json`](data/tool-policy.json) (mirrored by engine
+constants as the fail-safe; a unit test pins the two equal). A project
+can **strengthen** it with `.polymath/tool-policy.json`:
+
+```json
+{
+  "gatedTools": ["WebFetch"],
+  "bashModifyPatterns": ["\\bmycorptool\\b"],
+  "mcpGatedPatterns": ["^mcp__internal-erp__"],
+  "mcpMutatingVerbs": ["provision"]
+}
+```
+
+Overlays are strengthen-only by construction: there are no keys that
+exempt anything, and unknown keys (e.g. an attempted `mcpReadOnlyVerbs`)
+are ignored and audited to the decision log
+(`policy-overlay-ignored` / `policy-overlay-invalid`).
 
 ## The loop
 

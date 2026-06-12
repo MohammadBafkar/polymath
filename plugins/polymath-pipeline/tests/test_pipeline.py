@@ -161,6 +161,15 @@ class BashBlacklistTests(PipelineTestCase):
         "python3 -c 'print(1)'",
         "curl https://example.com/api",
         "find . -name '*.py' | wc -l",
+        # words that the wrapper patterns must NOT catch out of command position
+        "echo make it work",
+        "gh pr list",
+        "gh pr view 123 --comments",
+        "az group list",
+        "gcloud projects list",
+        "aws s3 ls s3://bucket",
+        "tar -tzf backup.tgz",
+        "tar --list -f archive.tar",
     ]
     MUTATING = [
         "echo done > status.txt",
@@ -173,6 +182,28 @@ class BashBlacklistTests(PipelineTestCase):
         "docker run -it img",
         "mkdir -p new/dir",
         "curl -o out.bin https://example.com",
+        # the 11 sampled mutators the original blacklist missed
+        "make",
+        "cd ui && make",
+        "python3 deploy.py --prod",
+        "node scripts/build.js",
+        "npx prisma migrate dev",
+        "gh pr merge 123 --squash",
+        "az group delete -n prod",
+        "gcloud compute instances delete vm-1",
+        "psql -c 'drop table users'",
+        "rsync -av build/ srv:/var/www",
+        "patch -p1 < fix.diff",
+        "tar -xzf release.tgz",
+        # same families, adjacent shapes
+        "make install",
+        "bash scripts/release.sh",
+        "gh workflow run deploy.yml",
+        "aws s3 sync build/ s3://bucket",
+        "mysql -e 'delete from t'",
+        "scp build.tgz srv:/tmp",
+        "cat fix.diff | patch -p1",
+        "tar czf out.tgz src",
     ]
 
     def test_read_only_commands_exempt(self) -> None:
@@ -182,6 +213,127 @@ class BashBlacklistTests(PipelineTestCase):
     def test_mutating_commands_flagged(self) -> None:
         for cmd in self.MUTATING:
             self.assertTrue(self.mod.bash_is_mutating(cmd), f"missed: {cmd}")
+
+    def test_mark_invocation_is_never_gated(self) -> None:
+        # Deadlock guard: the recovery command the deny message prescribes
+        # must itself pass the gate, or enforce mode can never be satisfied.
+        cmd = (
+            '"/home/u/.claude/plugins/cache/polymath/polymath-pipeline/0.3.0'
+            '/bin/polymath-pipeline" mark --surface direct --cwd /work/repo'
+        )
+        self.assertFalse(self.mod.bash_is_mutating(cmd))
+
+
+class McpClassificationTests(PipelineTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.policy = self.mod.load_tool_policy(None)
+
+    def _gated(self, tool: str) -> bool:
+        return self.mod.mcp_is_gated(tool, self.policy)
+
+    def test_mutating_names_gated(self) -> None:
+        for tool in [
+            "mcp__plugin_polymath-vcs_github__push_files",
+            "mcp__plugin_polymath-vcs_github__create_pull_request",
+            "mcp__azure-devops__wit_update_work_item",
+            "mcp__azure-devops__pipelines_run_pipeline",
+            "mcp__claude_ai_Atlassian_Rovo__createConfluencePage",
+        ]:
+            self.assertTrue(self._gated(tool), f"not gated: {tool}")
+
+    def test_read_only_names_exempt(self) -> None:
+        for tool in [
+            "mcp__plugin_polymath-vcs_github__get_file_contents",
+            "mcp__plugin_polymath-vcs_github__search_code",
+            "mcp__azure-devops__repo_list_branches_by_repo",
+            "mcp__azure-devops__pipelines_get_run",  # first verb wins: get, not run
+            "mcp__claude_ai_Atlassian_Rovo__getConfluencePage",
+        ]:
+            self.assertFalse(self._gated(tool), f"over-gated: {tool}")
+
+    def test_unknown_verb_defaults_to_gated(self) -> None:
+        self.assertTrue(self._gated("mcp__foo__frobnicate_widget"))
+
+    def test_first_verb_wins_over_later_read_verb(self) -> None:
+        # a mutating verb leading the name gates it even when a read verb
+        # appears later (update_search_index must never pass as a "search")
+        self.assertTrue(self._gated("mcp__foo__update_search_index"))
+
+
+class EnforceGateExtendedTests(PipelineTestCase):
+    def _gate(self, tool: str, session: str = "s") -> tuple[int, str]:
+        payload = {"session_id": session, "cwd": str(self.repo), "tool_name": tool, "tool_input": {}}
+        code, _, err = self._hook("hook-pretool", payload)
+        return code, err
+
+    def test_task_denied_until_marked(self) -> None:
+        self._write_project("enforce")
+        code, err = self._gate("Task")
+        self.assertEqual(code, 2)
+        self.assertIn("blocked Task", err)
+        self._mark("--surface", "direct", "--cwd", str(self.repo))
+        code, _ = self._gate("Task")
+        self.assertEqual(code, 0)
+
+    def test_mutating_mcp_denied_read_only_mcp_exempt(self) -> None:
+        self._write_project("enforce")
+        code, err = self._gate("mcp__plugin_polymath-vcs_github__push_files")
+        self.assertEqual(code, 2)
+        self.assertIn("push_files", err)
+        code, _ = self._gate("mcp__plugin_polymath-vcs_github__get_file_contents")
+        self.assertEqual(code, 0)
+        self._mark("--surface", "direct", "--cwd", str(self.repo))
+        code, _ = self._gate("mcp__plugin_polymath-vcs_github__push_files")
+        self.assertEqual(code, 0)
+
+
+class ToolPolicyTests(PipelineTestCase):
+    def _overlay(self, content: str) -> None:
+        (self.repo / ".polymath" / "tool-policy.json").write_text(content)
+
+    def test_base_policy_file_matches_code_fallback(self) -> None:
+        path = REPO_ROOT / "plugins" / "polymath-pipeline" / "data" / "tool-policy.json"
+        doc = json.loads(path.read_text())
+        for key, want in self.mod.TOOL_POLICY_FALLBACK.items():
+            self.assertEqual(doc.get(key), want, f"data/tool-policy.json drifted on {key}")
+
+    def test_overlay_strengthens_bash_and_tools(self) -> None:
+        self._write_project("enforce")
+        self._overlay(json.dumps({
+            "bashModifyPatterns": [r"\bmycorptool\b"],
+            "gatedTools": ["WebFetch"],
+        }))
+        policy = self.mod.load_tool_policy(self.repo)
+        self.assertTrue(self.mod.bash_is_mutating("mycorptool sync", policy["bash_res"]))
+        self.assertIn("WebFetch", policy["gated_tools"])
+        payload = {"session_id": "s", "cwd": str(self.repo), "tool_name": "WebFetch", "tool_input": {}}
+        code, _, _ = self._hook("hook-pretool", payload)
+        self.assertEqual(code, 2)
+
+    def test_overlay_cannot_weaken(self) -> None:
+        self._write_project("enforce")
+        self._overlay(json.dumps({"mcpReadOnlyVerbs": ["push"], "bashModifyPatterns": []}))
+        policy = self.mod.load_tool_policy(self.repo)
+        self.assertTrue(self.mod.mcp_is_gated("mcp__x__push_files", policy))
+        self.assertTrue(self.mod.bash_is_mutating("rm -rf build", policy["bash_res"]))
+        self.assertIn("policy-overlay-ignored", self._events())
+
+    def test_invalid_overlay_keeps_base_policy(self) -> None:
+        self._write_project("enforce")
+        self._overlay("not json {")
+        payload = {"session_id": "s", "cwd": str(self.repo), "tool_name": "Edit", "tool_input": {}}
+        code, _, _ = self._hook("hook-pretool", payload)
+        self.assertEqual(code, 2)
+        self.assertIn("policy-overlay-invalid", self._events())
+
+    def test_hooks_matcher_covers_task_and_mcp(self) -> None:
+        hooks = json.loads(
+            (REPO_ROOT / "plugins" / "polymath-pipeline" / "hooks" / "hooks.json").read_text()
+        )
+        matcher = hooks["hooks"]["PreToolUse"][0]["matcher"]
+        for needle in ("Bash", "Edit", "Write", "Task", "mcp__"):
+            self.assertIn(needle, matcher)
 
 
 class ClassifyHookTests(PipelineTestCase):
