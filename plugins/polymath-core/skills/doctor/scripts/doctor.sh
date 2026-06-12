@@ -140,6 +140,55 @@ if interesting:
     line("!", "decisions", f"last {window} log lines for this root: {summary}")
 elif mode != "hint":
     line("✓", "decisions", f"no denials, fail-opens, or kill-switch uses in the last {window} log lines")
+
+# Hint-adoption telemetry (opt-in, POLYMATH_TELEMETRY=1): join emitted
+# hints (polymath-core hint-log.jsonl, surface names only) against
+# `classified` mark events within a 30-minute window — the proxy for
+# "hint emitted ⇒ surface invoked within N turns".
+import datetime, pathlib
+
+base = pathlib.Path(os.environ.get("CLAUDE_PLUGIN_DATA")
+                    or pathlib.Path.home() / ".claude" / "plugins" / "data")
+hint_log = (base if base.name == "polymath-core" else base / "polymath-core") / "hint-log.jsonl"
+if hint_log.is_file():
+    def parse_ts(value):
+        try:
+            return datetime.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except Exception:
+            return None
+
+    marks = []
+    for cand in (base / "decisions.jsonl",
+                 base / "polymath-pipeline" / "decisions.jsonl"):
+        if cand.is_file():
+            for raw in cand.read_text(errors="ignore").splitlines()[-1000:]:
+                try:
+                    ev = json.loads(raw)
+                except Exception:
+                    continue
+                if isinstance(ev, dict) and ev.get("event") == "classified":
+                    ts = parse_ts(ev.get("ts"))
+                    if ts and ev.get("surface"):
+                        marks.append((ts, ev["surface"]))
+            break
+    emissions = []
+    for raw in hint_log.read_text(errors="ignore").splitlines()[-200:]:
+        try:
+            ev = json.loads(raw)
+        except Exception:
+            continue
+        ts = parse_ts(ev.get("ts")) if isinstance(ev, dict) else None
+        if ts and ev.get("surfaces"):
+            emissions.append((ts, ev["surfaces"]))
+    adopted = 0
+    for ts, surfaces in emissions:
+        if any(0 <= (mts - ts).total_seconds() <= 1800
+               and any(s in msurf or msurf in s for s in surfaces)
+               for mts, msurf in marks):
+            adopted += 1
+    if emissions:
+        line("✓", "adoption", f"{adopted}/{len(emissions)} recent hint emission(s) followed "
+             f"by a matching mark within 30m (telemetry opt-in)")
 PY
 fi
 

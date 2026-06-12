@@ -85,22 +85,25 @@ elsewhere is intentional.
 
 ## 4. Known operational gaps
 
-- **Live-model fixtures are disabled.** Only the jobs that call a
-  real model are off: `claude-cli-fixtures` in
-  [`.github/workflows/golden-tests.yml.disabled`](.github/workflows/golden-tests.yml.disabled)
-  and `live-bakeoff` in
-  [`.github/workflows/evaluation.yml.disabled`](.github/workflows/evaluation.yml.disabled)
-  ship disabled so Claude API budget is not spent on every push. The
-  six token-free deterministic jobs (executable unit tests, the
-  shipFeature scratch-repo e2e, the hollow-run falsifiability anchor,
-  golden-fixture frontmatter parsing, skill-triggering frontmatter, and
-  bakeoff-case parsing) run on every PR and push in
+- **Live-model coverage is weekly and rotated, not per-PR.** The suites
+  that call a real model run via
+  [`.github/workflows/model-ci.yml`](.github/workflows/model-ci.yml):
+  one suite per week on an ISO-week rotation (skill-triggering →
+  workflow-triggering → golden live + DESC-2 behavioral), bakeoff
+  monthly, all behind a secret-presence guard
+  (`CLAUDE_CODE_OAUTH_TOKEN` preferred) that skips cleanly when no
+  secret is set — so without the secret, model behaviour is still
+  unproven. A regression in a given suite can therefore go unnoticed
+  for up to three weeks. The older per-PR `/evaluate` workflow
+  ([`.github/workflows/evaluation.yml.disabled`](.github/workflows/evaluation.yml.disabled))
+  and `claude-cli-fixtures`
+  ([`.github/workflows/golden-tests.yml.disabled`](.github/workflows/golden-tests.yml.disabled))
+  still ship disabled. The six token-free deterministic jobs
+  (executable unit tests, the shipFeature scratch-repo e2e, the
+  hollow-run falsifiability anchor, golden-fixture frontmatter parsing,
+  skill-triggering frontmatter, and bakeoff-case parsing) run on every
+  PR and push in
   [`.github/workflows/golden-deterministic.yml`](.github/workflows/golden-deterministic.yml).
-  So CI proves the executable workflow runner, the gate hardening, and
-  fixture well-formedness; what it does not prove while the live jobs
-  are off is real model behaviour. To enable the live gate: rename the
-  `*.yml.disabled` files to `*.yml` and set `CLAUDE_CODE_OAUTH_TOKEN`
-  (or `ANTHROPIC_API_KEY`) in repo secrets.
 - **`artifact_matrix` has no consumer.** The project.yaml key is
   schema-validated and loaded into the project-context snapshot, but no
   skill, workflow guard, or tool reads it today. Its consumer spec lived

@@ -31,6 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Weekly model-CI tier + opt-in hint-adoption telemetry.**
+  `model-ci.yml` runs the live-model suites weekly on an ISO-week
+  rotation (skill-triggering → workflow-triggering → golden live +
+  DESC-2 behavioral; bakeoff monthly with per-case JSON artifacts),
+  behind a secret-presence guard that skips cleanly without
+  `CLAUDE_CODE_OAUTH_TOKEN` — never a red X for a missing secret.
+  With `POLYMATH_TELEMETRY=1`, route-hint logs emitted surface names
+  (never prompt text) machine-locally and doctor reports how many
+  recent hints were followed by a matching mark within 30 minutes —
+  the adoption signal the enforce-strict deferral is waiting on.
 - **SURFACE-1, CONFUSION-1, and the constrained-top-3 ratchet.**
   SURFACE-1 (`check-registry.py routing`, self-tested): every catalog
   surface — 184 across skills, workflows, tools, agents — either

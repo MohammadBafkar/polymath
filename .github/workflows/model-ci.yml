@@ -1,0 +1,130 @@
+name: model-ci
+
+# Weekly live-model tier. Deterministic gates run on every PR
+# (validate.yml, golden-deterministic.yml); the suites here spend Claude
+# API budget, so they run WEEKLY with an ISO-week rotation that bounds
+# per-week cost to one suite:
+#
+#   week % 3 == 0  →  skill-triggering run  (naive prompt → right skill)
+#   week % 3 == 1  →  workflow-triggering run  (naive prompt → right proposal)
+#   week % 3 == 2  →  golden fixtures live + DESC-2 behavioral confusion run
+#
+# The bakeoff (baseline-vs-polymath value measurement, per-case JSON
+# reports) runs MONTHLY — on the first scheduled run of each month.
+#
+# Secret-presence guard: every paid step requires CLAUDE_CODE_OAUTH_TOKEN
+# (preferred; ANTHROPIC_API_KEY fallback). When neither is set the run
+# skips cleanly with a warning — never a red X for a missing secret.
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # Mondays 05:00 UTC
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Override the rotation (skill | workflow | golden-desc2 | bakeoff)"
+        type: choice
+        options: [rotation, skill, workflow, golden-desc2, bakeoff]
+        default: rotation
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-ci
+  cancel-in-progress: false
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Detect Claude auth (secret-presence guard)
+        id: auth
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]]; then
+            echo "method=oauth" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "method=apikey" >> "$GITHUB_OUTPUT"
+          else
+            echo "method=none" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skip cleanly on missing auth
+        if: steps.auth.outputs.method == 'none'
+        run: |
+          echo "::warning::No Claude auth available; skipping the live-model tier."
+          echo "::warning::Set CLAUDE_CODE_OAUTH_TOKEN (preferred) to enable."
+      - name: Pick this week's suite (ISO-week rotation)
+        id: suite
+        if: steps.auth.outputs.method != 'none'
+        env:
+          OVERRIDE: ${{ inputs.suite || 'rotation' }}
+        run: |
+          if [[ "$OVERRIDE" != "rotation" ]]; then
+            suite="$OVERRIDE"
+          else
+            week=$(date -u +%V)
+            case $((10#$week % 3)) in
+              0) suite=skill ;;
+              1) suite=workflow ;;
+              2) suite=golden-desc2 ;;
+            esac
+            # First scheduled run of the month additionally runs the bakeoff.
+            if [[ $(date -u +%d) -le 07 ]]; then
+              echo "bakeoff=yes" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          echo "suite=$suite" >> "$GITHUB_OUTPUT"
+          echo "ISO week $(date -u +%V) → suite: $suite"
+      - name: Install Claude Code CLI (pinned)
+        if: steps.auth.outputs.method != 'none'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: steps.auth.outputs.method != 'none'
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.175
+          claude --version
+      - name: skill-triggering run
+        if: steps.auth.outputs.method != 'none' && steps.suite.outputs.suite == 'skill'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 tools/triggering.py skill run --timeout 180
+      - name: workflow-triggering run
+        if: steps.auth.outputs.method != 'none' && steps.suite.outputs.suite == 'workflow'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 tools/triggering.py workflow run --timeout 180
+      - name: golden fixtures live + DESC-2 behavioral
+        if: steps.auth.outputs.method != 'none' && steps.suite.outputs.suite == 'golden-desc2'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          bash tests/golden/run-fixtures.sh
+          python3 tools/check-description-confusion.py run
+      - name: bakeoff (monthly; per-case JSON reports)
+        if: >-
+          steps.auth.outputs.method != 'none'
+          && (steps.suite.outputs.bakeoff == 'yes' || steps.suite.outputs.suite == 'bakeoff')
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 tools/bakeoff.py run --out-dir .pdata/bakeoff
+      - name: Upload bakeoff reports
+        if: always() && hashFiles('.pdata/bakeoff/*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: bakeoff-${{ github.run_id }}
+          path: .pdata/bakeoff/
+          retention-days: 90

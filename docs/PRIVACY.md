@@ -77,11 +77,30 @@ titles), prompts, step summaries, file paths, file contents, inputs,
 usernames, hostnames. The payload matches the maximum allowed by the
 contract above: name + duration + outcome.
 
+### Hint-adoption log (polymath-core)
+
+Under the same `POLYMATH_TELEMETRY=1` opt-in, the route-hint hook appends
+one line per *emitted* hint to
+
+```text
+${CLAUDE_PLUGIN_DATA}/polymath-core/hint-log.jsonl
+```
+
+```json
+{"ts": "2026-06-12T10:00:00+00:00", "surfaces": ["polymath-flows:run-workflow reviewPR"]}
+```
+
+Surface *names* and a timestamp only — never prompt text, paths, or file
+contents. Its single consumer is `polymath-core:doctor`, which joins it
+against polymath-pipeline `classified` events (also local) to report
+whether emitted hints are followed by a matching mark within 30 minutes.
+Local-only, fail-open, size-capped, no network.
+
 ### Lifecycle
 
-The file grows by one line per runner invocation and is yours to truncate
-or delete at any time; nothing depends on it. Writing is fail-open — an
-unwritable data dir never affects the runner.
+Each file grows by one line per event and is yours to truncate
+or delete at any time; nothing depends on them. Writing is fail-open — an
+unwritable data dir never affects the runner or a hook.
 
 ## What about MCP servers?
 

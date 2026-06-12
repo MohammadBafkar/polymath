@@ -400,7 +400,38 @@ def main() -> int:
     if top_trust == "auto-headless":
         print("    trust: auto-headless — read-only may run unconfirmed in classify/enforce mode; otherwise propose-first.")
     print("Detect-only; nothing ran. Confirm: /polymath-core:route. Mute: POLYMATH_ROUTE_MUTE=1 or .polymath/route-muted")
+    _log_emission([r["surface"] for _, r, _ in top])
     return 0
+
+
+HINT_LOG_MAX_BYTES = 256 * 1024
+HINT_LOG_KEEP_LINES = 500
+
+
+def _log_emission(surfaces: list[str]) -> None:
+    """Opt-in adoption telemetry (POLYMATH_TELEMETRY=1): append the emitted
+    surface NAMES (never prompt text) with a timestamp, machine-local only.
+    polymath-core:doctor joins this against polymath-pipeline `classified`
+    events to report whether hints are followed. Fail-open everywhere."""
+    if os.environ.get("POLYMATH_TELEMETRY") != "1":
+        return
+    try:
+        import datetime
+
+        base = os.environ.get("CLAUDE_PLUGIN_DATA")
+        root = Path(base) if base else Path.home() / ".claude" / "plugins" / "data"
+        if root.name != "polymath-core":
+            root = root / "polymath-core"
+        log = root / "hint-log.jsonl"
+        root.mkdir(parents=True, exist_ok=True)
+        ts = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+        with log.open("a") as f:
+            f.write(json.dumps({"ts": ts, "surfaces": surfaces}) + "\n")
+        if log.stat().st_size > HINT_LOG_MAX_BYTES:
+            lines = log.read_text(errors="ignore").splitlines()[-HINT_LOG_KEEP_LINES:]
+            log.write_text("\n".join(lines) + "\n")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

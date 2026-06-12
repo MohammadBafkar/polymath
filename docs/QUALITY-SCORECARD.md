@@ -58,10 +58,15 @@ Outside the per-PR loop:
 
 - **Catalog reproducibility** — `tools/build-catalog.py --check`, run
   by the Pages deploy on `main` pushes.
-- **Live-model runs** — bakeoff, skill-triggering `run` mode, and
-  workflow-triggering `run` mode spend Claude API budget and are
-  opt-in under `CLAUDE_CODE_OAUTH_TOKEN`; the CI workflows that
-  automate them ship disabled. See
+- **Live-model runs** — bakeoff, skill-triggering `run` mode,
+  workflow-triggering `run` mode, golden fixtures live, and the DESC-2
+  behavioral half spend Claude API budget. They run WEEKLY via
+  [`model-ci.yml`](../.github/workflows/model-ci.yml) on an ISO-week
+  rotation (one suite per week: skill → workflow → golden+DESC-2), with
+  the bakeoff monthly on the first scheduled run; everything sits behind
+  a secret-presence guard (`CLAUDE_CODE_OAUTH_TOKEN` preferred) that
+  skips cleanly — never a red X for a missing secret. The older
+  on-demand `/evaluate` PR workflow still ships disabled. See
   [`LIMITATIONS.md § 4`](../LIMITATIONS.md#4-known-operational-gaps).
 
 ## Promotion bars

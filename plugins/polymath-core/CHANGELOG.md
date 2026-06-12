@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Opt-in hint-adoption telemetry.** With exactly
+  `POLYMATH_TELEMETRY=1`, the route-hint hook appends emitted-hint
+  records (surface names + timestamp, never prompt text) to
+  `${CLAUDE_PLUGIN_DATA}/polymath-core/hint-log.jsonl` — local-only,
+  fail-open, size-capped; the off state is unit-verified. Doctor joins
+  it against polymath-pipeline `classified` events and reports how many
+  recent emissions were followed by a matching mark within 30 minutes.
 - **Hint render budgeted (HINT-BUDGET) + doctor shows injection
   tiering.** The route-hint trust/footer wording is tightened and the
   worst single-candidate render is gated at ≤120 tokens
