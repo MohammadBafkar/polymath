@@ -1,5 +1,7 @@
 # Changelog
 
+<!-- markdownlint-disable MD024 -->
+
 All notable changes to this marketplace will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -9,6 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CI hardening — MANIFEST-1 made real, SECRET-1 implemented,
+  markdownlint gates.** `validate.yml` installs a pinned
+  `@anthropic-ai/claude-code@2.1.175` so `claude plugin validate
+  --strict` actually executes; `conformance.sh` and `validate-all.sh`
+  hard-fail (instead of silently skipping) when the CLI is absent and
+  `CI` is set. New `secret-scan` job runs a checksum-pinned gitleaks
+  8.30.1 filesystem scan (`--no-git`); detection is unit-proven by
+  `tests/tools/test_secret_scan.py` (seeded shape-valid PAT must flag,
+  clean dir must pass; skips when gitleaks absent locally).
+  `lint.yml` drops `continue-on-error` — markdownlint now gates, with a
+  documented ratchet baseline in `.markdownlint-cli2.jsonc` (MD012 /
+  MD025 / MD033 disabled with counts and re-enable rule; CHANGELOG gets
+  an inline MD024 disable; the two one-off violations fixed).
 - **COUNT-1 / TESTDIR-1 / DOCPATH-1 — drift gates for the previously
   ungated.** `tools/check-registry.py` gains three subcommands wired
   into `conformance.sh --all`: `aggregates` recomputes README's

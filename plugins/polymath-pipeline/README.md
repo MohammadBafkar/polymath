@@ -78,7 +78,7 @@ ${CLAUDE_PLUGIN_DATA}/
 ## Limitations
 
 - The `routing.mode` reader is a line-scan for the block form
-  (`routing:` newline `  mode: …`); a flow-style `routing: {mode: …}`
+  (`routing:` newline, then an indented `mode: …` line); a flow-style `routing: {mode: …}`
   reads as `hint`.
 - `mark` runs through the Bash tool, which cannot know the harness session
   id — markers are stored session-namespaced but accepted root-scoped

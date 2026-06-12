@@ -10,6 +10,16 @@
     // Default: enable all rules
     "default": true,
 
+    // RATCHET BASELINE (lint.yml gates without continue-on-error): the three
+    // rules below are disabled because the tree fails them in bulk today
+    // (MD012 ×174 blank-line runs; MD025 ×139 multi-H1 golden fixtures and
+    // templates; MD033 ×76 placeholder tokens like <slug> in prose).
+    // Re-enabling one requires fixing its violations in the same PR — the
+    // bar only moves up, never silently down.
+    "MD012": false,
+    "MD025": false,
+    "MD033": false,
+
     // MD013 - Line length: disable because skill files and docs routinely have long lines
     "MD013": false,
 
@@ -45,10 +55,8 @@
     // MD032 - Blanks around lists: disable because reference files use tight list formatting
     "MD032": false,
 
-    // MD033 - Inline HTML: allow specific elements commonly used in docs
-    "MD033": {
-      "allowed_elements": ["br", "char", "details", "summary", "img", "a", "sub", "sup", "T", "strong", "em", "b", "i", "u", "span"]
-    },
+    // MD033 is disabled in the ratchet baseline block above (placeholder
+    // tokens like <slug> in prose make an element allowlist unmaintainable).
 
     // MD034 - Bare URLs: disable because reference files use bare URLs on Source: lines
     "MD034": false,

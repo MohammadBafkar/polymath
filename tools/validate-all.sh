@@ -26,6 +26,12 @@ if command -v claude >/dev/null 2>&1; then
     fail=1
   fi
   echo "::endgroup::"
+elif [[ -n "${CI:-}" ]]; then
+  # In CI the validator must actually run — a silent skip here is how
+  # MANIFEST-1 spent months green without ever executing. validate.yml
+  # installs a pinned @anthropic-ai/claude-code; absence is a real failure.
+  echo "  ✗ claude CLI not on PATH in CI — install the pinned @anthropic-ai/claude-code"
+  fail=1
 fi
 
 check_json() {

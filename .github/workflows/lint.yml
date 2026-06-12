@@ -26,4 +26,3 @@ jobs:
             **/*.md
             !node_modules
             !.git
-        continue-on-error: true

@@ -64,8 +64,12 @@ if s not in allowed:
       echo "  ✗ MANIFEST-1: claude plugin validate --strict failed"
       fail=1
     fi
+  elif [[ -n "${CI:-}" ]]; then
+    # A silent CI skip is how MANIFEST-1 ran zero times while looking green.
+    echo "  ✗ MANIFEST-1: claude CLI not on PATH in CI (validate.yml installs a pinned version)"
+    fail=1
   else
-    echo "  · MANIFEST-1: claude CLI not on PATH (skipped)"
+    echo "  · MANIFEST-1: claude CLI not on PATH (skipped locally)"
   fi
 
   # DOCS-1
