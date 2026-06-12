@@ -14,14 +14,14 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
   DOCS, STABILITY) is in [AGENTS.md](../AGENTS.md).
 - **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
   SKILL.md ≤ 500 lines) plus markdownlint.
-- **Token budget** — `tools/token-budget.sh` (≤ 400 tokens per plugin
+- **Token budget** — `tools/token-report.py budget` (≤ 400 tokens per plugin
   always-on; total scales with plugin count).
 - **Deterministic golden suite** —
   [`.github/workflows/golden-deterministic.yml`](../.github/workflows/golden-deterministic.yml):
   polymath-flows + polymath-core unit tests, the shipFeature
   scratch-repo end-to-end job, the hollow-run falsifiability anchor,
   golden-fixture frontmatter parsing, `python3
-  tools/skill-triggering.py check`, and `python3 tools/bakeoff.py
+  tools/triggering.py skill check`, and `python3 tools/bakeoff.py
   check` (which enforces the symmetric-prompt contract, see § Bakeoff
   fairness).
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
@@ -51,8 +51,8 @@ the supporting evidence link, not just a status flip; receipts live in
 | -------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------- |
 | Conformance pass rate per plugin | [`tools/conformance.sh --all`](../tools/conformance.sh)             | every PR (validate.yml)                         |
 | Fixture + case well-formedness   | golden-deterministic.yml                                            | every PR                                        |
-| Token budget                     | [`tools/token-budget.sh`](../tools/token-budget.sh)                 | every PR (token-budget.yml)                     |
-| Skill-triggering pass rate       | [`tools/skill-triggering.py run`](../tools/skill-triggering.py)     | opt-in live run (evaluation workflow disabled)  |
+| Token budget                     | [`tools/token-report.py budget`](../tools/token-report.py)          | every PR (token-budget.yml)                     |
+| Skill-triggering pass rate       | [`tools/triggering.py skill run`](../tools/triggering.py)           | opt-in live run (evaluation workflow disabled)  |
 | Bakeoff regex deltas             | [`tools/bakeoff.py run`](../tools/bakeoff.py)                       | opt-in live run (evaluation workflow disabled)  |
 | Bakeoff LLM-judge deltas         | [`tools/bakeoff.py run --judge`](../tools/bakeoff.py)               | opt-in live run                                 |
 | Judge calibration drift          | [`tools/bakeoff.py calibrate`](../tools/bakeoff.py)                 | opt-in live run                                 |
@@ -114,12 +114,12 @@ default; populate it to enable drift checks). Drift > 1 fails
 ```bash
 tools/conformance.sh --all
 tools/lint-skills.sh
-tools/token-budget.sh
+tools/token-report.py budget
 tools/build-catalog.py --check
 python3 -m unittest discover -s plugins/polymath-flows/tests
 python3 -m unittest discover -s plugins/polymath-core/tests
 python3 tools/bakeoff.py check
-python3 tools/skill-triggering.py check
+python3 tools/triggering.py skill check
 ```
 
 With an authenticated Claude Code CLI (`CLAUDE_CODE_OAUTH_TOKEN` or
@@ -128,7 +128,7 @@ With an authenticated Claude Code CLI (`CLAUDE_CODE_OAUTH_TOKEN` or
 ```bash
 tests/golden/run-fixtures.sh --plugin polymath-thinking
 python3 tools/bakeoff.py run --judge --out-dir .pdata/bakeoff
-python3 tools/skill-triggering.py run --timeout 180
+python3 tools/triggering.py skill run --timeout 180
 python3 tools/bakeoff.py calibrate
-python3 tools/skill-triggering.py list   # inspect expected invocations
+python3 tools/triggering.py skill list   # inspect expected invocations
 ```

@@ -113,7 +113,7 @@ Add the marketplace entry in `.claude-plugin/marketplace.json` (no
 }
 ```
 
-`tools/check-catalog.py` (invoked by `tools/conformance.sh --all`)
+`tools/check-registry.py catalog` (invoked by `tools/conformance.sh --all`)
 rejects mismatched plugin sets between `marketplace.json`,
 `plugin.json` files, and `registry/polymath-catalog.json`, and rejects
 any version drift between a marketplace entry and its plugin.json.
@@ -170,7 +170,7 @@ ship neither a command nor a workflow.
   *frequent direct user entry point* people reach for by typing `/name`
   (e.g. `commit`, `pr`, `init-project`). A command's `description` **is
   counted** against the plugin's 400-token budget by
-  `tools/token-budget.sh` (it scans `commands/`, `agents/`, and
+  `tools/token-report.py budget` (it scans `commands/`, `agents/`, and
   `skills/`), so a shim is not free. Keep the command description a short
   *complementary* verb phrase that disambiguates *when to type the slash
   command* — never a restatement of the skill description.
@@ -246,7 +246,7 @@ fork catches nothing. Concretely:
   `polymath-qa`, `polymath-sre`, `polymath-product`, `polymath-incident`, … each
   bundle exactly the skills a role-agent would curate. A role-agent just
   shadows one of them at the cost of always-on description budget
-  (`tools/token-budget.sh` counts `agents/`).
+  (`tools/token-report.py budget` counts `agents/`).
 - **Role hand-offs already exist as workflows.** `plugins/polymath-flows/`
   sequences PM → eng → reviewer → release (`featureFromIdea`) and the incident
   arc (`respondToIncident`) with `mustPass` gates and artifact schemas a chain
@@ -278,8 +278,8 @@ Hooks live in `hooks/hooks.json`; helper scripts live in
 
 - Per-plugin always-on listing ≤ 400 tokens.
 - Catalog total target scales with plugin count (see
-  `tools/token-budget.sh`).
-- Run `tools/token-budget.sh` locally before PR.
+  `tools/token-report.py budget`).
+- Run `tools/token-report.py budget` locally before PR.
 
 CI fails ≥ 50-token regressions without an explicit `expected-cost:`
 override.
@@ -323,7 +323,7 @@ A plugin may additionally ship:
 1. `polymath-author:new-plugin <name>` (or
    `plugins/polymath-author/bin/new-plugin.sh <name>`) to scaffold.
 2. Author components.
-3. `tools/validate-all.sh && tools/lint-skills.sh && tools/token-budget.sh`
+3. `tools/validate-all.sh && tools/lint-skills.sh && tools/token-report.py budget`
    must pass.
 4. Add at least one golden fixture under `tests/golden/<plugin>/`.
 5. Register the plugin in `.claude-plugin/marketplace.json`.

@@ -64,7 +64,7 @@ or documented workflow-shape gap) showing Polymath adds workflow,
 critique, safety, or artifact value beyond the official surface — is
 recorded in
 [`registry/stability-evidence.json`](../registry/stability-evidence.json)
-as `distinct_value_url` and enforced by `tools/check-stability-evidence.py`
+as `distinct_value_url` and enforced by `tools/check-registry.py stability`
 (rule `STABILITY-1`). Without it the ledger blocks the promotion.
 
 ## 3. Per-plugin audit

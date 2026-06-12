@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
-"""Token-usage analyzer.
+"""Token accounting — the always-on budget gate and a transcript analyzer.
 
-Parses a `claude -p --output-format stream-json` transcript and breaks
-down token consumption by:
+  token-report.py budget
+  token-report.py usage <transcript.jsonl>
+  token-report.py usage --baseline <baseline.jsonl> --candidate <candidate.jsonl>
+
+budget — estimate per-plugin always-on listing token cost. The per-plugin
+cap (default 400) is the load-bearing gate: each plugin must stay under it
+whether you install 5 or 50. The repo-wide total is informational: the
+report compares it against a *scaling* target of (250 × plugin_count),
+with a floor of 1500 to keep the MVP signal alive. Only the `name` +
+`description` frontmatter fields of every SKILL.md, command, and agent
+count — estimated via lib.tokens.estimate_tokens (ceil(chars/4)).
+Environment overrides: POLYMATH_PER_PLUGIN_CEILING (per-plugin cap),
+POLYMATH_MVP_TOTAL_TARGET (total target). Exit 1 on any plugin over the
+cap or total over target.
+
+usage — parse a `claude -p --output-format stream-json` transcript and
+break down token consumption by:
 
   - main conversation (the lead model)
   - per-subagent (Agent tool invocations)
@@ -12,31 +27,101 @@ down token consumption by:
 Every time you propose adding an agent, run the analyzer against a
 representative transcript to confirm the agent saves tokens (or earns
 them through quality the no-agent baseline can't match). The
-"no-agent baseline" comparison is the falsifiability anchor.
-
-Usage:
-
-    tools/analyze-token-usage.py <transcript.jsonl>
-    tools/analyze-token-usage.py --baseline <baseline.jsonl> --candidate <candidate.jsonl>
-
-When run with --baseline/--candidate, prints a side-by-side delta plus a
+"no-agent baseline" comparison is the falsifiability anchor. When run
+with --baseline/--candidate, prints a side-by-side delta plus a
 recommendation (PROCEED / REJECT / INCONCLUSIVE).
 
-Field tolerance:
-  Transcripts vary by Claude Code version. The analyzer treats every
-  field as optional and reports gracefully when usage data is absent
-  (e.g. transcripts saved before stream-json gained `usage` blocks).
+Field tolerance: transcripts vary by Claude Code version. The analyzer
+treats every field as optional and reports gracefully when usage data is
+absent (e.g. transcripts saved before stream-json gained `usage` blocks).
 """
-
 from __future__ import annotations
 
 import argparse
 import collections
 import json
+import os
 import pathlib
-import sys
+import re
 from dataclasses import dataclass, field
 from typing import Any
+
+from lib.repo import iter_plugins
+from lib.tokens import estimate_tokens
+
+# ---------------------------------------------------------------------------
+# budget — per-plugin always-on listing cost vs the 400-token ceiling
+# ---------------------------------------------------------------------------
+
+# Always-on listing surfaces: any SKILL.md plus every .md under these
+# top-level plugin directories. tests/ and references/ never count.
+SURFACE_DIRS = {"commands", "agents", "skills"}
+SKIP_DIRS = {"tests", "references"}
+
+
+def _listing_text(plugin: pathlib.Path) -> str:
+    """Concatenated `name:` + `description:` frontmatter values of every
+    always-on listing surface under `plugin` — the only text Claude pays
+    for per installed plugin before any skill is invoked."""
+    parts: list[str] = []
+    for md in plugin.rglob("*.md"):
+        rel = md.relative_to(plugin)
+        segs = rel.parts
+        if segs and segs[0] in SKIP_DIRS:
+            continue
+        if md.name != "SKILL.md" and segs and segs[0] not in SURFACE_DIRS:
+            continue
+        text = md.read_text(errors="ignore")
+        m = re.search(r"^---\s*\n(.*?)\n---", text, re.DOTALL | re.MULTILINE)
+        if not m:
+            continue
+        fm = m.group(1)
+        name = re.search(r"^name:\s*(.+)$", fm, re.MULTILINE)
+        desc = re.search(r"^description:\s*(.+)$", fm, re.MULTILINE)
+        if name:
+            parts.append(name.group(1))
+        if desc:
+            parts.append(desc.group(1))
+    return "".join(parts)
+
+
+def budget() -> int:
+    per_plugin_ceiling = int(os.environ.get("POLYMATH_PER_PLUGIN_CEILING") or 400)
+    plugins = list(iter_plugins())
+    scaling_target = max(len(plugins) * 250, 1500)
+    total_target = int(os.environ.get("POLYMATH_MVP_TOTAL_TARGET") or scaling_target)
+
+    total = 0
+    fail = 0
+
+    print("## Plugin listing budget")
+    print(f"{'Plugin':<30} | {'Tokens':<8} | Status")
+    print("------------------------------ | -------- | ------")
+
+    for plugin in plugins:
+        try:
+            tokens = estimate_tokens(_listing_text(plugin))
+        except OSError:
+            tokens = 0
+        total += tokens
+        status = "ok"
+        if tokens > per_plugin_ceiling:
+            status = f"OVER ({per_plugin_ceiling})"
+            fail = 1
+        print(f"{plugin.name:<30} | {tokens!s:<8} | {status}")
+
+    print()
+    print(f"Total measured: {total} tokens (target ≤ {total_target})")
+    if total > total_target:
+        print("FAIL: total exceeds target")
+        fail = 1
+
+    return fail
+
+
+# ---------------------------------------------------------------------------
+# usage — stream-json transcript breakdown
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -203,13 +288,7 @@ def compare(baseline: Report, candidate: Report) -> str:
     return "\n".join(out)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("transcript", nargs="?")
-    parser.add_argument("--baseline")
-    parser.add_argument("--candidate")
-    args = parser.parse_args()
-
+def usage_main(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     if args.baseline and args.candidate:
         base = analyze(_iter_events(pathlib.Path(args.baseline)))
         cand = analyze(_iter_events(pathlib.Path(args.candidate)))
@@ -220,6 +299,38 @@ def main() -> int:
     r = analyze(_iter_events(pathlib.Path(args.transcript)))
     print(render(r, label=args.transcript))
     return 0
+
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Token accounting — the always-on budget gate and a transcript analyzer."
+    )
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser(
+        "budget",
+        help="per-plugin always-on listing cost vs the 400-token ceiling",
+    )
+
+    usage = sub.add_parser(
+        "usage",
+        help="token breakdown of a `claude -p --output-format stream-json` transcript",
+    )
+    usage.add_argument("transcript", nargs="?")
+    usage.add_argument("--baseline")
+    usage.add_argument("--candidate")
+
+    args = parser.parse_args()
+    if args.cmd == "budget":
+        return budget()
+    if args.cmd == "usage":
+        return usage_main(args, usage)
+    raise AssertionError(args.cmd)
 
 
 if __name__ == "__main__":

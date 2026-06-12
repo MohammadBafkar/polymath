@@ -42,7 +42,7 @@ description: Shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustPass, fl
 - **Plugin** — Single-responsibility unit of trust, versioning, and distribution.
 - **Component** — A skill, command, agent, hook, MCP, or monitor inside a plugin.
 - **Always-on listing cost** — Tokens consumed by component descriptions surfaced to the model every turn.
-- **Token budget** — ≤ 400 per plugin; ≤ 1,500 MVP total. Measured by `tools/token-budget.sh`.
+- **Token budget** — ≤ 400 per plugin; ≤ 1,500 MVP total. Measured by `tools/token-report.py budget`.
 
 ## Capabilities & integrations
 

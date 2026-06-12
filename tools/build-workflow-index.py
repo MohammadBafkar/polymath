@@ -65,7 +65,7 @@ def _count_tokens(text: str) -> int:
 
         return len(tiktoken.get_encoding("cl100k_base").encode(text))
     except Exception:
-        # Heuristic fallback (chars / 4) — matches token-budget.sh's posture.
+        # Heuristic fallback (chars / 4) — close to token-report.py budget's posture.
         return len(text) // 4 + 1
 
 

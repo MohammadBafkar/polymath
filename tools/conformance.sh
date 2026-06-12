@@ -198,8 +198,8 @@ if [[ "$mode" == "--all" ]]; then
   # per-plugin versions. Independent of whether the Claude CLI is
   # installed; runs the same check in CI without claude on PATH.
   echo
-  echo "── MANIFEST-3 cross-check (check-catalog.py)"
-  if python3 "$root/tools/check-catalog.py"; then
+  echo "── MANIFEST-3 cross-check (check-registry.py catalog)"
+  if python3 "$root/tools/check-registry.py" catalog; then
     :
   else
     overall=1
@@ -247,8 +247,8 @@ if [[ "$mode" == "--all" ]]; then
   # PR, and changelog entry. Connector/infra plugins additionally need
   # primary-source distinct-value evidence. See docs/MATURITY.md.
   echo
-  echo "── STABILITY-1 cross-check (check-stability-evidence.py)"
-  if python3 "$root/tools/check-stability-evidence.py"; then
+  echo "── STABILITY-1 cross-check (check-registry.py stability)"
+  if python3 "$root/tools/check-registry.py" stability; then
     :
   else
     overall=1
@@ -363,8 +363,8 @@ if [[ "$mode" == "--all" ]]; then
   # must_propose names resolve). Cheap structural check, no LLM; the live `run`
   # mode is a separate opt-in CI job under CLAUDE_CODE_OAUTH_TOKEN.
   echo
-  echo "── WORKFLOW-TRIGGER cross-check (workflow-triggering.py check)"
-  if python3 "$root/tools/workflow-triggering.py" check; then
+  echo "── WORKFLOW-TRIGGER cross-check (triggering.py workflow check)"
+  if python3 "$root/tools/triggering.py" workflow check; then
     :
   else
     overall=1
@@ -375,8 +375,8 @@ if [[ "$mode" == "--all" ]]; then
   # this is run live here — no model, no token, no opt-in. A regression in the
   # signal table or the scorer fails the build.
   echo
-  echo "── ROUTE-TRIGGER cross-check (route-triggering.py run)"
-  if python3 "$root/tools/route-triggering.py" run; then
+  echo "── ROUTE-TRIGGER cross-check (triggering.py route run)"
+  if python3 "$root/tools/triggering.py" route run; then
     :
   else
     overall=1
@@ -386,8 +386,8 @@ if [[ "$mode" == "--all" ]]; then
   # plugins that exist in the marketplace. Drift-guard so a fold/rename can't
   # leave a dangling profile reference.
   echo
-  echo "── PROFILE-1 cross-check (check-profiles.py)"
-  if python3 "$root/tools/check-profiles.py"; then
+  echo "── PROFILE-1 cross-check (check-registry.py profiles)"
+  if python3 "$root/tools/check-registry.py" profiles; then
     :
   else
     overall=1

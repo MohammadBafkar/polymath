@@ -24,7 +24,7 @@ jobs:
       - name: Measure per-plugin always-on token cost
         id: budget
         run: |
-          bash tools/token-budget.sh | tee budget.txt
+          python3 tools/token-report.py budget | tee budget.txt
       - name: Upsert sticky budget comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7

@@ -85,7 +85,7 @@ setup:
     - Run tools/lint-skills.sh and tools/lint-descriptions.py --strict after editing skills, commands, or agents.
     - Run tools/conformance.sh --all before changing plugin structure, workflows, connectors, templates, or catalog metadata.
     - Re-run tools/build-workflow-index.py, tools/build-surface-index.py, and tools/build-capability-index.py after editing workflow YAML, routing.yaml sidecars, or bindings; the --check gates fail on drift.
-    - Run tools/bakeoff.py check, tools/skill-triggering.py check, and tools/workflow-triggering.py check after changing evaluation or triggering fixtures.
+    - Run tools/bakeoff.py check, tools/triggering.py skill check, and tools/triggering.py workflow check after changing evaluation or triggering fixtures.
     - Run python3 -m unittest discover -s plugins/polymath-core/tests and -s plugins/polymath-flows/tests after changing hooks or the flows runner.
 
 polymath:
@@ -146,4 +146,4 @@ skill_overrides:
       - language: python
         cmd: python3 -m unittest discover -s plugins/polymath-core/tests && python3 -m unittest discover -s plugins/polymath-flows/tests
       - language: shell
-        cmd: tools/validate-all.sh && tools/lint-skills.sh && tools/token-budget.sh && tools/conformance.sh --all && tools/bakeoff.py check && tools/skill-triggering.py check && tools/workflow-triggering.py check && tools/build-workflow-index.py --check && tools/build-surface-index.py --check && tools/build-capability-index.py --check && tools/lint-descriptions.py --strict && tools/check-description-confusion.py check
+        cmd: tools/validate-all.sh && tools/lint-skills.sh && tools/token-report.py budget && tools/conformance.sh --all && tools/bakeoff.py check && tools/triggering.py skill check && tools/triggering.py workflow check && tools/build-workflow-index.py --check && tools/build-surface-index.py --check && tools/build-capability-index.py --check && tools/lint-descriptions.py --strict && tools/check-description-confusion.py check

@@ -118,7 +118,7 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python3 tools/skill-triggering.py run --timeout 180
+          python3 tools/triggering.py skill run --timeout 180
       - name: Calibrate judge (no-op if no calibration set)
         if: steps.auth.outputs.method != 'none' && github.event.inputs.include_judge == 'true'
         env:

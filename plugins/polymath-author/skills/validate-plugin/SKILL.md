@@ -21,7 +21,7 @@ description: Run every Polymath gate against a plugin — claude plugin validate
 
 1. **Manifest validation** — `claude plugin validate --strict <path>` from the plugin directory. Surface every error and warning.
 2. **Skill lint** — `tools/lint-skills.sh`. Description ≤ 200 chars, SKILL.md ≤ 500 lines.
-3. **Token budget** — `tools/token-budget.sh` for the heuristic, then `claude plugin details <name>@polymath` for the canonical measurement. Per-plugin cap is 400 tok; flag if over.
+3. **Token budget** — `tools/token-report.py budget` for the heuristic, then `claude plugin details <name>@polymath` for the canonical measurement. Per-plugin cap is 400 tok; flag if over.
 4. **Template materialization** — if `.claude-plugin/templates.json` exists, `tools/link-templates.sh` must materialize every named template without error.
 5. **Workflow schema** — if the plugin ships any `workflows/*.yaml`, run `plugins/polymath-flows/bin/polymath-flow validate <file>` on each.
 6. **Frontmatter** — every SKILL.md, command.md, and agent.md has the required frontmatter fields (`name`, `description`); descriptions lead with an imperative verb.
@@ -33,7 +33,7 @@ Validate: plugins/polymath-foo
 
   ✓ claude plugin validate --strict      passed
   ✓ lint-skills.sh                       passed (3 SKILL.md, 2 commands)
-  ✓ token-budget.sh                      heuristic 142 tok
+  ✓ token-report.py budget               heuristic 142 tok
   ✓ claude plugin details                canonical 218 tok (under 400 cap)
   ✓ link-templates.sh                    materialized 2 templates
   ✓ workflow schema                      n/a (no workflows in plugin)

@@ -30,9 +30,9 @@ forbidden_prompts:        # must propose NO workflow at all
 ## Running
 
 ```bash
-python3 tools/workflow-triggering.py check   # frontmatter + drift guard (CI; no LLM)
-python3 tools/workflow-triggering.py list     # one row per test
-python3 tools/workflow-triggering.py run      # live; needs CLAUDE_CODE_OAUTH_TOKEN
+python3 tools/triggering.py workflow check   # frontmatter + drift guard (CI; no LLM)
+python3 tools/triggering.py workflow list    # one row per test
+python3 tools/triggering.py workflow run     # live; needs CLAUDE_CODE_OAUTH_TOKEN
 ```
 
 `check` runs in `tools/conformance.sh --all` (the `WORKFLOW-TRIGGER` gate).

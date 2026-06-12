@@ -13,11 +13,11 @@ Run these before opening a PR (CI enforces all of them):
 ```bash
 tools/validate-all.sh                  # plugin.json validity + frontmatter discipline
 tools/lint-skills.sh                   # description ≤200 chars, SKILL.md ≤500 lines
-tools/token-budget.sh                  # per-plugin always-on cost ≤400 tokens
+tools/token-report.py budget           # per-plugin always-on cost ≤400 tokens
 tools/conformance.sh --all             # MANIFEST/SKILL/TEMPLATE/WORKFLOW/CONNECTOR/FIXTURE checks
 tools/bakeoff.py check                 # parses bakeoff cases without running a judge
-tools/skill-triggering.py check        # validates skill-triggering test frontmatter
-tools/workflow-triggering.py check     # workflow-triggering frontmatter + trigger drift guard
+tools/triggering.py skill check        # validates skill-triggering test frontmatter
+tools/triggering.py workflow check     # workflow-triggering frontmatter + trigger drift guard
 tools/build-workflow-index.py --check  # workflow routing index in sync with workflow YAML
 tools/build-surface-index.py --check   # deterministic route-signals table in sync with per-surface routing.yaml
 tools/build-capability-index.py --check # capabilities.json providerPlugins in sync with per-provider bindings
@@ -45,8 +45,8 @@ polymath-author:new-workflow <name>
 Hand-run analysis tools (not CI gates — measurement/diagnostics, run manually):
 
 ```bash
-tools/route-eval.py                    # held-out routing measurement (precision/reach vs tests/route-eval/heldout.jsonl); reports, always exits 0 — NOT the tests/route-triggering gate
-tools/analyze-token-usage.py <file>    # break down a `claude -p --output-format stream-json` transcript by token consumption
+tools/triggering.py route-eval         # held-out routing measurement (precision/reach vs tests/route-eval/heldout.jsonl); reports, always exits 0 — NOT the tests/route-triggering gate
+tools/token-report.py usage <file>     # break down a `claude -p --output-format stream-json` transcript by token consumption
 tools/check-mcp-packages.py --online  # re-verify connector .mcp.json packages against npm (the offline MCP-PKG gate runs in conformance)
 ```
 
@@ -71,7 +71,7 @@ tests/                         # Unit tests, golden fixtures, skill-triggering c
 README.md, CHANGELOG.md        # Both required (DOCS-1 conformance check)
 ```
 
-The token-budget script measures only the `name` + `description` frontmatter fields from every SKILL.md, command, and agent in the plugin. Long procedure bodies don't count against the cap, but they still must stay ≤500 lines.
+The budget report (`tools/token-report.py budget`) measures only the `name` + `description` frontmatter fields from every SKILL.md, command, and agent in the plugin. Long procedure bodies don't count against the cap, but they still must stay ≤500 lines.
 
 Default to **skill-only**: a skill earns a command only when it is a frequent direct user entry point, and a workflow only when ≥2 skills chain with data dependencies or gates. Because command descriptions count against the per-plugin budget, a thin shim is not free. See [docs/PLUGIN-AUTHORING.md § 5.1](docs/PLUGIN-AUTHORING.md) for the promotion policy; `tools/check-command-overlap.py` and `tools/check-workflow-invokes.py` enforce it.
 
@@ -136,7 +136,7 @@ See [docs/PROJECT-LOCALIZATION.md](docs/PROJECT-LOCALIZATION.md) for the full sc
 
 ## Marketplace registration
 
-Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) (Claude's catalog manifest) AND in [registry/polymath-catalog.json](registry/polymath-catalog.json) (Polymath's own catalog, where `status` lives). Update both when adding or renaming a plugin. `status` cannot live in `marketplace.json` or `plugin.json` — Claude Code's `--strict` validator rejects unknown fields in both, and `MANIFEST-3` enforces presence in the Polymath catalog. `tools/check-catalog.py` rejects divergent plugin sets between the two files.
+Every plugin must appear in [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) (Claude's catalog manifest) AND in [registry/polymath-catalog.json](registry/polymath-catalog.json) (Polymath's own catalog, where `status` lives). Update both when adding or renaming a plugin. `status` cannot live in `marketplace.json` or `plugin.json` — Claude Code's `--strict` validator rejects unknown fields in both, and `MANIFEST-3` enforces presence in the Polymath catalog. `tools/check-registry.py catalog` rejects divergent plugin sets between the two files.
 
 ## Commit and PR conventions
 

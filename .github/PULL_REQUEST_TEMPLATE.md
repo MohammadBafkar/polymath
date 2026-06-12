@@ -14,7 +14,7 @@
 
 - [ ] `tools/validate-all.sh`
 - [ ] `tools/lint-skills.sh`
-- [ ] `tools/token-budget.sh`
+- [ ] `tools/token-report.py budget`
 - [ ] Golden fixture added or updated under `tests/golden/`
 
 ## Risk and rollback

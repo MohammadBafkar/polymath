@@ -35,7 +35,7 @@ jobs:
         run: |
           bash tools/validate-all.sh
           bash tools/lint-skills.sh
-          bash tools/token-budget.sh
+          python3 tools/token-report.py budget
           python3 -m unittest discover -s plugins/polymath-flows/tests -v
           python3 -m unittest discover -s plugins/polymath-core/tests -v
       - name: Verify conformance

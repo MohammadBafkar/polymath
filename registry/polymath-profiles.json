@@ -1,11 +1,11 @@
 {
-  "description": "Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from the full plugin catalog, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-profiles.py (PROFILE-1).",
+  "description": "Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from the full plugin catalog, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-registry.py profiles (PROFILE-1).",
   "version": 1,
   "_spine": [
     "polymath-core",
     "polymath-flows"
   ],
-  "_note": "Every profile implicitly includes the _spine (core = routing/conventions/project-context; flows = workflow runner). check-profiles.py treats the spine as always present.",
+  "_note": "Every profile implicitly includes the _spine (core = routing/conventions/project-context; flows = workflow runner). check-registry.py profiles treats the spine as always present.",
   "profiles": {
     "backend": {
       "title": "Backend engineer",

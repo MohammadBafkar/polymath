@@ -129,6 +129,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Triggering tools consolidated into `tools/triggering.py`.** The four
+  entrypoints `tools/skill-triggering.py`, `tools/workflow-triggering.py`,
+  `tools/route-triggering.py`, and `tools/route-eval.py` are now subcommands
+  of one tool — `triggering.py skill|workflow|route check|list|run` and
+  `triggering.py route-eval [--json]` — with flags, exit codes, and output
+  unchanged. Their duplicated frontmatter/YAML-shim code moved to the shared
+  `tools/lib` package.
+
+- **Registry checks consolidated into `tools/check-registry.py`.** The three
+  entrypoints `tools/check-catalog.py`, `tools/check-profiles.py`, and
+  `tools/check-stability-evidence.py` are now subcommands of one tool —
+  `check-registry.py catalog|profiles|stability` (the MANIFEST-3, PROFILE-1,
+  and STABILITY-1 cross-checks) — with exit codes and output unchanged,
+  built on the shared `tools/lib` package.
+
+- **Token tools consolidated into `tools/token-report.py`.**
+  `tools/token-budget.sh` is ported to Python as `token-report.py budget`
+  (same per-plugin numbers, 400-token ceiling, and scaling total target;
+  now on `tools/lib/tokens.py`'s canonical estimator) and
+  `tools/analyze-token-usage.py` becomes `token-report.py usage`
+  (`--baseline`/`--candidate` comparison modes unchanged).
+
 - **Project-config loader tolerates unknown top-level keys.** Unknown keys
   in `project.yaml` are warned and dropped (recorded in
   `_meta.ignored_keys`) instead of failing the session with exit 2 — so a

@@ -53,7 +53,7 @@ or more skills called by a user or workflow.
 
 - Everything from `experimental`, **and**
 - At least one parseable bakeoff case under `tests/bakeoff/<plugin>/<scenario>/case.json` (validated by `python3 tools/bakeoff.py check`), **and**
-- At least one parseable skill-triggering test under `tests/skill-triggering/<plugin>/<skill>.md` (validated by `python3 tools/skill-triggering.py check`).
+- At least one parseable skill-triggering test under `tests/skill-triggering/<plugin>/<skill>.md` (validated by `python3 tools/triggering.py skill check`).
 
 **Path B — foundation / runner plugins.** The plugin's primary value
 is an executable (`bin/`), a hook script, a SessionStart loader, or a
@@ -107,7 +107,7 @@ one entry per catalog plugin, with `target_status`, `evidence_state`,
 `promotion_pr`, `changelog_entry`, and (for connector/infra) the
 required `distinct_value_url`. The ledger is the single source of
 truth for where each plugin stands. It is enforced by
-[`tools/check-stability-evidence.py`](../tools/check-stability-evidence.py)
+[`tools/check-registry.py stability`](../tools/check-registry.py)
 as the `STABILITY-1` conformance gate: the catalog cannot claim
 `stable` for a plugin unless the ledger has populated every required
 field, and connector/infra plugins cannot reach `beta` without the

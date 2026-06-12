@@ -16,7 +16,7 @@ description: Measure listing-token cost per plugin via claude plugin details; fl
 ## Procedure
 
 1. **Identify the marketplace root** (the directory containing `.claude-plugin/marketplace.json`).
-2. **Heuristic measurement** — `tools/token-budget.sh`. Fast, no install required. Each plugin's heuristic cost is roughly half the canonical.
+2. **Heuristic measurement** — `tools/token-report.py budget`. Fast, no install required. Each plugin's heuristic cost is roughly half the canonical.
 3. **Canonical measurement** — for each plugin, `claude plugin details <name>@<marketplace>`. The CLI parses descriptions and computes the listing cost. This is the load-bearing number.
 4. **Per-plugin gate**: any plugin > 400 tok is over the cap.
 5. **Trim recommendations** — for plugins ≥ 300 tok, surface the longest single description (skill, command, or agent) so the author knows what to cut first.
@@ -26,7 +26,7 @@ description: Measure listing-token cost per plugin via claude plugin details; fl
 ```text
 Token-budget report — polymath marketplace, <plugin_count> plugins, <date>
 
-Heuristic (tools/token-budget.sh):       3,124 tok
+Heuristic (tools/token-report.py budget): 3,124 tok
 Canonical  (claude plugin details):      5,636 tok
 Total target (250 × plugin_count, ≥1500):  7,250 tok      [ok]
 

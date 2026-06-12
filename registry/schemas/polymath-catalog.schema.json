@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/MohammadBafkar/Polymath/registry/schemas/polymath-catalog.schema.json",
   "title": "Polymath catalog",
-  "description": "Polymath-only catalog metadata. Lives outside .claude-plugin/marketplace.json because Claude Code's plugin validate --strict rejects unknown fields there. Consumed by tools/conformance.sh (MANIFEST-3), tools/build-catalog.py (status badges), tools/sync-integration-policy.py (README disclosure), and tools/check-catalog.py (cross-file consistency).",
+  "description": "Polymath-only catalog metadata. Lives outside .claude-plugin/marketplace.json because Claude Code's plugin validate --strict rejects unknown fields there. Consumed by tools/conformance.sh (MANIFEST-3), tools/build-catalog.py (status badges), tools/sync-integration-policy.py (README disclosure), and tools/check-registry.py catalog (cross-file consistency).",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "plugins"],
@@ -42,7 +42,7 @@
     },
     "plugins": {
       "type": "object",
-      "description": "Per-plugin Polymath metadata, keyed by plugin name. Every plugin listed in .claude-plugin/marketplace.json must appear here exactly once (enforced by tools/check-catalog.py).",
+      "description": "Per-plugin Polymath metadata, keyed by plugin name. Every plugin listed in .claude-plugin/marketplace.json must appear here exactly once (enforced by tools/check-registry.py catalog).",
       "propertyNames": {
         "pattern": "^polymath-[a-z0-9-]+$"
       },

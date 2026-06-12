@@ -80,7 +80,7 @@ elsewhere is intentional.
   external user beyond the maintainer. Every status claim is backed by
   the evidence ledger at
   [`registry/stability-evidence.json`](registry/stability-evidence.json)
-  (enforced by `tools/check-stability-evidence.py`, rule `STABILITY-1`).
+  (enforced by `tools/check-registry.py stability`, rule `STABILITY-1`).
   No plugin in the catalog is `stable` today.
 
 ## 4. Known operational gaps

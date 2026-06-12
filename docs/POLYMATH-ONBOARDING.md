@@ -187,11 +187,11 @@ Run these before opening a PR (CI enforces all of them):
 ```bash
 tools/validate-all.sh
 tools/lint-skills.sh
-tools/token-budget.sh
+tools/token-report.py budget
 tools/conformance.sh --all
 tools/bakeoff.py check
-tools/skill-triggering.py check
-tools/workflow-triggering.py check
+tools/triggering.py skill check
+tools/triggering.py workflow check
 tools/build-workflow-index.py --check
 tools/build-surface-index.py --check
 tools/build-capability-index.py --check

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/MohammadBafkar/Polymath/registry/schemas/stability-evidence.schema.json",
   "title": "Polymath stability evidence ledger",
-  "description": "One entry per catalog plugin recording the live-run, adopter, and connector/infra distinct-value evidence that backs promotion. Consumed by tools/check-stability-evidence.py (STABILITY-1 conformance gate) and tools/build-catalog.py (status badge tooltip). The catalog's status field is the user-facing claim; this ledger is the receipt.",
+  "description": "One entry per catalog plugin recording the live-run, adopter, and connector/infra distinct-value evidence that backs promotion. Consumed by tools/check-registry.py stability (STABILITY-1 conformance gate) and tools/build-catalog.py (status badge tooltip). The catalog's status field is the user-facing claim; this ledger is the receipt.",
   "type": "object",
   "additionalProperties": false,
   "required": ["entries"],
@@ -12,7 +12,7 @@
     },
     "entries": {
       "type": "object",
-      "description": "Per-plugin evidence keyed by plugin name. Every plugin listed in registry/polymath-catalog.json must appear here exactly once (enforced by tools/check-stability-evidence.py).",
+      "description": "Per-plugin evidence keyed by plugin name. Every plugin listed in registry/polymath-catalog.json must appear here exactly once (enforced by tools/check-registry.py stability).",
       "propertyNames": {
         "pattern": "^polymath-[a-z0-9-]+$"
       },

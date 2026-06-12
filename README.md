@@ -103,7 +103,7 @@ For language-specific depth (`.NET`, Python, Laravel, …), Polymath defers to e
 ## Design principles
 
 - **Work-shaped plugins.** One role / lifecycle stage / target per plugin. Not primitive-shaped catch-alls.
-- **Token budget discipline.** ≤ 400 tokens always-on per plugin; the CLI's `claude plugin details` is the authoritative measurement, the heuristic in `tools/token-budget.sh` is informational.
+- **Token budget discipline.** ≤ 400 tokens always-on per plugin; the CLI's `claude plugin details` is the authoritative measurement, the heuristic in `tools/token-report.py budget` is informational.
 - **Commands vs. skills.** Skills bundle templates / scripts / references. Commands are thin aliases (≤ 20 lines).
 - **Agents only when justified.** Reserved for forked context or panel critique.
 - **Workflows are YAML.** Driven by a deterministic executable (`polymath-flows/bin/polymath-flow`) that owns validation, state, and `mustPass` checks. The skill drives the loop; the script owns state.
@@ -153,13 +153,13 @@ Every change runs locally and in CI:
 
 - `tools/validate-all.sh` — `claude plugin validate --strict` at marketplace root + per plugin; catches version drift between a marketplace entry and its `plugin.json`.
 - `tools/lint-skills.sh` — description ≤ 200 chars, SKILL.md ≤ 500 lines.
-- `tools/token-budget.sh` — per-plugin cap of 400 tokens; total target scales with plugin count.
-- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `registry/polymath-catalog.json`), `INTEGRATION-2` (connector / infra plugins audited in `docs/INTEGRATION-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-catalog.py` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `registry/polymath-catalog.json`.
+- `tools/token-report.py budget` — per-plugin cap of 400 tokens; total target scales with plugin count.
+- `tools/conformance.sh --all` — structural check, including `MANIFEST-3` (maturity tier in `registry/polymath-catalog.json`), `INTEGRATION-2` (connector / infra plugins audited in `docs/INTEGRATION-POLICY.md`), `SKILL-1`, `TEMPLATE-1`, `WORKFLOW-1`, `FIXTURE-1`. The cross-check via `tools/check-registry.py catalog` verifies plugin sets and versions agree across `marketplace.json`, every `plugin.json`, and `registry/polymath-catalog.json`.
 - `tools/build-catalog.py --check` — verifies the GitHub Pages catalog regenerates reproducibly.
 - `plugins/polymath-flows/bin/polymath-flow validate` — every workflow YAML against the schema.
 - `python3 -m unittest discover -s plugins/polymath-flows/tests` and `-s plugins/polymath-core/tests` — executable unit tests.
 - `tools/bakeoff.py check` — baseline-vs-Polymath quality cases are parseable; optional `--judge` mode scores with an LLM judge.
-- `tools/skill-triggering.py check` — every skill-triggering test's frontmatter is valid.
+- `tools/triggering.py skill check` — every skill-triggering test's frontmatter is valid.
 
 The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Claude Code CLI on every push to `main`. The job requires `CLAUDE_CODE_OAUTH_TOKEN` (preferred — Claude.ai subscription) or `ANTHROPIC_API_KEY` set in repo secrets, and **hard-fails** main-branch pushes when no auth is present. PR jobs without secrets (e.g. fork PRs) emit a warning and skip the live run.
 

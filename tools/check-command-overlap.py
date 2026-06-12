@@ -3,7 +3,7 @@
 
 Per the promotion policy (docs/PLUGIN-AUTHORING.md § 5.1), a command's
 `description` is counted against the plugin's 400-token always-on budget by
-tools/token-budget.sh. A command therefore earns its description only by
+tools/token-report.py budget. A command therefore earns its description only by
 saying something the skill description does NOT — *when to reach for the slash
 command* — not by paraphrasing the procedure.
 
