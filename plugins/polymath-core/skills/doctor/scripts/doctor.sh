@@ -143,6 +143,34 @@ elif mode != "hint":
 PY
 fi
 
+# --- workflow injection tiering (written by polymath-flows at SessionStart) ---
+tiering_file="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}/polymath-flows/workflow-index.project.json"
+if [[ -f "$tiering_file" ]] && command -v python3 >/dev/null 2>&1; then
+  echo
+  echo "Workflow injection:"
+  POLYMATH_DOCTOR_TIERING="$tiering_file" python3 - <<'PY'
+import json, os
+
+try:
+    doc = json.loads(open(os.environ["POLYMATH_DOCTOR_TIERING"]).read())
+except Exception:
+    doc = {}
+t = doc.get("tiering") or {}
+if not t:
+    print("  ! tiering    no tiering record yet (pre-tiering session data)")
+else:
+    tier_a = t.get("tier_a") or []
+    relevant = t.get("relevant") or []
+    overflow = t.get("overflow_relevant") or []
+    print(f"  ✓ tiering    tier A {len(tier_a)} workflow(s) "
+          f"({len(relevant)} repo-relevant), tier B {t.get('tier_b_count', 0)} via pointer "
+          f"(budget {t.get('budget_tokens', '?')} tokens)")
+    if overflow:
+        print(f"  ! tiering    repo-relevant but did not fit tier A: {', '.join(overflow)} "
+              f"— trim whenToUse lines or revisit the budget")
+PY
+fi
+
 echo
 if [[ "$req_fail" -ne 0 ]]; then
   echo "doctor: FAILED — a required tool is missing (see ✗ above)."

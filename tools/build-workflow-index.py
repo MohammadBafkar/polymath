@@ -19,8 +19,11 @@ Modes:
   --check     build in memory and diff against what's on disk; exit 1 on drift
               (the conformance diff-guard — keeps the index from going stale).
 
-The rendered min-index (the text the hook actually injects) is asserted to stay
-under MAX_INJECTION_TOKENS; over budget exits 1 and names the longest whenToUse.
+The injection is TIERED: Tier A (repo-relevant first, alphabetical fill) is
+budgeted at ≤ TIER_A_BUDGET tokens for the whole rendered block; the rest
+collapse to the one-line Tier B pointer. Each whenToUse is capped at
+WHEN_TO_USE_MAX_CHARS so no single workflow eats the shared block. This file
+owns the budget constants; the renderer mirrors them (pinned by unit test).
 """
 from __future__ import annotations
 
@@ -39,39 +42,69 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 WORKFLOWS_DIR = REPO / "plugins" / "polymath-flows" / "workflows"
 DATA_DIR = REPO / "plugins" / "polymath-flows" / "data"
 
-# Injection framing — kept byte-identical to the SessionStart renderer
-# (plugins/polymath-flows/hooks/scripts/project-index.py) so the token
-# assertion measures what is actually surfaced. The machine-local project
-# fragment that renderer may append is deliberately OUTSIDE this assertion.
+# Injection framing + tier constants — kept byte-identical to the SessionStart
+# renderer (plugins/polymath-flows/hooks/scripts/project-index.py); a unit test
+# pins the two files' constants and tier selection equal. The machine-local
+# project fragment that renderer may append is deliberately OUTSIDE the budget.
 INJECTION_HEADER = "Polymath workflows available (multi-step arcs you can run):"
 INJECTION_FOOTER = (
     "Before starting substantial multi-step work that matches one of these, first "
     "propose that workflow in one line (name in backticks) and wait for approval; "
     "otherwise just answer. Never start a workflow without asking."
 )
-# Ceiling on the always-on routing surface. The full catalog is one consolidated
-# block of ~18 tokens per workflow (name + terse whenToUse) plus framing. The
-# flat list is acceptable up to ~30 workflows; 560 fits the current 26 with
-# near-zero headroom. This is the LAST recalibration of the flat surface — at
-# ~30 workflows, switch to a collapsed/tiered injection (group by phase, names
-# with on-demand whenToUse) rather than raising this again. See the audit
-# roadmap Q2.
-MAX_INJECTION_TOKENS = 560
+# Tiered injection: Tier A (full `name: whenToUse` lines, repo-relevant first,
+# alphabetical fill) is budgeted at ≤ TIER_A_BUDGET tokens for the whole
+# catalog block — header, entries, pointer, footer. Everything else collapses
+# to the one-line Tier B pointer. This replaces the old flat-list ceiling
+# (which had reached its cap with zero headroom): growth lands in Tier B,
+# never in always-on tokens. THIS BUILDER IS THE ONE BUDGET OWNER — catalog,
+# project, and pack layers all render through the same constants.
+TIER_A_BUDGET = 400
+# No single workflow may eat the shared block: whenToUse is capped per entry.
+WHEN_TO_USE_MAX_CHARS = 140
+TIER_B_POINTER = (
+    "  …plus {n} more — full list: polymath-flows data/workflow-index.json; "
+    "ask /polymath-core:route to pick."
+)
 
 
-def _count_tokens(text: str) -> int:
-    try:
-        import tiktoken  # type: ignore
-
-        return len(tiktoken.get_encoding("cl100k_base").encode(text))
-    except Exception:
-        # Heuristic fallback (chars / 4) — close to token-report.py budget's posture.
-        return len(text) // 4 + 1
+def estimate_tokens(text: str) -> int:
+    # (chars + 3) // 4 — tools/lib/tokens.py's arithmetic; deterministic in
+    # every environment (the old tiktoken-when-available path made the budget
+    # depend on what happened to be importable).
+    return (len(text) + 3) // 4
 
 
-def render_injection(min_records: list[dict]) -> str:
+def select_tier_a(min_records: list[dict], relevant: set[str]) -> tuple[list[dict], list[dict]]:
+    """Deterministic tier split: repo-relevant records first (alphabetical),
+    then the rest (alphabetical), greedily admitted while the rendered block
+    — header + entries + worst-case pointer + footer — stays ≤ TIER_A_BUDGET.
+    Returns (tier_a, tier_b)."""
+    ordered = sorted(min_records, key=lambda r: (r["n"] not in relevant, r["n"]))
+    overhead = (
+        estimate_tokens(INJECTION_HEADER)
+        + estimate_tokens(TIER_B_POINTER.format(n=len(min_records)))
+        + estimate_tokens(INJECTION_FOOTER)
+    )
+    tier_a: list[dict] = []
+    used = overhead
+    for rec in ordered:
+        cost = estimate_tokens(f"  - {rec['n']}: {rec['w']}")
+        if used + cost > TIER_A_BUDGET:
+            break  # deterministic cut; remaining records all go to Tier B
+        tier_a.append(rec)
+        used += cost
+    tier_a_names = {r["n"] for r in tier_a}
+    tier_b = [r for r in min_records if r["n"] not in tier_a_names]
+    return tier_a, tier_b
+
+
+def render_injection(min_records: list[dict], relevant: set[str] | None = None) -> str:
+    tier_a, tier_b = select_tier_a(min_records, relevant or set())
     lines = [INJECTION_HEADER]
-    lines += [f"  - {r['n']}: {r['w']}" for r in min_records]
+    lines += [f"  - {r['n']}: {r['w']}" for r in tier_a]
+    if tier_b:
+        lines.append(TIER_B_POINTER.format(n=len(tier_b)))
     lines.append(INJECTION_FOOTER)
     return "\n".join(lines)
 
@@ -175,15 +208,26 @@ def main() -> int:
         for d in problems["dangling_chains"]:
             print(f"build-workflow-index: warning: {d}", file=sys.stderr)
 
-    # Token budget on the rendered injection (what the hook surfaces).
-    rendered = render_injection(mini)
-    tokens = _count_tokens(rendered)
-    if tokens > MAX_INJECTION_TOKENS:
-        longest = max(mini, key=lambda r: len(r["w"]))
+    # Per-entry cap: one workflow must not eat the shared Tier A block.
+    over_cap = [r for r in mini if len(r["w"]) > WHEN_TO_USE_MAX_CHARS]
+    if over_cap:
+        for r in over_cap:
+            print(
+                f"build-workflow-index: whenToUse of {r['n']} is {len(r['w'])} chars "
+                f"(cap {WHEN_TO_USE_MAX_CHARS}) — trim it",
+                file=sys.stderr,
+            )
+        return 1
+    # Tier budget: the rendered block self-truncates to TIER_A_BUDGET by
+    # construction; assert the invariant holds in the worst case (every
+    # workflow relevant) and report the split.
+    rendered = render_injection(mini, relevant={r["n"] for r in mini})
+    tokens = estimate_tokens(rendered)
+    tier_a, tier_b = select_tier_a(mini, {r["n"] for r in mini})
+    if tokens > TIER_A_BUDGET:
         print(
-            f"build-workflow-index: rendered min-index is ~{tokens} tokens "
-            f"(>{MAX_INJECTION_TOKENS}). Trim the longest whenToUse: "
-            f"{longest['n']} ({len(longest['w'])} chars).",
+            f"build-workflow-index: tiered render is ~{tokens} tokens "
+            f"(>{TIER_A_BUDGET}) — select_tier_a violated its own budget",
             file=sys.stderr,
         )
         return 1
@@ -203,7 +247,10 @@ def main() -> int:
                 file=sys.stderr,
             )
             return 1
-        print(f"workflow-index OK ({len(mini)} workflows, ~{tokens} injection tokens)")
+        print(
+            f"workflow-index OK ({len(mini)} workflows; tier A {len(tier_a)}, "
+            f"tier B {len(tier_b)} via pointer; ~{tokens} worst-case injection tokens)"
+        )
         return 0
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -211,7 +258,8 @@ def main() -> int:
         (DATA_DIR / fname).write_text(content)
     print(
         f"wrote {len(files)} index files for {len(mini)} workflows "
-        f"(~{tokens} injection tokens) to {DATA_DIR.relative_to(REPO)}/"
+        f"(tier A {len(tier_a)} / tier B {len(tier_b)}; ~{tokens} worst-case injection tokens) "
+        f"to {DATA_DIR.relative_to(REPO)}/"
     )
     return 0
 

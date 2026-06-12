@@ -18,7 +18,14 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
 - **Lint** — `tools/lint-skills.sh` (description ≤ 200 chars,
   SKILL.md ≤ 500 lines) plus markdownlint.
 - **Token budget** — `tools/token-report.py budget` (≤ 400 tokens per plugin
-  always-on; total scales with plugin count).
+  always-on; total scales with plugin count), `tools/token-report.py
+  profiles` (PROFILE-2: each install profile's summed always-on cost stays
+  within its declared `alwaysOnBudget` in
+  [`registry/polymath-profiles.json`](../registry/polymath-profiles.json)),
+  and `tools/build-surface-index.py --hint-budget` (HINT-BUDGET: the worst
+  single-candidate ambient route hint stays ≤ 120 tokens). The workflow
+  SessionStart injection is tiered — Tier A repo-relevant ≤ 400 tokens,
+  Tier B one pointer line — owned by `tools/build-workflow-index.py`.
 - **Routing SLO (ROUTE-EVAL-1)** — `tools/triggering.py route-eval --gate`
   (run inside `conformance.sh --all`). Gates the schema-locked invariants
   on the held-out corpus: token precision 1.0, zero false positives, and

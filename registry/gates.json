@@ -2,36 +2,276 @@
   "description": "Machine-readable source of truth for every conformance gate ID. check-registry.py gates (GATES-1) enforces bijectivity between this file and the IDs appearing in tools/conformance.sh, and executes the registered --self-test for every entry whose verification is `selftest`. verification values: selftest = the gate proves it can fail via the registered invocation; grandfathered = pre-existing gate without a committed falsifiability proof (backfill is deliberately deferred — see docs/plans/solidify-discovery-and-packs.md).",
   "schemaVersion": 1,
   "gates": [
-    {"id": "MANIFEST-1", "tool": "tools/conformance.sh", "invocation": "claude plugin validate --strict <plugin> (per plugin; hard-fails in CI when the CLI is absent)", "tier": "per-plugin", "verification": "grandfathered", "description": "Official manifest validation, strict mode."},
-    {"id": "MANIFEST-2", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "plugin.json required fields and shape."},
-    {"id": "MANIFEST-3", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py catalog (+ per-plugin status presence)", "tier": "cross-plugin", "verification": "grandfathered", "description": "marketplace.json / plugin.json / polymath-catalog.json agreement and status declared."},
-    {"id": "DOCS-1", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "README.md and CHANGELOG.md present per plugin."},
-    {"id": "DOCS-2", "tool": "tools/check-readme-inventory.py", "invocation": "python3 tools/check-readme-inventory.py", "tier": "cross-plugin", "verification": "grandfathered", "description": "Every shipped first-class surface is mentioned in its plugin README."},
-    {"id": "SKILL-1", "tool": "tools/lint-skills.sh", "invocation": "tools/lint-skills.sh (frontmatter discipline)", "tier": "per-plugin", "verification": "grandfathered", "description": "Skill frontmatter: description present/length, SKILL.md line cap."},
-    {"id": "TEMPLATE-1", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "Plugin-owned artifact templates validate against registry/schemas/artifacts/."},
-    {"id": "WORKFLOW-1", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "Workflow YAMLs validate against the workflow schema."},
-    {"id": "INTEGRATION-1", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "Connector/infra plugins carry the required disclosure block."},
-    {"id": "INTEGRATION-2", "tool": "tools/sync-integration-policy.py", "invocation": "python3 tools/sync-integration-policy.py --check", "tier": "cross-plugin", "verification": "grandfathered", "description": "README disclosure blocks in sync with docs/INTEGRATION-POLICY.md."},
-    {"id": "FIXTURE-1", "tool": "tools/conformance.sh", "invocation": "tools/conformance.sh (per-plugin check_one)", "tier": "per-plugin", "verification": "grandfathered", "description": "Golden fixture frontmatter parses and references real surfaces."},
-    {"id": "MCP-PKG", "tool": "tools/check-mcp-packages.py", "invocation": "python3 tools/check-mcp-packages.py", "tier": "cross-plugin", "verification": "grandfathered", "description": "Connector .mcp.json packages resolve on npm or carry a disclosure marker."},
-    {"id": "STABILITY-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py stability", "tier": "cross-plugin", "verification": "grandfathered", "description": "stability-evidence.json backs every catalog status claim."},
-    {"id": "DESC-1", "tool": "tools/lint-descriptions.py", "invocation": "python3 tools/lint-descriptions.py --strict", "tier": "cross-plugin", "verification": "grandfathered", "description": "Description quality scoring; disambiguation floor."},
-    {"id": "DESC-2", "tool": "tools/check-description-confusion.py", "invocation": "python3 tools/check-description-confusion.py check", "tier": "cross-plugin", "verification": "grandfathered", "description": "Sibling-skill confusion matrix structure (behavioral half is live-run only)."},
-    {"id": "AGENT-1", "tool": "tools/check-agents.py", "invocation": "python3 tools/check-agents.py", "tier": "cross-plugin", "verification": "grandfathered", "description": "Every agent has a golden fixture; no workflow-intent collisions."},
-    {"id": "PROMOTION-1", "tool": "tools/check-command-overlap.py", "invocation": "python3 tools/check-command-overlap.py", "tier": "cross-plugin", "verification": "grandfathered", "description": "Skill-alias command descriptions complement, not restate, the skill."},
-    {"id": "PROMOTION-2", "tool": "tools/check-workflow-invokes.py", "invocation": "python3 tools/check-workflow-invokes.py", "tier": "cross-plugin", "verification": "grandfathered", "description": "Every workflow step invoke resolves to a real skill."},
-    {"id": "WORKFLOW-TRIGGER", "tool": "tools/triggering.py", "invocation": "python3 tools/triggering.py workflow check", "tier": "cross-plugin", "verification": "grandfathered", "description": "Workflow-triggering tests structurally valid; triggers superset of YAML."},
-    {"id": "WORKFLOW-INDEX", "tool": "tools/build-workflow-index.py", "invocation": "python3 tools/build-workflow-index.py --check --strict", "tier": "cross-plugin", "verification": "grandfathered", "description": "Workflow routing index drift-free and within the injection token budget."},
-    {"id": "SURFACE-INDEX", "tool": "tools/build-surface-index.py", "invocation": "python3 tools/build-surface-index.py --check", "tier": "cross-plugin", "verification": "grandfathered", "description": "route-signals.json / surface-index.json drift-free against sidecars."},
-    {"id": "SURFACE-2", "tool": "tools/build-surface-index.py", "invocation": "python3 tools/build-surface-index.py --check --strict", "tier": "cross-plugin", "verification": "grandfathered", "description": "Global uniqueness of intents/url/regex across all routing sidecars."},
-    {"id": "CAPABILITY-INDEX", "tool": "tools/build-capability-index.py", "invocation": "python3 tools/build-capability-index.py --check", "tier": "cross-plugin", "verification": "grandfathered", "description": "providerPlugins map in capabilities.json drift-free against bindings."},
-    {"id": "BINDING-1", "tool": "tools/build-capability-index.py", "invocation": "python3 tools/build-capability-index.py --check --strict", "tier": "cross-plugin", "verification": "grandfathered", "description": "Capability bindings valid: known providers, no duplicates, MCP consistency."},
-    {"id": "PROFILE-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py profiles", "tier": "cross-plugin", "verification": "grandfathered", "description": "Install profiles only name marketplace plugins."},
-    {"id": "ROUTE-TRIGGER", "tool": "tools/triggering.py", "invocation": "python3 tools/triggering.py route run", "tier": "cross-plugin", "verification": "grandfathered", "description": "Deterministic route-hint fixtures run live (no model)."},
-    {"id": "ROUTE-EVAL-1", "tool": "tools/triggering.py", "invocation": "python3 tools/triggering.py route-eval --gate", "selftest": "python3 tools/triggering.py route-eval --self-test", "tier": "cross-plugin", "verification": "selftest", "description": "Held-out routing invariants: token precision 1.0, zero false positives, partial-install affordance correctness; metrics drift guard."},
-    {"id": "COUNT-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py aggregates", "selftest": "python3 tools/check-registry.py aggregates --self-test", "tier": "cross-plugin", "verification": "selftest", "description": "README marker-wrapped aggregate counts match the filesystem."},
-    {"id": "TESTDIR-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py testdirs", "selftest": "python3 tools/check-registry.py testdirs --self-test", "tier": "cross-plugin", "verification": "selftest", "description": "Fixture dirs under tests/ name real plugins (or `workflows`)."},
-    {"id": "DOCPATH-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py docpaths", "selftest": "python3 tools/check-registry.py docpaths --self-test", "tier": "cross-plugin", "verification": "selftest", "description": "Relative markdown links in docs/*.md and README resolve."},
-    {"id": "GATES-1", "tool": "tools/check-registry.py", "invocation": "python3 tools/check-registry.py gates", "selftest": "python3 tools/check-registry.py gates --self-test", "tier": "cross-plugin", "verification": "selftest", "description": "registry/gates.json bijective with conformance.sh gate IDs; selftest entries executed."}
+    {
+      "id": "MANIFEST-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "claude plugin validate --strict <plugin> (per plugin; hard-fails in CI when the CLI is absent)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Official manifest validation, strict mode."
+    },
+    {
+      "id": "MANIFEST-2",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "plugin.json required fields and shape."
+    },
+    {
+      "id": "MANIFEST-3",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py catalog (+ per-plugin status presence)",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "marketplace.json / plugin.json / polymath-catalog.json agreement and status declared."
+    },
+    {
+      "id": "DOCS-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "README.md and CHANGELOG.md present per plugin."
+    },
+    {
+      "id": "DOCS-2",
+      "tool": "tools/check-readme-inventory.py",
+      "invocation": "python3 tools/check-readme-inventory.py",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Every shipped first-class surface is mentioned in its plugin README."
+    },
+    {
+      "id": "SKILL-1",
+      "tool": "tools/lint-skills.sh",
+      "invocation": "tools/lint-skills.sh (frontmatter discipline)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Skill frontmatter: description present/length, SKILL.md line cap."
+    },
+    {
+      "id": "TEMPLATE-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Plugin-owned artifact templates validate against registry/schemas/artifacts/."
+    },
+    {
+      "id": "WORKFLOW-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Workflow YAMLs validate against the workflow schema."
+    },
+    {
+      "id": "INTEGRATION-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Connector/infra plugins carry the required disclosure block."
+    },
+    {
+      "id": "INTEGRATION-2",
+      "tool": "tools/sync-integration-policy.py",
+      "invocation": "python3 tools/sync-integration-policy.py --check",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "README disclosure blocks in sync with docs/INTEGRATION-POLICY.md."
+    },
+    {
+      "id": "FIXTURE-1",
+      "tool": "tools/conformance.sh",
+      "invocation": "tools/conformance.sh (per-plugin check_one)",
+      "tier": "per-plugin",
+      "verification": "grandfathered",
+      "description": "Golden fixture frontmatter parses and references real surfaces."
+    },
+    {
+      "id": "MCP-PKG",
+      "tool": "tools/check-mcp-packages.py",
+      "invocation": "python3 tools/check-mcp-packages.py",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Connector .mcp.json packages resolve on npm or carry a disclosure marker."
+    },
+    {
+      "id": "STABILITY-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py stability",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "stability-evidence.json backs every catalog status claim."
+    },
+    {
+      "id": "DESC-1",
+      "tool": "tools/lint-descriptions.py",
+      "invocation": "python3 tools/lint-descriptions.py --strict",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Description quality scoring; disambiguation floor."
+    },
+    {
+      "id": "DESC-2",
+      "tool": "tools/check-description-confusion.py",
+      "invocation": "python3 tools/check-description-confusion.py check",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Sibling-skill confusion matrix structure (behavioral half is live-run only)."
+    },
+    {
+      "id": "AGENT-1",
+      "tool": "tools/check-agents.py",
+      "invocation": "python3 tools/check-agents.py",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Every agent has a golden fixture; no workflow-intent collisions."
+    },
+    {
+      "id": "PROMOTION-1",
+      "tool": "tools/check-command-overlap.py",
+      "invocation": "python3 tools/check-command-overlap.py",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Skill-alias command descriptions complement, not restate, the skill."
+    },
+    {
+      "id": "PROMOTION-2",
+      "tool": "tools/check-workflow-invokes.py",
+      "invocation": "python3 tools/check-workflow-invokes.py",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Every workflow step invoke resolves to a real skill."
+    },
+    {
+      "id": "WORKFLOW-TRIGGER",
+      "tool": "tools/triggering.py",
+      "invocation": "python3 tools/triggering.py workflow check",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Workflow-triggering tests structurally valid; triggers superset of YAML."
+    },
+    {
+      "id": "WORKFLOW-INDEX",
+      "tool": "tools/build-workflow-index.py",
+      "invocation": "python3 tools/build-workflow-index.py --check --strict",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Workflow routing index drift-free and within the injection token budget."
+    },
+    {
+      "id": "SURFACE-INDEX",
+      "tool": "tools/build-surface-index.py",
+      "invocation": "python3 tools/build-surface-index.py --check",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "route-signals.json / surface-index.json drift-free against sidecars."
+    },
+    {
+      "id": "SURFACE-2",
+      "tool": "tools/build-surface-index.py",
+      "invocation": "python3 tools/build-surface-index.py --check --strict",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Global uniqueness of intents/url/regex across all routing sidecars."
+    },
+    {
+      "id": "CAPABILITY-INDEX",
+      "tool": "tools/build-capability-index.py",
+      "invocation": "python3 tools/build-capability-index.py --check",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "providerPlugins map in capabilities.json drift-free against bindings."
+    },
+    {
+      "id": "BINDING-1",
+      "tool": "tools/build-capability-index.py",
+      "invocation": "python3 tools/build-capability-index.py --check --strict",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Capability bindings valid: known providers, no duplicates, MCP consistency."
+    },
+    {
+      "id": "PROFILE-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py profiles",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Install profiles only name marketplace plugins."
+    },
+    {
+      "id": "ROUTE-TRIGGER",
+      "tool": "tools/triggering.py",
+      "invocation": "python3 tools/triggering.py route run",
+      "tier": "cross-plugin",
+      "verification": "grandfathered",
+      "description": "Deterministic route-hint fixtures run live (no model)."
+    },
+    {
+      "id": "ROUTE-EVAL-1",
+      "tool": "tools/triggering.py",
+      "invocation": "python3 tools/triggering.py route-eval --gate",
+      "selftest": "python3 tools/triggering.py route-eval --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Held-out routing invariants: token precision 1.0, zero false positives, partial-install affordance correctness; metrics drift guard."
+    },
+    {
+      "id": "COUNT-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py aggregates",
+      "selftest": "python3 tools/check-registry.py aggregates --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "README marker-wrapped aggregate counts match the filesystem."
+    },
+    {
+      "id": "TESTDIR-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py testdirs",
+      "selftest": "python3 tools/check-registry.py testdirs --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Fixture dirs under tests/ name real plugins (or `workflows`)."
+    },
+    {
+      "id": "DOCPATH-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py docpaths",
+      "selftest": "python3 tools/check-registry.py docpaths --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Relative markdown links in docs/*.md and README resolve."
+    },
+    {
+      "id": "GATES-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py gates",
+      "selftest": "python3 tools/check-registry.py gates --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "registry/gates.json bijective with conformance.sh gate IDs; selftest entries executed."
+    },
+    {
+      "id": "PROFILE-2",
+      "tool": "tools/token-report.py",
+      "invocation": "python3 tools/token-report.py profiles",
+      "selftest": "python3 tools/token-report.py profiles --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Each install profile's summed always-on listing cost stays within its declared alwaysOnBudget."
+    },
+    {
+      "id": "HINT-BUDGET",
+      "tool": "tools/build-surface-index.py",
+      "invocation": "python3 tools/build-surface-index.py --hint-budget",
+      "selftest": "python3 tools/build-surface-index.py --hint-budget --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Worst single-candidate ambient route-hint render stays ≤ 120 tokens (install affordance excluded)."
+    }
   ]
 }

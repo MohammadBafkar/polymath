@@ -121,14 +121,23 @@ class ProjectIndexTests(unittest.TestCase):
             (self.data_root / "polymath-flows" / "workflow-index.project.json").read_text()
         )
 
-    def test_no_project_workflows_is_byte_identical_to_catalog(self) -> None:
+    def test_no_project_workflows_is_byte_identical_to_tiered_catalog(self) -> None:
         out = self._run()
         records = json.loads(self.min_index.read_text())
+        # The catalog block is the TIERED render: Tier A entries (no repo
+        # relevance in the scratch cwd → alphabetical fill), a Tier B
+        # pointer when anything overflowed, then the footer.
+        tier_a, tier_b = self.mod.select_tier_a(records, set())
         expected_lines = [self.mod.INJECTION_HEADER]
-        expected_lines += [f"  - {r['n']}: {r['w']}" for r in records]
+        expected_lines += [f"  - {r['n']}: {r['w']}" for r in tier_a]
+        if tier_b:
+            expected_lines.append(self.mod.TIER_B_POINTER.format(n=len(tier_b)))
         expected_lines.append(self.mod.INJECTION_FOOTER)
         self.assertEqual(out, "\n".join(expected_lines) + "\n")
         self.assertEqual(self._fragment()["entries"], [])
+        self.assertLessEqual(
+            self.mod.estimate_tokens(out.rstrip("\n")), self.mod.TIER_A_BUDGET
+        )
 
     def test_project_workflow_indexed_and_injected(self) -> None:
         self._write_project_workflow(

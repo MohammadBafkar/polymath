@@ -31,6 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Tiered workflow injection + HINT-BUDGET + PROFILE-2.** The
+  SessionStart workflow index is tiered: Tier A (≤400-token block,
+  enforced by `build-workflow-index.py` — the one budget owner, with a
+  140-char per-workflow `whenToUse` cap) lists repo-relevant workflows
+  first (detectionSignals paths probed against the repo, bounded,
+  fail-open) and the rest collapse to a one-line Tier B pointer;
+  renderer and builder are pinned byte-identical by test, and doctor
+  renders the tiering record including relevant-but-overflowed
+  workflows. Two new self-tested conformance gates: **HINT-BUDGET**
+  (worst single-candidate route hint ≤120 tokens — the hint template
+  was tightened to fit) and **PROFILE-2** (each install profile's
+  summed always-on cost stays within its declared `alwaysOnBudget` in
+  polymath-profiles.json). Gate registry now counts 33.
 - **Install-aware route hints + `partial-install` eval category.** An
   uninstalled match renders a one-line install affordance instead of a
   broken proposal (cache-layout detection; repo checkouts and project

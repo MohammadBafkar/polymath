@@ -4,6 +4,17 @@
 
 ### Added
 
+- **Tiered SessionStart injection.** The workflow index no longer
+  injects all workflows flat (the old 560-token ceiling had zero
+  headroom): Tier A (≤400-token block) lists repo-relevant workflows
+  first — `detectionSignals.paths` probed against the repo root,
+  ≤64 probes / 200ms, fail-open — then fills alphabetically; the rest
+  collapse to a one-line Tier B pointer. `tools/build-workflow-index.py`
+  owns the budget (per-entry 140-char `whenToUse` cap, deterministic
+  `select_tier_a`), the renderer mirrors it byte-identically (pinned by
+  `tests/tools/test_workflow_tiering.py`), and the tiering record —
+  including relevant-but-overflowed workflows — lands in the
+  machine-local fragment for `polymath-core:doctor`.
 - **bugTriage routing sidecar (event-only).** The failed-test-run nudge
   moved out of event-trigger.py's hardcoded table into
   `routing/bugTriage.yaml` as a declarative `events:` rule (routing

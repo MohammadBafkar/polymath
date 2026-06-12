@@ -434,6 +434,26 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # PROFILE-2: each install profile's summed always-on listing cost stays
+  # within its declared alwaysOnBudget (registry/polymath-profiles.json).
+  echo
+  echo "── PROFILE-2 cross-check (token-report.py profiles)"
+  if python3 "$root/tools/token-report.py" profiles; then
+    :
+  else
+    overall=1
+  fi
+
+  # HINT-BUDGET: the worst single-candidate ambient route hint must stay
+  # within its token budget (template bloat or a verbose surface fails).
+  echo
+  echo "── HINT-BUDGET cross-check (build-surface-index.py --hint-budget)"
+  if python3 "$root/tools/build-surface-index.py" --hint-budget; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

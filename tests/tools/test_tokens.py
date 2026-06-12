@@ -1,9 +1,11 @@
 """Unit tests for tools/lib/tokens.py.
 
-Pins estimate_tokens to token-report.py budget's arithmetic — (chars + 3) / 4 —
-and pins the documented divergence from build-workflow-index.py's fallback
-(chars // 4 + 1) at chars % 4 == 0, which is why that heuristic was NOT
-adopted as canonical.
+Pins estimate_tokens to token-report.py budget's arithmetic — (chars + 3) / 4.
+build-workflow-index.py's old fallback (chars // 4 + 1) over-counted by one
+whenever chars % 4 == 0 and was rejected; that builder now uses
+(chars + 3) / 4 as well (the tier budget must be deterministic and identical
+to the SessionStart renderer's — pinned by test_workflow_tiering.py), so the
+divergence test below documents the rejected heuristic, not a live difference.
 
 Run with: python3 -m unittest discover -s tests/tools
 """
@@ -34,10 +36,11 @@ class EstimateTokensTests(unittest.TestCase):
         for n in range(201):
             self.assertEqual(estimate_tokens("x" * n), (n + 3) // 4, msg=f"chars={n}")
 
-    def test_diverges_from_build_workflow_index_fallback_on_multiples_of_4(self) -> None:
-        """The decision pin: build-workflow-index's `len // 4 + 1` over-counts
+    def test_diverges_from_rejected_fallback_on_multiples_of_4(self) -> None:
+        """The decision pin: the rejected `len // 4 + 1` heuristic over-counts
         by one whenever chars % 4 == 0 (14 of 37 plugins on the budget inputs
-        measured for the consolidation), so it was not adopted."""
+        measured for the consolidation) — why (chars + 3) / 4 is canonical
+        everywhere, including build-workflow-index.py's tier budget."""
         for n in (4, 8, 1572):  # 1572 = polymath-release's measured char count
             text = "x" * n
             self.assertEqual(estimate_tokens(text), n // 4)

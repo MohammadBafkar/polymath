@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Hint render budgeted (HINT-BUDGET) + doctor shows injection
+  tiering.** The route-hint trust/footer wording is tightened and the
+  worst single-candidate render is gated at ≤120 tokens
+  (`tools/build-surface-index.py --hint-budget`, self-tested; the
+  install-affordance path is outside the budget). `doctor.sh` gains a
+  *Workflow injection* section rendering polymath-flows' tiering
+  record: Tier A size, repo-relevant count, Tier B pointer count, and
+  any relevant-but-overflowed workflows.
 - **Install-aware route hints.** When polymath-core runs from the
   install cache, the hint checks whether a matched surface's plugin is
   actually installed: an uninstalled match renders a one-line install

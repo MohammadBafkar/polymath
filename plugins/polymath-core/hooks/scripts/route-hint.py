@@ -394,11 +394,12 @@ def main() -> int:
     # propose-first contract (run-workflow SKILL.md still owns "never
     # auto-start"). polymath-pipeline honors auto-headless for read-only
     # surfaces when the project declares routing.mode classify|enforce.
+    # Wording is budgeted: HINT-BUDGET gates the worst single-candidate
+    # render (build-surface-index.py --hint-budget).
     top_trust = top[0][1].get("trust")
     if top_trust == "auto-headless":
-        print("    trust: auto-headless (declared) — honored for read-only use by polymath-pipeline when routing.mode != hint; in hint mode still propose-first.")
-    print("Detect-only; nothing was run. Confirm with /polymath-core:route, or proceed.")
-    print("Silence: POLYMATH_ROUTE_MUTE=1 or touch .polymath/route-muted")
+        print("    trust: auto-headless — read-only may run unconfirmed in classify/enforce mode; otherwise propose-first.")
+    print("Detect-only; nothing ran. Confirm: /polymath-core:route. Mute: POLYMATH_ROUTE_MUTE=1 or .polymath/route-muted")
     return 0
 
 

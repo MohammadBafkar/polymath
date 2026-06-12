@@ -47,14 +47,99 @@ import re
 import sys
 
 # Keep byte-identical to tools/build-workflow-index.py (INJECTION_HEADER /
-# INJECTION_FOOTER) — the builder's token assertion measures this framing.
+# INJECTION_FOOTER / TIER_A_BUDGET / TIER_B_POINTER / select_tier_a) — the
+# builder owns the budget; a unit test pins the two files equal.
 INJECTION_HEADER = "Polymath workflows available (multi-step arcs you can run):"
 INJECTION_FOOTER = (
     "Before starting substantial multi-step work that matches one of these, first "
     "propose that workflow in one line (name in backticks) and wait for approval; "
     "otherwise just answer. Never start a workflow without asking."
 )
+TIER_A_BUDGET = 400
+TIER_B_POINTER = (
+    "  …plus {n} more — full list: polymath-flows data/workflow-index.json; "
+    "ask /polymath-core:route to pick."
+)
 PROJECT_HEADER = "Project workflows (machine-local additions; same propose-first contract):"
+
+# Repo-relevance probing is bounded exactly like polymath-core's
+# write-repo-evidence.py: probe count capped, total wall budget 200ms,
+# fail-open (an unprobed workflow simply isn't boosted into Tier A).
+MAX_RELEVANCE_PROBES = 64
+RELEVANCE_BUDGET_SECONDS = 0.200
+
+
+def estimate_tokens(text: str) -> int:
+    return (len(text) + 3) // 4
+
+
+def select_tier_a(min_records: list[dict], relevant: set[str]) -> tuple[list[dict], list[dict]]:
+    """Deterministic tier split: repo-relevant records first (alphabetical),
+    then the rest (alphabetical), greedily admitted while the rendered block
+    — header + entries + worst-case pointer + footer — stays ≤ TIER_A_BUDGET.
+    Returns (tier_a, tier_b)."""
+    ordered = sorted(min_records, key=lambda r: (r["n"] not in relevant, r["n"]))
+    overhead = (
+        estimate_tokens(INJECTION_HEADER)
+        + estimate_tokens(TIER_B_POINTER.format(n=len(min_records)))
+        + estimate_tokens(INJECTION_FOOTER)
+    )
+    tier_a: list[dict] = []
+    used = overhead
+    for rec in ordered:
+        cost = estimate_tokens(f"  - {rec['n']}: {rec['w']}")
+        if used + cost > TIER_A_BUDGET:
+            break  # deterministic cut; remaining records all go to Tier B
+        tier_a.append(rec)
+        used += cost
+    tier_a_names = {r["n"] for r in tier_a}
+    tier_b = [r for r in min_records if r["n"] not in tier_a_names]
+    return tier_a, tier_b
+
+
+def _repo_root() -> pathlib.Path | None:
+    here = pathlib.Path.cwd()
+    for d in (here, *here.parents):
+        if (d / ".git").exists() or (d / ".polymath").is_dir():
+            return d
+    return None
+
+
+def relevant_workflows(detect_records: list[dict]) -> set[str]:
+    """Workflow names whose detectionSignals paths match this repo —
+    existence probes against the repo root (exact path / 'dir/' / glob,
+    one level of ** allowed). Bounded and fail-open."""
+    import time
+
+    root = _repo_root()
+    if root is None:
+        return set()
+    relevant: set[str] = set()
+    probes = 0
+    deadline = time.monotonic() + RELEVANCE_BUDGET_SECONDS
+    for rec in detect_records:
+        name = rec.get("n")
+        if not isinstance(name, str) or not name:
+            continue
+        for probe in rec.get("paths") or []:
+            if not isinstance(probe, str) or not probe:
+                continue
+            if probes >= MAX_RELEVANCE_PROBES or time.monotonic() > deadline:
+                return relevant
+            probes += 1
+            try:
+                if any(ch in probe for ch in "*?["):
+                    hit = next(root.glob(probe), None) is not None
+                elif probe.endswith("/"):
+                    hit = (root / probe.rstrip("/")).is_dir()
+                else:
+                    hit = (root / probe).exists()
+            except Exception:
+                continue
+            if hit:
+                relevant.add(name)
+                break  # one hit is enough for this workflow
+    return relevant
 
 FRAGMENT_NAME = "workflow-index.project.json"
 MAX_FRAGMENT_ENTRIES = 30  # sanity cap; a project layer is a handful of files
@@ -192,11 +277,15 @@ def collect_fragment(catalog_names: set[str], catalog_triggers: dict[str, str]) 
     }
 
 
-def render(min_records: list[dict], fragment: dict) -> str:
+def render(min_records: list[dict], fragment: dict, relevant: set[str] | None = None) -> str:
+    relevant = relevant or set()
     lines: list[str] = []
     if min_records:
+        tier_a, tier_b = select_tier_a(min_records, relevant)
         lines.append(INJECTION_HEADER)
-        lines += [f"  - {r['n']}: {r['w']}" for r in min_records]
+        lines += [f"  - {r['n']}: {r['w']}" for r in tier_a]
+        if tier_b:
+            lines.append(TIER_B_POINTER.format(n=len(tier_b)))
         lines.append(INJECTION_FOOTER)
     entries = fragment.get("entries") or []
     if entries:
@@ -217,6 +306,7 @@ def main(argv: list[str]) -> int:
     min_index_path = pathlib.Path(argv[1])
     full_index_path = pathlib.Path(argv[2])
     data_root = pathlib.Path(argv[3])
+    detect_index_path = pathlib.Path(argv[4]) if len(argv) > 4 else None
 
     min_records: list[dict] = []
     try:
@@ -241,10 +331,37 @@ def main(argv: list[str]) -> int:
         pass
     catalog_names.discard("")
 
+    relevant: set[str] = set()
+    if detect_index_path is not None:
+        try:
+            detect = json.loads(detect_index_path.read_text())
+            if isinstance(detect, list):
+                relevant = relevant_workflows([r for r in detect if isinstance(r, dict)])
+        except Exception:
+            relevant = set()
+
     try:
         fragment = collect_fragment(catalog_names, catalog_triggers)
     except Exception:
         fragment = {"entries": []}
+
+    # Doctor-visible tiering record: which workflows made Tier A, how many
+    # collapsed to the pointer, and which RELEVANT ones did not fit (the
+    # overflow that should prompt a whenToUse trim or a budget discussion).
+    try:
+        tier_a, tier_b = select_tier_a(min_records, relevant)
+        tier_a_names = [r["n"] for r in tier_a]
+        fragment["tiering"] = {
+            "tier_a": tier_a_names,
+            "tier_b_count": len(tier_b),
+            "relevant": sorted(relevant),
+            "overflow_relevant": sorted(
+                n for n in relevant if n not in set(tier_a_names)
+            ),
+            "budget_tokens": TIER_A_BUDGET,
+        }
+    except Exception:
+        pass
 
     try:
         target_dir = data_root / "polymath-flows"
@@ -255,7 +372,7 @@ def main(argv: list[str]) -> int:
     except Exception:
         pass  # unwritable data dir must not cost the injection
 
-    text = render(min_records, fragment)
+    text = render(min_records, fragment, relevant)
     if text:
         print(text)
     return 0

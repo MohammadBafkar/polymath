@@ -43,10 +43,11 @@ import json
 import os
 import pathlib
 import re
+import sys
 from dataclasses import dataclass, field
 from typing import Any
 
-from lib.repo import iter_plugins
+from lib.repo import iter_plugins, plugins_dir, repo_root
 from lib.tokens import estimate_tokens
 
 # ---------------------------------------------------------------------------
@@ -83,6 +84,52 @@ def _listing_text(plugin: pathlib.Path) -> str:
         if desc:
             parts.append(desc.group(1))
     return "".join(parts)
+
+
+def profiles(self_test: bool = False) -> int:
+    """PROFILE-2: each install profile's summed always-on listing cost
+    (its plugins + the _spine) must stay within its declared
+    alwaysOnBudget in registry/polymath-profiles.json. A missing budget
+    declaration fails too — every profile is gated or none are."""
+    registry = repo_root() / "registry" / "polymath-profiles.json"
+    try:
+        doc = json.loads(registry.read_text())
+    except Exception as e:
+        print(f"profile-budget: cannot read {registry}: {e}", file=sys.stderr)
+        return 1
+    spine = doc.get("_spine") or []
+    profile_map = doc.get("profiles") or {}
+
+    if self_test:
+        # Prove the gate can fail: the spine alone must exceed a synthetic
+        # 1-token budget under the same comparison the real gate uses.
+        tokens = sum(estimate_tokens(_listing_text(plugins_dir() / p)) for p in spine)
+        if not (tokens > 1):
+            print("profiles --self-test FAILED: spine measured ≤1 token", file=sys.stderr)
+            return 1
+        print(f"profiles --self-test: synthetic 1-token budget correctly fails (spine ~{tokens} tokens)")
+        return 0
+
+    fail = 0
+    print("## Per-profile always-on budget (PROFILE-2)")
+    print(f"{'Profile':<12} | {'Plugins':<7} | {'Tokens':<7} | {'Budget':<7} | Status")
+    print("------------ | ------- | ------- | ------- | ------")
+    for name, body in sorted(profile_map.items()):
+        plugin_names = list(dict.fromkeys(spine + (body.get("plugins") or [])))
+        tokens = sum(estimate_tokens(_listing_text(plugins_dir() / p)) for p in plugin_names)
+        declared = body.get("alwaysOnBudget")
+        if not isinstance(declared, int):
+            print(f"{name:<12} | {len(plugin_names)!s:<7} | {tokens!s:<7} | {'—':<7} | MISSING alwaysOnBudget")
+            fail = 1
+            continue
+        status = "ok"
+        if tokens > declared:
+            status = "OVER"
+            fail = 1
+        print(f"{name:<12} | {len(plugin_names)!s:<7} | {tokens!s:<7} | {declared!s:<7} | {status}")
+    if fail:
+        print("FAIL: a profile exceeds (or lacks) its always-on budget")
+    return fail
 
 
 def budget() -> int:
@@ -317,6 +364,13 @@ def main() -> int:
         help="per-plugin always-on listing cost vs the 400-token ceiling",
     )
 
+    prof = sub.add_parser(
+        "profiles",
+        help="PROFILE-2: per-profile always-on cost vs declared alwaysOnBudget",
+    )
+    prof.add_argument("--self-test", action="store_true",
+                      help="prove the budget comparison can fail")
+
     usage = sub.add_parser(
         "usage",
         help="token breakdown of a `claude -p --output-format stream-json` transcript",
@@ -328,6 +382,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.cmd == "budget":
         return budget()
+    if args.cmd == "profiles":
+        return profiles(self_test=args.self_test)
     if args.cmd == "usage":
         return usage_main(args, usage)
     raise AssertionError(args.cmd)

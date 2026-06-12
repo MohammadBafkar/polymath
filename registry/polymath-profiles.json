@@ -17,7 +17,8 @@
         "polymath-security",
         "polymath-release",
         "polymath-vcs"
-      ]
+      ],
+      "alwaysOnBudget": 1950
     },
     "frontend": {
       "title": "Frontend / web engineer",
@@ -29,11 +30,12 @@
         "polymath-qa",
         "polymath-release",
         "polymath-vcs"
-      ]
+      ],
+      "alwaysOnBudget": 1900
     },
     "sre": {
       "title": "SRE / on-call",
-      "for": "Reliability and incident response \u2014 SLOs, observability, live incidents, postmortems.",
+      "for": "Reliability and incident response — SLOs, observability, live incidents, postmortems.",
       "plugins": [
         "polymath-sre",
         "polymath-observability",
@@ -41,7 +43,8 @@
         "polymath-performance",
         "polymath-paging",
         "polymath-chat"
-      ]
+      ],
+      "alwaysOnBudget": 1750
     },
     "platform": {
       "title": "Platform / DevOps engineer",
@@ -53,11 +56,12 @@
         "polymath-kubernetes",
         "polymath-sre",
         "polymath-release"
-      ]
+      ],
+      "alwaysOnBudget": 2050
     },
     "pm": {
       "title": "Product manager",
-      "for": "Discovery through delivery \u2014 PRDs, prioritization, roadmaps, research, comms.",
+      "for": "Discovery through delivery — PRDs, prioritization, roadmaps, research, comms.",
       "plugins": [
         "polymath-product",
         "polymath-research",
@@ -65,7 +69,8 @@
         "polymath-communication",
         "polymath-decisions",
         "polymath-tracker"
-      ]
+      ],
+      "alwaysOnBudget": 1800
     },
     "staff": {
       "title": "Staff+ / tech lead",
@@ -78,7 +83,8 @@
         "polymath-engineering",
         "polymath-communication",
         "polymath-leadership"
-      ]
+      ],
+      "alwaysOnBudget": 2150
     },
     "author": {
       "title": "Polymath plugin author",
@@ -87,7 +93,9 @@
         "polymath-author",
         "polymath-engineering",
         "polymath-writing"
-      ]
+      ],
+      "alwaysOnBudget": 1400
     }
-  }
+  },
+  "_budget_note": "alwaysOnBudget: per-profile ceiling (tokens) on the summed always-on listing cost of the profile's plugins plus the _spine, gated by tools/token-report.py profiles (PROFILE-2). Ratchet: lower it when descriptions shrink; raising it is a reviewed decision."
 }
