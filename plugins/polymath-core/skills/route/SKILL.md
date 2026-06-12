@@ -26,6 +26,16 @@ Do not bulk-load every `SKILL.md`. Load the chosen target's body only after rout
 
 ## Procedure
 
+0. **Read the deterministic shortlist first.** Run
+   `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/route-hint.py" --shortlist "<the user's request text>"`
+   and treat its `candidates` as the constrained choice set: the scorer
+   has already done the narrowing the model is bad at (1-of-153), so
+   reason *inside* the top-3 before reasoning outside it. Candidates with
+   `"fires": true` matched a hard signal and clear the ambient threshold —
+   strong evidence. Sub-threshold candidates are still ranked context. An
+   empty list means no declared signal matched: proceed with steps 1–5
+   unconstrained, and say so in `evidence`. Only route outside a
+   non-empty shortlist with an explicit reason in `evidence`.
 1. **Honor explicit targets.** If the user names a plugin, skill, command, agent, or workflow, route there unless it is missing or unsafe.
 2. **Classify the work shape.**
    - Multi-step SDLC arc with dependent artifacts or gates -> prefer a `polymath-flows` workflow.

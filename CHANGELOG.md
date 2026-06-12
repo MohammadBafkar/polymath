@@ -31,6 +31,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Constrain-layer shipped: deterministic shortlist + consumers +
+  measurement.** `route-hint.py --shortlist "<text>"` exposes the
+  scorer's top-3 (sub-threshold included, `fires` flagged) as JSON;
+  `/polymath-core:route` and `polymath-pipeline:intake` gain a step 0
+  that reads it as the constrained choice set. The held-out eval now
+  measures **constrained-top-3** — currently 6/54 naturalistic cases
+  find their intended surface in the shortlist — published in
+  route-metrics.json and reported (never floored) by ROUTE-EVAL-1;
+  the P3 coverage push ratchets exactly this number.
 - **Surface-routing schema v1 — tier, vetoes, declarative events,
   repo-state evidence.** Sidecars may now declare an optional
   `schemaVersion: 1` (const), `tier: hard|soft` (feeds the future

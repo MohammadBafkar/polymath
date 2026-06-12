@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Deterministic shortlist consumer (`--shortlist`).**
+  `route-hint.py --shortlist "<text>"` prints the top-3 scored
+  candidates as JSON — including sub-threshold ones, each flagged
+  `fires` when it matched a hard signal above the ambient threshold —
+  and `/polymath-core:route` gains a step 0 that reads it as the
+  constrained choice set (reason inside the top-3 first; route outside
+  a non-empty shortlist only with a stated reason). The held-out eval
+  reports the matching `constrained` block (top-3 hit rate on
+  naturalistic cases) in route-metrics.json — reported, not gated.
 - **Routing schema v1 consumed end-to-end.** `route-hint.py` honors
   `not_intents` (a matching phrase vetoes the surface before scoring)
   and `repo_state` (+1 soft boost from cached repo evidence — never

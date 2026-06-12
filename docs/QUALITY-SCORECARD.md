@@ -22,8 +22,11 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
 - **Routing SLO (ROUTE-EVAL-1)** — `tools/triggering.py route-eval --gate`
   (run inside `conformance.sh --all`). Gates exactly two schema-locked
   invariants on the held-out corpus: token precision 1.0 and zero false
-  positives. Naturalistic reach is reported, never floored. The current
-  numbers are published in
+  positives. Naturalistic reach and constrained-top-3 (whether a case's
+  intended surface appears in the deterministic shortlist that
+  `/polymath-core:route` and `polymath-pipeline:intake` read as their
+  step 0 — `route-hint.py --shortlist`) are reported, never floored. The
+  current numbers are published in
   [`plugins/polymath-core/data/route-metrics.json`](../plugins/polymath-core/data/route-metrics.json)
   (single producer: `route-eval --write-metrics`; the gate fails on drift).
 - **Deterministic golden suite** —

@@ -16,6 +16,11 @@
   fixture, with command-position anchors keeping argument words exempt
   and a deadlock-guard test pinning that the `mark` recovery command
   itself always passes.
+- **Intake reads the deterministic shortlist.** `intake` gains a step 0:
+  run `route-hint.py --shortlist` (sibling polymath-core; skipped
+  silently when absent) and treat its top-3 as the constrained choice
+  set for routing — route outside a non-empty shortlist only with a
+  stated reason.
 - **Validated, session-attributed `mark`.** `mark --surface` is checked
   against the sibling-plugin catalog (skills, workflow names, `direct`;
   the `polymath-flows:run-workflow <name>` form accepted) — an unknown

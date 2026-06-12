@@ -857,6 +857,20 @@ def _eval_metrics(results: list[dict]) -> dict:
             "misroute": n("naturalistic", "MISROUTE"),
             "reach": round(nat_fired / len(nat), 4) if nat else 0.0,
         },
+        # Constrained-top-3 (reported, not gated until the P3 target lands):
+        # of the naturalistic cases that name an intended surface, how many
+        # would find it in the deterministic shortlist a consumer reads?
+        "constrained": _constrained_block(nat),
+    }
+
+
+def _constrained_block(nat_rows: list[dict]) -> dict:
+    scored = [r for r in nat_rows if "constrained_hit" in r]
+    hits = sum(1 for r in scored if r["constrained_hit"])
+    return {
+        "top3": hits,
+        "cases": len(scored),
+        "ratio": round(hits / len(scored), 4) if scored else 0.0,
     }
 
 
@@ -948,7 +962,9 @@ def _eval_gate(metrics: dict) -> int:
     )
     print(
         f"  reported: naturalistic reach {metrics['naturalistic']['fired']}"
-        f"/{metrics['corpus']['naturalistic']} — never floored"
+        f"/{metrics['corpus']['naturalistic']}, constrained-top-3 "
+        f"{metrics['constrained']['top3']}/{metrics['constrained']['cases']}"
+        f" — never floored"
     )
     for p in problems:
         print(f"  FAIL  {p}")
@@ -1024,6 +1040,22 @@ def route_eval_self_test() -> int:
     return 0
 
 
+def _eval_shortlist(prompt: str) -> list[str]:
+    """Constrained candidate surfaces (top-3, threshold-free) — the same
+    view /polymath-core:route and intake consume as their step 0."""
+    proc = subprocess.run(
+        [sys.executable, str(HOOK), "--shortlist", prompt],
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    try:
+        doc = json.loads(proc.stdout)
+        return [c["surface"] for c in doc.get("candidates", []) if isinstance(c, dict)]
+    except Exception:
+        return []
+
+
 def route_eval(emit_json: bool = False, gate: bool = False,
                write_metrics: bool = False) -> int:
     cases = _eval_load_cases()
@@ -1033,11 +1065,19 @@ def route_eval(emit_json: bool = False, gate: bool = False,
         fired = FIRED_MARKER in out
         cands = _eval_candidates(out)
         verdict = _eval_classify(c, fired, cands)
-        results.append({
+        row = {
             "id": c["id"], "category": c["category"], "expect": c["expect"],
             "fired": fired, "top": cands[0] if cands else "", "candidates": cands,
             "target": c.get("target", ""), "verdict": verdict, "note": c.get("note", ""),
-        })
+        }
+        # Constrained-top-3: would the intended surface be in the
+        # deterministic shortlist a consumer reads? Naturalistic cases name
+        # their intended surface in `concept`.
+        concept = c.get("concept", "")
+        if c["category"] == "naturalistic" and concept:
+            shortlist = _eval_shortlist(c["prompt"])
+            row["constrained_hit"] = any(concept in s for s in shortlist)
+        results.append(row)
 
     if emit_json:
         print(json.dumps(results, indent=2))
@@ -1084,6 +1124,10 @@ def route_eval(emit_json: bool = False, gate: bool = False,
     if nat:
         print(f"  naturalistic reach (fired at all):           {nat_fired}/{nat_total}  "
               f"-- the rest stay silent by design (no hard signal in natural phrasing)")
+        cons = _constrained_block(nat)
+        if cons["cases"]:
+            print(f"  constrained-top-3 (intended surface in shortlist): "
+                  f"{cons['top3']}/{cons['cases']}  -- what a /route or intake step-0 consumer would see")
     if neg:
         print(f"  false-positive rate on negatives:            {neg_fp}/{len(neg)}")
     print()

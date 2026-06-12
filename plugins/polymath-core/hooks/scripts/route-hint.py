@@ -251,7 +251,53 @@ def why(fired: list[str]) -> str:
     return " + ".join(seen)
 
 
+def compute_shortlist(prompt: str) -> dict:
+    """The deterministic constrained candidate set: top-3 scored rules for
+    this prompt — INCLUDING sub-threshold candidates (each carries `fires`,
+    whether the ambient hint would have emitted it). This is the
+    machine-readable view consumed by /polymath-core:route and
+    polymath-pipeline:intake as their step 0: narrow first, then reason
+    inside the narrowed set."""
+    rules = load_project_rules() + load_rules()
+    low = prompt.lower()
+    urls = URL_RE.findall(prompt)
+    has_diff = bool(DIFF_RE.search(prompt))
+    evidence = load_evidence()
+    scored: list[dict] = []
+    for rule in rules:
+        score, fired = score_rule(rule, prompt, low, urls, has_diff, evidence)
+        if score <= 0:
+            continue
+        cand: dict = {
+            "surface": rule["surface"],
+            "kind": rule.get("kind", "skill"),
+            "score": score,
+            "signals": [f for i, f in enumerate(fired) if f not in fired[:i]],
+            "fires": score >= MIN_SCORE and any(f in HARD_KINDS for f in fired),
+        }
+        if rule.get("alt"):
+            cand["alt"] = rule["alt"]
+        if rule.get("_project"):
+            cand["project"] = True
+        scored.append(cand)
+    scored.sort(key=lambda c: -c["score"])  # stable on table order for ties
+    return {"candidates": scored[:MAX_CANDIDATES]}
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "--shortlist":
+        # Explicit consumer invocation (not the ambient hook): ignores the
+        # mute switch, never threshold-gates the display, always exits 0.
+        text = " ".join(sys.argv[2:]).strip()
+        if not text:
+            try:
+                payload = json.load(sys.stdin)
+                text = (payload.get("prompt") or "").strip() if isinstance(payload, dict) else ""
+            except Exception:
+                text = ""
+        print(json.dumps(compute_shortlist(text) if text else {"candidates": []}))
+        return 0
+
     prompt = read_prompt()
     if not prompt or muted():
         return 0

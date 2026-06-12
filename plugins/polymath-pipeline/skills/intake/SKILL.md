@@ -24,6 +24,15 @@ that); intake decides *where the request goes*, in one screen.
 
 ## Procedure
 
+0. **Read the deterministic shortlist first** (when polymath-core is
+   installed; skip silently otherwise). Run
+   `python3 "<polymath-core>/hooks/scripts/route-hint.py" --shortlist "<the request text>"`
+   — the sibling plugin's hook script, resolvable from the directive's
+   plugin path. Its `candidates` are the constrained choice set for
+   step 5: the scorer already narrowed 153 surfaces to ≤3, so reason
+   inside that set first and route outside a non-empty shortlist only
+   with a stated reason. An empty list means no declared signal matched —
+   proceed unconstrained.
 1. **Score four confidence dimensions, 0–5 each**, from the request plus the
    project context (`polymath-core:project-context`):
    - **Intent** — what outcome the user wants and why now.
