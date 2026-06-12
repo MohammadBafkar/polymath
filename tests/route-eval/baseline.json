@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
   "token_precision_min": 1.0,
-  "false_positives_max": 0
+  "false_positives_max": 0,
+  "constrained_top3_min": 0.6
 }

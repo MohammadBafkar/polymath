@@ -12,4 +12,8 @@ intents:
 - record the decision
 - architecture decision record
 - log this decision
+not_intents:
+- weigh the tradeoffs
+- help me decide
+- can't agree
 alt: polymath-writing:rfc

@@ -277,6 +277,11 @@
         "architecture decision record",
         "log this decision"
       ],
+      "not_intents": [
+        "weigh the tradeoffs",
+        "help me decide",
+        "can't agree"
+      ],
       "tier": "hard"
     },
     {

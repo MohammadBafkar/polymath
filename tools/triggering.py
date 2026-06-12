@@ -922,6 +922,13 @@ def _eval_validate_baseline(doc: Any) -> str | None:
     if fp > 0:
         return (f"false_positives_max {fp} > 0 — the false-positive invariant "
                 f"is schema-locked, not configurable")
+    cons = doc.get("constrained_top3_min")
+    if cons is not None:
+        if isinstance(cons, bool) or not isinstance(cons, (int, float)):
+            return "constrained_top3_min not a number"
+        if cons < 0.6:
+            return (f"constrained_top3_min {cons} < 0.6 — the coverage floor "
+                    f"is a ratchet: it may only go up from the P3 target")
     return None
 
 
@@ -958,6 +965,14 @@ def _gate_problems(metrics: dict, baseline: dict) -> list[str]:
             f"partial-install behavior broken: {pi['ok']}/{pi['cases']} cases ok "
             f"(uninstalled matches must render the install affordance; installed ones must not)"
         )
+    cons_min = baseline.get("constrained_top3_min")
+    cons = metrics.get("constrained") or {}
+    if cons_min is not None and cons.get("cases", 0):
+        if cons["ratio"] < cons_min:
+            problems.append(
+                f"constrained-top-3 {cons['ratio']} ({cons['top3']}/{cons['cases']}) "
+                f"< floor {cons_min} — coverage regressed below the ratchet"
+            )
     return problems
 
 
@@ -995,11 +1010,12 @@ def _eval_gate(metrics: dict) -> int:
         f"(max {baseline['false_positives_max']}), "
         f"partial-install {pi.get('ok', 0)}/{pi.get('cases', 0)}"
     )
+    cons_floor = baseline.get("constrained_top3_min")
     print(
         f"  reported: naturalistic reach {metrics['naturalistic']['fired']}"
-        f"/{metrics['corpus']['naturalistic']}, constrained-top-3 "
+        f"/{metrics['corpus']['naturalistic']} (never floored); constrained-top-3 "
         f"{metrics['constrained']['top3']}/{metrics['constrained']['cases']}"
-        f" — never floored"
+        + (f" (ratchet floor {cons_floor})" if cons_floor is not None else "")
     )
     for p in problems:
         print(f"  FAIL  {p}")
@@ -1092,7 +1108,24 @@ def route_eval_self_test() -> int:
           _eval_validate_baseline(
               {"schemaVersion": 1, "token_precision_min": 0.5,
                "false_positives_max": 0}) is not None)
+    check("weakened constrained_top3_min baseline refused",
+          _eval_validate_baseline(
+              {"schemaVersion": 1, "token_precision_min": 1.0,
+               "false_positives_max": 0, "constrained_top3_min": 0.3}) is not None)
     check("locked baseline accepted", _eval_validate_baseline(baseline) is None)
+
+    # Coverage regression below the constrained floor must gate.
+    low_cov_rows = [
+        {"category": "naturalistic", "expect": "silent", "fired": False,
+         "verdict": "silent-by-design", "constrained_hit": False},
+        {"category": "naturalistic", "expect": "silent", "fired": False,
+         "verdict": "silent-by-design", "constrained_hit": True},
+    ]
+    cov_baseline = {"schemaVersion": 1, "token_precision_min": 1.0,
+                    "false_positives_max": 0, "constrained_top3_min": 0.6}
+    check("constrained-top-3 below the floor rejected",
+          any("ratchet" in p for p in
+              _gate_problems(_eval_metrics(low_cov_rows), cov_baseline)))
 
     if failures:
         print(f"route-eval --self-test FAILED ({len(failures)} check(s))", file=sys.stderr)
@@ -1115,6 +1148,100 @@ def _eval_shortlist(prompt: str) -> list[str]:
         return [c["surface"] for c in doc.get("candidates", []) if isinstance(c, dict)]
     except Exception:
         return []
+
+
+def _eval_shortlist_scored(prompt: str) -> list[dict]:
+    proc = subprocess.run(
+        [sys.executable, str(HOOK), "--shortlist", prompt],
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    try:
+        doc = json.loads(proc.stdout)
+        return [c for c in doc.get("candidates", []) if isinstance(c, dict)]
+    except Exception:
+        return []
+
+
+def _confusion_analyze(rows: list[dict]) -> tuple[list[str], list[str]]:
+    """(gate_problems, advisories). A row: {id, candidates: [{surface, score,
+    fires}]}. GATED: two candidates tied at the top where BOTH clear the
+    ambient firing bar (`fires`) — the hint itself is ambiguous, a
+    disambiguating signal (not_intents, a sharper regex) is required.
+    ADVISORY: sub-threshold top ties — visible to shortlist consumers as a
+    ranked pair, acceptable, but worth watching as coverage grows."""
+    problems: list[str] = []
+    advisories: list[str] = []
+    for row in rows:
+        cands = row.get("candidates") or []
+        if len(cands) < 2:
+            continue
+        top_score = cands[0].get("score", 0)
+        tied = [c for c in cands if c.get("score", 0) == top_score]
+        if len(tied) < 2:
+            continue
+        pair = " <-> ".join(sorted(c["surface"] for c in tied))
+        if all(c.get("fires") for c in tied):
+            problems.append(
+                f"{row['id']}: firing tie at score {top_score}: {pair} — both "
+                f"clear the ambient bar; add a veto or sharper signal"
+            )
+        else:
+            advisories.append(f"{row['id']}: sub-threshold top tie at {top_score}: {pair}")
+    return problems, advisories
+
+
+def route_confusion(gate: bool = False) -> int:
+    cases = _eval_load_cases()
+    rows = [
+        {"id": c["id"], "candidates": _eval_shortlist_scored(c["prompt"])}
+        for c in cases
+    ]
+    problems, advisories = _confusion_analyze(rows)
+    print(f"CONFUSION-1 — shortlist tie report over {len(cases)} corpus cases")
+    if advisories:
+        print(f"  advisory ({len(advisories)} sub-threshold top ties):")
+        for a in advisories:
+            print(f"    {a}")
+    else:
+        print("  advisory: no sub-threshold top ties")
+    if problems:
+        for p in problems:
+            print(f"  FAIL  {p}")
+        print(f"confusion: {'FAILED' if gate else 'reported'} ({len(problems)} firing tie(s))")
+        return 1 if gate else 0
+    print("confusion: OK — no firing ties (the ambient hint is never ambiguous on this corpus)")
+    return 0
+
+
+def route_confusion_self_test() -> int:
+    fire_tie = [{"id": "st-tie", "candidates": [
+        {"surface": "a:x", "score": 4, "fires": True},
+        {"surface": "b:y", "score": 4, "fires": True},
+    ]}]
+    soft_tie = [{"id": "st-soft", "candidates": [
+        {"surface": "a:x", "score": 2, "fires": False},
+        {"surface": "b:y", "score": 2, "fires": False},
+    ]}]
+    clean = [{"id": "st-clean", "candidates": [
+        {"surface": "a:x", "score": 4, "fires": True},
+        {"surface": "b:y", "score": 2, "fires": False},
+    ]}]
+    checks = [
+        ("firing tie gates", bool(_confusion_analyze(fire_tie)[0])),
+        ("sub-threshold tie is advisory only",
+         not _confusion_analyze(soft_tie)[0] and bool(_confusion_analyze(soft_tie)[1])),
+        ("distinct top passes", _confusion_analyze(clean) == ([], [])),
+    ]
+    failures = [label for label, ok in checks if not ok]
+    for label, ok in checks:
+        print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+    if failures:
+        print(f"confusion --self-test FAILED ({len(failures)})", file=sys.stderr)
+        return 1
+    print("confusion --self-test: tie classification correct on synthetic input")
+    return 0
 
 
 def route_eval(emit_json: bool = False, gate: bool = False,
@@ -1270,6 +1397,17 @@ def main() -> int:
                     help="prove the gate can fail: run the gate logic against "
                          "inline synthetic bad input")
 
+    conf = top.add_parser(
+        "confusion",
+        description="CONFUSION-1: shortlist tie report over the held-out corpus.",
+        help="advisory shortlist-tie report; --gate fails on firing ties",
+    )
+    conf.add_argument("--gate", action="store_true",
+                      help="exit 1 when two candidates tie at the top AND both "
+                           "clear the ambient firing bar")
+    conf.add_argument("--self-test", action="store_true",
+                      help="prove the tie classification can fail")
+
     args = parser.parse_args()
     if args.surface == "skill":
         if args.cmd == "check":
@@ -1295,6 +1433,10 @@ def main() -> int:
         if args.self_test:
             return route_eval_self_test()
         return route_eval(args.json, args.gate, args.write_metrics)
+    if args.surface == "confusion":
+        if args.self_test:
+            return route_confusion_self_test()
+        return route_confusion(args.gate)
     raise AssertionError(args.surface)
 
 

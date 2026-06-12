@@ -31,6 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **SURFACE-1, CONFUSION-1, and the constrained-top-3 ratchet.**
+  SURFACE-1 (`check-registry.py routing`, self-tested): every catalog
+  surface — 184 across skills, workflows, tools, agents — either
+  declares routing or carries a reasoned entry in
+  `registry/routing-exemptions.json` (130 exempt; exemption is the
+  default posture for knowledge skills); the hard tier (16 surfaces,
+  each backed by a route-triggering fixture) is ratcheted by
+  `registry/routing-coverage.json` and may only grow. CONFUSION-1
+  (`triggering.py confusion`, self-tested): shortlist ties over the
+  held-out corpus — sub-threshold ties advisory, ties where both
+  candidates clear the ambient firing bar gate; its first run caught a
+  real adr↔decideUnderAmbiguity firing tie, fixed with the first
+  `not_intents` veto in the catalog (adr yields while the user is
+  still deciding). The route-eval baseline gains
+  `constrained_top3_min: 0.6` — the P3 exit floor, schema-locked
+  against weakening, refusing values below 0.6. Gate registry: 35.
 - **Evidence-driven routing coverage: 37 → 54 routable surfaces,
   constrained-top-3 6/54 → 54/54.** Every constrained-top-3 miss in the
   held-out corpus got signals a consumer can use: 33 existing sidecars

@@ -456,6 +456,18 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # CONFUSION-1: shortlist ties over the held-out corpus. Sub-threshold
+  # ties are advisory; a tie where BOTH candidates clear the ambient
+  # firing bar fails (the hint itself would be ambiguous).
+  echo
+  echo "── CONFUSION-1 cross-check (triggering.py confusion --gate)"
+  if python3 "$root/tools/triggering.py" confusion --gate >/dev/null 2>&1; then
+    echo "confusion gate: OK (no firing ties on the corpus)"
+  else
+    python3 "$root/tools/triggering.py" confusion --gate | tail -6
+    overall=1
+  fi
+
   # HINT-BUDGET: the worst single-candidate ambient route hint must stay
   # within its token budget (template bloat or a verbose surface fails).
   echo

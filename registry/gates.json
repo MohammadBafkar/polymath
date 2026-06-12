@@ -281,6 +281,15 @@
       "tier": "cross-plugin",
       "verification": "selftest",
       "description": "Declare-or-exempt: every surface has a routing sidecar or a reasoned exemption; hard-tier ratchet with fixture backing."
+    },
+    {
+      "id": "CONFUSION-1",
+      "tool": "tools/triggering.py",
+      "invocation": "python3 tools/triggering.py confusion --gate",
+      "selftest": "python3 tools/triggering.py confusion --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Shortlist tie report over the held-out corpus: firing ties gate (ambiguous ambient hint); sub-threshold ties advisory."
     }
   ]
 }
