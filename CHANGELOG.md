@@ -31,6 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **P4 pull-forwards: removeSteps, agent invoke labels, per-step
+  artifact contract, first release tags.** `override.removeSteps` lets
+  an org variant drop parent steps under the strong-gate-survival
+  invariant (dangling `needs`, orphaned strong gates, and
+  gate-stripping all error at flatten). Workflow steps may invoke
+  `agent:<plugin>:<name>` (schema + runner + check-workflow-invokes
+  resolution). A step's `artifacts:` list is now a checked contract:
+  `complete` refuses while a declared path is missing
+  (`artifactsAdvisory: true` opts a step down to warnings).
+  `release.yml` gains a marketplace↔manifest version coherence check
+  (refuses to tag on disagreement) and a fix for the changelog-source
+  bug in its tag messages; first per-plugin tags cut locally with its
+  exact naming (`<plugin>-v<version>`).
 - **Weekly model-CI tier + opt-in hint-adoption telemetry.**
   `model-ci.yml` runs the live-model suites weekly on an ISO-week
   rotation (skill-triggering → workflow-triggering → golden live +

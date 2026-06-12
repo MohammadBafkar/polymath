@@ -30,6 +30,7 @@ PROMPT_RETEACH_CHARS = 700  # advisory only
 
 _INVOKE = re.compile(r"^\s*invoke:\s*(.+?)\s*$", re.MULTILINE)
 _PLUGIN_SKILL = re.compile(r"^([a-z0-9-]+):([a-z0-9-]+)$")
+_AGENT_LABEL = re.compile(r"^agent:([a-z0-9-]+):([a-z0-9-]+)$")
 _DESCRIPTION = re.compile(r"^\s*description:\s*(.+?)\s*$", re.MULTILINE)
 DESC_MAX = 200  # workflow.schema.json maxLength on description (workflow + inputs)
 
@@ -38,12 +39,19 @@ def _skill_exists(plugin: str, skill: str) -> bool:
     return (PLUGINS_DIR / plugin / "skills" / skill / "SKILL.md").exists()
 
 
+def _agent_exists(plugin: str, name: str) -> bool:
+    return (PLUGINS_DIR / plugin / "agents" / f"{name}.md").exists()
+
+
 def check_workflow(path: pathlib.Path) -> tuple[list[str], list[str]]:
     """Return (errors, warnings)."""
     text = path.read_text()
     errors: list[str] = []
     warnings: list[str] = []
-    rel = path.relative_to(REPO)
+    try:
+        rel = path.relative_to(REPO)
+    except ValueError:
+        rel = path  # explicit file argument outside the repo tree
 
     # Mirror the schema's maxLength:200 on every description (workflow + inputs)
     # so local tooling catches what CI's strict jsonschema would reject.
@@ -56,9 +64,21 @@ def check_workflow(path: pathlib.Path) -> tuple[list[str], list[str]]:
         raw = m.group(1).strip().strip("'\"")
         if "${" in raw:
             continue  # capability-resolved at runtime
+        ag = _AGENT_LABEL.match(raw)
+        if ag:
+            plugin, name = ag.group(1), ag.group(2)
+            if not _agent_exists(plugin, name):
+                errors.append(
+                    f"{rel}: invoke `{raw}` resolves to no agent "
+                    f"(plugins/{plugin}/agents/{name}.md)"
+                )
+            continue
         ps = _PLUGIN_SKILL.match(raw)
         if not ps:
-            errors.append(f"{rel}: invoke `{raw}` is not a plugin:skill reference")
+            errors.append(
+                f"{rel}: invoke `{raw}` is not a plugin:skill or "
+                f"agent:plugin:name reference"
+            )
             continue
         plugin, skill = ps.group(1), ps.group(2)
         if not _skill_exists(plugin, skill):

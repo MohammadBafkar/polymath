@@ -379,6 +379,55 @@ class StateTransitionTests(unittest.TestCase):
         # test_hollow_run_blocked_by_strong_gates.
         self.assertIn("prd-strict", ids)
 
+    def test_complete_refuses_on_missing_declared_artifact(self) -> None:
+        code, out = self._capture("start", "shipFeature", "--input", "title=Missing artifact")
+        run_id = json.loads(out)["run_id"]
+        code, out = self._capture("complete", run_id, "prd", "--summary", "claimed done")
+        self.assertEqual(code, 2)
+        doc = json.loads(out)
+        self.assertEqual(doc["status"], "refused")
+        self.assertTrue(any("missing-artifact" in m for m in doc["missing_artifacts"]))
+        # the step is NOT recorded complete
+        state = json.loads(
+            (self.mod._workflow_runs_dir() / run_id / "state.json").read_text()
+        )
+        prd = next(s for s in state["steps"] if s["id"] == "prd")
+        self.assertNotEqual(prd["status"], "complete")
+
+    def test_artifacts_advisory_step_completes_with_warning(self) -> None:
+        wf_dir = self.work / ".claude" / "polymath" / "workflows"
+        wf_dir.mkdir(parents=True)
+        (wf_dir / "advisoryTest.yaml").write_text(
+            "schemaVersion: 0.1\n"
+            "name: advisoryTest\n"
+            "version: 0.1.0\n"
+            "description: Exercise artifactsAdvisory.\n"
+            "whenToUse: never (test fixture)\n"
+            "triggers:\n"
+            "- advisory artifact one\n"
+            "- advisory artifact two\n"
+            "- advisory artifact three\n"
+            "steps:\n"
+            "- id: maybe\n"
+            "  invoke: a:b\n"
+            "  prompt: Produce the report only when relevant.\n"
+            "  artifacts:\n"
+            "  - docs/conditional-report.md\n"
+            "  artifactsAdvisory: true\n"
+            "mustPass:\n"
+            "- id: smoke\n"
+            "  type: commandSucceeds\n"
+            "  command: 'true'\n"
+        )
+        code, out = self._capture("start", "advisoryTest", "--input", "title=adv")
+        self.assertEqual(code, 0, out)
+        run_id = json.loads(out)["run_id"]
+        code, out = self._capture("complete", run_id, "maybe", "--summary", "not needed")
+        self.assertEqual(code, 0, out)
+        doc = json.loads(out)
+        self.assertEqual(doc["status"], "complete")
+        self.assertTrue(any("advisory" in w for w in doc.get("warnings", [])))
+
     def test_stepsummary_matches_is_advisory_by_default(self) -> None:
         """stepSummaryMatches defaults to advisory severity — a failure
         reports as an advisory but does NOT pause the workflow. Only
@@ -686,7 +735,16 @@ class ResumabilityTests(unittest.TestCase):
         code, _ = self._capture("checkpoint", run_id, "--note", "halfway")
         self.assertEqual(code, 0)
         self.assertEqual(json.loads((sd / "state.json").read_text())["in_flight"]["note"], "halfway")
-        # `complete` clears the in-flight breadcrumb.
+        # `complete` refuses while the step's declared artifact is missing —
+        # and the in-flight breadcrumb survives the refusal.
+        code, out = self._capture("complete", run_id, step_id, "--summary", "done")
+        self.assertEqual(code, 2)
+        self.assertIn("missing_artifacts", json.loads(out))
+        self.assertIsNotNone(json.loads((sd / "state.json").read_text()).get("in_flight"))
+        # With the artifact in place, `complete` clears the breadcrumb.
+        prd = pathlib.Path("docs/prds/demo.md")
+        prd.parent.mkdir(parents=True, exist_ok=True)
+        prd.write_text("# PRD — Demo\n")
         code, _ = self._capture("complete", run_id, step_id, "--summary", "done")
         self.assertEqual(code, 0)
         self.assertIsNone(json.loads((sd / "state.json").read_text()).get("in_flight"))

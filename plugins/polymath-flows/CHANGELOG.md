@@ -4,6 +4,24 @@
 
 ### Added
 
+- **`override.removeSteps` with the strong-gate-survival invariant.**
+  An extends partial may now drop parent steps (applied last, so an
+  insert-after-anchor-then-remove-anchor composition works). Flatten
+  errors when a surviving step still `needs` a removed one, when a
+  `stepSummaryMatches` names a removed step, when a strong blocking
+  gate checks an artifact only removed steps produced, or when removal
+  leaves a parent-with-strong-gate result with none. `mustPass` stays
+  append-only — a variant can never silently strip the parent's gates.
+- **Per-step artifact contract.** `complete` refuses (exit 2, step
+  stays in-flight) while any of the step's declared `artifacts:` paths
+  is missing — the smallest hollow-run guard, applied at the moment of
+  the claim. `artifactsAdvisory: true` downgrades missing paths to
+  completion-payload warnings for genuinely conditional artifacts.
+- **`agent:<plugin>:<name>` invoke labels.** Steps may label a
+  forked-context agent instead of a skill; the runner and
+  workflow.schema.json accept the form and
+  `tools/check-workflow-invokes.py` resolves it against
+  `plugins/<plugin>/agents/<name>.md`, failing on a dangling label.
 - **Tiered SessionStart injection.** The workflow index no longer
   injects all workflows flat (the old 560-token ceiling had zero
   headroom): Tier A (≤400-token block) lists repo-relevant workflows

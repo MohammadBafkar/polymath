@@ -257,6 +257,89 @@ class RuntimeHardErrorTests(unittest.TestCase):
         self.assertTrue(any("provenance.hash" in e for e in errs))
 
 
+class RemoveStepsTests(unittest.TestCase):
+    """override.removeSteps + the strong-gate-survival invariant."""
+
+    def setUp(self) -> None:
+        self.mod = _import_flow()
+
+    def _partial(self, remove: list[str], **extra) -> dict:
+        override = {"removeSteps": remove}
+        override.update(extra.pop("override_extra", {}))
+        return {"schemaVersion": 0.1, "extends": REF, "override": override, **extra}
+
+    def test_remove_step_drops_it(self) -> None:
+        flat, errs = self.mod._flatten(self._partial(["two"]), _parent(), REF)
+        self.assertEqual(errs, [])
+        self.assertEqual([s["id"] for s in flat["steps"]], ["one", "three"])
+
+    def test_remove_unknown_id_rejected(self) -> None:
+        flat, errs = self.mod._flatten(self._partial(["ghost"]), _parent(), REF)
+        self.assertIsNone(flat)
+        self.assertTrue(any("does not exist after composition" in e for e in errs))
+
+    def test_remove_and_replace_same_id_rejected_in_partial(self) -> None:
+        errs = self.mod._validate_partial({
+            "schemaVersion": 0.1,
+            "extends": REF,
+            "override": {
+                "steps": [{"id": "two", "invoke": "x:y", "prompt": "?"}],
+                "removeSteps": ["two"],
+            },
+        })
+        self.assertTrue(any("replace or remove, not both" in e for e in errs))
+
+    def test_remove_breaks_surviving_needs_rejected(self) -> None:
+        parent = _parent()
+        parent["steps"][2]["needs"] = ["two"]
+        flat, errs = self.mod._flatten(self._partial(["two"]), parent, REF)
+        self.assertIsNone(flat)
+        self.assertTrue(any("needs removed step" in e for e in errs))
+
+    def test_remove_referenced_by_step_summary_check_rejected(self) -> None:
+        parent = _parent()
+        parent["mustPass"].append(
+            {"id": "sum", "type": "stepSummaryMatches", "step": "two", "pattern": "ok"}
+        )
+        flat, errs = self.mod._flatten(self._partial(["two"]), parent, REF)
+        self.assertIsNone(flat)
+        self.assertTrue(any("references removed step" in e for e in errs))
+
+    def test_remove_orphaning_strong_gate_rejected(self) -> None:
+        parent = _parent()
+        parent["steps"][1]["artifacts"] = ["docs/out/${workflow.slug}.md"]
+        parent["mustPass"].append({
+            "id": "art", "type": "artifactValid",
+            "path": "docs/out/${workflow.slug}.md", "artifact": "Plan",
+        })
+        flat, errs = self.mod._flatten(self._partial(["two"]), parent, REF)
+        self.assertIsNone(flat)
+        self.assertTrue(any("strong-gate survival" in e for e in errs))
+
+    def test_remove_ok_when_another_step_produces_the_artifact(self) -> None:
+        parent = _parent()
+        parent["steps"][1]["artifacts"] = ["docs/out/x.md"]
+        parent["steps"][2]["artifacts"] = ["docs/out/x.md"]
+        parent["mustPass"].append({
+            "id": "art", "type": "artifactValid",
+            "path": "docs/out/x.md", "artifact": "Plan",
+        })
+        flat, errs = self.mod._flatten(self._partial(["two"]), parent, REF)
+        self.assertEqual(errs, [])
+        self.assertEqual([s["id"] for s in flat["steps"]], ["one", "three"])
+
+    def test_insert_after_anchor_then_remove_anchor(self) -> None:
+        partial = {
+            "schemaVersion": 0.1,
+            "extends": REF,
+            "insertAfter": {"two": [{"id": "two-b", "invoke": "x:y", "prompt": "B."}]},
+            "override": {"removeSteps": ["two"]},
+        }
+        flat, errs = self.mod._flatten(partial, _parent(), REF)
+        self.assertEqual(errs, [])
+        self.assertEqual([s["id"] for s in flat["steps"]], ["one", "two-b", "three"])
+
+
 class FlattenCliTests(unittest.TestCase):
     """Drive the flatten CLI against the real catalog shipFeature parent."""
 

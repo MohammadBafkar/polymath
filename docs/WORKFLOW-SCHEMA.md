@@ -50,6 +50,15 @@ mustPass:
     path: docs/prds/${workflow.slug}.md
 ```
 
+A step's `artifacts:` list is a CHECKED contract, not documentation:
+`polymath-flow complete` refuses (exit 2, step stays in-flight) while any
+declared path is missing — the smallest hollow-run guard, applied at the
+moment of the claim rather than only at final `assert`. A step whose
+artifacts are genuinely conditional declares `artifactsAdvisory: true`;
+missing paths then warn in the completion payload instead of refusing.
+Existence is the per-step bar — content quality stays with the strong
+`artifactValid` / `artifactSchemaStrict` gates at `assert`.
+
 ## 2. Resolution order
 
 A workflow by `name` resolves in this order (highest priority first):
@@ -106,6 +115,15 @@ Composition semantics:
 
 - `override.steps`: replace parent steps with the same `id` (unknown id
   errors).
+- `override.removeSteps`: drop the named steps, applied LAST (so a
+  partial may insert after an anchor and then remove the anchor). Guarded
+  by the **strong-gate-survival invariant**: flatten errors when a
+  surviving step still `needs` a removed one, when a
+  `stepSummaryMatches` check names a removed step, when a strong
+  blocking gate checks an artifact that only removed steps produced, or
+  when removal would leave a parent-with-strong-gate flattened into a
+  result with none. `mustPass` itself is append-only — an org variant
+  can never silently strip the parent's gates.
 - `insertAfter.<id>`: insert new steps after the named anchor (unknown
   anchor or colliding step id errors).
 - `steps`: appended after the parent's steps.
@@ -201,6 +219,13 @@ so a workflow can be provider-agnostic by writing
 of a hard-coded connector plugin name. See
 [`docs/CAPABILITIES.md`](CAPABILITIES.md). `${project.*}` expands in
 `prompt`, `artifacts`, and mustPass `path`/`command` — not in `invoke`.
+
+`invoke` also accepts the form `agent:<plugin>:<name>` to label a
+forked-context agent (`plugins/<plugin>/agents/<name>.md`) instead of a
+skill — e.g. `agent:polymath-thinking:architecture-critic` for an
+adversarial design-review step. Like every invoke, it is a routing
+label, not a programmatic call; `tools/check-workflow-invokes.py`
+resolves it against the agent definition and fails on a dangling label.
 
 ## 6. State
 

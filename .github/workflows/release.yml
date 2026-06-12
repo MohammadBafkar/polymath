@@ -54,26 +54,32 @@ jobs:
               if target_plugin and p["name"] != target_plugin:
                   continue
               manifest = json.loads(pathlib.Path(p["source"].lstrip("./") + "/.claude-plugin/plugin.json").read_text())
+              # RELEASE-1 coherence: the tag name derives from the committed
+              # manifest, and marketplace.json must agree with it.
+              if p.get("version") and p["version"] != manifest["version"]:
+                  print(f"::error::{p['name']}: marketplace.json says {p['version']} "
+                        f"but plugin.json says {manifest['version']} — refusing to tag")
+                  sys.exit(1)
               tag = f"{p['name']}-v{manifest['version']}"
               try:
                   subprocess.run(["git", "rev-parse", tag], check=True, capture_output=True)
                   print(f"skip:  {tag} (already exists)")
               except subprocess.CalledProcessError:
-                  plans.append((p["name"], manifest["version"], tag))
+                  plans.append((p["name"], manifest["version"], tag, p["source"].lstrip("./")))
 
           if not plans:
               print("no new tags to create.")
               sys.exit(0)
 
           print("Would create:" if dry_run else "Creating:")
-          for name, version, tag in plans:
+          for name, version, tag, source in plans:
               print(f"  {tag}")
 
           if dry_run:
               sys.exit(0)
 
-          for name, version, tag in plans:
-              changelog = pathlib.Path(p["source"].lstrip("./") + "/CHANGELOG.md")
+          for name, version, tag, source in plans:
+              changelog = pathlib.Path(source + "/CHANGELOG.md")
               message = f"{name} v{version}"
               if changelog.exists():
                   message = changelog.read_text(errors="ignore")[:4000]

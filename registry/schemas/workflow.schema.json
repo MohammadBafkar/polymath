@@ -197,9 +197,9 @@
             "pattern": "^[a-z][a-z0-9-]*$"
           },
           "invoke": {
-            "description": "Routing label of the form '<plugin>:<capability>'. v0.1 is a label, not a programmatic slash-command call. May contain `${capabilities.<cap>.plugin}` or `${capabilities.<cap>.provider}` placeholders so workflows can be provider-agnostic; placeholders are resolved at run time from the project's `.polymath/capabilities.yaml`.",
+            "description": "Routing label of the form '<plugin>:<capability>', or 'agent:<plugin>:<name>' for a forked-context agent (plugins/<plugin>/agents/<name>.md; resolved by tools/check-workflow-invokes.py). v0.1 is a label, not a programmatic slash-command call. May contain `${capabilities.<cap>.plugin}` or `${capabilities.<cap>.provider}` placeholders so workflows can be provider-agnostic; placeholders are resolved at run time from the project's `.polymath/capabilities.yaml`.",
             "type": "string",
-            "pattern": "^(?:[a-z0-9_-]+|\\$\\{[^}]+\\})+:(?:[a-zA-Z0-9_-]+|\\$\\{[^}]+\\})+$"
+            "pattern": "^(agent:)?(?:[a-z0-9_-]+|\\$\\{[^}]+\\})+:(?:[a-zA-Z0-9_-]+|\\$\\{[^}]+\\})+$"
           },
           "prompt": {
             "description": "Instruction the executor presents when reaching this step. May reference ${inputs.*} and ${workflow.*} placeholders.",
@@ -213,10 +213,14 @@
             "uniqueItems": true
           },
           "artifacts": {
-            "description": "Files this step is expected to produce or update.",
+            "description": "Files this step is expected to produce or update. CHECKED at `complete` time: a step may only complete when every declared path exists, unless artifactsAdvisory is true.",
             "type": "array",
             "items": { "type": "string", "minLength": 1 },
             "uniqueItems": true
+          },
+          "artifactsAdvisory": {
+            "description": "When true, missing declared artifacts WARN at `complete` instead of refusing it — for genuinely conditional artifacts. Declared and auditable, never ambient.",
+            "type": "boolean"
           },
           "topology": {
             "description": "Composition pattern for this step (§ 4.6). 'series' executes after the previous step (default if absent). 'fanout' is accepted by validation but executor still runs serially in v0.1.5 — actual parallel execution lands when the runtime supports it. Other patterns reserved.",
@@ -227,11 +231,17 @@
       }
     },
     "override": {
-      "description": "When 'extends' is set, replace steps in the parent with the same id.",
+      "description": "When 'extends' is set: replace parent steps with the same id (steps), and/or drop parent steps (removeSteps — applied last, guarded by the strong-gate-survival invariant; see docs/WORKFLOW-SCHEMA.md § 3).",
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "steps": { "$ref": "#/properties/steps" }
+        "steps": { "$ref": "#/properties/steps" },
+        "removeSteps": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "uniqueItems": true,
+          "minItems": 1
+        }
       }
     },
     "insertAfter": {

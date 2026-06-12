@@ -507,7 +507,7 @@ ALLOWED_TOP_LEVEL = {
 # workflow carrying any of these at runtime is rejected by _validate (and by
 # the next/assert reload guard) with a pointer to `flatten`.
 BUILD_TIME_ONLY_KEYS = ("extends", "override", "insertAfter")
-ALLOWED_STEP_KEYS = {"id", "invoke", "prompt", "needs", "artifacts", "topology"}
+ALLOWED_STEP_KEYS = {"id", "invoke", "prompt", "needs", "artifacts", "artifactsAdvisory", "topology"}
 ALLOWED_CHECK_TYPES = {
     "fileExists",
     "fileMatches",
@@ -692,13 +692,15 @@ def _validate(workflow: dict) -> list[str]:
                 errs.append(f"step {sid!r} missing 'invoke'")
             else:
                 # Allow `${capabilities.*.plugin}` and `${capabilities.*.provider}`
-                # placeholders in invoke so workflows can be provider-agnostic.
+                # placeholders in invoke so workflows can be provider-agnostic,
+                # and the `agent:<plugin>:<name>` form for forked-context agents.
                 # Strip placeholders before validating the static shape.
                 stripped = re.sub(r"\$\{[^}]+\}", "_p_", step["invoke"])
-                if not re.match(r"^[a-z0-9_-]+:[a-zA-Z0-9_][a-zA-Z0-9_-]*$", stripped):
+                if not re.match(r"^(agent:)?[a-z0-9_-]+:[a-zA-Z0-9_][a-zA-Z0-9_-]*$", stripped):
                     errs.append(
-                        f"step {sid!r} invoke must be '<plugin>:<capability>' or contain "
-                        f"only `${{capabilities.*}}` placeholders (got {step['invoke']!r})"
+                        f"step {sid!r} invoke must be '<plugin>:<capability>', "
+                        f"'agent:<plugin>:<name>', or contain only "
+                        f"`${{capabilities.*}}` placeholders (got {step['invoke']!r})"
                     )
             if "prompt" not in step or not isinstance(step["prompt"], str) or not step["prompt"].strip():
                 errs.append(f"step {sid!r} missing non-empty 'prompt'")
@@ -1019,10 +1021,25 @@ def _validate_partial(partial: dict) -> list[str]:
         errs.append(f"version must be semver (got {version!r})")
     override = partial.get("override")
     if override is not None:
-        if not isinstance(override, dict) or set(override.keys()) - {"steps"}:
-            errs.append("override must be a mapping with only a 'steps' list")
-        elif not isinstance(override.get("steps"), list):
-            errs.append("override.steps must be a list")
+        if not isinstance(override, dict) or set(override.keys()) - {"steps", "removeSteps"}:
+            errs.append("override must be a mapping with only 'steps' and/or 'removeSteps'")
+        else:
+            if "steps" in override and not isinstance(override.get("steps"), list):
+                errs.append("override.steps must be a list")
+            if "removeSteps" in override:
+                rm = override.get("removeSteps")
+                if not isinstance(rm, list) or not all(isinstance(x, str) and x for x in rm):
+                    errs.append("override.removeSteps must be a list of step ids")
+                else:
+                    replaced = {
+                        s.get("id") for s in override.get("steps") or [] if isinstance(s, dict)
+                    }
+                    both = sorted(set(rm) & replaced)
+                    if both:
+                        errs.append(
+                            f"step id(s) {both} appear in both override.steps and "
+                            f"override.removeSteps — replace or remove, not both"
+                        )
     insert = partial.get("insertAfter")
     if insert is not None:
         if not isinstance(insert, dict):
@@ -1084,8 +1101,10 @@ def _flatten(partial: dict, parent: dict, ref: str) -> tuple[dict | None, list[s
     """Compose parent + partial into a standalone workflow dict.
     Semantics (docs/WORKFLOW-SCHEMA.md § 3): override.steps replaces parent
     steps by id; insertAfter.<anchor> inserts after the named anchor;
-    partial steps append; mustPass/guards append to the parent's; any other
-    key present on the partial replaces the parent's value wholesale."""
+    partial steps append; mustPass/guards append to the parent's;
+    override.removeSteps drops steps LAST, guarded by the strong-gate
+    survival invariant; any other key present on the partial replaces the
+    parent's value wholesale."""
     errs: list[str] = []
     m = EXTENDS_REF_RE.match(ref)
     if m is None:
@@ -1151,6 +1170,77 @@ def _flatten(partial: dict, parent: dict, ref: str) -> tuple[dict | None, list[s
     for section in ("mustPass", "guards"):
         if section in partial:
             out[section] = list(parent.get(section) or []) + list(partial[section] or [])
+
+    # removeSteps applies LAST (after replace/insert/append), so a partial
+    # may insert after an anchor and then remove the anchor itself. The
+    # STRONG-GATE-SURVIVAL invariant: removal must not orphan a strong
+    # blocking gate (one whose artifact only a removed step produced, or a
+    # stepSummaryMatches naming a removed step), must not dangle a
+    # surviving step's `needs`, and the flattened result must keep at
+    # least one strong blocking gate when the parent had one.
+    remove = list((partial.get("override") or {}).get("removeSteps") or [])
+    if remove:
+        ids = [s.get("id") for s in steps if isinstance(s, dict)]
+        for sid in remove:
+            if sid not in ids:
+                errs.append(f"removeSteps id {sid!r} does not exist after composition")
+        removed_set = {sid for sid in remove if sid in ids}
+        kept = [s for s in steps if not (isinstance(s, dict) and s.get("id") in removed_set)]
+        for s in kept:
+            if not isinstance(s, dict):
+                continue
+            dangling = [n for n in (s.get("needs") or []) if n in removed_set]
+            if dangling:
+                errs.append(
+                    f"step {s.get('id')!r} needs removed step(s) {dangling} — "
+                    f"remove the dependents too, or override them"
+                )
+        kept_artifacts = {
+            a for s in kept if isinstance(s, dict) for a in (s.get("artifacts") or [])
+        }
+        removed_artifacts = {
+            a
+            for s in steps
+            if isinstance(s, dict) and s.get("id") in removed_set
+            for a in (s.get("artifacts") or [])
+        } - kept_artifacts
+        for check in out.get("mustPass") or []:
+            if not isinstance(check, dict):
+                continue
+            ctype = check.get("type")
+            if ctype == "stepSummaryMatches" and check.get("step") in removed_set:
+                errs.append(
+                    f"mustPass {check.get('id')!r} references removed step "
+                    f"{check.get('step')!r}"
+                )
+            if (
+                ctype in STRONG_CHECK_TYPES
+                and _check_severity(check) == "blocking"
+                and check.get("path") in removed_artifacts
+            ):
+                errs.append(
+                    f"strong gate {check.get('id')!r} checks {check.get('path')!r}, "
+                    f"produced only by removed step(s) — the gate would be "
+                    f"unsatisfiable (strong-gate survival)"
+                )
+        parent_had_strong = any(
+            isinstance(c, dict)
+            and c.get("type") in STRONG_CHECK_TYPES
+            and _check_severity(c) == "blocking"
+            for c in parent.get("mustPass") or []
+        )
+        result_has_strong = any(
+            isinstance(c, dict)
+            and c.get("type") in STRONG_CHECK_TYPES
+            and _check_severity(c) == "blocking"
+            for c in out.get("mustPass") or []
+        )
+        if parent_had_strong and not result_has_strong:
+            errs.append(
+                "parent had a strong blocking gate but the flattened result has "
+                "none (strong-gate survival)"
+            )
+        out["steps"] = kept
     out["provenance"] = {
         "extends": ref,
         "parentVersion": parent_version,
@@ -1503,6 +1593,65 @@ def cmd_complete(args: argparse.Namespace) -> int:
     state = json.loads((run_dir / "state.json").read_text())
     step_id = args.step
 
+    # Per-step artifact contract: a step that declares `artifacts:` may only
+    # complete when every declared path exists — the smallest hollow-run
+    # guard, applied at the moment of the claim rather than at final assert.
+    # `artifactsAdvisory: true` on the step downgrades missing paths to a
+    # warning (for conditional artifacts); declared, auditable, never ambient.
+    artifact_warnings: list[str] = []
+    try:
+        workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
+        inputs = json.loads((run_dir / "inputs.json").read_text())
+        capabilities = state.get("capabilities") or {}
+        project = state.get("project_context")
+        workflow_meta = {
+            "id": state["run_id"],
+            "slug": _slugify(str(inputs.get("title", state["workflow"]))),
+            "name": state["workflow"],
+        }
+        step_def = next(
+            (
+                s
+                for s in (workflow.get("steps") or [])
+                if isinstance(s, dict) and s.get("id") == step_id
+            ),
+            None,
+        )
+    except Exception:
+        step_def = None  # unreadable sources: assert remains the backstop
+    if step_def:
+        missing = []
+        for a in step_def.get("artifacts") or []:
+            resolved = _substitute(
+                a, inputs=inputs, workflow_meta=workflow_meta,
+                capabilities=capabilities, project=project,
+            )
+            if not pathlib.Path(resolved).exists():
+                missing.append(resolved)
+        if missing:
+            if step_def.get("artifactsAdvisory"):
+                artifact_warnings = [
+                    f"declared artifact missing (advisory): {m}" for m in missing
+                ]
+            else:
+                _trace(run_dir, "artifact-missing", {"step": step_id, "missing": missing})
+                print(
+                    json.dumps(
+                        {
+                            "step": step_id,
+                            "status": "refused",
+                            "missing_artifacts": missing,
+                            "hint": (
+                                "create the declared artifact(s) and retry, or "
+                                "declare artifactsAdvisory: true on the step if "
+                                "they are genuinely conditional"
+                            ),
+                        },
+                        indent=2,
+                    )
+                )
+                return 2
+
     summary = ""
     if args.summary:
         sp = pathlib.Path(args.summary)
@@ -1532,7 +1681,10 @@ def cmd_complete(args: argparse.Namespace) -> int:
     state["in_flight"] = None  # step finished; clear the mid-step breadcrumb
     (run_dir / "state.json").write_text(json.dumps(state, indent=2))
     _trace(run_dir, "complete", {"step": step_id})
-    print(json.dumps({"step": step_id, "status": "complete"}, indent=2))
+    payload: dict = {"step": step_id, "status": "complete"}
+    if artifact_warnings:
+        payload["warnings"] = artifact_warnings
+    print(json.dumps(payload, indent=2))
     return 0
 
 
