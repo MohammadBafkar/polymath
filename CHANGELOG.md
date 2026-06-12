@@ -31,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **polymath-core 0.6.0 — doctor + init wired to the pipeline.**
+  `doctor.sh` gains a *Routing pipeline* section (resolved mode, config
+  errors, kill switch, recent enforce denials / fail-opens for this
+  root, not-installed warning), and `initialize-project` authors an
+  explicit `routing:` block — `mode: classify` by default, `enforce`
+  offered, `hint` as the opt-out — so strictness is always a written,
+  reviewable line.
 - **GATES-1 — registry/gates.json is the machine-readable source of
   truth for conformance gates.** 31 gate entries (id, tool, invocation,
   tier, verification); `check-registry.py gates` enforces bijectivity

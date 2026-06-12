@@ -1022,6 +1022,33 @@ def cmd_mark(args: argparse.Namespace) -> int:
     return 0
 
 
+RECENT_EVENT_WINDOW = 200
+
+
+def recent_event_counts(root: pathlib.Path | None) -> dict[str, int]:
+    """Per-event counts over the newest RECENT_EVENT_WINDOW decision-log
+    lines, scoped to this root (events without a root field — e.g.
+    fail-open — always count)."""
+    counts: dict[str, int] = {}
+    try:
+        lines = _log_path().read_text(errors="ignore").splitlines()[-RECENT_EVENT_WINDOW:]
+    except OSError:
+        return counts
+    for line in lines:
+        try:
+            doc = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(doc, dict):
+            continue
+        if root is not None and doc.get("root") not in (None, str(root)):
+            continue
+        event = str(doc.get("event") or "")
+        if event:
+            counts[event] = counts.get(event, 0) + 1
+    return counts
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
     markers = []
@@ -1047,6 +1074,8 @@ def cmd_status(args: argparse.Namespace) -> int:
         "kill_switch": kill_switch(root),
         "markers": markers,
         "decision_log_lines": log_lines,
+        "recent_events": recent_event_counts(root),
+        "recent_event_window": RECENT_EVENT_WINDOW,
         "data_root": str(data_root()),
     }, indent=2))
     return 0

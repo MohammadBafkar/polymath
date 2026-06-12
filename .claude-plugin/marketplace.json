@@ -14,7 +14,7 @@
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
       "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "category": "foundation",
       "tags": [
         "foundation",

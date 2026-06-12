@@ -23,6 +23,11 @@
   open the gate; unresolvable siblings fail open. The classify
   directive and the deny message bake `--session <id>` into the mark
   command so markers are attributed to the issuing session.
+- **`status` summarizes recent decisions.** `status` output gains
+  `recent_events` — per-event counts over the newest 200 decision-log
+  lines scoped to the resolved root (rootless events such as
+  `fail-open` always count) — consumed by `polymath-core:doctor`'s
+  Routing pipeline section.
 - **Loud config errors.** Flow-style `routing: {…}` and unknown
   `routing.mode` values no longer read silently as `hint`: SessionStart
   prints a `config error` line, `mode`/`status` expose `config_errors`,

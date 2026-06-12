@@ -591,6 +591,21 @@ class MarkerAndSweepTests(PipelineTestCase):
         self.assertLessEqual(len(log.read_text().splitlines()), self.mod.LOG_KEEP_LINES + 1)
 
 
+class StatusEventTests(PipelineTestCase):
+    def test_status_summarizes_recent_events_for_this_root(self) -> None:
+        self._write_project("enforce")
+        payload = {"session_id": "s", "cwd": str(self.repo), "tool_name": "Edit", "tool_input": {}}
+        self._hook("hook-pretool", payload)  # one deny
+        self.mod.log_decision("enforce-deny", root="/somewhere/else", tool="Edit")
+        self.mod.log_decision("fail-open", at="prompt")  # rootless: always counts
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.mod.main(["status", "--cwd", str(self.repo)])
+        doc = json.loads(out.getvalue())
+        self.assertEqual(doc["recent_events"].get("enforce-deny"), 1)  # other root excluded
+        self.assertEqual(doc["recent_events"].get("fail-open"), 1)
+
+
 class SessionStartTests(PipelineTestCase):
     def test_announces_active_mode(self) -> None:
         self._write_project("enforce")

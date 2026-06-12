@@ -25,7 +25,12 @@ description: Preflight the Polymath environment — check required and optional 
    `bash plugins/polymath-core/skills/doctor/scripts/doctor.sh`.)
 2. Read the report. It groups results as **Required** (`bash`, `python3`),
    **Recommended** (`git`, `claude` CLI), and **Optional** (PyYAML, `jq`), then
-   validates any `.polymath/project.yaml` via the SessionStart loader.
+   validates any `.polymath/project.yaml` via the SessionStart loader, and
+   finally reports the **Routing pipeline**: the resolved `routing.mode`,
+   any routing config errors, an engaged kill switch, and recent decision
+   events for this root (enforce denials, fail-opens, kill-switch uses,
+   rejected marks) — or a warning that `polymath-pipeline` is not
+   installed, which would make `classify`/`enforce` declarations inert.
 3. For each `✗` (required) or `!` (recommended/optional), relay the one-line fix
    hint to the user. The script exits non-zero only when a **required** tool is
    missing — that is the gate.

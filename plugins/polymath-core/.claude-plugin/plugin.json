@@ -1,6 +1,6 @@
 {
   "name": "polymath-core",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
   "license": "MIT",
   "author": {

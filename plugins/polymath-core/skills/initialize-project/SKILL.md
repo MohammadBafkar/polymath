@@ -47,6 +47,21 @@ pack intent the same way it preserves user intent.
 4. **Write or update `.polymath/project.yaml`.**
    - Preserve existing user intent where present.
    - Add `setup:` and `polymath:` sections when inferred.
+   - Declare the routing posture explicitly — strictness must be a
+     written, reviewable line, never ambient. Default to:
+
+     ```yaml
+     routing:
+       mode: classify
+     ```
+
+     and offer `enforce` (mutating tool calls gated until the request is
+     classified) when the team wants the strict loop. `hint` is the
+     zero-ceremony opt-out for repos that only want ambient route hints.
+     Block form only (`routing:` then indented `mode:`); `classify` and
+     `enforce` take effect only with the `polymath-pipeline` plugin
+     installed — when it is missing, say so and include it in the
+     recommended install set.
    - Prefer explicit `skill_overrides` for test commands and project-owned templates.
    - Map existing convention docs into `conventions_docs` by role
      (`review-checklist`, `backend-stack`, `database`, `deployment`, … —
@@ -82,6 +97,9 @@ pack intent the same way it preserves user intent.
      `polymath-core` + `polymath-flows` spine), then add project-specific extras
      a-la-carte with one line of *why* per added plugin. Naming a profile turns
      "which of ~40 plugins?" into one decision plus a short delta.
+   - The declared routing posture: name the `routing.mode` that was
+     written and what it does for this repo; for `classify`/`enforce`,
+     list `polymath-pipeline` in the install set.
    - Useful workflows and when to run them.
    - Agent compatibility: skills port via agentskills.io; commands, hooks,
      workflows, and MCP are Claude Code surfaces. Note that on another agent the

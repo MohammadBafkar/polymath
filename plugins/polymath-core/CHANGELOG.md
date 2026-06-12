@@ -4,6 +4,19 @@
 
 ### Added
 
+- **Doctor reports the routing pipeline.** `doctor.sh` gains a
+  *Routing pipeline* section: resolved `routing.mode`, routing config
+  errors (flow-style / unknown values), an engaged kill switch, and
+  recent decision events for this root (enforce denials, fail-opens,
+  kill-switch uses, rejected marks) via the sibling
+  `polymath-pipeline status` — with a warning when that plugin is not
+  installed and `classify`/`enforce` declarations would be inert.
+- **`initialize-project` authors the routing posture.** Step 4 now
+  writes an explicit `routing:` block — `mode: classify` by default,
+  `enforce` offered, `hint` as the zero-ceremony opt-out — and the
+  onboarding doc names the declared mode and adds `polymath-pipeline`
+  to the install set when classify/enforce is chosen. Strictness is a
+  written, reviewable line, never ambient.
 - **Opt-in visibility markers (`attribution` consumed).** The
   `project-context` contract now defines: `chat_markers: true` makes
   localizing skills prefix their primary chat-visible output with an

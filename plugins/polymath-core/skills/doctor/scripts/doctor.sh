@@ -81,6 +81,69 @@ else
 fi
 
 echo
+echo "Routing pipeline:"
+# Locate the sibling polymath-pipeline engine in either layout:
+# repo checkout (plugins/<name>/…) or install cache (…/polymath/<name>/<ver>/…).
+core_root="$(cd "${script_dir}/../../.." && pwd)"
+parent="$(dirname "$core_root")"
+pipeline_bin=""
+if [[ "$(basename "$parent")" == "plugins" ]]; then
+  cand="${parent}/polymath-pipeline/bin/polymath-pipeline"
+  [[ -f "$cand" ]] && pipeline_bin="$cand"
+else
+  for cand in "$(dirname "$parent")"/polymath-pipeline/*/bin/polymath-pipeline \
+              "$(dirname "$parent")"/polymath-pipeline/bin/polymath-pipeline; do
+    [[ -f "$cand" ]] && pipeline_bin="$cand"
+  done
+fi
+if [[ -z "$pipeline_bin" ]]; then
+  warn "routing" "polymath-pipeline not installed — routing.mode classify/enforce would be inert; ambient hints only"
+elif ! command -v python3 >/dev/null 2>&1; then
+  warn "routing" "cannot inspect (python3 unavailable)"
+else
+  status_json="$(python3 "$pipeline_bin" status --cwd . 2>/dev/null || echo '{}')"
+  POLYMATH_DOCTOR_STATUS="$status_json" python3 - <<'PY'
+import json, os
+
+try:
+    doc = json.loads(os.environ.get("POLYMATH_DOCTOR_STATUS") or "{}")
+except Exception:
+    doc = {}
+mode = doc.get("mode") or "hint"
+errs = doc.get("config_errors") or []
+kill = doc.get("kill_switch")
+events = doc.get("recent_events") or {}
+window = doc.get("recent_event_window") or 0
+
+
+def line(sym: str, label: str, msg: str) -> None:
+    print(f"  {sym} {label:<10} {msg}")
+
+
+if errs:
+    line("✗", "routing", f"mode={mode} with {len(errs)} config error(s):")
+    for e in errs:
+        print(f"      {e}")
+elif mode == "hint":
+    line("✓", "routing", "mode=hint — ambient route hints only "
+         "(declare routing.mode classify|enforce in .polymath/project.yaml to opt in)")
+else:
+    line("✓", "routing", f"mode={mode} — polymath-pipeline active")
+if kill:
+    line("!", "routing", f"kill switch engaged via {kill} (audited)")
+interesting = {k: events[k] for k in
+               ("enforce-deny", "kill-switch", "fail-open", "mark-rejected", "config-error",
+                "policy-overlay-ignored", "policy-overlay-invalid")
+               if events.get(k)}
+if interesting:
+    summary = ", ".join(f"{k}×{v}" for k, v in sorted(interesting.items()))
+    line("!", "decisions", f"last {window} log lines for this root: {summary}")
+elif mode != "hint":
+    line("✓", "decisions", f"no denials, fail-opens, or kill-switch uses in the last {window} log lines")
+PY
+fi
+
+echo
 if [[ "$req_fail" -ne 0 ]]; then
   echo "doctor: FAILED — a required tool is missing (see ✗ above)."
   exit 1
