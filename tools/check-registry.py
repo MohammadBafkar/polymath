@@ -4,6 +4,9 @@
   check-registry.py catalog      MANIFEST-3 cross-check
   check-registry.py profiles     PROFILE-1
   check-registry.py stability    STABILITY-1
+  check-registry.py aggregates   COUNT-1
+  check-registry.py testdirs     TESTDIR-1
+  check-registry.py docpaths     DOCPATH-1
 
 catalog — cross-file consistency for the Polymath catalog. Verifies that
 .claude-plugin/marketplace.json, every plugin's .claude-plugin/plugin.json,
@@ -58,13 +61,33 @@ tier. Enforces:
   5. distinct_value_url MUST be null for plugins that are neither
      connector nor infra (it is a field reserved for those categories).
 
-All three are wired into tools/conformance.sh --all. Exit code per
-subcommand: 0 if all checks pass, 1 otherwise.
+aggregates — COUNT-1: aggregate numbers claimed in README.md (plugin count,
+workflow count) are wrapped in `<!-- count:KEY -->…N…<!-- /count -->` marker
+comments and recomputed from the filesystem. A marked number that drifts from
+the tree fails the build — the 36-vs-37 README drift class can't recur.
+Unknown keys fail; a known key with no marker at all fails (so deleting the
+markers can't silently un-gate the claim).
+
+testdirs — TESTDIR-1: every directory under tests/skill-triggering/ and
+tests/golden/ must exactly match an existing plugin directory name or be
+`workflows`. Catches orphan fixture dirs left behind by renames.
+
+docpaths — DOCPATH-1: every relative markdown link target in docs/*.md and
+README.md must exist on disk (fenced code blocks are skipped; URLs, anchors,
+and placeholder targets containing <>*{} are skipped; CHANGELOG files and
+docs/plans/ are exempt by policy — history and plans may reference paths
+that no longer or do not yet exist).
+
+All six are wired into tools/conformance.sh --all. Exit code per
+subcommand: 0 if all checks pass, 1 otherwise. The three drift gates each
+take --self-test, which proves the gate can fail by running its check logic
+against inline synthetic bad input.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 
 from lib.repo import load_catalog, load_marketplace, plugins_dir, repo_root
@@ -338,6 +361,246 @@ def stability_check() -> int:
 
 
 # ---------------------------------------------------------------------------
+# aggregates — COUNT-1
+# ---------------------------------------------------------------------------
+
+COUNT_MARKER_RE = re.compile(
+    r"<!--\s*count:([a-z][a-z-]*)\s*-->(.*?)<!--\s*/count\s*-->", re.DOTALL
+)
+COUNTED_FILES = ("README.md",)
+
+
+def _computed_counts() -> dict[str, int]:
+    """The filesystem truth that README aggregate claims are checked against."""
+    plugin_dirs = [
+        p for p in PLUGINS_DIR.iterdir()
+        if p.is_dir() and p.name.startswith("polymath-")
+    ]
+    workflows = list((PLUGINS_DIR / "polymath-flows" / "workflows").glob("*.yaml"))
+    return {"plugins": len(plugin_dirs), "workflows": len(workflows)}
+
+
+def _aggregate_errors(
+    text: str, label: str, counts: dict[str, int]
+) -> tuple[list[str], set[str]]:
+    """Check every count-marker span in `text`. The first integer inside the
+    span must equal the computed value for its key. Returns (errors, keys seen)."""
+    errors: list[str] = []
+    seen: set[str] = set()
+    for m in COUNT_MARKER_RE.finditer(text):
+        key, span = m.group(1), m.group(2)
+        if key not in counts:
+            errors.append(f"{label}: unknown count key `{key}` (known: {sorted(counts)})")
+            continue
+        seen.add(key)
+        num = re.search(r"\d+", span)
+        if not num:
+            errors.append(f"{label}: count:{key} span carries no number: {span!r}")
+        elif int(num.group()) != counts[key]:
+            errors.append(
+                f"{label}: count:{key} claims {num.group()} but the tree has "
+                f"{counts[key]} — update the marked number"
+            )
+    return errors, seen
+
+
+def aggregates_check() -> int:
+    counts = _computed_counts()
+    errors: list[str] = []
+
+    market = len(load_marketplace().get("plugins", []))
+    if market != counts["plugins"]:
+        errors.append(
+            f"plugins/ holds {counts['plugins']} polymath-* dirs but "
+            f"marketplace.json lists {market} (the catalog gate should also be red)"
+        )
+
+    seen_all: set[str] = set()
+    for rel in COUNTED_FILES:
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        errs, seen = _aggregate_errors(text, rel, counts)
+        errors.extend(errs)
+        seen_all |= seen
+    for key in sorted(set(counts) - seen_all):
+        errors.append(
+            f"README.md: no <!-- count:{key} --> marker found — aggregate claims "
+            f"must stay marker-wrapped so this gate can see them"
+        )
+
+    for e in errors:
+        print(f"  FAIL  {e}")
+    if errors:
+        print(f"check-aggregates: FAILED ({len(errors)} error(s))")
+        return 1
+    print(
+        f"check-aggregates: OK — README count markers match the tree "
+        f"({counts['plugins']} plugins, {counts['workflows']} workflows)"
+    )
+    return 0
+
+
+def aggregates_self_test() -> int:
+    """Prove COUNT-1 can fail: synthetic spans with a wrong number and an
+    unknown key must be rejected; correct spans must pass."""
+    counts = {"plugins": 37, "workflows": 26}
+    bad = (
+        "**<!-- count:plugins -->36<!-- /count --> plugins** and "
+        "<!-- count:bogus -->7<!-- /count -->"
+    )
+    good = (
+        "<!-- count:plugins -->37<!-- /count --> / "
+        "<!-- count:workflows -->26<!-- /count -->"
+    )
+    errs_bad, _ = _aggregate_errors(bad, "synthetic", counts)
+    errs_good, seen_good = _aggregate_errors(good, "synthetic", counts)
+    checks = [
+        ("wrong marked number rejected", any("claims 36" in e for e in errs_bad)),
+        ("unknown count key rejected", any("unknown count key" in e for e in errs_bad)),
+        ("correct markers accepted",
+         not errs_good and seen_good == {"plugins", "workflows"}),
+    ]
+    return _self_test_verdict("aggregates", checks)
+
+
+# ---------------------------------------------------------------------------
+# testdirs — TESTDIR-1
+# ---------------------------------------------------------------------------
+
+TEST_DIR_BASES = ("tests/skill-triggering", "tests/golden")
+
+
+def _testdir_errors(dirnames: list[str], allowed: set[str], base: str) -> list[str]:
+    return [
+        f"{base}/{d}/ matches no plugin directory (and is not `workflows`) — orphan test dir"
+        for d in sorted(dirnames)
+        if d not in allowed
+    ]
+
+
+def testdirs_check() -> int:
+    allowed = {p.name for p in PLUGINS_DIR.iterdir() if p.is_dir()} | {"workflows"}
+    errors: list[str] = []
+    for base in TEST_DIR_BASES:
+        root = ROOT / base
+        if not root.is_dir():
+            continue
+        dirnames = [d.name for d in root.iterdir() if d.is_dir()]
+        errors.extend(_testdir_errors(dirnames, allowed, base))
+
+    for e in errors:
+        print(f"  FAIL  {e}")
+    if errors:
+        print(f"check-testdirs: FAILED ({len(errors)} error(s))")
+        return 1
+    print("check-testdirs: OK — every fixture dir names a real plugin (or `workflows`)")
+    return 0
+
+
+def testdirs_self_test() -> int:
+    allowed = {"polymath-core", "polymath-flows", "workflows"}
+    checks = [
+        ("orphan dir rejected",
+         bool(_testdir_errors(["polymath-bogus"], allowed, "tests/golden"))),
+        ("plugin dir accepted",
+         not _testdir_errors(["polymath-core", "workflows"], allowed, "tests/golden")),
+    ]
+    return _self_test_verdict("testdirs", checks)
+
+
+# ---------------------------------------------------------------------------
+# docpaths — DOCPATH-1
+# ---------------------------------------------------------------------------
+
+DOC_LINK_RE = re.compile(r"\]\(([^)\s]+)\)")
+SKIP_TARGET_CHARS = set("<>*{}")
+
+
+def _strip_fences(text: str) -> str:
+    """Drop fenced code blocks and simple inline code spans — example links
+    inside code are syntax documentation, not claims. Inline stripping covers
+    single-backtick spans without inner backticks; pathological nesting should
+    be rewritten in the doc rather than special-cased here."""
+    out: list[str] = []
+    in_fence = False
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            out.append(re.sub(r"`[^`\n]+`", " ", line))
+    return "\n".join(out)
+
+
+def _docpath_errors(text: str, base_dir, label: str) -> list[str]:
+    errors: list[str] = []
+    for m in DOC_LINK_RE.finditer(_strip_fences(text)):
+        target = m.group(1)
+        if not target or target.startswith("#"):
+            continue
+        if "://" in target or target.startswith("mailto:"):
+            continue
+        if any(c in target for c in SKIP_TARGET_CHARS):
+            continue
+        path = target.split("#", 1)[0]
+        if not path:
+            continue
+        if not (base_dir / path).exists():
+            errors.append(f"{label}: dead link target `{target}`")
+    return errors
+
+
+def docpaths_check() -> int:
+    errors: list[str] = []
+    files = sorted(ROOT.glob("docs/*.md")) + [ROOT / "README.md"]
+    for f in files:
+        if f.name.startswith("CHANGELOG"):
+            continue
+        errors.extend(
+            _docpath_errors(f.read_text(encoding="utf-8"), f.parent,
+                            str(f.relative_to(ROOT)))
+        )
+
+    for e in errors:
+        print(f"  FAIL  {e}")
+    if errors:
+        print(f"check-docpaths: FAILED ({len(errors)} error(s))")
+        return 1
+    print(f"check-docpaths: OK — every relative link in {len(files)} doc file(s) resolves")
+    return 0
+
+
+def docpaths_self_test() -> int:
+    base = ROOT / "docs"
+    checks = [
+        ("dead relative link rejected",
+         bool(_docpath_errors("see [x](does-not-exist-xyz.md)", base, "synthetic"))),
+        ("live relative link accepted",
+         not _docpath_errors("see [m](MATURITY.md)", base, "synthetic")),
+        ("URL / anchor / placeholder skipped",
+         not _docpath_errors(
+             "[a](https://example.com) [b](#anchor) [c](docs/prds/<slug>.md)",
+             base, "synthetic")),
+        ("fenced example links skipped",
+         not _docpath_errors("```\n[x](nope-xyz.md)\n```", base, "synthetic")),
+    ]
+    return _self_test_verdict("docpaths", checks)
+
+
+def _self_test_verdict(name: str, checks: list[tuple[str, bool]]) -> int:
+    failures = 0
+    for label, ok in checks:
+        print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+        failures += 0 if ok else 1
+    if failures:
+        print(f"check-registry {name} --self-test FAILED ({failures} check(s))",
+              file=sys.stderr)
+        return 1
+    print(f"check-registry {name} --self-test: gate logic correctly rejects synthetic bad input")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -359,14 +622,32 @@ def main() -> int:
         "stability",
         help="stability-evidence.json backs every catalog status claim (STABILITY-1)",
     )
+    for name, help_text in (
+        ("aggregates", "README aggregate counts match the tree (COUNT-1)"),
+        ("testdirs", "fixture dirs name real plugins (TESTDIR-1)"),
+        ("docpaths", "relative doc links resolve (DOCPATH-1)"),
+    ):
+        p = sub.add_parser(name, help=help_text)
+        p.add_argument(
+            "--self-test", action="store_true",
+            help="prove the gate can fail: run its check logic against "
+                 "inline synthetic bad input",
+        )
 
     args = parser.parse_args()
+    self_test = getattr(args, "self_test", False)
     if args.cmd == "catalog":
         return catalog_check()
     if args.cmd == "profiles":
         return profiles_check()
     if args.cmd == "stability":
         return stability_check()
+    if args.cmd == "aggregates":
+        return aggregates_self_test() if self_test else aggregates_check()
+    if args.cmd == "testdirs":
+        return testdirs_self_test() if self_test else testdirs_check()
+    if args.cmd == "docpaths":
+        return docpaths_self_test() if self_test else docpaths_check()
     raise AssertionError(args.cmd)
 
 

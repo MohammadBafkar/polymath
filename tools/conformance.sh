@@ -382,6 +382,20 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # COUNT-1 / TESTDIR-1 / DOCPATH-1: drift gates. README aggregate counts are
+  # marker-wrapped and recomputed from the tree; fixture dirs must name real
+  # plugins; relative doc links must resolve. Each has a --self-test proving
+  # it can fail.
+  for sub in aggregates testdirs docpaths; do
+    echo
+    echo "── ${sub} cross-check (check-registry.py ${sub})"
+    if python3 "$root/tools/check-registry.py" "$sub"; then
+      :
+    else
+      overall=1
+    fi
+  done
+
   # ROUTE-EVAL-1: the held-out routing eval's two invariants — token precision
   # 1.0 and zero false positives — gate the build; reach is reported, never
   # floored. Also drift-guards the committed route-metrics.json against a

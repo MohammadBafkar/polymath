@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **COUNT-1 / TESTDIR-1 / DOCPATH-1 — drift gates for the previously
+  ungated.** `tools/check-registry.py` gains three subcommands wired
+  into `conformance.sh --all`: `aggregates` recomputes README's
+  marker-wrapped plugin/workflow counts from the tree (the 36-vs-37
+  drift class can't recur — and deleting the markers also fails);
+  `testdirs` rejects fixture dirs that name no real plugin; `docpaths`
+  resolves every relative markdown link in `docs/*.md` + README
+  (fences, inline code, URLs, anchors, and placeholder targets are
+  skipped; CHANGELOGs and `docs/plans/` exempt). Each takes
+  `--self-test`, proving the gate logic rejects synthetic bad input.
+  First live run caught one false-positive-prone doc line
+  (PLUGIN-AUTHORING §4's example link), rewritten as literal syntax.
 - **ROUTE-EVAL-1 — the held-out routing eval becomes a conformance
   gate.** `tools/triggering.py route-eval --gate` fails the build iff
   token precision < 1.0 or false positives > 0 against the schema-locked

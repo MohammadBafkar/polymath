@@ -31,6 +31,11 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
   tools/triggering.py skill check`, and `python3 tools/bakeoff.py
   check` (which enforces the symmetric-prompt contract, see § Bakeoff
   fairness).
+- **Drift gates (COUNT-1, TESTDIR-1, DOCPATH-1)** —
+  `tools/check-registry.py aggregates|testdirs|docpaths` (run inside
+  `conformance.sh --all`). README aggregate counts are marker-wrapped and
+  recomputed from the tree; fixture dirs must name real plugins; relative
+  doc links must resolve. Each takes `--self-test` to prove it can fail.
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
   updated alongside any change that resolves a documented limitation.
 

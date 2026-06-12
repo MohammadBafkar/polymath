@@ -123,8 +123,9 @@ any version drift between a marketplace entry and its plugin.json.
 - `name`: bare kebab-case slug.
 - `description`: ≤ 200 chars, trigger phrase first, present tense.
 - `SKILL.md` body ≤ 500 lines. Spill to `references/`.
-- Reference the plugin's templates via relative path from the skill
-  (e.g. `[\`PRD.md\`](../../templates/PRD.md)`).
+- Reference the plugin's templates via relative path from the skill —
+  a link target of `../../templates/PRD.md` resolves from
+  `skills/<skill>/SKILL.md` to the plugin's own `templates/` directory.
 
 Example:
 
