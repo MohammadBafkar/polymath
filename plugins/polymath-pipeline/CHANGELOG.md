@@ -15,7 +15,8 @@
   `route-signals.project.json`) are applied behind ONE confirmation;
   catalog-level findings are emitted only as proposed patch files under
   `.polymath/feedback/catalog-proposals/` — never auto-committed.
-- Initial plugin (Phase 3 of `docs/plans/generalized-localization.md`).
+- Initial plugin (Phase 3 of `docs/plans/generalized-localization.md`,
+  plan file since removed).
   Opt-in on `routing.mode: classify|enforce`:
   - `bin/polymath-pipeline` engine: shared root resolver (refusing `$HOME`
     and `${CLAUDE_CONFIG_DIR}`), overlay-aware `routing.mode` line-scan,

@@ -52,9 +52,7 @@ plugins/polymath-<name>/
   "version": "0.1.0",
   "description": "Short, ≤ 200 chars, trigger phrase first.",
   "license": "MIT",
-  "dependencies": {
-    "plugins": ["polymath-core"]
-  },
+  "dependencies": ["polymath-core"],
   "metadata": {
     "category": "engineering",
     "tags": ["tdd", "review"]

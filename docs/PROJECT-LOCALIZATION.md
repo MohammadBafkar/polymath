@@ -238,8 +238,8 @@ default off). `attribution` is consumed as opt-in visibility markers:
 `chat_markers: true` makes localizing skills prefix their primary
 output with an origin marker, and `commit_trailer` is appended by
 `polymath-release:commit` (absent/empty = no trailer). `artifact_matrix`
-validates and loads into the snapshot today; its consumer lands per
-`docs/plans/generalized-localization.md`. Future keys degrade
+validates and loads into the snapshot today; no consumer is wired yet
+(see `LIMITATIONS.md`). Future keys degrade
 gracefully: the loader warns and ignores unknown top-level keys instead
 of failing.
 

@@ -101,6 +101,12 @@ elsewhere is intentional.
   are off is real model behaviour. To enable the live gate: rename the
   `*.yml.disabled` files to `*.yml` and set `CLAUDE_CODE_OAUTH_TOKEN`
   (or `ANTHROPIC_API_KEY`) in repo secrets.
+- **`artifact_matrix` has no consumer.** The project.yaml key is
+  schema-validated and loaded into the project-context snapshot, but no
+  skill, workflow guard, or tool reads it today. Its consumer spec lived
+  in a plan file that has since been removed; the key either gains a
+  consumer or is deleted (tracked in
+  `docs/plans/solidify-discovery-and-packs.md`).
 - **The fallback YAML parser in `polymath-flow` folds block scalars.**
   `|` and `>` are both treated as folded — newlines collapse to
   spaces. Workflows that depend on newline-preserving prompts must

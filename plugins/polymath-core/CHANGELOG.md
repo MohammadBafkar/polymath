@@ -37,7 +37,8 @@
   (conventions_docs roles → wired consumer skills) and resolves the
   snapshot by glob, covering the per-plugin+marketplace data-dir layout.
 - **Localization keys in the project schema** — shipped ahead of their
-  consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
+  consumers per `docs/plans/generalized-localization.md` (plan file since
+  removed): `conventions_docs`
   (convention documents resolved by role, not filename), `smoke`
   (per-language boot-verification recipes for the planned `appStarts`
   gate), `tracker` (work-item destination + provenance marking; provider

@@ -3,13 +3,13 @@
 
 agentskills.io v1.0 (https://agentskills.io) is the open standard that
 Claude Code, Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI,
-Goose, OpenCode, Roo Code, JetBrains Junie, and ~25 other clients read.
+Goose, OpenCode, Roo Code, JetBrains Junie, and other clients read.
 Each client looks for SKILL.md files in one or more well-known
 directories — `.agents/skills/`, `.codex/skills/`, `.cursor/skills/`,
 `.claude/skills/`, `.github/skills/`. They all accept the same
 SKILL.md shape: YAML frontmatter (`name` + `description`) + body.
 
-This script materializes Polymath's 124 skills into a portable bundle
+This script materializes every Polymath skill into a portable bundle
 under `dist/agents-skills/`. Drop the contents into any of the
 well-known directories in your project and the host harness will pick
 them up.

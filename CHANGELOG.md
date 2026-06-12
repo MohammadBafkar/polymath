@@ -110,7 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.polymath/project.yaml`; `polymath-flow validate` warns on the bare
   form, which is reserved for project/org-layer workflows.
 - **Localization keys in the project schema** — shipped ahead of their
-  consumers per `docs/plans/generalized-localization.md`: `conventions_docs`
+  consumers per `docs/plans/generalized-localization.md` (plan file since
+  removed): `conventions_docs`
   (convention docs resolved by role), `smoke` (per-language
   boot-verification recipes), `tracker` (work-item destination +
   provenance marking), `routing.mode` (`hint`/`classify`/`enforce`;
@@ -122,7 +123,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   merge per key with the overlay winning, lists and scalars replace. The
   overlay is fail-open (warned and skipped on any problem) and may serve as
   the sole source when no base file resolves. First step of the
-  generalized-localization plan (`docs/plans/generalized-localization.md`).
+  generalized-localization plan (`docs/plans/generalized-localization.md`,
+  since removed).
 
 ### Changed
 

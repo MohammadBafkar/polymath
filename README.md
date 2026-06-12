@@ -4,7 +4,7 @@
 
 ## The marketplace
 
-**36 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **26 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
+**37 plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **26 workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
 
@@ -30,7 +30,7 @@ plugins for you. Reach for one of these before hand-picking plugins; run with
 | `progressiveRollout` | Flag rollout with SLO health gates. |
 | `weeklyReleaseTrain` | Cut a release: notes, verify, tag PR. |
 
-Full list (27): `/polymath-flows:list-workflows`, or see [`plugins/polymath-flows/workflows/`](plugins/polymath-flows/workflows/).
+Full list (26): `/polymath-flows:list-workflows`, or see [`plugins/polymath-flows/workflows/`](plugins/polymath-flows/workflows/).
 
 ## Quick start
 
@@ -51,7 +51,7 @@ claude
 
 ### Install profiles
 
-Picking a handful of plugins out of 36 is the real first hurdle. Install
+Picking a handful of plugins out of 37 is the real first hurdle. Install
 profiles in [`registry/polymath-profiles.json`](registry/polymath-profiles.json)
 are curated role spines — install one, then add more a-la-carte on top. Every
 profile implicitly includes the `polymath-core` + `polymath-flows` spine.
