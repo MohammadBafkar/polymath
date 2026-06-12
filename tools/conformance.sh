@@ -445,6 +445,17 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # SURFACE-1: every catalog surface either declares routing or carries an
+  # exemption with a reason; the hard tier only ratchets up and every
+  # hard-tier surface is fixture-backed.
+  echo
+  echo "── SURFACE-1 cross-check (check-registry.py routing)"
+  if python3 "$root/tools/check-registry.py" routing; then
+    :
+  else
+    overall=1
+  fi
+
   # HINT-BUDGET: the worst single-candidate ambient route hint must stay
   # within its token budget (template bloat or a verbose surface fails).
   echo

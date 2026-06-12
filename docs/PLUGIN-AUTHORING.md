@@ -27,11 +27,13 @@ plugins/polymath-<name>/
 │   └── plugin.json
 ├── skills/<skill>/
 │   ├── SKILL.md
+│   ├── routing.yaml            # deterministic routing declaration (see below)
 │   ├── references/             # optional
 │   └── scripts/                # optional
 ├── templates/                  # plugin-owned artifact templates (PRD.md, etc.)
 ├── commands/<cmd>.md
 ├── agents/<role>.md
+│   └── <role>.routing.yaml     # optional agent routing sidecar
 ├── hooks/
 │   ├── hooks.json
 │   └── scripts/
@@ -43,6 +45,18 @@ plugins/polymath-<name>/
 ├── README.md
 └── CHANGELOG.md
 ```
+
+**Routing is declare-or-exempt (SURFACE-1).** Every new surface (skill,
+workflow, tool, agent) must either ship a routing declaration —
+`routing.yaml` validated against
+[`registry/schemas/surface-routing.schema.json`](../registry/schemas/surface-routing.schema.json),
+compiled by `tools/build-surface-index.py` — or carry a reasoned entry in
+[`registry/routing-exemptions.json`](../registry/routing-exemptions.json).
+CI fails a surface that is neither. Exemption is the normal posture for
+knowledge skills; declaring is the deliberate act. Declare `tier: hard`
+only when you also add a deterministic fixture under
+`tests/route-triggering/` — hard-tier count is ratcheted
+(`registry/routing-coverage.json`) and fixture-backing is enforced.
 
 ## 3. plugin.json
 

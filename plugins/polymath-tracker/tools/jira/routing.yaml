@@ -5,6 +5,7 @@
 # Linear keys, so it is NOT used as a deterministic signal — it produced frequent
 # false positives. The `jira issue`/`jira ticket` intents raise the score when a
 # browse URL is also present; bare keys stay silent (correctly ambiguous).
+tier: hard
 url:
 - https://[A-Za-z0-9.-]+\.atlassian\.net/browse/[A-Z][A-Z0-9_]+-[0-9]+
 intents:

@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "SURFACE-1 hard-tier ratchet. hard_tier_min is the floor on the number of tier: hard surfaces in surface-index.json (each backed by a route-triggering fixture). It may only go UP, by editing this file in the same change that adds the fixtures. Soft-tier sidecars are never ratcheted — junk intents can't game this number.",
+  "hard_tier_min": 16
+}

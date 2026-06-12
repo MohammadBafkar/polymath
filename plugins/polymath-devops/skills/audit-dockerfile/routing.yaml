@@ -1,6 +1,7 @@
 # Routing declaration for polymath-devops:audit-dockerfile (skill). Compiled into
 # route-signals.json by tools/build-surface-index.py.
 # Schema: registry/schemas/surface-routing.schema.json
+tier: hard
 paths:
 - Dockerfile
 intents:

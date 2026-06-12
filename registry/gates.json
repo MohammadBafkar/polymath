@@ -272,6 +272,15 @@
       "tier": "cross-plugin",
       "verification": "selftest",
       "description": "Worst single-candidate ambient route-hint render stays ≤ 120 tokens (install affordance excluded)."
+    },
+    {
+      "id": "SURFACE-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py routing",
+      "selftest": "python3 tools/check-registry.py routing --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Declare-or-exempt: every surface has a routing sidecar or a reasoned exemption; hard-tier ratchet with fixture backing."
     }
   ]
 }

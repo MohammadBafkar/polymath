@@ -1,6 +1,7 @@
 # Routing declaration for polymath-release:changelog (skill). Compiled into
 # route-signals.json by tools/build-surface-index.py.
 # Schema: registry/schemas/surface-routing.schema.json
+tier: hard
 diff: true
 intents:
 - see what changed

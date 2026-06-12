@@ -32,6 +32,7 @@ Walk the file top-to-bottom against the Polymath skill style guide
 6. **Output**: a fenced code block showing the exact shape the skill produces. The model is going to imitate this; vague output sections produce vague outputs.
 7. **Quality bar OR Anti-patterns** section (preferably both): pin failure modes the model would otherwise drift into.
 8. **Body length**: ≤ 500 lines total. Anything longer should split into `references/*.md`.
+9. **Routing posture declared (SURFACE-1)**: the skill either ships a `routing.yaml` sidecar (schema: `registry/schemas/surface-routing.schema.json`) or has a reasoned entry in `registry/routing-exemptions.json` — CI rejects a surface that is neither. Flag a missing choice, and flag `tier: hard` without a `tests/route-triggering/` fixture.
 
 For each finding, cite **file:line** and give the corrective change.
 

@@ -3,6 +3,7 @@
 # Require a Sentry-specific URL shape: a *.sentry.io host, or the
 # organizations/<org>/issues/<id> path (self-hosted). A bare `/issues/<n>` on any
 # host (matched the old pattern) hits unrelated trackers, so it was dropped.
+tier: hard
 url:
 - https://[A-Za-z0-9.-]*sentry\.io/(?:organizations/[A-Za-z0-9_-]+/)?issues/[0-9]+
 - https://[A-Za-z0-9.-]+/organizations/[A-Za-z0-9_-]+/issues/[0-9]+

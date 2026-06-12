@@ -1,6 +1,7 @@
 # Routing declaration for polymath-writing:architecture-doc (skill). Compiled into
 # route-signals.json by tools/build-surface-index.py.
 # Schema: registry/schemas/surface-routing.schema.json
+tier: hard
 paths:
 - docs/architecture/
 intents:

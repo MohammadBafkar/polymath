@@ -30,7 +30,8 @@
         "upgrade the package",
         "bump the version of",
         "upgrade to the latest"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "decideUnderAmbiguity",
@@ -165,7 +166,8 @@
         "review the change",
         "code review",
         "pr review"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "rootCauseAnalysis",
@@ -202,7 +204,8 @@
         "fix this vuln",
         "security fix",
         "remediate the cve"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "shipFeature",
@@ -273,7 +276,8 @@
         "record the decision",
         "architecture decision record",
         "log this decision"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "architecture-doc",
@@ -290,7 +294,8 @@
         "write an architecture doc",
         "architecture document",
         "document the architecture"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "audit-compose",
@@ -322,7 +327,8 @@
         "audit the dockerfile",
         "review the dockerfile",
         "dockerfile best practices"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "caching-tradeoffs",
@@ -362,7 +368,8 @@
         "update the changelog",
         "add to the changelog",
         "add a changelog line"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "ci-pipeline-github",
@@ -426,7 +433,8 @@
         "write a dockerfile",
         "dockerize the service",
         "containerize the app"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "exec-brief",
@@ -534,7 +542,8 @@
         "write a postmortem",
         "blameless postmortem",
         "draft the postmortem"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "prd",
@@ -606,7 +615,8 @@
         "draft an rfc",
         "write an rfc",
         "request for comments"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "roadmap",
@@ -685,7 +695,8 @@
         "design an slo",
         "define an slo",
         "service level objective"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "sql-optimize",
@@ -701,7 +712,8 @@
         "optimize this query",
         "slow query",
         "explain analyze output"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "stride-threat-model",
@@ -789,7 +801,8 @@
         "write a plan",
         "draft a plan",
         "write the implementation plan"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "jira",
@@ -803,7 +816,8 @@
         "where the discussion landed",
         "jira issue",
         "jira ticket"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "linear",
@@ -817,7 +831,8 @@
         "issue our pm filed",
         "linear issue",
         "linear ticket"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "sentry-issue",
@@ -832,7 +847,8 @@
         "spike in null-reference",
         "sentry issue",
         "sentry error"
-      ]
+      ],
+      "tier": "hard"
     },
     {
       "id": "architecture-critic",

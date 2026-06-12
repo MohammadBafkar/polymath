@@ -694,6 +694,158 @@ def gates_self_test() -> int:
     return _self_test_verdict("gates", checks)
 
 
+# ---------------------------------------------------------------------------
+# routing — SURFACE-1 declare-or-exempt + hard-tier ratchet
+# ---------------------------------------------------------------------------
+
+ROUTING_EXEMPTIONS = ROOT / "registry" / "routing-exemptions.json"
+ROUTING_COVERAGE = ROOT / "registry" / "routing-coverage.json"
+SURFACE_INDEX = ROOT / "plugins" / "polymath-core" / "data" / "surface-index.json"
+ROUTE_FIXTURES_DIR = ROOT / "tests" / "route-triggering"
+
+
+def _routing_surfaces() -> dict[str, bool]:
+    """Every catalog surface -> whether it declares a routing sidecar.
+    Walks the same locations build-surface-index.py compiles from."""
+    plugins = ROOT / "plugins"
+    out: dict[str, bool] = {}
+    for s in plugins.glob("*/skills/*/SKILL.md"):
+        out[f"{s.parts[-4]}:{s.parts[-2]}"] = (s.parent / "routing.yaml").is_file()
+    for w in (plugins / "polymath-flows" / "workflows").glob("*.yaml"):
+        out[f"polymath-flows:run-workflow {w.stem}"] = (
+            plugins / "polymath-flows" / "routing" / f"{w.stem}.yaml"
+        ).is_file()
+    for t in plugins.glob("*/tools/*/tool.json"):
+        out[f"{t.parts[-4]}:{t.parts[-2]}"] = (t.parent / "routing.yaml").is_file()
+    for a in plugins.glob("*/agents/*.md"):
+        out[f"{a.parts[-3]}:{a.stem}"] = (a.parent / f"{a.stem}.routing.yaml").is_file()
+    return out
+
+
+def _fixture_surfaces() -> set[str]:
+    """Surfaces asserted by at least one route-triggering fixture
+    (must_appear entries)."""
+    surfaces: set[str] = set()
+    if not ROUTE_FIXTURES_DIR.is_dir():
+        return surfaces
+    for path in ROUTE_FIXTURES_DIR.glob("*.md"):
+        in_must = False
+        for line in path.read_text(errors="ignore").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("must_appear"):
+                in_must = True
+                continue
+            if in_must:
+                if stripped.startswith("- "):
+                    surfaces.add(stripped[2:].strip().strip("\"'"))
+                else:
+                    in_must = False
+    return surfaces
+
+
+def _routing_problems(
+    surfaces: dict[str, bool],
+    exemptions: dict[str, str],
+    hard_surfaces: set[str],
+    fixture_surfaces: set[str],
+    hard_tier_min: int,
+) -> list[str]:
+    problems: list[str] = []
+    for surface, declared in sorted(surfaces.items()):
+        exempt = surface in exemptions
+        if not declared and not exempt:
+            problems.append(
+                f"{surface}: neither declares routing nor is exempt — add a "
+                f"routing.yaml sidecar or an entry in registry/routing-exemptions.json"
+            )
+        if declared and exempt:
+            problems.append(
+                f"{surface}: both declared and exempt — remove the stale exemption"
+            )
+    for surface in sorted(exemptions):
+        if surface not in surfaces:
+            problems.append(
+                f"exemption for {surface!r} names a surface that no longer exists"
+            )
+    if len(hard_surfaces) < hard_tier_min:
+        problems.append(
+            f"hard-tier count {len(hard_surfaces)} fell below the ratchet floor "
+            f"{hard_tier_min} (registry/routing-coverage.json) — hard tier only ratchets up"
+        )
+    for surface in sorted(hard_surfaces):
+        if not any(surface in fx for fx in fixture_surfaces):
+            problems.append(
+                f"hard-tier surface {surface} has no route-triggering fixture "
+                f"asserting it (tests/route-triggering/*.md must_appear)"
+            )
+    return problems
+
+
+def routing_check() -> int:
+    try:
+        exemptions = json.loads(ROUTING_EXEMPTIONS.read_text()).get("exemptions") or {}
+    except Exception as e:
+        print(f"check-routing: cannot read {ROUTING_EXEMPTIONS}: {e}", file=sys.stderr)
+        return 1
+    try:
+        hard_tier_min = int(json.loads(ROUTING_COVERAGE.read_text())["hard_tier_min"])
+    except Exception as e:
+        print(f"check-routing: cannot read {ROUTING_COVERAGE}: {e}", file=sys.stderr)
+        return 1
+    try:
+        index = json.loads(SURFACE_INDEX.read_text())
+        hard_surfaces = {
+            s["surface"] for s in index.get("surfaces") or [] if s.get("tier") == "hard"
+        }
+    except Exception as e:
+        print(f"check-routing: cannot read {SURFACE_INDEX}: {e}", file=sys.stderr)
+        return 1
+    surfaces = _routing_surfaces()
+    problems = _routing_problems(
+        surfaces, exemptions, hard_surfaces, _fixture_surfaces(), hard_tier_min
+    )
+    for p in problems:
+        print(f"  FAIL  {p}")
+    declared = sum(surfaces.values())
+    if problems:
+        print(f"check-routing: FAILED ({len(problems)} problem(s))")
+        return 1
+    print(
+        f"check-routing: OK — {len(surfaces)} surfaces: {declared} declared, "
+        f"{len(surfaces) - declared} exempt; hard tier {len(hard_surfaces)} "
+        f"(floor {hard_tier_min}), all fixture-backed"
+    )
+    return 0
+
+
+def routing_self_test() -> int:
+    surfaces = {"demo:declared": True, "demo:naked": False, "demo:covered": True}
+    exemptions = {"demo:declared": "stale", "demo:ghost": "gone"}
+    checks = [
+        ("undeclared+unexempt surface rejected",
+         any("neither declares" in p for p in _routing_problems(
+             surfaces, {}, set(), set(), 0))),
+        ("declared+exempt contradiction rejected",
+         any("both declared and exempt" in p for p in _routing_problems(
+             surfaces, exemptions, set(), set(), 0))),
+        ("stale exemption rejected",
+         any("no longer exists" in p for p in _routing_problems(
+             surfaces, exemptions, set(), set(), 0))),
+        ("hard-tier ratchet violation rejected",
+         any("ratchet floor" in p for p in _routing_problems(
+             {"demo:covered": True}, {}, {"demo:covered"}, {"demo:covered"}, 5))),
+        ("fixtureless hard surface rejected",
+         any("no route-triggering fixture" in p for p in _routing_problems(
+             {"demo:covered": True}, {}, {"demo:covered"}, set(), 1))),
+        ("clean state passes",
+         not _routing_problems(
+             {"demo:covered": True, "demo:soft": False},
+             {"demo:soft": "knowledge skill"},
+             {"demo:covered"}, {"demo:covered"}, 1)),
+    ]
+    return _self_test_verdict("routing", checks)
+
+
 def _self_test_verdict(name: str, checks: list[tuple[str, bool]]) -> int:
     failures = 0
     for label, ok in checks:
@@ -734,6 +886,7 @@ def main() -> int:
         ("testdirs", "fixture dirs name real plugins (TESTDIR-1)"),
         ("docpaths", "relative doc links resolve (DOCPATH-1)"),
         ("gates", "gates.json bijective with conformance.sh; selftests run (GATES-1)"),
+        ("routing", "declare-or-exempt + hard-tier ratchet (SURFACE-1)"),
     ):
         p = sub.add_parser(name, help=help_text)
         p.add_argument(
@@ -758,6 +911,8 @@ def main() -> int:
         return docpaths_self_test() if self_test else docpaths_check()
     if args.cmd == "gates":
         return gates_self_test() if self_test else gates_check()
+    if args.cmd == "routing":
+        return routing_self_test() if self_test else routing_check()
     raise AssertionError(args.cmd)
 
 
