@@ -82,7 +82,7 @@ A comparison audit of Polymath against KMS's org-specific `kms-agentic-flow` mar
 ## Implementation status
 
 - P0 day-one fixes — Status: done (counts, profiles wording, dependencies doc shape, export docstring, orphan dirs removed, 4 dangling refs annotated, artifact_matrix gap recorded in LIMITATIONS.md; conformance --all green)
-- P1 baseline locks + toolchain — Status: in progress (docs merges done: TELEMETRY→PRIVACY + inbound refs, CONTRIBUTING thinned, MATURITY dedupe; tools/lib + 26→20 consolidation done — triggering.py, check-registry.py catalog|profiles|stability, token-report.py budget|usage; conformance verdicts and budget numbers verified unchanged against baseline)
+- P1 baseline locks + toolchain — Status: done (docs merges; tools/lib + 26→20 consolidation with parity; ROUTE-EVAL-1 gating precision/FP with schema-locked baseline, corpus 16→54 naturalistic, route-metrics.json published; COUNT-1/TESTDIR-1/DOCPATH-1 drift gates with --self-test; MANIFEST-1 real in CI via pinned claude CLI + hard-fail; SECRET-1 gitleaks job with unit-proven detection; markdownlint gating with ratchet baseline; registry/gates.json + GATES-1 bijectivity — 31 gates registered)
 - P2 strict discovery mechanisms — Status: not started
 - P3 evidence-driven coverage — Status: not started
 - P4 reshapeability pilot + pull-forwards — Status: not started
