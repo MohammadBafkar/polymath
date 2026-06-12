@@ -382,6 +382,19 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # ROUTE-EVAL-1: the held-out routing eval's two invariants — token precision
+  # 1.0 and zero false positives — gate the build; reach is reported, never
+  # floored. Also drift-guards the committed route-metrics.json against a
+  # fresh computation. Deterministic: no model, no token.
+  echo
+  echo "── ROUTE-EVAL-1 cross-check (triggering.py route-eval --gate)"
+  if python3 "$root/tools/triggering.py" route-eval --gate >/dev/null 2>&1; then
+    echo "route-eval gate: OK (precision 1.0, false positives 0; metrics file in sync)"
+  else
+    python3 "$root/tools/triggering.py" route-eval --gate | tail -8
+    overall=1
+  fi
+
   # PROFILE-1: install profiles (registry/polymath-profiles.json) only name
   # plugins that exist in the marketplace. Drift-guard so a fold/rename can't
   # leave a dangling profile reference.

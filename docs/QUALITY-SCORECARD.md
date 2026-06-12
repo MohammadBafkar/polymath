@@ -16,6 +16,13 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
   SKILL.md ≤ 500 lines) plus markdownlint.
 - **Token budget** — `tools/token-report.py budget` (≤ 400 tokens per plugin
   always-on; total scales with plugin count).
+- **Routing SLO (ROUTE-EVAL-1)** — `tools/triggering.py route-eval --gate`
+  (run inside `conformance.sh --all`). Gates exactly two schema-locked
+  invariants on the held-out corpus: token precision 1.0 and zero false
+  positives. Naturalistic reach is reported, never floored. The current
+  numbers are published in
+  [`plugins/polymath-core/data/route-metrics.json`](../plugins/polymath-core/data/route-metrics.json)
+  (single producer: `route-eval --write-metrics`; the gate fails on drift).
 - **Deterministic golden suite** —
   [`.github/workflows/golden-deterministic.yml`](../.github/workflows/golden-deterministic.yml):
   polymath-flows + polymath-core unit tests, the shipFeature
@@ -52,6 +59,7 @@ the supporting evidence link, not just a status flip; receipts live in
 | Conformance pass rate per plugin | [`tools/conformance.sh --all`](../tools/conformance.sh)             | every PR (validate.yml)                         |
 | Fixture + case well-formedness   | golden-deterministic.yml                                            | every PR                                        |
 | Token budget                     | [`tools/token-report.py budget`](../tools/token-report.py)          | every PR (token-budget.yml)                     |
+| Route precision / FP / reach     | [`tools/triggering.py route-eval --gate`](../tools/triggering.py)   | every PR (conformance ROUTE-EVAL-1)             |
 | Skill-triggering pass rate       | [`tools/triggering.py skill run`](../tools/triggering.py)           | opt-in live run (evaluation workflow disabled)  |
 | Bakeoff regex deltas             | [`tools/bakeoff.py run`](../tools/bakeoff.py)                       | opt-in live run (evaluation workflow disabled)  |
 | Bakeoff LLM-judge deltas         | [`tools/bakeoff.py run --judge`](../tools/bakeoff.py)               | opt-in live run                                 |

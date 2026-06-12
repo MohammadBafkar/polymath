@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **ROUTE-EVAL-1 — the held-out routing eval becomes a conformance
+  gate.** `tools/triggering.py route-eval --gate` fails the build iff
+  token precision < 1.0 or false positives > 0 against the schema-locked
+  `tests/route-eval/baseline.json` (a baseline declaring weaker
+  invariants is refused, exit 2); naturalistic reach is reported, never
+  floored. Current numbers are published to
+  `plugins/polymath-core/data/route-metrics.json` (single producer
+  `--write-metrics`; the gate drift-guards it). Held-out corpus grown
+  16 → 54 naturalistic cases (78 total) so reach is measured on real
+  phrasing breadth; `--self-test` proves the gate logic rejects
+  synthetic misroutes, false positives, and weakened baselines.
+
 - **Plan/spec template upgrades, visibility markers, summary-first
   checkpoints (Phase 6).** The Plan and PRD templates gain **Locked
   decisions** and a **Deferral registry** (every deferral names its
