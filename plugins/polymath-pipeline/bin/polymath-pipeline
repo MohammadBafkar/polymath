@@ -108,8 +108,10 @@ def resolve_root(start: pathlib.Path | None = None) -> pathlib.Path | None:
     return None
 
 
-_MODE_RE = re.compile(r"^[ \t]+mode:[ \t]*['\"]?(hint|classify|enforce)['\"]?[ \t]*$")
-_ROUTING_RE = re.compile(r"^routing:[ \t]*$")
+_MODE_RE = re.compile(r"^[ \t]+mode:[ \t]*['\"]?(hint|classify|enforce)['\"]?[ \t]*(#.*)?$")
+_MODE_ANY_RE = re.compile(r"^[ \t]+mode:[ \t]*(\S.*?)[ \t]*$")
+_ROUTING_RE = re.compile(r"^routing:[ \t]*(#.*)?$")
+_ROUTING_FLOW_RE = re.compile(r"^routing:[ \t]*[^#\s]")
 _TOP_KEY_RE = re.compile(r"^[A-Za-z_]")
 
 
@@ -134,10 +136,50 @@ def _scan_mode(path: pathlib.Path) -> str | None:
     return None
 
 
+def config_diagnostics(root: pathlib.Path) -> list[str]:
+    """Routing declarations the line-scan cannot honor — these must be
+    LOUD, not silently read as hint: a flow-style `routing: {…}` line, or
+    a `mode:` inside the routing block with an unknown value."""
+    problems: list[str] = []
+    for name in ("project.local.yaml", "project.yaml"):
+        path = root / ".polymath" / name
+        try:
+            text = path.read_text(errors="ignore")
+        except OSError:
+            continue
+        in_routing = False
+        for line in text.splitlines():
+            if _ROUTING_FLOW_RE.match(line):
+                problems.append(
+                    f"{name}: flow-style `{line.strip()}` is not supported — "
+                    f"use block form (routing:\\n  mode: hint|classify|enforce)"
+                )
+                continue
+            if _ROUTING_RE.match(line):
+                in_routing = True
+                continue
+            if in_routing:
+                if _MODE_RE.match(line):
+                    in_routing = False
+                    continue
+                m = _MODE_ANY_RE.match(line)
+                if m and m.group(1).split("#", 1)[0].strip().strip("'\"") not in MODES:
+                    problems.append(
+                        f"{name}: routing.mode {m.group(1)!r} is not one of "
+                        f"hint|classify|enforce — treated as hint"
+                    )
+                    in_routing = False
+                    continue
+                if _TOP_KEY_RE.match(line):
+                    in_routing = False
+    return problems
+
+
 def read_mode(root: pathlib.Path) -> str:
     """routing.mode for the project, overlay-aware (the gitignored
     project.local.yaml wins per key, matching the loader's merge policy).
-    Absent or unknown → 'hint' (the pipeline stays dormant)."""
+    Absent or unknown → 'hint' (the pipeline stays dormant); declarations
+    the scan cannot honor are surfaced by config_diagnostics()."""
     for name in ("project.local.yaml", "project.yaml"):
         mode = _scan_mode(root / ".polymath" / name)
         if mode in MODES:
@@ -260,32 +302,47 @@ def fresh_classification(session: str, root: pathlib.Path) -> dict | None:
     return None
 
 
-def mark_classified(root: pathlib.Path, surface: str | None) -> dict | None:
-    """Upgrade the NEWEST marker for this root to classified. When no
-    marker exists (hook missed, headless run), create a root-scoped one."""
+def mark_classified(
+    root: pathlib.Path, surface: str | None, session: str | None = None
+) -> dict | None:
+    """Record a classification. With a session id (the directive bakes one
+    into the mark command) the marker is attributed to THAT session; without
+    one, upgrade the NEWEST marker for this root, creating a root-scoped one
+    when none exists (hook missed, headless run)."""
     newest: pathlib.Path | None = None
-    try:
-        for path in sorted(
-            _markers_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
-        ):
-            try:
-                doc = json.loads(path.read_text())
-            except Exception:
-                continue
-            if isinstance(doc, dict) and doc.get("root") == str(root):
-                newest = path
-                marker = doc
-                break
-    except OSError:
-        pass
-    if newest is None:
-        marker = {
-            "session": f"cli-{os.getpid()}",
-            "root": str(root),
-            "first_seen": _now_iso(),
-            "prompts": 0,
-        }
-        newest = _marker_path(marker["session"])
+    marker: dict = {}
+    if session:
+        marker = read_marker(session) or {}
+        if marker.get("root") not in (None, str(root)):
+            marker = {}
+        marker.setdefault("session", session)
+        marker.setdefault("first_seen", _now_iso())
+        marker.setdefault("prompts", 0)
+        marker["root"] = str(root)
+        newest = _marker_path(session)
+    else:
+        try:
+            for path in sorted(
+                _markers_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+            ):
+                try:
+                    doc = json.loads(path.read_text())
+                except Exception:
+                    continue
+                if isinstance(doc, dict) and doc.get("root") == str(root):
+                    newest = path
+                    marker = doc
+                    break
+        except OSError:
+            pass
+        if newest is None:
+            marker = {
+                "session": f"cli-{os.getpid()}",
+                "root": str(root),
+                "first_seen": _now_iso(),
+                "prompts": 0,
+            }
+            newest = _marker_path(marker["session"])
     marker["classified_at"] = _now_iso()
     if surface:
         marker["classified_surface"] = surface
@@ -295,6 +352,80 @@ def mark_classified(root: pathlib.Path, surface: str | None) -> dict | None:
     except Exception:
         return None
     return marker
+
+
+# ---------------------------------------------------------------------------
+# Surface catalog (mark validation)
+# ---------------------------------------------------------------------------
+
+
+def _sibling_plugins_root() -> pathlib.Path | None:
+    """Directory containing the sibling Polymath plugins, for both layouts:
+    repo checkout (plugins/<name>/…) and the install cache
+    (<cache>/polymath/<name>/<version>/…)."""
+    plugin_root = pathlib.Path(__file__).resolve().parent.parent
+    if plugin_root.parent.name == "plugins":
+        return plugin_root.parent
+    if plugin_root.parent.name == "polymath-pipeline":
+        return plugin_root.parent.parent
+    return None
+
+
+def surface_catalog() -> tuple[set[str], set[str]] | None:
+    """(skills, workflows) across sibling plugins, or None when siblings
+    are unresolvable — the caller must FAIL OPEN then (a standalone
+    install of this plugin must not make `mark` unusable)."""
+    base = _sibling_plugins_root()
+    if base is None or not base.is_dir():
+        return None
+    skills: set[str] = set()
+    workflows: set[str] = set()
+    try:
+        for plugin_dir in base.iterdir():
+            if not plugin_dir.is_dir() or plugin_dir.name.startswith("."):
+                continue
+            candidates = [plugin_dir]
+            try:
+                candidates += [d for d in plugin_dir.iterdir() if d.is_dir()]
+            except OSError:
+                pass
+            for cand in candidates:
+                sdir = cand / "skills"
+                if sdir.is_dir():
+                    for skill in sdir.iterdir():
+                        if (skill / "SKILL.md").is_file():
+                            skills.add(f"{plugin_dir.name}:{skill.name}")
+                wdir = cand / "workflows"
+                if wdir.is_dir():
+                    for wf in wdir.glob("*.yaml"):
+                        workflows.add(wf.stem)
+    except OSError:
+        return None
+    if not skills and not workflows:
+        return None
+    return skills, workflows
+
+
+def validate_surface(surface: str) -> tuple[bool, str | None]:
+    """(accepted, reason-if-rejected). 'direct', any catalog skill
+    (<plugin>:<skill>), any workflow name, or the surface-index workflow
+    form ('polymath-flows:run-workflow <name>') pass. Unresolvable
+    catalog → fail open (accept)."""
+    if surface == "direct":
+        return True, None
+    catalog = surface_catalog()
+    if catalog is None:
+        return True, None
+    skills, workflows = catalog
+    if surface in skills or surface in workflows:
+        return True, None
+    head, _, tail = surface.partition(" ")
+    if tail and head.endswith(":run-workflow") and tail in workflows:
+        return True, None
+    return False, (
+        f"unknown surface {surface!r} — expected 'direct', a catalog skill "
+        f"(<plugin>:<skill>), or a workflow name"
+    )
 
 
 def sweep() -> dict:
@@ -697,7 +828,15 @@ def _payload_cwd(payload: dict) -> pathlib.Path:
     return pathlib.Path.cwd()
 
 
-def _directive(mode: str, plugin_root: str) -> str:
+def _mark_command(plugin_root: str, session: str | None) -> str:
+    session_arg = f" --session {session}" if session and session != "unknown" else ""
+    return (
+        f"\"{plugin_root}/bin/polymath-pipeline\" mark{session_arg} "
+        f"--surface <skill-or-workflow-or-'direct'>"
+    )
+
+
+def _directive(mode: str, plugin_root: str, session: str | None = None) -> str:
     enforce_line = (
         " Mutating tool calls (Edit/Write, modify-pattern Bash, mutating "
         "MCP tools, Task) are GATED until that mark exists (fresh within "
@@ -713,12 +852,11 @@ def _directive(mode: str, plugin_root: str) -> str:
         f"run polymath-pipeline:intake for an ambiguous or multi-step ask, "
         f"or just answer a trivial/conversational turn (that counts as "
         f"classified). (3) Record the classification: "
-        f"\"{plugin_root}/bin/polymath-pipeline\" mark --surface "
-        f"<skill-or-workflow-or-'direct'>.{enforce_line} Surfaces declared "
-        f"`trust: auto-headless` that are read-only may be run directly "
-        f"without propose-confirm in this mode (minimum intervention). "
-        f"Kill switch (audited): POLYMATH_PIPELINE_OFF=1 or touch "
-        f".polymath/pipeline-off."
+        f"{_mark_command(plugin_root, session)}.{enforce_line} Surfaces "
+        f"declared `trust: auto-headless` that are read-only may be run "
+        f"directly without propose-confirm in this mode (minimum "
+        f"intervention). Kill switch (audited): POLYMATH_PIPELINE_OFF=1 or "
+        f"touch .polymath/pipeline-off."
     )
 
 
@@ -729,6 +867,11 @@ def cmd_hook_session_start(args: argparse.Namespace) -> int:
         if root is None:
             return 0
         mode = read_mode(root)
+        problems = config_diagnostics(root)
+        if problems:
+            for problem in problems:
+                print(f"polymath-pipeline config error: {problem}")
+            log_decision("config-error", root=str(root), problems=problems)
         if mode == "hint":
             return 0
         off = kill_switch(root)
@@ -769,7 +912,7 @@ def cmd_hook_prompt(args: argparse.Namespace) -> int:
             "CLAUDE_PLUGIN_ROOT",
             str(pathlib.Path(__file__).resolve().parent.parent),
         )
-        print(_directive(mode, plugin_root))
+        print(_directive(mode, plugin_root, session))
         log_decision("classify-directive", session=session, root=str(root), mode=mode)
         return 0
     except Exception:
@@ -819,9 +962,8 @@ def cmd_hook_pretool(args: argparse.Namespace) -> int:
             f"MCP tools, Task) behind classification (routing.mode=enforce). "
             f"Classify first — run polymath-pipeline:intake "
             f"(ambiguous/multi-step) or decide the surface yourself — then "
-            f"record it: \"{plugin_root}/bin/polymath-pipeline\" mark "
-            f"--surface <skill-or-workflow-or-'direct'> and retry. Read-only "
-            f"commands are exempt. Kill switch (audited): "
+            f"record it: {_mark_command(plugin_root, session)} and retry. "
+            f"Read-only commands are exempt. Kill switch (audited): "
             f"POLYMATH_PIPELINE_OFF=1 or touch .polymath/pipeline-off.",
             file=sys.stderr,
         )
@@ -839,7 +981,11 @@ def cmd_hook_pretool(args: argparse.Namespace) -> int:
 def cmd_mode(args: argparse.Namespace) -> int:
     root = resolve_root(pathlib.Path(args.cwd) if args.cwd else None)
     mode = read_mode(root) if root else "hint"
-    print(json.dumps({"root": str(root) if root else None, "mode": mode}))
+    print(json.dumps({
+        "root": str(root) if root else None,
+        "mode": mode,
+        "config_errors": config_diagnostics(root) if root else [],
+    }))
     return 0
 
 
@@ -852,7 +998,13 @@ def cmd_mark(args: argparse.Namespace) -> int:
     if mode == "hint":
         print(json.dumps({"marked": False, "reason": "routing.mode is hint — nothing to mark"}))
         return 0
-    marker = mark_classified(root, args.surface)
+    if args.surface:
+        accepted, reason = validate_surface(args.surface)
+        if not accepted:
+            log_decision("mark-rejected", root=str(root), surface=args.surface, reason=reason)
+            print(json.dumps({"marked": False, "reason": reason}))
+            return 2
+    marker = mark_classified(root, args.surface, session=args.session)
     if marker is None:
         print(json.dumps({"marked": False, "reason": "marker store unwritable"}))
         return 0
@@ -864,6 +1016,7 @@ def cmd_mark(args: argparse.Namespace) -> int:
         "marked": True,
         "root": str(root),
         "surface": args.surface or None,
+        "session": marker.get("session"),
         "valid_for_seconds": CLASSIFIED_TTL_SECONDS,
     }))
     return 0
@@ -890,6 +1043,7 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(json.dumps({
         "root": str(root) if root else None,
         "mode": read_mode(root) if root else "hint",
+        "config_errors": config_diagnostics(root) if root else [],
         "kill_switch": kill_switch(root),
         "markers": markers,
         "decision_log_lines": log_lines,
@@ -916,6 +1070,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     pk = sub.add_parser("mark", help="record that this request was classified (1h validity)")
     pk.add_argument("--surface", help="chosen surface: <plugin>:<skill>, workflow name, or 'direct'")
+    pk.add_argument("--session", help="harness session id (the classify directive bakes it in)")
     pk.add_argument("--cwd")
     pk.set_defaults(func=cmd_mark)
 

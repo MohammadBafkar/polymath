@@ -60,6 +60,20 @@ class PipelineTestCase(unittest.TestCase):
         (self.base / "home").mkdir()
         self._prev_cwd = pathlib.Path.cwd()
         os.chdir(self.repo)
+        # Hermetic surface catalog: mark validation must not depend on the
+        # real repo's plugin tree.
+        fake_plugins = self.base / "fake-plugins"
+        for plugin, skill in (
+            ("polymath-engineering", "feature-dev"),
+            ("demo-plugin", "demo-skill"),
+        ):
+            skill_dir = fake_plugins / plugin / "skills" / skill
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: x\n---\n")
+        wf_dir = fake_plugins / "polymath-flows" / "workflows"
+        wf_dir.mkdir(parents=True)
+        (wf_dir / "shipFeature.yaml").write_text("name: shipFeature\n")
+        self.mod._sibling_plugins_root = lambda: fake_plugins
 
     def tearDown(self) -> None:
         os.chdir(self._prev_cwd)
@@ -334,6 +348,117 @@ class ToolPolicyTests(PipelineTestCase):
         matcher = hooks["hooks"]["PreToolUse"][0]["matcher"]
         for needle in ("Bash", "Edit", "Write", "Task", "mcp__"):
             self.assertIn(needle, matcher)
+
+
+class MarkValidationTests(PipelineTestCase):
+    def _mark_out(self, *argv: str) -> tuple[int, dict]:
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = self.mod.main(["mark", *argv, "--cwd", str(self.repo)])
+        return code, json.loads(out.getvalue())
+
+    def test_catalog_surfaces_accepted(self) -> None:
+        self._write_project("classify")
+        for surface in (
+            "direct",
+            "polymath-engineering:feature-dev",
+            "demo-plugin:demo-skill",
+            "shipFeature",
+            "polymath-flows:run-workflow shipFeature",
+        ):
+            code, doc = self._mark_out("--surface", surface)
+            self.assertEqual((code, doc["marked"]), (0, True), surface)
+
+    def test_unknown_surface_rejected_and_not_classified(self) -> None:
+        self._write_project("enforce")
+        code, doc = self._mark_out("--surface", "made-up:not-a-skill")
+        self.assertEqual(code, 2)
+        self.assertFalse(doc["marked"])
+        self.assertIn("unknown surface", doc["reason"])
+        self.assertIn("mark-rejected", self._events())
+        payload = {"session_id": "s", "cwd": str(self.repo), "tool_name": "Edit", "tool_input": {}}
+        code, _, _ = self._hook("hook-pretool", payload)
+        self.assertEqual(code, 2)  # the rejected mark must not unlock the gate
+
+    def test_unresolvable_catalog_fails_open(self) -> None:
+        self._write_project("classify")
+        self.mod._sibling_plugins_root = lambda: None
+        code, doc = self._mark_out("--surface", "anything:goes-here")
+        self.assertEqual((code, doc["marked"]), (0, True))
+
+
+class SessionBakingTests(PipelineTestCase):
+    def test_directive_bakes_session_id(self) -> None:
+        self._write_project("classify")
+        code, out, _ = self._hook("hook-prompt", {"session_id": "sess-42", "cwd": str(self.repo)})
+        self.assertEqual(code, 0)
+        self.assertIn("mark --session sess-42 --surface", out)
+
+    def test_deny_message_bakes_session_id(self) -> None:
+        self._write_project("enforce")
+        payload = {"session_id": "sess-42", "cwd": str(self.repo), "tool_name": "Edit", "tool_input": {}}
+        code, _, err = self._hook("hook-pretool", payload)
+        self.assertEqual(code, 2)
+        self.assertIn("mark --session sess-42 --surface", err)
+
+    def test_mark_with_session_attributes_that_session(self) -> None:
+        self._write_project("enforce")
+        with redirect_stdout(io.StringIO()):
+            self.mod.main(["mark", "--session", "sess-42", "--surface", "direct", "--cwd", str(self.repo)])
+        doc = json.loads((self.base / ".pdata" / "markers" / "sess-42.json").read_text())
+        self.assertEqual(doc["session"], "sess-42")
+        self.assertIn("classified_at", doc)
+        self.assertIsNotNone(self.mod.fresh_classification("sess-42", self.repo.resolve()))
+
+    def test_unknown_session_not_baked(self) -> None:
+        self._write_project("classify")
+        code, out, _ = self._hook("hook-prompt", {"cwd": str(self.repo)})
+        self.assertEqual(code, 0)
+        self.assertIn("mark --surface", out)
+        self.assertNotIn("--session", out)
+
+
+class ConfigDiagnosticsTests(PipelineTestCase):
+    def test_flow_style_routing_is_loud(self) -> None:
+        (self.repo / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nrouting: {mode: enforce}\n"
+        )
+        self.assertEqual(self.mod.read_mode(self.repo), "hint")
+        code, out, _ = self._hook("hook-session-start", {"session_id": "s", "cwd": str(self.repo)})
+        self.assertEqual(code, 0)
+        self.assertIn("config error", out)
+        self.assertIn("flow-style", out)
+        self.assertIn("config-error", self._events())
+
+    def test_invalid_mode_value_is_loud(self) -> None:
+        (self.repo / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nrouting:\n  mode: clasify\n"
+        )
+        problems = self.mod.config_diagnostics(self.repo)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("clasify", problems[0])
+
+    def test_mode_command_reports_config_errors(self) -> None:
+        (self.repo / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nrouting: {mode: enforce}\n"
+        )
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.mod.main(["mode", "--cwd", str(self.repo)])
+        doc = json.loads(out.getvalue())
+        self.assertEqual(doc["mode"], "hint")
+        self.assertTrue(doc["config_errors"])
+
+    def test_valid_block_form_has_no_diagnostics(self) -> None:
+        self._write_project("enforce")
+        self.assertEqual(self.mod.config_diagnostics(self.repo), [])
+
+    def test_comments_parse_as_block_form(self) -> None:
+        (self.repo / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nrouting:  # block form below\n  mode: classify  # opt-in\n"
+        )
+        self.assertEqual(self.mod.config_diagnostics(self.repo), [])
+        self.assertEqual(self.mod.read_mode(self.repo), "classify")
 
 
 class ClassifyHookTests(PipelineTestCase):

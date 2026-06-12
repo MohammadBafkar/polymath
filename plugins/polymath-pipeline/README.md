@@ -103,11 +103,18 @@ ${CLAUDE_PLUGIN_DATA}/
 ## Limitations
 
 - The `routing.mode` reader is a line-scan for the block form
-  (`routing:` newline, then an indented `mode: …` line); a flow-style `routing: {mode: …}`
-  reads as `hint`.
-- `mark` runs through the Bash tool, which cannot know the harness session
-  id — markers are stored session-namespaced but accepted root-scoped
+  (`routing:` newline, then an indented `mode: …` line; trailing comments
+  are fine). A flow-style `routing: {mode: …}` or an unknown mode value
+  still reads as `hint`, but LOUDLY: SessionStart prints a
+  `config error` line, `mode`/`status` report it under `config_errors`,
+  and a `config-error` event is audited.
+- The classify directive bakes `--session <id>` into the mark command, so
+  markers are attributed to the issuing session. A mark issued without
+  `--session` (headless run, hand-typed) is still accepted root-scoped
   within the 1 h TTL.
+- `mark --surface` is validated against the sibling-plugin catalog
+  (skills, workflow names, `direct`); when the siblings are unresolvable
+  (standalone install) validation fails open.
 
 ## Installation
 

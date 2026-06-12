@@ -16,6 +16,18 @@
   fixture, with command-position anchors keeping argument words exempt
   and a deadlock-guard test pinning that the `mark` recovery command
   itself always passes.
+- **Validated, session-attributed `mark`.** `mark --surface` is checked
+  against the sibling-plugin catalog (skills, workflow names, `direct`;
+  the `polymath-flows:run-workflow <name>` form accepted) — an unknown
+  surface is rejected (exit 2, `mark-rejected` audited) and does not
+  open the gate; unresolvable siblings fail open. The classify
+  directive and the deny message bake `--session <id>` into the mark
+  command so markers are attributed to the issuing session.
+- **Loud config errors.** Flow-style `routing: {…}` and unknown
+  `routing.mode` values no longer read silently as `hint`: SessionStart
+  prints a `config error` line, `mode`/`status` expose `config_errors`,
+  and a `config-error` event is audited. Trailing comments on
+  `routing:` / `mode:` lines now parse instead of breaking the scan.
 - **Data-driven tool policy.** Base policy ships in
   `data/tool-policy.json` (mirrored by engine constants as the
   fail-safe; a unit test pins the two equal). Projects can strengthen it

@@ -53,9 +53,12 @@ that); intake decides *where the request goes*, in one screen.
    - trivial after clarification → `direct`
    - Surfaces declared `trust: auto-headless` that are read-only may be run
      without propose-confirm when `routing.mode != hint`.
-6. **Record the classification** so the gate opens (1h validity):
-   `"${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" mark --surface <choice>`
-   (the directive/deny message carries the absolute path).
+6. **Record the classification** so the gate opens (1h validity): run the
+   exact mark command the directive/deny message carries (absolute path
+   plus `--session <id>`), filling in the surface:
+   `"${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" mark --session <id> --surface <choice>`.
+   The surface is validated against the catalog — a typo'd or invented
+   name is rejected and does not open the gate.
 7. **Output one screen**: the 4 scores with one-line justifications, open
    assumptions, the chosen route, and the mark confirmation.
 

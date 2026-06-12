@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   data-driven (`data/tool-policy.json`, code-mirrored with a drift
   test); projects can strengthen — never weaken — it via
   `.polymath/tool-policy.json` (weakening keys ignored and audited).
+  `mark --surface` is validated against the sibling-plugin catalog
+  (unknown surfaces rejected and audited; fail-open without siblings),
+  the classify directive bakes `--session <id>` into the mark command,
+  and unparseable routing declarations (flow-style `routing: {…}`,
+  unknown mode values) are loud — SessionStart config-error lines,
+  `config_errors` in `mode`/`status`, audited `config-error` events —
+  instead of silently reading as `hint`.
 - **GATES-1 — registry/gates.json is the machine-readable source of
   truth for conformance gates.** 31 gate entries (id, tool, invocation,
   tier, verification); `check-registry.py gates` enforces bijectivity
