@@ -758,13 +758,19 @@ FIRED_MARKER = "[polymath-core route]"
 CAND_RE = re.compile(r"^\s+-\s+(.+?)\s{2,}\(", re.MULTILINE)
 
 
-def _eval_run_hook(prompt: str) -> str:
+def _eval_run_hook(prompt: str, installed: str | None = None) -> str:
+    env = dict(os.environ)
+    env.pop("POLYMATH_INSTALLED_PLUGINS", None)
+    if installed is not None:
+        # partial-install cases pin the installed-plugin set the hook sees.
+        env["POLYMATH_INSTALLED_PLUGINS"] = installed
     proc = subprocess.run(
         [sys.executable, str(HOOK)],
         input=json.dumps({"prompt": prompt}),
         capture_output=True,
         text=True,
         timeout=15,
+        env=env,
     )
     return proc.stdout
 
@@ -782,7 +788,7 @@ def _eval_load_cases() -> list[dict]:
     return rows
 
 
-def _eval_classify(case: dict, fired: bool, cands: list[str]) -> str:
+def _eval_classify(case: dict, fired: bool, cands: list[str], out: str = "") -> str:
     top = cands[0] if cands else ""
     target = case.get("target", "")
     hit = bool(target) and any(target in c for c in cands)
@@ -790,6 +796,19 @@ def _eval_classify(case: dict, fired: bool, cands: list[str]) -> str:
     cat = case["category"]
     if cat == "negative":
         return "FALSE-POSITIVE" if fired else "ok-silent"
+    if cat == "partial-install":
+        plugin = target.split(":", 1)[0]
+        affordance = f"not installed; install: claude plugin install {plugin}@polymath"
+        if case["expect"] == "install-affordance":
+            if not fired:
+                return "MISS"
+            return "ok-affordance" if affordance in out else "AFFORDANCE-MISSING"
+        # expect == fire: counter-case — plugin installed, affordance must NOT render
+        if not fired:
+            return "MISS"
+        if affordance in out:
+            return "AFFORDANCE-SPURIOUS"
+        return "ok-clean" if top_hit else "MISROUTE"
     if cat == "naturalistic":
         if case["expect"] == "silent":
             # Silence is the by-design outcome; firing on pure prose is the surprise.
@@ -838,6 +857,7 @@ def _eval_metrics(results: list[dict]) -> dict:
             "token": len(tok),
             "negative": len(by_cat.get("negative", [])),
             "ambiguous": len(by_cat.get("ambiguous", [])),
+            "partial_install": len(by_cat.get("partial-install", [])),
             "total": len(results),
         },
         "token": {
@@ -861,6 +881,12 @@ def _eval_metrics(results: list[dict]) -> dict:
         # of the naturalistic cases that name an intended surface, how many
         # would find it in the deterministic shortlist a consumer reads?
         "constrained": _constrained_block(nat),
+        # Gated alongside precision/FP: an uninstalled match must render the
+        # install affordance, an installed one must not.
+        "partial_install": {
+            "cases": len(by_cat.get("partial-install", [])),
+            "ok": n("partial-install", "ok-affordance", "ok-clean"),
+        },
     }
 
 
@@ -913,8 +939,9 @@ def _eval_load_baseline() -> tuple[dict | None, str | None]:
 
 
 def _gate_problems(metrics: dict, baseline: dict) -> list[str]:
-    """ROUTE-EVAL-1 verdicts: ONLY token precision and false positives gate.
-    Everything else in `metrics` (reach above all) is reporting."""
+    """ROUTE-EVAL-1 verdicts: token precision, false positives, and
+    partial-install correctness gate. Everything else in `metrics`
+    (reach and constrained-top-3 above all) is reporting."""
     problems: list[str] = []
     tok = metrics["token"]
     if tok["precision"] < baseline["token_precision_min"]:
@@ -925,6 +952,12 @@ def _gate_problems(metrics: dict, baseline: dict) -> list[str]:
     fp = metrics["negative"]["false_positives"]
     if fp > baseline["false_positives_max"]:
         problems.append(f"false positives {fp} > {baseline['false_positives_max']} allowed")
+    pi = metrics.get("partial_install") or {}
+    if pi.get("cases", 0) and pi["ok"] < pi["cases"]:
+        problems.append(
+            f"partial-install behavior broken: {pi['ok']}/{pi['cases']} cases ok "
+            f"(uninstalled matches must render the install affordance; installed ones must not)"
+        )
     return problems
 
 
@@ -954,11 +987,13 @@ def _eval_gate(metrics: dict) -> int:
             f"{EVAL_METRICS.relative_to(ROOT)} drifted from a fresh computation — {rerun}"
         )
     print("== ROUTE-EVAL-1 GATE ==")
+    pi = metrics.get("partial_install") or {}
     print(
         f"  gated:    token precision {metrics['token']['precision']} "
         f"(floor {baseline['token_precision_min']}), "
         f"false positives {metrics['negative']['false_positives']} "
-        f"(max {baseline['false_positives_max']})"
+        f"(max {baseline['false_positives_max']}), "
+        f"partial-install {pi.get('ok', 0)}/{pi.get('cases', 0)}"
     )
     print(
         f"  reported: naturalistic reach {metrics['naturalistic']['fired']}"
@@ -999,6 +1034,32 @@ def route_eval_self_test() -> int:
     )
     check("synthetic firing negative classifies as FALSE-POSITIVE",
           false_pos == "FALSE-POSITIVE")
+
+    # An uninstalled match whose output lacks the affordance must be caught.
+    no_affordance = _eval_classify(
+        {"id": "st-pi", "category": "partial-install", "expect": "install-affordance",
+         "target": "polymath-data:sql-optimize"},
+        True, ["polymath-data:sql-optimize"],
+        out="  - polymath-data:sql-optimize  (skill — path + phrasing)",
+    )
+    check("synthetic missing affordance classifies as AFFORDANCE-MISSING",
+          no_affordance == "AFFORDANCE-MISSING")
+    spurious = _eval_classify(
+        {"id": "st-pi2", "category": "partial-install", "expect": "fire",
+         "target": "polymath-data:sql-optimize"},
+        True, ["polymath-data:sql-optimize"],
+        out="not installed; install: claude plugin install polymath-data@polymath",
+    )
+    check("synthetic spurious affordance classifies as AFFORDANCE-SPURIOUS",
+          spurious == "AFFORDANCE-SPURIOUS")
+    pi_rows = [
+        {"category": "partial-install", "expect": "install-affordance", "fired": True,
+         "verdict": no_affordance},
+    ]
+    check("gate rejects broken partial-install behavior",
+          any("partial-install" in p for p in _gate_problems(
+              _eval_metrics(pi_rows),
+              {"schemaVersion": 1, "token_precision_min": 1.0, "false_positives_max": 0})))
 
     baseline = {"schemaVersion": 1, "token_precision_min": 1.0, "false_positives_max": 0}
     bad_rows = [
@@ -1061,10 +1122,10 @@ def route_eval(emit_json: bool = False, gate: bool = False,
     cases = _eval_load_cases()
     results = []
     for c in cases:
-        out = _eval_run_hook(c["prompt"])
+        out = _eval_run_hook(c["prompt"], c.get("installed"))
         fired = FIRED_MARKER in out
         cands = _eval_candidates(out)
-        verdict = _eval_classify(c, fired, cands)
+        verdict = _eval_classify(c, fired, cands, out)
         row = {
             "id": c["id"], "category": c["category"], "expect": c["expect"],
             "fired": fired, "top": cands[0] if cands else "", "candidates": cands,
@@ -1090,7 +1151,7 @@ def route_eval(emit_json: bool = False, gate: bool = False,
 
     print("HELD-OUT ROUTING MEASUREMENT  (deterministic; no model, no token)")
     print(f"cases: {len(results)}   hook: {HOOK.relative_to(ROOT)}\n")
-    for cat in ("token", "ambiguous", "naturalistic", "negative"):
+    for cat in ("token", "ambiguous", "naturalistic", "negative", "partial-install"):
         rows = by_cat.get(cat, [])
         if not rows:
             continue

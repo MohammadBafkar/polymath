@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Install-aware route hints.** When polymath-core runs from the
+  install cache, the hint checks whether a matched surface's plugin is
+  actually installed: an uninstalled match renders a one-line install
+  affordance (`… — plugin not installed; install: claude plugin install
+  <plugin>@polymath`) instead of a broken proposal, and shortlist
+  candidates carry `"installed": false`. Repo checkouts and
+  project-overlay rules are never flagged (fail-open);
+  `POLYMATH_INSTALLED_PLUGINS` pins the set for tests. Locked by the
+  route-eval `partial-install` category, gated in ROUTE-EVAL-1.
 - **Deterministic shortlist consumer (`--shortlist`).**
   `route-hint.py --shortlist "<text>"` prints the top-3 scored
   candidates as JSON — including sub-threshold ones, each flagged

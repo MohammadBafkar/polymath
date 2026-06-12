@@ -31,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Install-aware route hints + `partial-install` eval category.** An
+  uninstalled match renders a one-line install affordance instead of a
+  broken proposal (cache-layout detection; repo checkouts and project
+  overlays never flagged; `POLYMATH_INSTALLED_PLUGINS` pins the set for
+  tests). Two `partial-install` corpus cases (affordance present when
+  uninstalled, absent when installed) gate in ROUTE-EVAL-1 alongside
+  precision/FP, with self-test coverage for both failure shapes.
 - **Constrain-layer shipped: deterministic shortlist + consumers +
   measurement.** `route-hint.py --shortlist "<text>"` exposes the
   scorer's top-3 (sub-threshold included, `fires` flagged) as JSON;

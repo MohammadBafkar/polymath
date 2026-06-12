@@ -20,9 +20,11 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
 - **Token budget** — `tools/token-report.py budget` (≤ 400 tokens per plugin
   always-on; total scales with plugin count).
 - **Routing SLO (ROUTE-EVAL-1)** — `tools/triggering.py route-eval --gate`
-  (run inside `conformance.sh --all`). Gates exactly two schema-locked
-  invariants on the held-out corpus: token precision 1.0 and zero false
-  positives. Naturalistic reach and constrained-top-3 (whether a case's
+  (run inside `conformance.sh --all`). Gates the schema-locked invariants
+  on the held-out corpus: token precision 1.0, zero false positives, and
+  partial-install correctness (an uninstalled match must render the
+  one-line install affordance; an installed one must not).
+  Naturalistic reach and constrained-top-3 (whether a case's
   intended surface appears in the deterministic shortlist that
   `/polymath-core:route` and `polymath-pipeline:intake` read as their
   step 0 — `route-hint.py --shortlist`) are reported, never floored. The

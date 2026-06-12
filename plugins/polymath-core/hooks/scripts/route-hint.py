@@ -103,6 +103,39 @@ def load_rules() -> list[dict]:
     return rules if isinstance(rules, list) else []
 
 
+def installed_plugins() -> set[str] | None:
+    """Plugin names installed alongside polymath-core, or None when the set
+    is indeterminate — a repo checkout (every surface present) or an
+    unrecognizable layout (fail open: never claim something is missing on
+    shaky evidence). POLYMATH_INSTALLED_PLUGINS overrides for tests:
+    comma-separated names, empty string = only polymath-core."""
+    override = os.environ.get("POLYMATH_INSTALLED_PLUGINS")
+    if override is not None:
+        return {p.strip() for p in override.split(",") if p.strip()} | {"polymath-core"}
+    plugin_root = Path(__file__).resolve().parent.parent.parent
+    parent = plugin_root.parent
+    if parent.name == "plugins":
+        return None  # repo checkout
+    if parent.name == "polymath-core":
+        try:
+            return {d.name for d in parent.parent.iterdir() if d.is_dir()}
+        except OSError:
+            return None
+    return None
+
+
+def surface_plugin(surface: str) -> str:
+    return surface.split(":", 1)[0]
+
+
+def rule_available(rule: dict, installed: set[str] | None) -> bool:
+    """A project-overlay rule is project-authored truth (never flagged);
+    a catalog rule needs its plugin installed."""
+    if installed is None or rule.get("_project"):
+        return True
+    return surface_plugin(rule.get("surface", "")) in installed
+
+
 # Project overlays are intentionally small: the table is scanned per prompt,
 # and a project should add a handful of company-specific signals, not a
 # second catalog.
@@ -263,6 +296,7 @@ def compute_shortlist(prompt: str) -> dict:
     urls = URL_RE.findall(prompt)
     has_diff = bool(DIFF_RE.search(prompt))
     evidence = load_evidence()
+    installed = installed_plugins()
     scored: list[dict] = []
     for rule in rules:
         score, fired = score_rule(rule, prompt, low, urls, has_diff, evidence)
@@ -275,6 +309,8 @@ def compute_shortlist(prompt: str) -> dict:
             "signals": [f for i, f in enumerate(fired) if f not in fired[:i]],
             "fires": score >= MIN_SCORE and any(f in HARD_KINDS for f in fired),
         }
+        if not rule_available(rule, installed):
+            cand["installed"] = False
         if rule.get("alt"):
             cand["alt"] = rule["alt"]
         if rule.get("_project"):
@@ -331,12 +367,23 @@ def main() -> int:
         return 0
 
     top = candidates[:MAX_CANDIDATES]
+    installed = installed_plugins()
 
     print("[polymath-core route] Prompt signals suggest a Polymath surface:")
     for score, rule, fired in top:
         kind = rule.get("kind", "skill")
         if rule.get("_project"):
             kind = f"{kind}, project overlay"
+        if not rule_available(rule, installed):
+            # Install affordance instead of a broken proposal: the surface
+            # matched, but its plugin is not in this session.
+            plugin = surface_plugin(rule["surface"])
+            print(
+                f"  - {rule['surface']}  ({kind} — {why(fired)}) — plugin "
+                f"not installed; install: claude plugin install "
+                f"{plugin}@polymath"
+            )
+            continue
         print(f"  - {rule['surface']}  ({kind} — {why(fired)})")
     # Surface a named alternative from the top rule if it adds a distinct option.
     alt = top[0][1].get("alt")

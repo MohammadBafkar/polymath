@@ -6,7 +6,8 @@
     "token": 9,
     "negative": 12,
     "ambiguous": 3,
-    "total": 78
+    "partial_install": 2,
+    "total": 80
   },
   "token": {
     "fired": 9,
@@ -29,5 +30,9 @@
     "top3": 6,
     "cases": 54,
     "ratio": 0.1111
+  },
+  "partial_install": {
+    "cases": 2,
+    "ok": 2
   }
 }
