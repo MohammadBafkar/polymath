@@ -1,0 +1,10 @@
+# Routing declaration for polymath-leadership:okr-setting (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bOKRs?\b
+intents:
+- planning season
+- goals we can actually measure
+- objectives and key results

@@ -1,0 +1,10 @@
+# Routing declaration for polymath-thinking:pre-mortem (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bpre-?mortems?\b
+intents:
+- could blow up in our faces
+- ways this could fail
+- before we commit to the

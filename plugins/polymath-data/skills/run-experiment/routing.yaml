@@ -4,6 +4,9 @@
 paths:
 - docs/experiments/
 intents:
+- real evidence before
+- converts better
+- before we roll it out to everyone
 - design an experiment
 - experiment design
 - a/b test plan

@@ -9,6 +9,8 @@ paths:
 - .python-version
 - tsconfig.json
 intents:
+- end-of-life
+- move the codebase forward
 - migrate to .net
 - upgrade the runtime
 - migrate the runtime

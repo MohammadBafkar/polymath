@@ -53,7 +53,7 @@ WORKFLOW_ROUTING = PLUGINS / "polymath-flows" / "routing"
 SCHEMA_PATH = REPO / "registry" / "schemas" / "surface-routing.schema.json"
 TOOL_SCHEMA_PATH = REPO / "registry" / "schemas" / "tool.schema.json"
 
-KIND_RANK = {"workflow": 0, "skill": 1, "tool": 2}
+KIND_RANK = {"workflow": 0, "skill": 1, "tool": 2, "agent": 3}
 # Canonical key order for each emitted rule (route-hint.py is order-agnostic;
 # this only keeps the generated file stable so --check is a real diff-guard).
 RULE_KEY_ORDER = (
@@ -258,6 +258,24 @@ def collect() -> tuple[list[dict], list[str]]:
             _validate(d["body"], schema, d["where"], errors)
             decls.append(d)
 
+    # Agents — forked-context critics/scouts. The sidecar sits beside the
+    # agent's .md (agents/<name>.routing.yaml; agents are files, not dirs);
+    # the agent definition must exist so a declaration cannot outlive its
+    # surface.
+    for sidecar in sorted(PLUGINS.glob("*/agents/*.routing.yaml")):
+        rel = sidecar.relative_to(PLUGINS).parts  # (plugin, 'agents', '<name>.routing.yaml')
+        plugin = rel[0]
+        name = sidecar.name[: -len(".routing.yaml")]
+        if not (sidecar.parent / f"{name}.md").is_file():
+            errors.append(
+                f"{str(sidecar.relative_to(REPO))}: no agent definition {name}.md beside it"
+            )
+        d = _declaration(sidecar, "agent", name, f"{plugin}:{name}", errors)
+        if d is None:
+            continue
+        _validate(d["body"], schema, d["where"], errors)
+        decls.append(d)
+
     # Tools (Phase 3) — first-class routable units. Every tools/<name>/ must carry
     # a tool.json manifest (TOOL-1); a routing.yaml beside it makes the tool a
     # deterministically-routed surface, identical in shape to a skill sidecar.
@@ -384,6 +402,7 @@ def serialize(decls: list[dict]) -> dict[str, str]:
             "workflows": sum(1 for d in decls if d["kind"] == "workflow"),
             "skills": sum(1 for d in decls if d["kind"] == "skill"),
             "tools": sum(1 for d in decls if d["kind"] == "tool"),
+            "agents": sum(1 for d in decls if d["kind"] == "agent"),
         },
         "surfaces": [build_index_entry(d) for d in decls],
     }

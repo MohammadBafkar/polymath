@@ -1,0 +1,10 @@
+# Routing declaration for polymath-sre:capacity-plan (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bcapacity plan(ning)?\b
+intents:
+- traffic triples
+- will the current cluster hold
+- what do we scale first

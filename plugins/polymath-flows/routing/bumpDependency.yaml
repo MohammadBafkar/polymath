@@ -11,6 +11,8 @@ paths:
 - Gemfile
 - Directory.Packages.props
 intents:
+- versions behind
+- without breaking call sites
 - upgrade the dependency
 - bump the dependency
 - update the dependency

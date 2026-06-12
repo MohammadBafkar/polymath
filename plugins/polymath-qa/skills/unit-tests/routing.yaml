@@ -1,0 +1,12 @@
+# Routing declaration for polymath-qa:unit-tests (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+paths:
+- tests/
+intents:
+- write tests for
+- write unit tests
+- edge cases around
+- add test coverage for
+alt: polymath-qa:coverage-gap

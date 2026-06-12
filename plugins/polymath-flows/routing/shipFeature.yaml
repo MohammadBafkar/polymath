@@ -4,6 +4,8 @@
 paths:
 - docs/prds/
 intents:
+- built, tested, and released
+- spec is approved
 - ship this feature
 - ship the feature
 - implement the prd

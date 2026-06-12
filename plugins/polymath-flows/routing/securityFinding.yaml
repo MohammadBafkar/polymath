@@ -5,6 +5,9 @@ regex:
 - \bCVE-\d{4}-\d{4,7}\b
 - \bGHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}\b
 intents:
+- pen-tester found
+- pentest finding
+- proving the fix holds
 - security finding
 - fix the vulnerability
 - fix this vuln

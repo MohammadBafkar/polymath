@@ -4,6 +4,9 @@
 paths:
 - docs/plans/
 intents:
+- implementation plan with steps
+- concrete implementation plan
+- rough estimates
 - write a plan
 - draft a plan
 - write the implementation plan

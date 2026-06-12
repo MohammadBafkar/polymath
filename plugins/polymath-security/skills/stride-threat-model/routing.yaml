@@ -4,6 +4,9 @@
 paths:
 - docs/threat-models/
 intents:
+- threat-model
+- threat model the new
+- before we start building
 - threat model
 - stride analysis
 - stride threat

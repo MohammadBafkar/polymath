@@ -4,6 +4,8 @@
 paths:
 - Dockerfile
 intents:
+- run the same on every machine
+- package it up so
 - write a dockerfile
 - dockerize the service
 - containerize the app

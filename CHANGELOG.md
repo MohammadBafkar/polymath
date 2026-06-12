@@ -31,6 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unknown mode values) are loud — SessionStart config-error lines,
   `config_errors` in `mode`/`status`, audited `config-error` events —
   instead of silently reading as `hint`.
+- **Evidence-driven routing coverage: 37 → 54 routable surfaces,
+  constrained-top-3 6/54 → 54/54.** Every constrained-top-3 miss in the
+  held-out corpus got signals a consumer can use: 33 existing sidecars
+  extended with naturalistic intents (shortlist-ranking only — intents
+  never fire the ambient hint, so precision 1.0 / FP 0 / reach are
+  unchanged), 15 new skill sidecars (qa unit-tests/coverage-gap,
+  engineering read-code, observability logging-strategy, sre
+  capacity-plan, frontend web-vitals-budget, mobile push-notifications,
+  learning explain, communication exec-brief, leadership okr-setting,
+  research interview-guide, data metrics-tree, performance
+  caching-tradeoffs, thinking pre-mortem, security
+  supply-chain-review), and the first two `kind: agent` sidecars
+  (research-scout, architecture-critic) with builder support
+  (`agents/<name>.routing.yaml`, definition-must-exist check). Note:
+  the corpus is now intent-mapped — new naturalistic cases must arrive
+  as true held-outs for the metric to measure generalization.
 - **Tiered workflow injection + HINT-BUDGET + PROFILE-2.** The
   SessionStart workflow index is tiered: Tier A (≤400-token block,
   enforced by `build-workflow-index.py` — the one budget owner, with a

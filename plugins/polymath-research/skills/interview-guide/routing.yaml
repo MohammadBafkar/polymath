@@ -1,0 +1,10 @@
+# Routing declaration for polymath-research:interview-guide (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \binterview guide\b
+intents:
+- what should i ask them
+- customer interviews
+- stopped using the

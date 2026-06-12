@@ -4,6 +4,9 @@
 paths:
 - .polymath/project.yaml
 intents:
+- actually understand what i'm asking
+- before you write any code
+- last attempt went sideways
 - intake this request
 - classify this request first
 - clarify the requirements before starting

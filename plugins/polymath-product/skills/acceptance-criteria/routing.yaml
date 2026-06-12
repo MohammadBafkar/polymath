@@ -4,6 +4,9 @@
 paths:
 - docs/prds/
 intents:
+- how we'll know
+- is actually done
+- definition of done
 - acceptance criteria
 - write acceptance criteria
 - define acceptance criteria

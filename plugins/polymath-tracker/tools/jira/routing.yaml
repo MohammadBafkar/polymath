@@ -8,6 +8,8 @@
 url:
 - https://[A-Za-z0-9.-]+\.atlassian\.net/browse/[A-Z][A-Z0-9_]+-[0-9]+
 intents:
+- ticket in our tracker
+- where the discussion landed
 - jira issue
 - jira ticket
 capabilities:

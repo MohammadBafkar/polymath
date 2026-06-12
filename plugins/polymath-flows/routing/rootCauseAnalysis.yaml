@@ -4,6 +4,9 @@
 paths:
 - docs/rca/
 intents:
+- what is actually causing
+- same symptom
+- not just patch it
 - root cause analysis
 - write an rca
 - drive to root cause

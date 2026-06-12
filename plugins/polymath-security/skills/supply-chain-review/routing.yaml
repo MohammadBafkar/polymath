@@ -1,0 +1,10 @@
+# Routing declaration for polymath-security:supply-chain-review (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bsupply[- ]chain\b
+intents:
+- third-party packages
+- what do we check before adding
+- dependency risk

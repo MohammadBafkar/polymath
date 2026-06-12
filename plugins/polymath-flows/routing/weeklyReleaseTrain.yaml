@@ -4,6 +4,8 @@
 paths:
 - docs/release-notes/
 intents:
+- out the door to production
+- this week's changes
 - cut a release
 - cut the release
 - release train

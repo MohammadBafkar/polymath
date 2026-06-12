@@ -4,6 +4,9 @@
 paths:
 - docs/adrs/
 intents:
+- capture that decision
+- capture this decision
+- document the decision we made
 - write an adr
 - record the decision
 - architecture decision record

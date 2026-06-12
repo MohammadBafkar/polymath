@@ -4,6 +4,9 @@
 paths:
 - docs/architecture/
 intents:
+- fits together
+- explains the moving parts
+- how the platform fits
 - write an architecture doc
 - architecture document
 - document the architecture

@@ -1,0 +1,10 @@
+# Routing declaration for polymath-data:metrics-tree (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bmetrics? tree\b
+intents:
+- which metric drives which
+- signups are flat
+- activation is down

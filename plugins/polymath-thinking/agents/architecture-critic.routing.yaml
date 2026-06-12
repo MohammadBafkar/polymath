@@ -1,0 +1,11 @@
+# Routing declaration for polymath-thinking:architecture-critic (agent). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+paths:
+- docs/adrs/
+intents:
+- poke holes in this design
+- challenge this adr
+- stress-test the architecture
+- adversarial design review

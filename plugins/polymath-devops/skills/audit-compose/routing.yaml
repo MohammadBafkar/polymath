@@ -6,6 +6,8 @@ paths:
 - compose.yaml
 - compose.yml
 intents:
+- local dev stack
+- why half of them exist
 - audit the compose file
 - review docker-compose
 - compose file review

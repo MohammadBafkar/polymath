@@ -4,6 +4,8 @@
 paths:
 - docs/rfcs/
 intents:
+- structured feedback
+- controversial proposal
 - draft an rfc
 - write an rfc
 - request for comments

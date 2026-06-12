@@ -4,6 +4,8 @@
 paths:
 - Dockerfile
 intents:
+- container image build
+- image for security problems
 - audit the dockerfile
 - review the dockerfile
 - dockerfile best practices

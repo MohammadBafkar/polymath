@@ -22,6 +22,8 @@
         "Directory.Packages.props"
       ],
       "intents": [
+        "versions behind",
+        "without breaking call sites",
         "upgrade the dependency",
         "bump the dependency",
         "update the dependency",
@@ -40,6 +42,9 @@
         "docs/decisions/"
       ],
       "intents": [
+        "structure the decision",
+        "in-house or buy",
+        "build or buy",
         "help me decide between",
         "decide between",
         "which should we choose",
@@ -59,6 +64,9 @@
         "docs/design/"
       ],
       "intents": [
+        "fit together",
+        "before we start coding",
+        "sketch out how",
         "design the system",
         "design a system",
         "system design for",
@@ -79,6 +87,8 @@
         "tsconfig.json"
       ],
       "intents": [
+        "end-of-life",
+        "move the codebase forward",
         "migrate to .net",
         "upgrade the runtime",
         "migrate the runtime",
@@ -97,6 +107,9 @@
         "docs/perf/"
       ],
       "intents": [
+        "find and fix the regression",
+        "slower after last week",
+        "latency roughly doubled",
         "performance regression",
         "perf regression",
         "got slower",
@@ -140,6 +153,9 @@
       ],
       "diff": true,
       "intents": [
+        "before i merge",
+        "review my refactor",
+        "correctness and edge cases",
         "review this pr",
         "review the pr",
         "review my pr",
@@ -160,6 +176,9 @@
         "docs/rca/"
       ],
       "intents": [
+        "what is actually causing",
+        "same symptom",
+        "not just patch it",
         "root cause analysis",
         "write an rca",
         "drive to root cause"
@@ -175,6 +194,9 @@
         "\\bGHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}\\b"
       ],
       "intents": [
+        "pen-tester found",
+        "pentest finding",
+        "proving the fix holds",
         "security finding",
         "fix the vulnerability",
         "fix this vuln",
@@ -191,6 +213,8 @@
         "docs/prds/"
       ],
       "intents": [
+        "built, tested, and released",
+        "spec is approved",
         "ship this feature",
         "ship the feature",
         "implement the prd",
@@ -208,6 +232,8 @@
         "docs/release-notes/"
       ],
       "intents": [
+        "out the door to production",
+        "this week's changes",
         "cut a release",
         "cut the release",
         "release train",
@@ -223,6 +249,9 @@
         "docs/prds/"
       ],
       "intents": [
+        "how we'll know",
+        "is actually done",
+        "definition of done",
         "acceptance criteria",
         "write acceptance criteria",
         "define acceptance criteria"
@@ -237,6 +266,9 @@
         "docs/adrs/"
       ],
       "intents": [
+        "capture that decision",
+        "capture this decision",
+        "document the decision we made",
         "write an adr",
         "record the decision",
         "architecture decision record",
@@ -252,6 +284,9 @@
         "docs/architecture/"
       ],
       "intents": [
+        "fits together",
+        "explains the moving parts",
+        "how the platform fits",
         "write an architecture doc",
         "architecture document",
         "document the architecture"
@@ -267,6 +302,8 @@
         "compose.yml"
       ],
       "intents": [
+        "local dev stack",
+        "why half of them exist",
         "audit the compose file",
         "review docker-compose",
         "compose file review"
@@ -280,9 +317,37 @@
         "Dockerfile"
       ],
       "intents": [
+        "container image build",
+        "image for security problems",
         "audit the dockerfile",
         "review the dockerfile",
         "dockerfile best practices"
+      ]
+    },
+    {
+      "id": "caching-tradeoffs",
+      "kind": "skill",
+      "surface": "polymath-performance:caching-tradeoffs",
+      "regex": [
+        "\\bcache invalidation\\b"
+      ],
+      "intents": [
+        "where should a cache live",
+        "go stale",
+        "hammer the database"
+      ]
+    },
+    {
+      "id": "capacity-plan",
+      "kind": "skill",
+      "surface": "polymath-sre:capacity-plan",
+      "regex": [
+        "\\bcapacity plan(ning)?\\b"
+      ],
+      "intents": [
+        "traffic triples",
+        "will the current cluster hold",
+        "what do we scale first"
       ]
     },
     {
@@ -291,6 +356,8 @@
       "surface": "polymath-release:changelog",
       "diff": true,
       "intents": [
+        "see what changed",
+        "next version goes out",
         "changelog entry",
         "update the changelog",
         "add to the changelog",
@@ -305,9 +372,28 @@
         ".github/workflows"
       ],
       "intents": [
+        "tests and linters automatically",
+        "before anyone can merge",
+        "every push should run",
         "set up github actions",
         "ci pipeline for",
         "github actions workflow"
+      ]
+    },
+    {
+      "id": "coverage-gap",
+      "kind": "skill",
+      "surface": "polymath-qa:coverage-gap",
+      "alt": "polymath-qa:unit-tests",
+      "paths": [
+        "coverage.xml",
+        ".coverage"
+      ],
+      "intents": [
+        "still untested",
+        "coverage gap",
+        "what behavior changes are",
+        "what's not tested"
       ]
     },
     {
@@ -319,6 +405,9 @@
         "docs/decisions/"
       ],
       "intents": [
+        "who actually decides",
+        "own the final call",
+        "who just needs a heads-up",
         "daci decision",
         "run a daci",
         "driver approver contributors informed"
@@ -332,9 +421,37 @@
         "Dockerfile"
       ],
       "intents": [
+        "run the same on every machine",
+        "package it up so",
         "write a dockerfile",
         "dockerize the service",
         "containerize the app"
+      ]
+    },
+    {
+      "id": "exec-brief",
+      "kind": "skill",
+      "surface": "polymath-communication:exec-brief",
+      "regex": [
+        "\\bexec(utive)? brief\\b"
+      ],
+      "intents": [
+        "make the case for",
+        "minutes with the cto",
+        "brief for leadership"
+      ]
+    },
+    {
+      "id": "explain",
+      "kind": "skill",
+      "surface": "polymath-learning:explain",
+      "paths": [
+        "docs/onboarding/"
+      ],
+      "intents": [
+        "to our new junior engineer",
+        "without drowning them in jargon",
+        "explain it simply"
       ]
     },
     {
@@ -346,9 +463,64 @@
         ".polymath/project.yaml"
       ],
       "intents": [
+        "actually understand what i'm asking",
+        "before you write any code",
+        "last attempt went sideways",
         "intake this request",
         "classify this request first",
         "clarify the requirements before starting"
+      ]
+    },
+    {
+      "id": "interview-guide",
+      "kind": "skill",
+      "surface": "polymath-research:interview-guide",
+      "regex": [
+        "\\binterview guide\\b"
+      ],
+      "intents": [
+        "what should i ask them",
+        "customer interviews",
+        "stopped using the"
+      ]
+    },
+    {
+      "id": "logging-strategy",
+      "kind": "skill",
+      "surface": "polymath-observability:logging-strategy",
+      "regex": [
+        "\\blog levels?\\b"
+      ],
+      "intents": [
+        "what we should actually log",
+        "silent or a firehose",
+        "logging strategy"
+      ]
+    },
+    {
+      "id": "metrics-tree",
+      "kind": "skill",
+      "surface": "polymath-data:metrics-tree",
+      "regex": [
+        "\\bmetrics? tree\\b"
+      ],
+      "intents": [
+        "which metric drives which",
+        "signups are flat",
+        "activation is down"
+      ]
+    },
+    {
+      "id": "okr-setting",
+      "kind": "skill",
+      "surface": "polymath-leadership:okr-setting",
+      "regex": [
+        "\\bOKRs?\\b"
+      ],
+      "intents": [
+        "planning season",
+        "goals we can actually measure",
+        "objectives and key results"
       ]
     },
     {
@@ -372,10 +544,52 @@
         "docs/prds/"
       ],
       "intents": [
+        "product requirements for",
+        "write the product requirements",
         "write a prd",
         "draft a prd",
         "product requirements doc",
         "product requirements document"
+      ]
+    },
+    {
+      "id": "pre-mortem",
+      "kind": "skill",
+      "surface": "polymath-thinking:pre-mortem",
+      "regex": [
+        "\\bpre-?mortems?\\b"
+      ],
+      "intents": [
+        "could blow up in our faces",
+        "ways this could fail",
+        "before we commit to the"
+      ]
+    },
+    {
+      "id": "push-notifications",
+      "kind": "skill",
+      "surface": "polymath-mobile:push-notifications",
+      "regex": [
+        "\\bpush notifications?\\b"
+      ],
+      "intents": [
+        "nudge users",
+        "turning notifications off",
+        "notification fatigue"
+      ]
+    },
+    {
+      "id": "read-code",
+      "kind": "skill",
+      "surface": "polymath-engineering:read-code",
+      "paths": [
+        "src/"
+      ],
+      "intents": [
+        "how it hangs together",
+        "lay of the land",
+        "just inherited the",
+        "walk me through this codebase"
       ]
     },
     {
@@ -387,6 +601,8 @@
         "docs/rfcs/"
       ],
       "intents": [
+        "structured feedback",
+        "controversial proposal",
         "draft an rfc",
         "write an rfc",
         "request for comments"
@@ -401,6 +617,8 @@
         "docs/roadmap"
       ],
       "intents": [
+        "deliver each quarter",
+        "quarterly roadmap",
         "build a roadmap",
         "draft the roadmap",
         "product roadmap"
@@ -414,6 +632,9 @@
         "docs/experiments/"
       ],
       "intents": [
+        "real evidence before",
+        "converts better",
+        "before we roll it out to everyone",
         "design an experiment",
         "experiment design",
         "a/b test plan"
@@ -427,6 +648,8 @@
         "docs/runbooks/"
       ],
       "intents": [
+        "whoever is on call",
+        "on call needs exact steps",
         "write a runbook",
         "draft a runbook",
         "operational runbook"
@@ -441,6 +664,8 @@
         ".polymath/project.yaml"
       ],
       "intents": [
+        "looks and feels like the rest",
+        "same layout, same test setup",
         "scaffold a new service",
         "scaffold a new component",
         "add a new module like the existing ones",
@@ -455,6 +680,8 @@
         "docs/slos/"
       ],
       "intents": [
+        "how reliable does",
+        "put a number on",
         "design an slo",
         "define an slo",
         "service level objective"
@@ -468,6 +695,9 @@
         "EXPLAIN ANALYZE"
       ],
       "intents": [
+        "reporting query",
+        "query is slow",
+        "speed up this query",
         "optimize this query",
         "slow query",
         "explain analyze output"
@@ -481,9 +711,54 @@
         "docs/threat-models/"
       ],
       "intents": [
+        "threat-model",
+        "threat model the new",
+        "before we start building",
         "threat model",
         "stride analysis",
         "stride threat"
+      ]
+    },
+    {
+      "id": "supply-chain-review",
+      "kind": "skill",
+      "surface": "polymath-security:supply-chain-review",
+      "regex": [
+        "\\bsupply[- ]chain\\b"
+      ],
+      "intents": [
+        "third-party packages",
+        "what do we check before adding",
+        "dependency risk"
+      ]
+    },
+    {
+      "id": "unit-tests",
+      "kind": "skill",
+      "surface": "polymath-qa:unit-tests",
+      "alt": "polymath-qa:coverage-gap",
+      "paths": [
+        "tests/"
+      ],
+      "intents": [
+        "write tests for",
+        "write unit tests",
+        "edge cases around",
+        "add test coverage for"
+      ]
+    },
+    {
+      "id": "web-vitals-budget",
+      "kind": "skill",
+      "surface": "polymath-frontend:web-vitals-budget",
+      "regex": [
+        "\\b(LCP|INP|CLS)\\b",
+        "\\bweb vitals\\b"
+      ],
+      "intents": [
+        "sluggish on phones",
+        "performance targets per page",
+        "performance budget"
       ]
     },
     {
@@ -508,6 +783,9 @@
         "docs/plans/"
       ],
       "intents": [
+        "implementation plan with steps",
+        "concrete implementation plan",
+        "rough estimates",
         "write a plan",
         "draft a plan",
         "write the implementation plan"
@@ -521,6 +799,8 @@
         "https://[A-Za-z0-9.-]+\\.atlassian\\.net/browse/[A-Z][A-Z0-9_]+-[0-9]+"
       ],
       "intents": [
+        "ticket in our tracker",
+        "where the discussion landed",
         "jira issue",
         "jira ticket"
       ]
@@ -533,6 +813,8 @@
         "https://linear\\.app/[A-Za-z0-9_-]+/issue/[A-Z][A-Z0-9_]+-[0-9]+"
       ],
       "intents": [
+        "grab the issue",
+        "issue our pm filed",
         "linear issue",
         "linear ticket"
       ]
@@ -546,8 +828,37 @@
         "https://[A-Za-z0-9.-]+/organizations/[A-Za-z0-9_-]+/issues/[0-9]+"
       ],
       "intents": [
+        "error tracker",
+        "spike in null-reference",
         "sentry issue",
         "sentry error"
+      ]
+    },
+    {
+      "id": "architecture-critic",
+      "kind": "agent",
+      "surface": "polymath-thinking:architecture-critic",
+      "paths": [
+        "docs/adrs/"
+      ],
+      "intents": [
+        "poke holes in this design",
+        "challenge this adr",
+        "stress-test the architecture",
+        "adversarial design review"
+      ]
+    },
+    {
+      "id": "research-scout",
+      "kind": "agent",
+      "surface": "polymath-research:research-scout",
+      "regex": [
+        "\\bprimary[- ]sources?\\b"
+      ],
+      "intents": [
+        "scout the evidence",
+        "find primary-source evidence",
+        "verify this claim against sources"
       ]
     }
   ],

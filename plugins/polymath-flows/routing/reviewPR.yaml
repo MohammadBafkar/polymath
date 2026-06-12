@@ -7,6 +7,9 @@ url:
 - dev\.azure\.com/[^\s]+/pullrequest/\d+
 diff: true
 intents:
+- before i merge
+- review my refactor
+- correctness and edge cases
 - review this pr
 - review the pr
 - review my pr

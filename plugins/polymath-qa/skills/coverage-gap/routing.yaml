@@ -1,0 +1,13 @@
+# Routing declaration for polymath-qa:coverage-gap (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+paths:
+- coverage.xml
+- .coverage
+intents:
+- still untested
+- coverage gap
+- what behavior changes are
+- what's not tested
+alt: polymath-qa:unit-tests

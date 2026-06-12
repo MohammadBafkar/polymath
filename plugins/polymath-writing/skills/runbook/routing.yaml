@@ -4,6 +4,8 @@
 paths:
 - docs/runbooks/
 intents:
+- whoever is on call
+- on call needs exact steps
 - write a runbook
 - draft a runbook
 - operational runbook

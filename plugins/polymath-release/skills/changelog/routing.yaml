@@ -3,6 +3,8 @@
 # Schema: registry/schemas/surface-routing.schema.json
 diff: true
 intents:
+- see what changed
+- next version goes out
 - changelog entry
 - update the changelog
 - add to the changelog

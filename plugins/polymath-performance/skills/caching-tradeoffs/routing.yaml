@@ -1,0 +1,10 @@
+# Routing declaration for polymath-performance:caching-tradeoffs (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bcache invalidation\b
+intents:
+- where should a cache live
+- go stale
+- hammer the database

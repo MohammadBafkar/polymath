@@ -1,0 +1,10 @@
+# Routing declaration for polymath-communication:exec-brief (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \bexec(utive)? brief\b
+intents:
+- make the case for
+- minutes with the cto
+- brief for leadership

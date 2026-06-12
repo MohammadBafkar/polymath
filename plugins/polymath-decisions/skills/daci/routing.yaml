@@ -4,6 +4,9 @@
 paths:
 - docs/decisions/
 intents:
+- who actually decides
+- own the final call
+- who just needs a heads-up
 - daci decision
 - run a daci
 - driver approver contributors informed

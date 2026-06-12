@@ -4,6 +4,8 @@
 paths:
 - .polymath/project.yaml
 intents:
+- looks and feels like the rest
+- same layout, same test setup
 - scaffold a new service
 - scaffold a new component
 - add a new module like the existing ones

@@ -4,6 +4,9 @@
 paths:
 - docs/perf/
 intents:
+- find and fix the regression
+- slower after last week
+- latency roughly doubled
 - performance regression
 - perf regression
 - got slower

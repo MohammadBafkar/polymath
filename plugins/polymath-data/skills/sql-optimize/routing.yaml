@@ -4,6 +4,9 @@
 paths:
 - EXPLAIN ANALYZE
 intents:
+- reporting query
+- query is slow
+- speed up this query
 - optimize this query
 - slow query
 - explain analyze output

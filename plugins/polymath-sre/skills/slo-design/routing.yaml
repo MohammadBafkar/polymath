@@ -4,6 +4,8 @@
 paths:
 - docs/slos/
 intents:
+- how reliable does
+- put a number on
 - design an slo
 - define an slo
 - service level objective

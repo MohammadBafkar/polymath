@@ -4,6 +4,9 @@
 paths:
 - .github/workflows
 intents:
+- tests and linters automatically
+- before anyone can merge
+- every push should run
 - set up github actions
 - ci pipeline for
 - github actions workflow

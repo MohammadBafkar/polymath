@@ -1,0 +1,11 @@
+# Routing declaration for polymath-frontend:web-vitals-budget (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \b(LCP|INP|CLS)\b
+- \bweb vitals\b
+intents:
+- sluggish on phones
+- performance targets per page
+- performance budget

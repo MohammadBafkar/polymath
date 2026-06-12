@@ -3,6 +3,8 @@
 url:
 - https://linear\.app/[A-Za-z0-9_-]+/issue/[A-Z][A-Z0-9_]+-[0-9]+
 intents:
+- grab the issue
+- issue our pm filed
 - linear issue
 - linear ticket
 capabilities:

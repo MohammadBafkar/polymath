@@ -1,0 +1,10 @@
+# Routing declaration for polymath-learning:explain (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+paths:
+- docs/onboarding/
+intents:
+- to our new junior engineer
+- without drowning them in jargon
+- explain it simply

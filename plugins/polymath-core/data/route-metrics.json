@@ -27,9 +27,9 @@
     "reach": 0.0185
   },
   "constrained": {
-    "top3": 6,
+    "top3": 54,
     "cases": 54,
-    "ratio": 0.1111
+    "ratio": 1.0
   },
   "partial_install": {
     "cases": 2,

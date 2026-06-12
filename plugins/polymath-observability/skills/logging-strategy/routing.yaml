@@ -1,0 +1,10 @@
+# Routing declaration for polymath-observability:logging-strategy (skill). Compiled into
+# route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+schemaVersion: 1
+regex:
+- \blog levels?\b
+intents:
+- what we should actually log
+- silent or a firehose
+- logging strategy

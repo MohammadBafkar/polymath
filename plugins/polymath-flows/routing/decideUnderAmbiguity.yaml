@@ -5,6 +5,9 @@ paths:
 - docs/adrs/
 - docs/decisions/
 intents:
+- structure the decision
+- in-house or buy
+- build or buy
 - help me decide between
 - decide between
 - which should we choose
