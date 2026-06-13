@@ -1,0 +1,17 @@
+# Routing declaration for polymath-architecture:design-patterns-apply (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- SOLID principle
+- god object
+- anemic domain model
+intents:
+- which design pattern fits
+- is this over-engineered
+- check this against SOLID
+- flag the anti-patterns in this design
+not_intents:
+- review this diff
+- review the pull request
+alt: polymath-engineering:code-review

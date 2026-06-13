@@ -4,8 +4,10 @@ Backend craft for the Polymath marketplace. Database/runtime/language-agnostic p
 
 ## What it ships
 
-- Skills: `api-design-rest`, `db-schema`, `migration-plan`, `review-migration`, `audit-pg-config`.
+- Skills: `api-design-rest`, `api-versioning`, `db-schema`, `migration-plan`, `review-migration`, `audit-pg-config`.
 - Commands: `/review-migration`, `/audit-config` (thin aliases).
+
+`api-versioning` (strategy for evolving a shipped API — mechanism, breaking-change rules, consumer-driven contracts, deprecation path) sits next to `api-design-rest`; the deprecation *notice* and *migration guide* artifacts stay in `polymath-release`.
 
 `review-migration` and `audit-pg-config` (Postgres migration safety + config
 audit) live next to `db-schema` and `migration-plan` rather than in a separate

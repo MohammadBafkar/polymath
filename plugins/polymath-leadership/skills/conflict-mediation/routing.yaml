@@ -1,0 +1,14 @@
+# Routing declaration for polymath-leadership:conflict-mediation (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- team conflict
+- difficult conversation
+- interpersonal conflict
+intents:
+- resolve the team conflict
+- two engineers disagree
+- prepare a difficult conversation
+- mediate the dispute
+alt: polymath-decisions:daci

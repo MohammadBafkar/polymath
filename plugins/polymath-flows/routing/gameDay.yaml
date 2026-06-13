@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow gameDay (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/gamedays/
+intents:
+- run a game day
+- plan a chaos game day
+- resilience game day exercise
+- controlled-failure game day
+alt: polymath-sre:chaos-experiment

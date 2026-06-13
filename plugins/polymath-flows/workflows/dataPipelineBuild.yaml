@@ -1,0 +1,80 @@
+schemaVersion: 0.1
+name: dataPipelineBuild
+version: 0.1.0
+description: Build a data pipeline end to end — model the target tables, design the idempotent pipeline, then verify the load and data-quality gates.
+whenToUse: "Model, build, and verify a data pipeline."
+triggers:
+  - "build a data pipeline from"
+  - "set up the etl into our warehouse"
+  - "ingest this source into the lakehouse"
+  - "design and build the pipeline and tables"
+detectionSignals:
+  paths:
+    - "docs/data/**"
+  intents:
+    - "data pipeline"
+    - "etl"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-streaming
+    - polymath-engineering
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the pipeline (drives the slug).
+  - name: source
+    type: string
+    required: true
+    description: The source(s) being ingested (DB, events, files, API).
+  - name: destination
+    type: string
+    required: true
+    description: The destination warehouse/lake and the analytical questions it must serve.
+guards:
+  - id: data-dir
+    type: command
+    command: mkdir -p docs/data && [ -w docs/data ]
+steps:
+  - id: model
+    invoke: polymath-streaming:data-modeling
+    prompt: |
+      Model the target tables in ${inputs.destination} for the questions it must answer. State the grain of
+      every fact, conform dimensions (with SCD type), choose partitioning, and pick the layering
+      (dimensional or medallion). Save docs/data/${workflow.slug}-model.md.
+    artifacts:
+      - docs/data/${workflow.slug}-model.md
+  - id: pipeline
+    invoke: polymath-streaming:data-pipeline
+    prompt: |
+      Design the pipeline from ${inputs.source} into the modeled tables: ETL vs ELT, batch vs streaming by
+      the freshness need, the orchestration DAG with idempotent steps, the backfill procedure, schema-drift
+      handling, and the data-quality assertions that gate each boundary. Save docs/data/${workflow.slug}-pipeline.md.
+    needs: [model]
+    artifacts:
+      - docs/data/${workflow.slug}-pipeline.md
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: |
+      Verify the pipeline implementation: a re-run of a window is idempotent (no dupes/loss), the
+      data-quality assertions fire on bad input, and a backfill of a sample range produces identical
+      output. The summary must include "test" or "verified".
+    needs: [pipeline]
+mustPass:
+  - id: model-exists
+    type: fileExists
+    path: docs/data/${workflow.slug}-model.md
+  - id: pipeline-exists
+    type: fileExists
+    path: docs/data/${workflow.slug}-pipeline.md
+  - id: pipeline-names-idempotency
+    type: fileMatches
+    severity: advisory
+    path: docs/data/${workflow.slug}-pipeline.md
+    pattern: "(idempoten|backfill|data.quality)"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    severity: advisory
+    step: verify
+    pattern: "(test|tests|verified|idempotent)"

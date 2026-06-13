@@ -1,0 +1,15 @@
+# Routing declaration for polymath-security:auth-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- oauth ?2?
+- \boidc\b
+- \b(rbac|abac)\b
+- single sign-on
+intents:
+- design the authentication
+- which oauth flow
+- rbac or abac
+- jwt or session tokens
+alt: polymath-security:owasp-review

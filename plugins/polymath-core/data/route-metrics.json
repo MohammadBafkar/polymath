@@ -20,11 +20,11 @@
     "false_positives": 0
   },
   "naturalistic": {
-    "fired": 1,
+    "fired": 2,
     "expected_fire": 1,
     "miss": 0,
     "misroute": 0,
-    "reach": 0.0185
+    "reach": 0.037
   },
   "constrained": {
     "top3": 54,

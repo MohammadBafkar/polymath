@@ -1,5 +1,14 @@
 # Changelog — polymath-backend
 
+## [0.4.0]
+
+### Added
+
+- `api-versioning` skill (whetstone-coverage program, P5): API versioning strategy —
+  mechanism choice (URL/header/media-type), breaking vs compatible classification,
+  consumer-driven contracts, and the parallel-support + deprecation path. Soft-tier
+  `routing.yaml`. Deprecation notices/migration guides remain in `polymath-release`.
+
 ## [Unreleased]
 
 ### Added

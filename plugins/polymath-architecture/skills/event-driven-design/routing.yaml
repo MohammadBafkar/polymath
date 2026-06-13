@@ -1,0 +1,14 @@
+# Routing declaration for polymath-architecture:event-driven-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- (transactional )?outbox pattern
+- saga pattern
+- choreography (vs|or) orchestration
+intents:
+- design the event flow
+- choreography versus orchestration
+- events between services
+- design the saga and compensation
+alt: polymath-architecture:integration-design

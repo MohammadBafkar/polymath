@@ -1,0 +1,15 @@
+# Routing declaration for polymath-iac:terraform-state (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- terraform state
+- remote backend
+- state locking
+- terraform.{0,8}drift
+intents:
+- set up the terraform backend
+- split the terraform state
+- terraform state surgery
+- detect infrastructure drift
+alt: polymath-iac:terraform-module

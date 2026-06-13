@@ -1,0 +1,17 @@
+# Routing declaration for polymath-streaming:stream-processing (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- \bflink\b
+- watermark
+- tumbling|sliding window
+- stream processing
+intents:
+- window the stream
+- handle late events
+- stateful stream processing
+- aggregate over the event stream
+not_intents:
+- partition key
+alt: polymath-streaming:streaming-design

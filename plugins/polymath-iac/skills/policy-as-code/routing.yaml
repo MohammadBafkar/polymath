@@ -1,0 +1,15 @@
+# Routing declaration for polymath-iac:policy-as-code (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- policy.as.code
+- \brego\b
+- (checkov|tfsec|conftest)
+- sentinel policy
+intents:
+- enforce infrastructure policy
+- policy as code for terraform
+- block misconfigured infrastructure
+- guardrails for terraform
+alt: polymath-security:devsecops-pipeline

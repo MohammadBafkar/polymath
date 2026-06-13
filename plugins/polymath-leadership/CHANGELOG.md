@@ -1,5 +1,15 @@
 # Changelog — polymath-leadership
 
+## [0.4.0]
+
+### Added
+
+- Three people-leadership skills (whetstone-coverage program, P5): `hiring-loop`
+  (scorecard, structured stages, calibrated evidence-based debrief), `conflict-mediation`
+  (positions→interests, difficult conversations, concrete commitments), and
+  `coaching-plan` (next-level gap, growth reps, sponsorship vs mentoring, cadence). Each
+  declares a soft-tier `routing.yaml`.
+
 ## [0.1.0]
 
 ### Added

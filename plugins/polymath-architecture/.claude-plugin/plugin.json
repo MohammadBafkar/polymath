@@ -1,0 +1,25 @@
+{
+  "name": "polymath-architecture",
+  "version": "0.7.0",
+  "description": "Software architecture design craft: DDD context mapping + aggregates, event-driven and integration design, resilience patterns, service decomposition, distributed consistency, and design-pattern application.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core",
+    "polymath-decisions",
+    "polymath-writing",
+    "polymath-thinking"
+  ],
+  "keywords": [
+    "architecture",
+    "ddd",
+    "event-driven",
+    "microservices",
+    "resilience",
+    "distributed-systems",
+    "patterns"
+  ]
+}

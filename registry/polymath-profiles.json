@@ -18,7 +18,7 @@
         "polymath-release",
         "polymath-vcs"
       ],
-      "alwaysOnBudget": 1950
+      "alwaysOnBudget": 2250
     },
     "frontend": {
       "title": "Frontend / web engineer",
@@ -77,6 +77,7 @@
       "for": "Thinking, architecture, decisions, planning, and review across the SDLC.",
       "plugins": [
         "polymath-thinking",
+        "polymath-architecture",
         "polymath-decisions",
         "polymath-writing",
         "polymath-planning",
@@ -84,7 +85,7 @@
         "polymath-communication",
         "polymath-leadership"
       ],
-      "alwaysOnBudget": 2150
+      "alwaysOnBudget": 2650
     },
     "author": {
       "title": "Polymath plugin author",

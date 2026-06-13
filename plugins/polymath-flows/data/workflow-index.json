@@ -30,6 +30,26 @@
     ]
   },
   {
+    "n": "capacityReview",
+    "w": "Forecast demand, size capacity, plan provisioning.",
+    "t": [
+      "do a capacity review",
+      "will we run out of capacity before",
+      "forecast and plan our capacity",
+      "capacity plan for the upcoming growth"
+    ]
+  },
+  {
+    "n": "dataPipelineBuild",
+    "w": "Model, build, and verify a data pipeline.",
+    "t": [
+      "build a data pipeline from",
+      "set up the etl into our warehouse",
+      "ingest this source into the lakehouse",
+      "design and build the pipeline and tables"
+    ]
+  },
+  {
     "n": "decideUnderAmbiguity",
     "w": "Frame a hard decision, govern it, record an ADR.",
     "t": [
@@ -80,6 +100,16 @@
     ]
   },
   {
+    "n": "evalDrivenDevelopment",
+    "w": "Define evals first, then build the LLM feature to pass them.",
+    "t": [
+      "build this llm feature eval-first",
+      "set up evals before we change the prompt",
+      "eval-driven development for this agent",
+      "define the eval suite then implement"
+    ]
+  },
+  {
     "n": "experimentToGA",
     "w": "A/B + flag rollout from pre-registration to GA.",
     "t": [
@@ -110,6 +140,16 @@
     ]
   },
   {
+    "n": "gameDay",
+    "w": "Design, run, and learn from a chaos game day.",
+    "t": [
+      "run a game day",
+      "design a chaos experiment for",
+      "test our resilience with a controlled failure",
+      "game day for the failover"
+    ]
+  },
+  {
     "n": "incidentRetroToActions",
     "w": "Turn a postmortem into filed action tickets.",
     "t": [
@@ -127,6 +167,16 @@
       "migrate to the new language version",
       "bump the language version across the repo",
       "do a phased runtime migration"
+    ]
+  },
+  {
+    "n": "migrationPlaybook",
+    "w": "Assess, plan, guide, and safely roll out a migration.",
+    "t": [
+      "plan the migration off the old system",
+      "strangler-fig migration playbook",
+      "migrate consumers to the new service safely",
+      "phased migration plan and rollout"
     ]
   },
   {
@@ -248,6 +298,16 @@
       "deprecate this with a customer notice",
       "add deprecation warnings and a sunset notice",
       "write the sunset notice and deprecate"
+    ]
+  },
+  {
+    "n": "techDebtPaydown",
+    "w": "Find, plan, and pay down technical debt.",
+    "t": [
+      "pay down our tech debt",
+      "find and address our technical debt",
+      "tackle the tech debt in this area",
+      "make a technical-debt paydown plan and start it"
     ]
   },
   {

@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow evalDrivenDevelopment (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/evals/
+intents:
+- eval-driven development
+- define evals then build
+- build the llm feature eval-first
+- eval-first workflow for the model
+alt: polymath-ai:eval-plan

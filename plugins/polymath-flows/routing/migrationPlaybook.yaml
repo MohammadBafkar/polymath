@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow migrationPlaybook (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/migrations/
+intents:
+- run the migration playbook
+- assess plan and roll out a migration
+- phased cutover plan
+- migrate off the old system safely
+alt: polymath-architecture:service-decomposition

@@ -1,0 +1,14 @@
+# Routing declaration for polymath-architecture:service-decomposition (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- strangler (fig|pattern)
+- monolith decomposition
+- modular monolith
+intents:
+- split the monolith
+- extract a microservice
+- find the service boundaries
+- should we split this into services
+alt: polymath-architecture:bounded-context-map

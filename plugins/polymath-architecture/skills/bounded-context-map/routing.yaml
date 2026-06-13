@@ -1,0 +1,16 @@
+# Routing declaration for polymath-architecture:bounded-context-map (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- bounded context
+- context map(ping)?
+- ubiquitous language
+intents:
+- map the bounded contexts
+- split the domain into bounded contexts
+- define the ubiquitous language
+- draw a context map
+not_intents:
+- design the aggregate
+alt: polymath-architecture:aggregate-design

@@ -1,0 +1,17 @@
+# Routing declaration for polymath-architecture:distributed-consistency (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- CAP theorem
+- PACELC
+- linearizab(le|ility)
+- (strong|eventual) consistency
+intents:
+- which consistency model
+- strong versus eventual consistency
+- do we need consensus
+- keep these in sync across nodes
+not_intents:
+- aggregate root
+alt: polymath-architecture:event-driven-design

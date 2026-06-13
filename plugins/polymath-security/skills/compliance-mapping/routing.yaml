@@ -1,0 +1,15 @@
+# Routing declaration for polymath-security:compliance-mapping (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- soc ?2
+- iso ?27001
+- \bgdpr\b
+- \bhipaa\b
+intents:
+- map the compliance controls
+- soc 2 readiness
+- what controls do we need for
+- audit evidence for the framework
+alt: polymath-security:stride-threat-model

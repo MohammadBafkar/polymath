@@ -1,0 +1,22 @@
+{
+  "name": "polymath-iac",
+  "version": "0.7.0",
+  "description": "Infrastructure-as-Code craft: Terraform module authoring, state/backends/drift, policy-as-code guardrails, and IaC plan/diff review.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core",
+    "polymath-cloud"
+  ],
+  "keywords": [
+    "iac",
+    "terraform",
+    "state",
+    "policy-as-code",
+    "opa",
+    "infrastructure"
+  ]
+}

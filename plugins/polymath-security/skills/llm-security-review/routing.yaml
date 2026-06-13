@@ -1,0 +1,16 @@
+# Routing declaration for polymath-security:llm-security-review (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+# Audit-framed signals; "prompt injection"/"jailbreak"/"guardrail" belong to
+# polymath-ai:llm-guardrails (design the controls) — kept distinct on purpose.
+tier: soft
+regex:
+- owasp.{0,5}llm
+- llm top.?10
+- (audit|review|secure).{0,12}llm
+intents:
+- audit the llm for security
+- owasp llm top 10
+- is this llm app secure
+- secure the rag pipeline
+alt: polymath-ai:llm-guardrails

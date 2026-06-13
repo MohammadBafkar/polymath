@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow techDebtPaydown (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/tech-debt/
+intents:
+- run a tech-debt paydown
+- find plan and fix tech debt
+- pay down debt end to end
+- tech-debt paydown workflow
+alt: polymath-engineering:tech-debt-management

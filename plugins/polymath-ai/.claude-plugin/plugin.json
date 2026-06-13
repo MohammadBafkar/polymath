@@ -1,7 +1,7 @@
 {
   "name": "polymath-ai",
-  "version": "0.3.0",
-  "description": "AI craft: prompt engineering, RAG architecture, eval-plan design; vendor-agnostic principles applicable across model providers.",
+  "version": "0.7.0",
+  "description": "AI craft: prompt engineering, RAG, eval design, agent design, LLM guardrails, and cost/latency tuning; vendor-agnostic across model providers.",
   "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
@@ -15,6 +15,8 @@
     "llm",
     "prompt",
     "rag",
-    "eval"
+    "eval",
+    "agents",
+    "guardrails"
   ]
 }

@@ -1,0 +1,14 @@
+# Routing declaration for polymath-leadership:coaching-plan (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- coaching plan
+- growth plan
+- career development
+intents:
+- build a growth plan
+- help this report grow
+- coaching plan for the engineer
+- how do they get to the next level
+alt: polymath-leadership:one-on-one-prep

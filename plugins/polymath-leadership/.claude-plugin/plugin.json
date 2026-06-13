@@ -1,7 +1,7 @@
 {
   "name": "polymath-leadership",
-  "version": "0.3.0",
-  "description": "Leadership craft: 1:1 prep, performance review authoring, OKR setting.",
+  "version": "0.7.0",
+  "description": "Leadership craft: 1:1 prep, performance reviews, OKR setting, hiring-loop design, conflict mediation, coaching/growth plans.",
   "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
@@ -14,6 +14,8 @@
     "leadership",
     "1on1",
     "perf-review",
-    "okr"
+    "okr",
+    "hiring",
+    "coaching"
   ]
 }

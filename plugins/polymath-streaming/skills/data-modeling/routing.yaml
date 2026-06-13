@@ -1,0 +1,15 @@
+# Routing declaration for polymath-streaming:data-modeling (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- (star|snowflake) schema
+- dimensional model
+- medallion (architecture|layer)
+- slowly.changing dimension
+intents:
+- model the warehouse tables
+- star schema or normalized
+- what is the grain of this fact
+- design the dimensional model
+alt: polymath-backend:db-schema

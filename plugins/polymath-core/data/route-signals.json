@@ -34,6 +34,36 @@
       "tier": "hard"
     },
     {
+      "id": "capacityReview",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow capacityReview",
+      "alt": "polymath-sre:demand-forecast",
+      "paths": [
+        "docs/capacity/"
+      ],
+      "intents": [
+        "run a capacity review",
+        "forecast size and plan capacity",
+        "capacity review for the service",
+        "end to end capacity planning"
+      ]
+    },
+    {
+      "id": "dataPipelineBuild",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow dataPipelineBuild",
+      "alt": "polymath-streaming:data-pipeline",
+      "paths": [
+        "docs/data/"
+      ],
+      "intents": [
+        "build the data pipeline end to end",
+        "model and build the pipeline",
+        "stand up the etl pipeline",
+        "pipeline from source to warehouse"
+      ]
+    },
+    {
       "id": "decideUnderAmbiguity",
       "kind": "workflow",
       "surface": "polymath-flows:run-workflow decideUnderAmbiguity",
@@ -76,6 +106,36 @@
       ]
     },
     {
+      "id": "evalDrivenDevelopment",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow evalDrivenDevelopment",
+      "alt": "polymath-ai:eval-plan",
+      "paths": [
+        "docs/evals/"
+      ],
+      "intents": [
+        "eval-driven development",
+        "define evals then build",
+        "build the llm feature eval-first",
+        "eval-first workflow for the model"
+      ]
+    },
+    {
+      "id": "gameDay",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow gameDay",
+      "alt": "polymath-sre:chaos-experiment",
+      "paths": [
+        "docs/gamedays/"
+      ],
+      "intents": [
+        "run a game day",
+        "plan a chaos game day",
+        "resilience game day exercise",
+        "controlled-failure game day"
+      ]
+    },
+    {
       "id": "migrateLanguageVersion",
       "kind": "workflow",
       "surface": "polymath-flows:run-workflow migrateLanguageVersion",
@@ -97,6 +157,21 @@
         "migrate to go 1",
         "bump the language version",
         "upgrade node to"
+      ]
+    },
+    {
+      "id": "migrationPlaybook",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow migrationPlaybook",
+      "alt": "polymath-architecture:service-decomposition",
+      "paths": [
+        "docs/migrations/"
+      ],
+      "intents": [
+        "run the migration playbook",
+        "assess plan and roll out a migration",
+        "phased cutover plan",
+        "migrate off the old system safely"
       ]
     },
     {
@@ -227,6 +302,21 @@
       ]
     },
     {
+      "id": "techDebtPaydown",
+      "kind": "workflow",
+      "surface": "polymath-flows:run-workflow techDebtPaydown",
+      "alt": "polymath-engineering:tech-debt-management",
+      "paths": [
+        "docs/tech-debt/"
+      ],
+      "intents": [
+        "run a tech-debt paydown",
+        "find plan and fix tech debt",
+        "pay down debt end to end",
+        "tech-debt paydown workflow"
+      ]
+    },
+    {
       "id": "weeklyReleaseTrain",
       "kind": "workflow",
       "surface": "polymath-flows:run-workflow weeklyReleaseTrain",
@@ -285,6 +375,61 @@
       "tier": "hard"
     },
     {
+      "id": "agent-design",
+      "kind": "skill",
+      "surface": "polymath-ai:agent-design",
+      "alt": "polymath-ai:prompt-engineer",
+      "regex": [
+        "agentic (workflow|loop|system)",
+        "multi-agent",
+        "plan.and.execute",
+        "tool-calling (agent|loop)"
+      ],
+      "intents": [
+        "design the agent",
+        "agent architecture for",
+        "should this be multi-agent",
+        "give the agent tools and a stop condition"
+      ]
+    },
+    {
+      "id": "aggregate-design",
+      "kind": "skill",
+      "surface": "polymath-architecture:aggregate-design",
+      "alt": "polymath-architecture:bounded-context-map",
+      "regex": [
+        "aggregate root",
+        "aggregate boundar(y|ies)"
+      ],
+      "intents": [
+        "design the aggregate",
+        "what are the aggregate boundaries",
+        "model the entities and value objects",
+        "enforce the invariant in one place"
+      ],
+      "not_intents": [
+        "across nodes",
+        "across regions"
+      ]
+    },
+    {
+      "id": "api-versioning",
+      "kind": "skill",
+      "surface": "polymath-backend:api-versioning",
+      "alt": "polymath-release:deprecation-plan",
+      "regex": [
+        "api versioning",
+        "consumer-driven contract",
+        "version (the|our) api"
+      ],
+      "intents": [
+        "how should we version the api",
+        "is this a breaking api change",
+        "url or header versioning",
+        "deprecate the old api version"
+      ]
+    },
+    {
       "id": "architecture-doc",
       "kind": "skill",
       "surface": "polymath-writing:architecture-doc",
@@ -334,6 +479,44 @@
         "dockerfile best practices"
       ],
       "tier": "hard"
+    },
+    {
+      "id": "auth-design",
+      "kind": "skill",
+      "surface": "polymath-security:auth-design",
+      "alt": "polymath-security:owasp-review",
+      "regex": [
+        "oauth ?2?",
+        "\\boidc\\b",
+        "\\b(rbac|abac)\\b",
+        "single sign-on"
+      ],
+      "intents": [
+        "design the authentication",
+        "which oauth flow",
+        "rbac or abac",
+        "jwt or session tokens"
+      ]
+    },
+    {
+      "id": "bounded-context-map",
+      "kind": "skill",
+      "surface": "polymath-architecture:bounded-context-map",
+      "alt": "polymath-architecture:aggregate-design",
+      "regex": [
+        "bounded context",
+        "context map(ping)?",
+        "ubiquitous language"
+      ],
+      "intents": [
+        "map the bounded contexts",
+        "split the domain into bounded contexts",
+        "define the ubiquitous language",
+        "draw a context map"
+      ],
+      "not_intents": [
+        "design the aggregate"
+      ]
     },
     {
       "id": "caching-tradeoffs",
@@ -393,6 +576,58 @@
       ]
     },
     {
+      "id": "coaching-plan",
+      "kind": "skill",
+      "surface": "polymath-leadership:coaching-plan",
+      "alt": "polymath-leadership:one-on-one-prep",
+      "regex": [
+        "coaching plan",
+        "growth plan",
+        "career development"
+      ],
+      "intents": [
+        "build a growth plan",
+        "help this report grow",
+        "coaching plan for the engineer",
+        "how do they get to the next level"
+      ]
+    },
+    {
+      "id": "compliance-mapping",
+      "kind": "skill",
+      "surface": "polymath-security:compliance-mapping",
+      "alt": "polymath-security:stride-threat-model",
+      "regex": [
+        "soc ?2",
+        "iso ?27001",
+        "\\bgdpr\\b",
+        "\\bhipaa\\b"
+      ],
+      "intents": [
+        "map the compliance controls",
+        "soc 2 readiness",
+        "what controls do we need for",
+        "audit evidence for the framework"
+      ]
+    },
+    {
+      "id": "conflict-mediation",
+      "kind": "skill",
+      "surface": "polymath-leadership:conflict-mediation",
+      "alt": "polymath-decisions:daci",
+      "regex": [
+        "team conflict",
+        "difficult conversation",
+        "interpersonal conflict"
+      ],
+      "intents": [
+        "resolve the team conflict",
+        "two engineers disagree",
+        "prepare a difficult conversation",
+        "mediate the dispute"
+      ]
+    },
+    {
       "id": "coverage-gap",
       "kind": "skill",
       "surface": "polymath-qa:coverage-gap",
@@ -406,6 +641,24 @@
         "coverage gap",
         "what behavior changes are",
         "what's not tested"
+      ]
+    },
+    {
+      "id": "crypto-review",
+      "kind": "skill",
+      "surface": "polymath-security:crypto-review",
+      "alt": "polymath-security:auth-design",
+      "regex": [
+        "encryption at rest",
+        "key rotation",
+        "key management service",
+        "\\bKMS\\b"
+      ],
+      "intents": [
+        "review the encryption",
+        "how should we manage keys",
+        "which encryption algorithm",
+        "is this crypto safe"
       ]
     },
     {
@@ -426,6 +679,118 @@
       ]
     },
     {
+      "id": "data-modeling",
+      "kind": "skill",
+      "surface": "polymath-streaming:data-modeling",
+      "alt": "polymath-backend:db-schema",
+      "regex": [
+        "(star|snowflake) schema",
+        "dimensional model",
+        "medallion (architecture|layer)",
+        "slowly.changing dimension"
+      ],
+      "intents": [
+        "model the warehouse tables",
+        "star schema or normalized",
+        "what is the grain of this fact",
+        "design the dimensional model"
+      ]
+    },
+    {
+      "id": "data-pipeline",
+      "kind": "skill",
+      "surface": "polymath-streaming:data-pipeline",
+      "alt": "polymath-streaming:data-modeling",
+      "regex": [
+        "\\bE[TL]L\\b",
+        "data pipeline",
+        "(airflow|dagster|dbt)"
+      ],
+      "intents": [
+        "design the data pipeline",
+        "etl or elt",
+        "make the pipeline idempotent",
+        "backfill the warehouse"
+      ]
+    },
+    {
+      "id": "demand-forecast",
+      "kind": "skill",
+      "surface": "polymath-sre:demand-forecast",
+      "alt": "polymath-sre:capacity-plan",
+      "regex": [
+        "capacity forecast",
+        "demand forecast",
+        "growth (model|projection)"
+      ],
+      "intents": [
+        "forecast the capacity",
+        "when will we run out of capacity",
+        "project the demand",
+        "plan for the traffic growth"
+      ]
+    },
+    {
+      "id": "design-patterns-apply",
+      "kind": "skill",
+      "surface": "polymath-architecture:design-patterns-apply",
+      "alt": "polymath-engineering:code-review",
+      "regex": [
+        "SOLID principle",
+        "god object",
+        "anemic domain model"
+      ],
+      "intents": [
+        "which design pattern fits",
+        "is this over-engineered",
+        "check this against SOLID",
+        "flag the anti-patterns in this design"
+      ],
+      "not_intents": [
+        "review this diff",
+        "review the pull request"
+      ]
+    },
+    {
+      "id": "devsecops-pipeline",
+      "kind": "skill",
+      "surface": "polymath-security:devsecops-pipeline",
+      "alt": "polymath-devops:ci-pipeline-github",
+      "regex": [
+        "devsecops",
+        "\\b(sast|dast)\\b",
+        "secret scanning",
+        "dependency scanning"
+      ],
+      "intents": [
+        "add security scanning to ci",
+        "shift security left",
+        "gate the build on vulnerabilities",
+        "security in the pipeline"
+      ]
+    },
+    {
+      "id": "distributed-consistency",
+      "kind": "skill",
+      "surface": "polymath-architecture:distributed-consistency",
+      "alt": "polymath-architecture:event-driven-design",
+      "regex": [
+        "CAP theorem",
+        "PACELC",
+        "linearizab(le|ility)",
+        "(strong|eventual) consistency"
+      ],
+      "intents": [
+        "which consistency model",
+        "strong versus eventual consistency",
+        "do we need consensus",
+        "keep these in sync across nodes"
+      ],
+      "not_intents": [
+        "aggregate root"
+      ]
+    },
+    {
       "id": "dockerize",
       "kind": "skill",
       "surface": "polymath-devops:dockerize",
@@ -440,6 +805,23 @@
         "containerize the app"
       ],
       "tier": "hard"
+    },
+    {
+      "id": "event-driven-design",
+      "kind": "skill",
+      "surface": "polymath-architecture:event-driven-design",
+      "alt": "polymath-architecture:integration-design",
+      "regex": [
+        "(transactional )?outbox pattern",
+        "saga pattern",
+        "choreography (vs|or) orchestration"
+      ],
+      "intents": [
+        "design the event flow",
+        "choreography versus orchestration",
+        "events between services",
+        "design the saga and compensation"
+      ]
     },
     {
       "id": "exec-brief",
@@ -468,6 +850,23 @@
       ]
     },
     {
+      "id": "hiring-loop",
+      "kind": "skill",
+      "surface": "polymath-leadership:hiring-loop",
+      "alt": "polymath-leadership:perf-review",
+      "regex": [
+        "hiring loop",
+        "interview loop",
+        "interview (panel|scorecard)"
+      ],
+      "intents": [
+        "design the interview process",
+        "structure the hiring loop",
+        "run the hiring debrief",
+        "build an interview scorecard"
+      ]
+    },
+    {
       "id": "intake",
       "kind": "skill",
       "surface": "polymath-pipeline:intake",
@@ -485,6 +884,26 @@
       ]
     },
     {
+      "id": "integration-design",
+      "kind": "skill",
+      "surface": "polymath-architecture:integration-design",
+      "alt": "polymath-architecture:event-driven-design",
+      "regex": [
+        "anti-corruption layer",
+        "backpressure",
+        "backend.for.frontend"
+      ],
+      "intents": [
+        "how should these services talk",
+        "sync or async between services",
+        "design the integration between",
+        "gateway or BFF"
+      ],
+      "not_intents": [
+        "design the saga and compensation"
+      ]
+    },
+    {
       "id": "interview-guide",
       "kind": "skill",
       "surface": "polymath-research:interview-guide",
@@ -495,6 +914,59 @@
         "what should i ask them",
         "customer interviews",
         "stopped using the"
+      ]
+    },
+    {
+      "id": "llm-cost-latency",
+      "kind": "skill",
+      "surface": "polymath-ai:llm-cost-latency",
+      "alt": "polymath-performance:perf-budget",
+      "regex": [
+        "prompt caching",
+        "model cascade",
+        "(llm|token) cost"
+      ],
+      "intents": [
+        "reduce the llm cost",
+        "make the llm faster",
+        "cut token usage",
+        "set an llm cost budget"
+      ]
+    },
+    {
+      "id": "llm-guardrails",
+      "kind": "skill",
+      "surface": "polymath-ai:llm-guardrails",
+      "regex": [
+        "prompt injection",
+        "jailbreak",
+        "llm guardrail"
+      ],
+      "intents": [
+        "guard the model against",
+        "validate the model output",
+        "defend against prompt injection",
+        "filter the llm output"
+      ],
+      "not_intents": [
+        "audit the llm for security"
+      ]
+    },
+    {
+      "id": "llm-security-review",
+      "kind": "skill",
+      "surface": "polymath-security:llm-security-review",
+      "alt": "polymath-ai:llm-guardrails",
+      "regex": [
+        "owasp.{0,5}llm",
+        "llm top.?10",
+        "(audit|review|secure).{0,12}llm"
+      ],
+      "intents": [
+        "audit the llm for security",
+        "owasp llm top 10",
+        "is this llm app secure",
+        "secure the rag pipeline"
       ]
     },
     {
@@ -534,6 +1006,42 @@
         "planning season",
         "goals we can actually measure",
         "objectives and key results"
+      ]
+    },
+    {
+      "id": "oncall-design",
+      "kind": "skill",
+      "surface": "polymath-sre:oncall-design",
+      "alt": "polymath-sre:slo-design",
+      "regex": [
+        "on-call rotation",
+        "escalation policy",
+        "alert fatigue",
+        "reduce toil"
+      ],
+      "intents": [
+        "design the on-call program",
+        "fix our noisy alerts",
+        "set up the on-call rotation",
+        "on-call is burning people out"
+      ]
+    },
+    {
+      "id": "policy-as-code",
+      "kind": "skill",
+      "surface": "polymath-iac:policy-as-code",
+      "alt": "polymath-security:devsecops-pipeline",
+      "regex": [
+        "policy.as.code",
+        "\\brego\\b",
+        "(checkov|tfsec|conftest)",
+        "sentinel policy"
+      ],
+      "intents": [
+        "enforce infrastructure policy",
+        "policy as code for terraform",
+        "block misconfigured infrastructure",
+        "guardrails for terraform"
       ]
     },
     {
@@ -604,6 +1112,23 @@
         "lay of the land",
         "just inherited the",
         "walk me through this codebase"
+      ]
+    },
+    {
+      "id": "resilience-design",
+      "kind": "skill",
+      "surface": "polymath-architecture:resilience-design",
+      "alt": "polymath-performance:backend-tail-latency",
+      "regex": [
+        "circuit breaker",
+        "bulkhead (pattern|isolation)",
+        "retry storm"
+      ],
+      "intents": [
+        "make this resilient to failure",
+        "what happens when the dependency fails",
+        "design the retry and backoff policy",
+        "protect against cascading failure"
       ]
     },
     {
@@ -688,6 +1213,23 @@
       ]
     },
     {
+      "id": "service-decomposition",
+      "kind": "skill",
+      "surface": "polymath-architecture:service-decomposition",
+      "alt": "polymath-architecture:bounded-context-map",
+      "regex": [
+        "strangler (fig|pattern)",
+        "monolith decomposition",
+        "modular monolith"
+      ],
+      "intents": [
+        "split the monolith",
+        "extract a microservice",
+        "find the service boundaries",
+        "should we split this into services"
+      ]
+    },
+    {
       "id": "slo-design",
       "kind": "skill",
       "surface": "polymath-sre:slo-design",
@@ -721,6 +1263,49 @@
       "tier": "hard"
     },
     {
+      "id": "stream-processing",
+      "kind": "skill",
+      "surface": "polymath-streaming:stream-processing",
+      "alt": "polymath-streaming:streaming-design",
+      "regex": [
+        "\\bflink\\b",
+        "watermark",
+        "tumbling|sliding window",
+        "stream processing"
+      ],
+      "intents": [
+        "window the stream",
+        "handle late events",
+        "stateful stream processing",
+        "aggregate over the event stream"
+      ],
+      "not_intents": [
+        "partition key"
+      ]
+    },
+    {
+      "id": "streaming-design",
+      "kind": "skill",
+      "surface": "polymath-streaming:streaming-design",
+      "alt": "polymath-architecture:event-driven-design",
+      "regex": [
+        "\\bkafka\\b",
+        "\\bpulsar\\b",
+        "consumer group",
+        "partition key"
+      ],
+      "intents": [
+        "design the kafka topics",
+        "choose a partition key",
+        "delivery semantics for the stream",
+        "set up the event stream"
+      ],
+      "not_intents": [
+        "windowing",
+        "watermark"
+      ]
+    },
+    {
       "id": "stride-threat-model",
       "kind": "skill",
       "surface": "polymath-security:stride-threat-model",
@@ -747,6 +1332,58 @@
         "third-party packages",
         "what do we check before adding",
         "dependency risk"
+      ]
+    },
+    {
+      "id": "tech-debt-management",
+      "kind": "skill",
+      "surface": "polymath-engineering:tech-debt-management",
+      "alt": "polymath-planning:prioritize",
+      "regex": [
+        "tech(nical)? debt",
+        "debt paydown",
+        "refactor backlog"
+      ],
+      "intents": [
+        "prioritize the tech debt",
+        "how much debt should we pay down",
+        "inventory the technical debt",
+        "is this debt worth fixing"
+      ]
+    },
+    {
+      "id": "terraform-module",
+      "kind": "skill",
+      "surface": "polymath-iac:terraform-module",
+      "alt": "polymath-cloud:design-stack-composition",
+      "regex": [
+        "terraform module",
+        "reusable terraform",
+        "required_providers"
+      ],
+      "intents": [
+        "write a terraform module",
+        "make this terraform reusable",
+        "module input variables",
+        "structure the terraform code"
+      ]
+    },
+    {
+      "id": "terraform-state",
+      "kind": "skill",
+      "surface": "polymath-iac:terraform-state",
+      "alt": "polymath-iac:terraform-module",
+      "regex": [
+        "terraform state",
+        "remote backend",
+        "state locking",
+        "terraform.{0,8}drift"
+      ],
+      "intents": [
+        "set up the terraform backend",
+        "split the terraform state",
+        "terraform state surgery",
+        "detect infrastructure drift"
       ]
     },
     {

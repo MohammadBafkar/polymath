@@ -1,0 +1,14 @@
+# Routing declaration for polymath-backend:api-versioning (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- api versioning
+- consumer-driven contract
+- version (the|our) api
+intents:
+- how should we version the api
+- is this a breaking api change
+- url or header versioning
+- deprecate the old api version
+alt: polymath-release:deprecation-plan

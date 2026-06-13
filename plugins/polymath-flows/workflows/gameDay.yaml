@@ -1,0 +1,77 @@
+schemaVersion: 0.1
+name: gameDay
+version: 0.1.0
+description: Run a resilience game day — design a chaos experiment with a hypothesis + abort, observe the live behavior, then capture findings as a blameless write-up with actions.
+whenToUse: "Design, run, and learn from a chaos game day."
+triggers:
+  - "run a game day"
+  - "design a chaos experiment for"
+  - "test our resilience with a controlled failure"
+  - "game day for the failover"
+detectionSignals:
+  paths:
+    - "docs/gamedays/**"
+  intents:
+    - "game day"
+    - "chaos experiment"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-sre
+    - polymath-observability
+    - polymath-incident
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short game-day title (drives the slug).
+  - name: target
+    type: string
+    required: true
+    description: The system and the steady-state hypothesis being tested (e.g. "checkout survives a cache-node loss").
+guards:
+  - id: gamedays-dir
+    type: command
+    command: mkdir -p docs/gamedays && [ -w docs/gamedays ]
+steps:
+  - id: design
+    invoke: polymath-sre:chaos-experiment
+    prompt: |
+      Design the chaos experiment for ${inputs.target}: the steady-state hypothesis + the metric that
+      proves it, the smallest blast radius, the fault to inject, the abort conditions, and the rollback.
+      Save docs/gamedays/${workflow.slug}-experiment.md.
+    artifacts:
+      - docs/gamedays/${workflow.slug}-experiment.md
+  - id: observe
+    invoke: polymath-observability:query-during-incident
+    prompt: |
+      Define exactly what to watch while the experiment runs: the steady-state metric, the abort tripwires,
+      and the queries/dashboards that confirm whether the hypothesis held. This is the live observation plan
+      for the game day.
+    needs: [design]
+  - id: learn
+    invoke: polymath-incident:postmortem-blameless
+    prompt: |
+      Capture the game-day outcome as a blameless write-up: did steady state hold, what weakness surfaced,
+      and the action items (with owners) to fix gaps before they become a real incident. Save
+      docs/gamedays/${workflow.slug}-findings.md.
+    needs: [observe]
+    artifacts:
+      - docs/gamedays/${workflow.slug}-findings.md
+mustPass:
+  - id: experiment-exists
+    type: fileExists
+    path: docs/gamedays/${workflow.slug}-experiment.md
+  - id: findings-exists
+    type: fileExists
+    path: docs/gamedays/${workflow.slug}-findings.md
+  - id: experiment-names-hypothesis
+    type: fileMatches
+    severity: advisory
+    path: docs/gamedays/${workflow.slug}-experiment.md
+    pattern: "(hypothesis|steady.state|abort|blast)"
+  - id: findings-names-actions
+    type: fileMatches
+    severity: advisory
+    path: docs/gamedays/${workflow.slug}-findings.md
+    pattern: "(action|owner|follow.up)"

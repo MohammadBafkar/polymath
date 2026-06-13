@@ -1,0 +1,114 @@
+schemaVersion: 0.1
+name: techDebtPaydown
+version: 0.1.0
+description: Identify technical debt, plan the paydown, then address the top item behind a test safety net — inventory, prioritize, plan, pin, refactor, verify, review.
+whenToUse: "Find, plan, and pay down technical debt."
+triggers:
+  - "pay down our tech debt"
+  - "find and address our technical debt"
+  - "tackle the tech debt in this area"
+  - "make a technical-debt paydown plan and start it"
+detectionSignals:
+  paths:
+    - "docs/tech-debt/**"
+  intents:
+    - "tech debt"
+    - "technical debt"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-engineering
+    - polymath-planning
+    - polymath-qa
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for this paydown effort (drives the slug).
+  - name: scope
+    type: string
+    required: true
+    description: The codebase area to assess and pay down (e.g. "api/billing", "src/legacy/").
+  - name: capacity
+    type: string
+    required: false
+    description: Roughly how much capacity is available this cycle (gates how many items the plan schedules).
+guards:
+  - id: tech-debt-dir
+    type: command
+    command: mkdir -p docs/tech-debt && [ -w docs/tech-debt ]
+  - id: git-status
+    type: command
+    command: git status --short
+steps:
+  - id: identify
+    invoke: polymath-engineering:tech-debt-management
+    prompt: |
+      Inventory the technical debt in ${inputs.scope}. For each item: location, symptom, evidence
+      (churn/bugs/lead-time), Fowler classification, and quantified interest vs principal. Rank by
+      interest ÷ principal weighted by proximity to upcoming work. Save the register to
+      docs/tech-debt/${workflow.slug}-register.md.
+    artifacts:
+      - docs/tech-debt/${workflow.slug}-register.md
+  - id: plan
+    invoke: polymath-planning:write-plan
+    prompt: |
+      Turn the top-ranked items from the register into a paydown plan sized to ${inputs.capacity}.
+      Sequence the high interest÷principal items, bundle paydown into nearby feature work where possible,
+      and name what is explicitly NOT being paid down this cycle (stable, untouched code). Save the plan
+      to docs/tech-debt/${workflow.slug}-plan.md.
+    needs: [identify]
+    artifacts:
+      - docs/tech-debt/${workflow.slug}-plan.md
+  - id: pin-behavior
+    invoke: polymath-qa:unit-tests
+    prompt: |
+      Before changing anything, pin the CURRENT behavior of the single highest-priority item from the plan
+      with tests that pass against the unmodified code. We pin behavior before paying down debt so the
+      refactor is verifiably behavior-preserving.
+    needs: [plan]
+  - id: address
+    invoke: polymath-engineering:feature-dev
+    prompt: |
+      Pay down the highest-priority item from the plan in ${inputs.scope}. The contract: every test from
+      pin-behavior still passes — this is debt paydown, not a behavior change. If a pinning test fails,
+      fix the change, not the test. Keep the diff scoped to the one item.
+    needs: [pin-behavior]
+  - id: verify
+    invoke: polymath-engineering:verify-change
+    prompt: |
+      Run the full test suite plus lint + typecheck on ${inputs.scope}. Confirm every pinning test from
+      pin-behavior still passes. The summary must include "test" or "verified".
+    needs: [address]
+  - id: review
+    invoke: polymath-engineering:code-review
+    prompt: |
+      Review the paydown diff for correctness and that it actually reduced the debt it targeted (not just
+      moved it). Treat any new behavior in the diff as a finding, not a feature.
+    needs: [verify]
+mustPass:
+  - id: register-exists
+    type: fileExists
+    path: docs/tech-debt/${workflow.slug}-register.md
+  - id: plan-exists
+    type: fileExists
+    path: docs/tech-debt/${workflow.slug}-plan.md
+  - id: register-quantifies-debt
+    type: fileMatches
+    severity: advisory
+    path: docs/tech-debt/${workflow.slug}-register.md
+    pattern: "(interest|principal|churn|classif)"
+  - id: paydown-produced-bounded-diff
+    type: diffConstraint
+    filesChanged:
+      min: 1
+      max: 80
+    linesChanged:
+      max: 2500
+    pathBlocklist:
+      - ".git/**"
+  - id: verify-mentions-tests
+    type: stepSummaryMatches
+    severity: advisory
+    step: verify
+    pattern: "(test|tests|verified|verification)"

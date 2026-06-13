@@ -33,6 +33,26 @@
     ]
   },
   {
+    "n": "capacityReview",
+    "paths": [
+      "docs/capacity/**"
+    ],
+    "intents": [
+      "capacity review",
+      "capacity planning"
+    ]
+  },
+  {
+    "n": "dataPipelineBuild",
+    "paths": [
+      "docs/data/**"
+    ],
+    "intents": [
+      "data pipeline",
+      "etl"
+    ]
+  },
+  {
     "n": "decideUnderAmbiguity",
     "paths": [
       "docs/decisions/**",
@@ -85,6 +105,16 @@
     ]
   },
   {
+    "n": "evalDrivenDevelopment",
+    "paths": [
+      "docs/evals/**"
+    ],
+    "intents": [
+      "eval-driven",
+      "eval harness"
+    ]
+  },
+  {
     "n": "experimentToGA",
     "paths": [
       "docs/experiments/**",
@@ -116,6 +146,16 @@
     ]
   },
   {
+    "n": "gameDay",
+    "paths": [
+      "docs/gamedays/**"
+    ],
+    "intents": [
+      "game day",
+      "chaos experiment"
+    ]
+  },
+  {
     "n": "incidentRetroToActions",
     "paths": [
       "docs/postmortems/**",
@@ -135,6 +175,16 @@
     ],
     "intents": [
       "runtime-migration"
+    ]
+  },
+  {
+    "n": "migrationPlaybook",
+    "paths": [
+      "docs/migrations/**"
+    ],
+    "intents": [
+      "migration playbook",
+      "strangler"
     ]
   },
   {
@@ -260,6 +310,16 @@
     "intents": [
       "sunset-twostage",
       "input:removalDate"
+    ]
+  },
+  {
+    "n": "techDebtPaydown",
+    "paths": [
+      "docs/tech-debt/**"
+    ],
+    "intents": [
+      "tech debt",
+      "technical debt"
     ]
   },
   {

@@ -1,0 +1,14 @@
+# Routing declaration for polymath-streaming:data-pipeline (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- \bE[TL]L\b
+- data pipeline
+- (airflow|dagster|dbt)
+intents:
+- design the data pipeline
+- etl or elt
+- make the pipeline idempotent
+- backfill the warehouse
+alt: polymath-streaming:data-modeling

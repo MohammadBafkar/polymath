@@ -1,0 +1,16 @@
+# Routing declaration for polymath-architecture:aggregate-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- aggregate root
+- aggregate boundar(y|ies)
+intents:
+- design the aggregate
+- what are the aggregate boundaries
+- model the entities and value objects
+- enforce the invariant in one place
+not_intents:
+- across nodes
+- across regions
+alt: polymath-architecture:bounded-context-map

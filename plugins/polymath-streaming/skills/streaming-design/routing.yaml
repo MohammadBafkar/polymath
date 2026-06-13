@@ -1,0 +1,18 @@
+# Routing declaration for polymath-streaming:streaming-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- \bkafka\b
+- \bpulsar\b
+- consumer group
+- partition key
+intents:
+- design the kafka topics
+- choose a partition key
+- delivery semantics for the stream
+- set up the event stream
+not_intents:
+- windowing
+- watermark
+alt: polymath-architecture:event-driven-design

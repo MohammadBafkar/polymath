@@ -1,7 +1,7 @@
 {
   "name": "polymath-backend",
-  "version": "0.3.0",
-  "description": "Backend craft: REST API design, relational schema design, safe online migration planning.",
+  "version": "0.7.0",
+  "description": "Backend craft: REST API design, API versioning strategy, relational schema design, safe online migration planning.",
   "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",

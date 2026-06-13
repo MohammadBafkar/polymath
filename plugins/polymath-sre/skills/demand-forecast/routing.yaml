@@ -1,0 +1,14 @@
+# Routing declaration for polymath-sre:demand-forecast (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- capacity forecast
+- demand forecast
+- growth (model|projection)
+intents:
+- forecast the capacity
+- when will we run out of capacity
+- project the demand
+- plan for the traffic growth
+alt: polymath-sre:capacity-plan

@@ -1,0 +1,81 @@
+schemaVersion: 0.1
+name: capacityReview
+version: 0.1.0
+description: Run a capacity review — forecast demand forward, size the resources with headroom, then write the provisioning plan with a must-act-by date.
+whenToUse: "Forecast demand, size capacity, plan provisioning."
+triggers:
+  - "do a capacity review"
+  - "will we run out of capacity before"
+  - "forecast and plan our capacity"
+  - "capacity plan for the upcoming growth"
+detectionSignals:
+  paths:
+    - "docs/capacity/**"
+  intents:
+    - "capacity review"
+    - "capacity planning"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-sre
+    - polymath-planning
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the review (drives the slug).
+  - name: service
+    type: string
+    required: true
+    description: The service/resource under review and its driving metric (RPS, storage, connections).
+  - name: horizon
+    type: string
+    required: false
+    description: The planning horizon and any known events (launch, season) to overlay.
+guards:
+  - id: capacity-dir
+    type: command
+    command: mkdir -p docs/capacity && [ -w docs/capacity ]
+steps:
+  - id: forecast
+    invoke: polymath-sre:demand-forecast
+    prompt: |
+      Forecast demand for ${inputs.service} over ${inputs.horizon}: pick the driver metric, fit a growth
+      model to history (check for compounding/seasonality), overlay known events, and translate to projected
+      resource need with a headroom target. Save docs/capacity/${workflow.slug}-forecast.md.
+    artifacts:
+      - docs/capacity/${workflow.slug}-forecast.md
+  - id: size
+    invoke: polymath-sre:capacity-plan
+    prompt: |
+      From the forecast, size the resources for ${inputs.service} at the headroom target, identify the
+      bottleneck resource, and compute the must-provision-by date given provisioning lead time. Save
+      docs/capacity/${workflow.slug}-sizing.md.
+    needs: [forecast]
+    artifacts:
+      - docs/capacity/${workflow.slug}-sizing.md
+  - id: plan
+    invoke: polymath-planning:write-plan
+    prompt: |
+      Turn the sizing into a provisioning plan: what to provision, by when (the must-act-by date), the cost
+      delta, and the refresh cadence to re-run the forecast. Save docs/capacity/${workflow.slug}-plan.md.
+    needs: [size]
+    artifacts:
+      - docs/capacity/${workflow.slug}-plan.md
+mustPass:
+  - id: forecast-exists
+    type: fileExists
+    path: docs/capacity/${workflow.slug}-forecast.md
+  - id: sizing-exists
+    type: fileExists
+    path: docs/capacity/${workflow.slug}-sizing.md
+  - id: forecast-names-model
+    type: fileMatches
+    severity: advisory
+    path: docs/capacity/${workflow.slug}-forecast.md
+    pattern: "(growth|headroom|forecast|season)"
+  - id: sizing-names-deadline
+    type: fileMatches
+    severity: advisory
+    path: docs/capacity/${workflow.slug}-sizing.md
+    pattern: "(provision|lead time|bottleneck|date)"

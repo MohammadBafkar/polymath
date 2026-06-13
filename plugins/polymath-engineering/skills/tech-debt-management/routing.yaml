@@ -1,0 +1,14 @@
+# Routing declaration for polymath-engineering:tech-debt-management (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- tech(nical)? debt
+- debt paydown
+- refactor backlog
+intents:
+- prioritize the tech debt
+- how much debt should we pay down
+- inventory the technical debt
+- is this debt worth fixing
+alt: polymath-planning:prioritize

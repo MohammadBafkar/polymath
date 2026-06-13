@@ -1,0 +1,14 @@
+# Routing declaration for polymath-architecture:resilience-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- circuit breaker
+- bulkhead (pattern|isolation)
+- retry storm
+intents:
+- make this resilient to failure
+- what happens when the dependency fails
+- design the retry and backoff policy
+- protect against cascading failure
+alt: polymath-performance:backend-tail-latency

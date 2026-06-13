@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow capacityReview (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/capacity/
+intents:
+- run a capacity review
+- forecast size and plan capacity
+- capacity review for the service
+- end to end capacity planning
+alt: polymath-sre:demand-forecast

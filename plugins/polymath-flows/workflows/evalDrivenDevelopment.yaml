@@ -1,0 +1,70 @@
+schemaVersion: 0.1
+name: evalDrivenDevelopment
+version: 0.1.0
+description: Build an LLM feature eval-first — define the eval harness and regression set, implement against it, then measure and report pass/fail before shipping.
+whenToUse: "Define evals first, then build the LLM feature to pass them."
+triggers:
+  - "build this llm feature eval-first"
+  - "set up evals before we change the prompt"
+  - "eval-driven development for this agent"
+  - "define the eval suite then implement"
+detectionSignals:
+  paths:
+    - "docs/evals/**"
+  intents:
+    - "eval-driven"
+    - "eval harness"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-ai
+    - polymath-engineering
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short title for the feature (drives the slug).
+  - name: feature
+    type: string
+    required: true
+    description: The LLM feature/behavior being built or changed.
+guards:
+  - id: evals-dir
+    type: command
+    command: mkdir -p docs/evals && [ -w docs/evals ]
+steps:
+  - id: define-evals
+    invoke: polymath-ai:eval-plan
+    prompt: |
+      Before any prompt/model change, design the eval harness for "${inputs.feature}": the offline regression
+      set (inputs + expected/graded outputs), the online metrics, the LLM-judge rubric + calibration, and the
+      pass threshold that gates shipping. Save docs/evals/${workflow.slug}-eval-plan.md.
+    artifacts:
+      - docs/evals/${workflow.slug}-eval-plan.md
+  - id: implement
+    invoke: polymath-ai:prompt-engineer
+    prompt: |
+      Implement/improve "${inputs.feature}" to pass the eval suite from define-evals. Iterate against the
+      regression set, not vibes. State which cases pass and which remain failing after your change.
+    needs: [define-evals]
+  - id: measure
+    invoke: polymath-engineering:verify-change
+    prompt: |
+      Run the eval suite from the eval plan against the implementation and report the score vs the pass
+      threshold — a regression on any previously-passing case is a fail. The summary must include "eval"
+      or "test" or "verified".
+    needs: [implement]
+mustPass:
+  - id: eval-plan-exists
+    type: fileExists
+    path: docs/evals/${workflow.slug}-eval-plan.md
+  - id: eval-plan-names-threshold
+    type: fileMatches
+    severity: advisory
+    path: docs/evals/${workflow.slug}-eval-plan.md
+    pattern: "(threshold|regression|rubric|metric)"
+  - id: measure-reports-evals
+    type: stepSummaryMatches
+    severity: advisory
+    step: measure
+    pattern: "(eval|test|verified|score|pass)"

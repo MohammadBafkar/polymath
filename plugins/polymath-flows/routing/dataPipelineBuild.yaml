@@ -1,0 +1,11 @@
+# Routing declaration for polymath-flows:run-workflow dataPipelineBuild (workflow).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+paths:
+- docs/data/
+intents:
+- build the data pipeline end to end
+- model and build the pipeline
+- stand up the etl pipeline
+- pipeline from source to warehouse
+alt: polymath-streaming:data-pipeline

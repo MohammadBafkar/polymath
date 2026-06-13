@@ -1,0 +1,22 @@
+{
+  "name": "polymath-streaming",
+  "version": "0.7.0",
+  "description": "Data & streaming engineering craft: streaming topology + delivery semantics, data pipelines (ETL/ELT), data modeling (dimensional/lakehouse), and stream processing.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core",
+    "polymath-data"
+  ],
+  "keywords": [
+    "streaming",
+    "kafka",
+    "data-engineering",
+    "etl",
+    "pipeline",
+    "data-modeling"
+  ]
+}

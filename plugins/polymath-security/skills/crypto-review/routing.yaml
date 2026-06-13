@@ -1,0 +1,15 @@
+# Routing declaration for polymath-security:crypto-review (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- encryption at rest
+- key rotation
+- key management service
+- \bKMS\b
+intents:
+- review the encryption
+- how should we manage keys
+- which encryption algorithm
+- is this crypto safe
+alt: polymath-security:auth-design

@@ -1,0 +1,87 @@
+schemaVersion: 0.1
+name: migrationPlaybook
+version: 0.1.0
+description: Run a phased migration — assess seams and a strangler sequence, plan the phases, write the consumer migration guide, then roll out gated by usage.
+whenToUse: "Assess, plan, guide, and safely roll out a migration."
+triggers:
+  - "plan the migration off the old system"
+  - "strangler-fig migration playbook"
+  - "migrate consumers to the new service safely"
+  - "phased migration plan and rollout"
+detectionSignals:
+  paths:
+    - "docs/migrations/**"
+  intents:
+    - "migration playbook"
+    - "strangler"
+requires:
+  plugins:
+    - polymath-core
+    - polymath-architecture
+    - polymath-planning
+    - polymath-release
+inputs:
+  - name: title
+    type: string
+    required: true
+    description: Short migration title (drives the slug).
+  - name: from
+    type: string
+    required: true
+    description: What is being migrated away from (system/service/schema).
+  - name: to
+    type: string
+    required: true
+    description: The target the migration moves to.
+guards:
+  - id: migrations-dir
+    type: command
+    command: mkdir -p docs/migrations && [ -w docs/migrations ]
+steps:
+  - id: assess
+    invoke: polymath-architecture:service-decomposition
+    prompt: |
+      Assess the migration from ${inputs.from} to ${inputs.to}: find the seams, rank extraction/cutover
+      candidates by value÷risk, design the strangler-fig sequence (facade + incremental cutover, never
+      big-bang), the data-migration approach, and the characterization tests that pin current behavior.
+      Save docs/migrations/${workflow.slug}-assessment.md.
+    artifacts:
+      - docs/migrations/${workflow.slug}-assessment.md
+  - id: plan
+    invoke: polymath-planning:write-plan
+    prompt: |
+      Turn the assessment into a phased migration plan: per-phase scope, the rollback strategy for each
+      irreversible step, multi-team coordination, and the usage-based criteria for advancing/retiring a
+      phase. Save docs/migrations/${workflow.slug}-plan.md.
+    needs: [assess]
+    artifacts:
+      - docs/migrations/${workflow.slug}-plan.md
+  - id: guide
+    invoke: polymath-release:migration-guide
+    prompt: |
+      Write the consumer-facing migration guide for moving from ${inputs.from} to ${inputs.to}: concrete
+      before/after steps, breaking changes, and the deprecation timeline.
+    needs: [plan]
+  - id: rollout
+    invoke: polymath-release:safe-rollout
+    prompt: |
+      Design the rollout for the first phase: progressive exposure, the metrics watched, the abort/rollback
+      trigger, and the usage signal that confirms it is safe to retire the old path.
+    needs: [guide]
+mustPass:
+  - id: assessment-exists
+    type: fileExists
+    path: docs/migrations/${workflow.slug}-assessment.md
+  - id: plan-exists
+    type: fileExists
+    path: docs/migrations/${workflow.slug}-plan.md
+  - id: assessment-names-strangler
+    type: fileMatches
+    severity: advisory
+    path: docs/migrations/${workflow.slug}-assessment.md
+    pattern: "(strangler|seam|characterization|rollback)"
+  - id: plan-names-rollback
+    type: fileMatches
+    severity: advisory
+    path: docs/migrations/${workflow.slug}-plan.md
+    pattern: "(rollback|phase|usage)"

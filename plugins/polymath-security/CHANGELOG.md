@@ -1,5 +1,17 @@
 # Changelog — polymath-security
 
+## [0.5.0]
+
+### Added
+
+- Five skills closing the security-breadth gap (whetstone-coverage program, P4):
+  `auth-design` (OAuth2/OIDC, tokens/sessions, RBAC/ABAC, SSO, revocation),
+  `compliance-mapping` (SOC 2 / GDPR / ISO 27001 / HIPAA requirement→control→evidence),
+  `devsecops-pipeline` (SAST/DAST/SCA/secret/IaC scanning as CI gates),
+  `crypto-review` (encryption, key management, algorithm choice, foot-guns), and
+  `llm-security-review` (OWASP LLM Top 10 audit — pairs with `polymath-ai:llm-guardrails`).
+  Each declares a soft-tier `routing.yaml`.
+
 ## [Unreleased]
 
 ### Added

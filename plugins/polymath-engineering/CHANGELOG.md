@@ -1,5 +1,13 @@
 # Changelog — polymath-engineering
 
+## [0.4.0]
+
+### Added
+
+- `tech-debt-management` skill (whetstone-coverage program, P5): inventory technical
+  debt, classify (Fowler quadrant), quantify interest vs principal, and sequence
+  paydown against the roadmap with a sustainable budget. Soft-tier `routing.yaml`.
+
 ## [Unreleased]
 
 ### Added

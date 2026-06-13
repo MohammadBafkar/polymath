@@ -56,7 +56,13 @@
     "polymath-backend": {
       "status": "experimental"
     },
+    "polymath-architecture": {
+      "status": "experimental"
+    },
     "polymath-data": {
+      "status": "experimental"
+    },
+    "polymath-streaming": {
       "status": "experimental"
     },
     "polymath-ai": {
@@ -69,6 +75,9 @@
       "status": "experimental"
     },
     "polymath-kubernetes": {
+      "status": "experimental"
+    },
+    "polymath-iac": {
       "status": "experimental"
     },
     "polymath-sre": {

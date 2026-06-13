@@ -1,0 +1,16 @@
+# Routing declaration for polymath-architecture:integration-design (skill).
+# Compiled into route-signals.json by tools/build-surface-index.py.
+# Schema: registry/schemas/surface-routing.schema.json
+tier: soft
+regex:
+- anti-corruption layer
+- backpressure
+- backend.for.frontend
+intents:
+- how should these services talk
+- sync or async between services
+- design the integration between
+- gateway or BFF
+not_intents:
+- design the saga and compensation
+alt: polymath-architecture:event-driven-design
