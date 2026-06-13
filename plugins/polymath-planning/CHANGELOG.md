@@ -1,6 +1,6 @@
 # Changelog — polymath-planning
 
-## [Unreleased]
+## [0.7.0]
 
 ### Changed
 

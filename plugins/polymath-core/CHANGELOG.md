@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD024 -->
 
-## [Unreleased]
+## [0.7.0]
 
 ### Removed
 

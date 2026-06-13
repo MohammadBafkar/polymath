@@ -1,6 +1,6 @@
 # Changelog — polymath-pipeline
 
-## [Unreleased]
+## [0.7.0]
 
 ### Added
 

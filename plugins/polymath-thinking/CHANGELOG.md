@@ -1,6 +1,6 @@
 # Changelog — polymath-thinking
 
-## [Unreleased]
+## [0.7.0]
 
 ### Added
 

@@ -1,6 +1,6 @@
 # Changelog — polymath-frontend
 
-## [Unreleased]
+## [0.7.0]
 
 ### Changed
 

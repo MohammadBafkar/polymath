@@ -1,6 +1,6 @@
 # Changelog — polymath-backend
 
-## [0.4.0]
+## [0.7.0]
 
 ### Added
 
@@ -8,11 +8,6 @@
   mechanism choice (URL/header/media-type), breaking vs compatible classification,
   consumer-driven contracts, and the parallel-support + deprecation path. Soft-tier
   `routing.yaml`. Deprecation notices/migration guides remain in `polymath-release`.
-
-## [Unreleased]
-
-### Added
-
 - `api-design-rest` and `db-schema` consume project localization: `conventions_docs` roles `api-style`/`backend-stack`/`database` from the project-context snapshot.
 
 ### Changed

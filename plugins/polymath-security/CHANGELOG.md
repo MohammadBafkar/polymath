@@ -1,6 +1,6 @@
 # Changelog — polymath-security
 
-## [0.5.0]
+## [0.7.0]
 
 ### Added
 
@@ -11,14 +11,10 @@
   `crypto-review` (encryption, key management, algorithm choice, foot-guns), and
   `llm-security-review` (OWASP LLM Top 10 audit — pairs with `polymath-ai:llm-guardrails`).
   Each declares a soft-tier `routing.yaml`.
-
-## [Unreleased]
-
-### Added
-
 - **Summary-first checkpoint.** `stride-threat-model` confirms scope,
   trust boundaries, and the highest-risk STRIDE candidates on one screen
   before drafting the full model.
+
 ### Changed
 
 - `supply-chain-review` skill folded in from the former `polymath-supply-chain` plugin — SBOM/SLSA/provenance are appsec.

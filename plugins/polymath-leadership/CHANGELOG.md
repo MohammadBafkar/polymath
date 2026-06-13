@@ -1,6 +1,6 @@
 # Changelog — polymath-leadership
 
-## [0.4.0]
+## [0.7.0]
 
 ### Added
 
