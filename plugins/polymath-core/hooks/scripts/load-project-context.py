@@ -236,7 +236,6 @@ KNOWN_TOP_KEYS = {
     "stack",
     "conventions",
     "external_skills",
-    "capabilities",
     "setup",
     "polymath",
     "skill_overrides",
@@ -246,7 +245,6 @@ KNOWN_TOP_KEYS = {
     "tracker",
     "routing",
     "attribution",
-    "artifact_matrix",
     "provenance",
 }
 COMMIT_STYLES = {"conventional-commits", "free-form", "ticket-prefixed"}
@@ -361,9 +359,6 @@ def _validate(data: Any) -> list[str]:
         value = data.get(key)
         if value is not None and not isinstance(value, dict):
             errs.append(f"{key} must be a mapping")
-    am = data.get("artifact_matrix")
-    if am is not None and not isinstance(am, str):
-        errs.append("artifact_matrix must be a string path")
     routing = data.get("routing")
     if isinstance(routing, dict):
         mode = routing.get("mode")

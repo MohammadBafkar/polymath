@@ -51,6 +51,18 @@ conformance table lives in [AGENTS.md](../AGENTS.md).
   `conformance.sh --all`). README aggregate counts are marker-wrapped and
   recomputed from the tree; fixture dirs must name real plugins; relative
   doc links must resolve. Each takes `--self-test` to prove it can fail.
+- **Config + coupling hygiene (DEADCONF-1, COUPLING-1)** —
+  `tools/check-registry.py deadconfig` (every `project.schema.json`
+  property is read by a real consumer — skill contract, hook, runner, or
+  tool — or is listed in
+  [`registry/deadconfig-exemptions.json`](../registry/deadconfig-exemptions.json)
+  with a reason; loader admission/validation and `*.sh` scaffolders do
+  not count) and `tools/export-agents-skills.py --coupling-ratchet`
+  (catalog-wide Claude-coupling occurrences stay at or below the frozen
+  ceiling in
+  [`registry/coupling-baseline.json`](../registry/coupling-baseline.json)
+  — coupling may shrink but never grow silently). Both run inside
+  `conformance.sh --all` and take `--self-test`.
 - **Honest limitations** — [`LIMITATIONS.md`](../LIMITATIONS.md) is
   updated alongside any change that resolves a documented limitation.
 
@@ -68,6 +80,14 @@ Outside the per-PR loop:
   skips cleanly — never a red X for a missing secret. The older
   on-demand `/evaluate` PR workflow still ships disabled. See
   [`LIMITATIONS.md § 4`](../LIMITATIONS.md#4-known-operational-gaps).
+- **Platform-churn canary** —
+  [`platform-canary.yml`](../.github/workflows/platform-canary.yml) runs
+  the MANIFEST-1 validation surface (`claude plugin validate --strict` on
+  the marketplace root and every plugin) against
+  `@anthropic-ai/claude-code@latest` weekly, while every other workflow
+  pins `@2.1.175`. If a new CLI rejects manifests the pinned version
+  accepts, the canary goes red before the pin is bumped. Purely
+  structural — no model token, scheduled-only so it never gates a PR.
 
 ## Promotion bars
 

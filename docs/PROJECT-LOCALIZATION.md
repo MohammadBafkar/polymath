@@ -29,9 +29,10 @@ language it had no way to know about.
   agent. Secret values never belong here.
 - **Polymath activation** — recommended Polymath plugins, useful
   workflows, and compatible agent surfaces for this repo.
-- **Capabilities** — pointer to `.polymath/capabilities.yaml`
-  (separate file, separate schema; see
-  [`docs/CAPABILITIES.md`](CAPABILITIES.md)).
+
+Capability resolution is owned by `.polymath/capabilities.yaml`
+(separate file, separate schema, resolved by its conventional path; see
+[`docs/CAPABILITIES.md`](CAPABILITIES.md)).
 
 The polymath-core SessionStart hook loads this file, validates it, and
 writes a resolved snapshot to
@@ -115,9 +116,6 @@ external_skills:
   - source: github.com/dotnet/skills
     plugins: [dotnet, dotnet-aspnet, dotnet-test, dotnet-data, dotnet-msbuild]
     install: marketplace
-
-capabilities:
-  inherit_from: .polymath/capabilities.yaml
 
 setup:
   context_sources:
@@ -204,8 +202,6 @@ provenance:
 attribution:
   chat_markers: false
   commit_trailer: ""
-
-artifact_matrix: docs/conventions/artifact-matrix.md
 ```
 
 See [the schema](../registry/schemas/project.schema.json) for the full
@@ -237,11 +233,9 @@ each completed run record into `.polymath/runs/<run_id>/` (fail-open,
 default off). `attribution` is consumed as opt-in visibility markers:
 `chat_markers: true` makes localizing skills prefix their primary
 output with an origin marker, and `commit_trailer` is appended by
-`polymath-release:commit` (absent/empty = no trailer). `artifact_matrix`
-validates and loads into the snapshot today; no consumer is wired yet
-(see `LIMITATIONS.md`). Future keys degrade
-gracefully: the loader warns and ignores unknown top-level keys instead
-of failing.
+`polymath-release:commit` (absent/empty = no trailer). Future keys
+degrade gracefully: the loader warns and ignores unknown top-level keys
+instead of failing.
 
 ## Convention packs
 
@@ -478,17 +472,11 @@ capability providers.
 
 Capability resolution lives in `.polymath/capabilities.yaml`
 (see [`docs/CAPABILITIES.md`](CAPABILITIES.md)). The two files are
-siblings under `.polymath/`. `project.yaml` may declare:
-
-```yaml
-capabilities:
-  inherit_from: .polymath/capabilities.yaml
-```
-
-This is a pointer for tooling; it does not duplicate the capability
-data. A project without `capabilities.yaml` simply doesn't get
-capability resolution — workflows that need it fail clearly at start
-time.
+siblings under `.polymath/` and `project.yaml` does not duplicate or
+point at the capability data: the runner resolves `capabilities.yaml`
+by its conventional path directly. A project without `capabilities.yaml`
+simply doesn't get capability resolution — workflows that need it fail
+clearly at start time.
 
 ## Per-session, not per-message
 

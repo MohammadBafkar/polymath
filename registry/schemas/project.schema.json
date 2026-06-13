@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/MohammadBafkar/Polymath/blob/main/registry/schemas/project.schema.json",
   "title": "Polymath project context",
-  "description": "Project-level localization for `.polymath/project.yaml`. Loaded by the polymath-core SessionStart hook and exposed to all skills as a resolved JSON snapshot under `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`. Lets a project tell Polymath what stack it uses (language, framework, testing tools), what conventions it follows (commit style, code-review checklist), which external skill catalogs to surface, and how to override specific skill behavior (additional review axes, test commands). Capability resolution is owned by `.polymath/capabilities.yaml` (separate file, separate schema); this file may reference it via `capabilities.inherit_from` but does not duplicate the data. The schema is intentionally minimal — start with the fields here, extend conservatively as patterns prove out.",
+  "description": "Project-level localization for `.polymath/project.yaml`. Loaded by the polymath-core SessionStart hook and exposed to all skills as a resolved JSON snapshot under `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`. Lets a project tell Polymath what stack it uses (language, framework, testing tools), what conventions it follows (commit style, code-review checklist), which external skill catalogs to surface, and how to override specific skill behavior (additional review axes, test commands). Capability resolution is owned by `.polymath/capabilities.yaml` (separate file, separate schema, resolved by its conventional path); this file does not duplicate that data. The schema is intentionally minimal — start with the fields here, extend conservatively as patterns prove out.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion"],
@@ -148,14 +148,6 @@
         }
       }
     },
-    "capabilities": {
-      "description": "Pointer to `.polymath/capabilities.yaml` so capability resolution can find a non-default location. The actual capability data lives in that file; not duplicated here.",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "inherit_from": { "type": "string", "minLength": 1, "maxLength": 200 }
-      }
-    },
     "setup": {
       "description": "Onboarding and local setup metadata inferred from README, AGENTS.md, CLAUDE.md, docs, CI, and project config files. Used to tell coding agents which context to read, which tools to check, which environment variables matter, and what first steps a new contributor should take.",
       "type": "object",
@@ -277,21 +269,12 @@
       }
     },
     "prompts": {
-      "description": "Pointers to project-owned artifact templates that skills should prefer over their built-in templates. One optional key per artifact type in the catalog's artifact vocabulary.",
+      "description": "Pointers to project-owned artifact templates that skills prefer over their built-in templates. Only keys with a consuming skill exist; add a key here in the same change that teaches a skill to read it.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "pr_description_template": { "type": "string", "maxLength": 200 },
-        "postmortem_template": { "type": "string", "maxLength": 200 },
-        "prd_template": { "type": "string", "maxLength": 200 },
-        "adr_template": { "type": "string", "maxLength": 200 },
-        "plan_template": { "type": "string", "maxLength": 200 },
-        "rfc_template": { "type": "string", "maxLength": 200 },
-        "runbook_template": { "type": "string", "maxLength": 200 },
-        "architecture_doc_template": { "type": "string", "maxLength": 200 },
-        "daci_decision_template": { "type": "string", "maxLength": 200 },
-        "tradeoff_matrix_template": { "type": "string", "maxLength": 200 },
-        "threat_model_template": { "type": "string", "maxLength": 200 }
+        "postmortem_template": { "type": "string", "maxLength": 200 }
       }
     },
     "conventions_docs": {
@@ -395,12 +378,6 @@
         "chat_markers": { "type": "boolean", "default": false },
         "commit_trailer": { "type": "string", "maxLength": 200 }
       }
-    },
-    "artifact_matrix": {
-      "description": "Repo-relative path to the project's artifact matrix: which artifacts (PRD/ADR/DRD/...) are required per work type and scope. Workflow guards consume it as an advisory check.",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 200
     }
   }
 }

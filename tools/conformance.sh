@@ -477,6 +477,31 @@ if [[ "$mode" == "--all" ]]; then
   else
     overall=1
   fi
+
+  # DEADCONF-1: every project.schema.json property (top-level + named children)
+  # is read by a real consumer — a skill contract, hook, Python runner, or tool
+  # — or is listed in registry/deadconfig-exemptions.json with a reason.
+  # Admission into KNOWN_TOP_KEYS, shape/enum validation in the loader, and *.sh
+  # scaffolders that merely emit keys do NOT count as consumers.
+  echo
+  echo "── DEADCONF-1 cross-check (check-registry.py deadconfig)"
+  if python3 "$root/tools/check-registry.py" deadconfig; then
+    :
+  else
+    overall=1
+  fi
+
+  # COUPLING-1: catalog-wide Claude-coupling occurrences must not exceed the
+  # frozen ceiling (registry/coupling-baseline.json) — coupling may shrink but
+  # never grow silently. Per-occurrence enumeration (which skill, which line)
+  # is a separate, deferred gate.
+  echo
+  echo "── COUPLING-1 cross-check (export-agents-skills.py --coupling-ratchet)"
+  if python3 "$root/tools/export-agents-skills.py" --coupling-ratchet; then
+    :
+  else
+    overall=1
+  fi
 elif [[ -d "$mode" ]]; then
   if ! check_one "${mode%/}"; then overall=1; fi
 else

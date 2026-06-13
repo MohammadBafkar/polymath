@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **P5 right-sized longevity: dead-config deletion, DEADCONF-1,
+  COUPLING-1, platform canary.** Deleted verified-dead `project.yaml`
+  schema keys that promised behavior nothing delivered — `artifact_matrix`
+  (no guard ever read it), `capabilities.inherit_from` (capabilities.yaml
+  resolves by its conventional path, nothing followed the pointer), and
+  nine unconsumed `prompts.*` template keys (only `pr_description_template`
+  and `postmortem_template` are wired) — from the schema, loader, tests,
+  shipped configs, and docs. **DEADCONF-1** (`check-registry.py
+  deadconfig`) now holds the line: every `project.schema.json` property
+  must be read by a real consumer (skill contract, hook, runner, or tool)
+  or be listed in `registry/deadconfig-exemptions.json` with a reason —
+  loader admission/validation and `*.sh` scaffolders explicitly do not
+  count, which is exactly how the old dead keys masqueraded as used. Six
+  declarative-but-unconsumed keys (commit_style, branch_strategy,
+  package_manager, language_specific, recommended_workflows,
+  compatible_agents) are exempted with standing "wire-or-delete" reasons.
+  **COUPLING-1** (`export-agents-skills.py --coupling-ratchet`) freezes
+  catalog-wide Claude-coupling at a ceiling of 45 occurrences
+  (`registry/coupling-baseline.json`) — coupling may shrink but never grow
+  silently. A weekly **platform-canary** workflow runs the MANIFEST-1
+  validation surface against `@anthropic-ai/claude-code@latest` so a
+  CLI release that breaks Polymath's manifests is caught before the pin is
+  bumped. Both gates ship a `--self-test`; 37 gates registered.
 - **polymath-pipeline 0.3.0 — enforce-gate hole closure.** The
   PreToolUse matcher extends to `Task` and `mcp__.*`: MCP tools default
   to gated unless their name classifies as read-only (first verb

@@ -104,12 +104,16 @@ elsewhere is intentional.
   skill-triggering frontmatter, and bakeoff-case parsing) run on every
   PR and push in
   [`.github/workflows/golden-deterministic.yml`](.github/workflows/golden-deterministic.yml).
-- **`artifact_matrix` has no consumer.** The project.yaml key is
-  schema-validated and loaded into the project-context snapshot, but no
-  skill, workflow guard, or tool reads it today. Its consumer spec lived
-  in a plan file that has since been removed; the key either gains a
-  consumer or is deleted (tracked in
-  `docs/plans/solidify-discovery-and-packs.md`).
+- **Six `project.yaml` keys are declarative-only.**
+  `stack.package_manager`, `conventions.commit_style`,
+  `conventions.branch_strategy`, `conventions.language_specific`,
+  `polymath.recommended_workflows`, and `polymath.compatible_agents` are
+  validated and surfaced in the project-context snapshot, but no skill,
+  hook, or tool reads them by name yet. They are not silent: DEADCONF-1
+  gates every schema property against a real consumer, and these six are
+  listed with reasons in
+  [`registry/deadconfig-exemptions.json`](registry/deadconfig-exemptions.json)
+  as standing "wire a consumer or delete" candidates.
 - **The fallback YAML parser in `polymath-flow` folds block scalars.**
   `|` and `>` are both treated as folded — newlines collapse to
   spaces. Workflows that depend on newline-preserving prompts must

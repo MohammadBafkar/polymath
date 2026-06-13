@@ -160,12 +160,6 @@ class ValidationTests(unittest.TestCase):
         )
         self.assertTrue(any("smoke.python missing `start`" in e for e in errs))
 
-    def test_artifact_matrix_must_be_string(self) -> None:
-        errs = self.mod._validate(
-            {"schemaVersion": 1, "artifact_matrix": ["docs/matrix.md"]}
-        )
-        self.assertTrue(any("artifact_matrix" in e for e in errs))
-
     def test_new_mapping_keys_reject_non_mappings(self) -> None:
         for key in ("conventions_docs", "smoke", "tracker", "routing", "attribution"):
             errs = self.mod._validate({"schemaVersion": 1, key: ["not", "a", "map"]})
@@ -196,8 +190,7 @@ class ValidationTests(unittest.TestCase):
                 },
                 "routing": {"mode": "hint"},
                 "attribution": {"chat_markers": True, "commit_trailer": "Co-Authored-By: Bot <bot@example.com>"},
-                "artifact_matrix": "docs/conventions/artifact-matrix.md",
-                "prompts": {"plan_template": "docs/plan-template.md"},
+                "prompts": {"pr_description_template": "docs/pr-template.md"},
             }
         )
         self.assertEqual(errs, [])

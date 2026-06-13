@@ -290,6 +290,24 @@
       "tier": "cross-plugin",
       "verification": "selftest",
       "description": "Shortlist tie report over the held-out corpus: firing ties gate (ambiguous ambient hint); sub-threshold ties advisory."
+    },
+    {
+      "id": "DEADCONF-1",
+      "tool": "tools/check-registry.py",
+      "invocation": "python3 tools/check-registry.py deadconfig",
+      "selftest": "python3 tools/check-registry.py deadconfig --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Every project.schema.json property is read by a real consumer (skill contract, hook, runner, or tool) or is exempted with a reason; loader admission/validation and *.sh scaffolders do not count."
+    },
+    {
+      "id": "COUPLING-1",
+      "tool": "tools/export-agents-skills.py",
+      "invocation": "python3 tools/export-agents-skills.py --coupling-ratchet",
+      "selftest": "python3 tools/export-agents-skills.py --coupling-ratchet --self-test",
+      "tier": "cross-plugin",
+      "verification": "selftest",
+      "description": "Catalog-wide Claude-coupling occurrences stay at or below the frozen ceiling (registry/coupling-baseline.json); coupling may shrink but never grow silently."
     }
   ]
 }

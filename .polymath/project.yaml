@@ -33,9 +33,6 @@ conventions:
     markdown:
       file: .markdownlint.json
 
-capabilities:
-  inherit_from: .polymath/capabilities.yaml
-
 setup:
   context_sources:
     - AGENTS.md

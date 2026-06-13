@@ -48,6 +48,7 @@ import tempfile
 REPO = pathlib.Path(__file__).resolve().parents[1]
 PLUGINS_DIR = REPO / "plugins"
 DEFAULT_OUT = REPO / "dist" / "agents-skills"
+COUPLING_BASELINE = REPO / "registry" / "coupling-baseline.json"
 
 FM_NAME = re.compile(r"^name:\s*([^\n]+)$", re.MULTILINE)
 TEMPLATE_LINK = re.compile(r"\((\.\./\.\./templates/[^)]+)\)")
@@ -89,6 +90,92 @@ def coupling_banner(reasons: list[str]) -> str:
         f"on Claude Code, or substitute your harness's equivalent tool. See "
         f"PORTABILITY.md in the Polymath repo.\n\n"
     )
+
+
+# ---------------------------------------------------------------------------
+# COUPLING-1 — occurrence ratchet over the catalog's Claude-coupling
+# ---------------------------------------------------------------------------
+
+
+def coupling_occurrences() -> tuple[int, list[tuple[str, list[str]]]]:
+    """Catalog-wide Claude-coupling: the total count of distinct
+    skill×surface dependencies, plus a per-coupled-skill breakdown. Counts the
+    same `coupling_reasons` the exporter banners on, so the ratchet and the
+    export banner can never disagree about what is coupled."""
+    breakdown: list[tuple[str, list[str]]] = []
+    total = 0
+    for plugin in sorted(PLUGINS_DIR.iterdir()):
+        skills_dir = plugin / "skills"
+        if not skills_dir.is_dir():
+            continue
+        for skill_dir in sorted(skills_dir.iterdir()):
+            md = skill_dir / "SKILL.md"
+            if not md.is_file():
+                continue
+            reasons = coupling_reasons(md.read_text(errors="ignore"))
+            if reasons:
+                breakdown.append((f"{plugin.name}:{skill_dir.name}", reasons))
+                total += len(reasons)
+    return total, breakdown
+
+
+def _coupling_problems(current: int, ceiling: int) -> list[str]:
+    """The ratchet is one-directional: coupling may shrink freely but may not
+    grow past the frozen ceiling without a conscious baseline bump."""
+    if current > ceiling:
+        return [
+            f"Claude-coupling occurrences rose to {current}, above the ratchet "
+            f"ceiling {ceiling} (registry/coupling-baseline.json) — make the new "
+            f"reference portable, or consciously raise the ceiling to accept the "
+            f"portability cost"
+        ]
+    return []
+
+
+def coupling_ratchet_check() -> int:
+    try:
+        ceiling = int(json.loads(COUPLING_BASELINE.read_text())["coupling_occurrences_max"])
+    except Exception as e:
+        print(f"coupling-ratchet: cannot read {COUPLING_BASELINE}: {e}", file=sys.stderr)
+        return 1
+    total, breakdown = coupling_occurrences()
+    problems = _coupling_problems(total, ceiling)
+    if problems:
+        for p in problems:
+            print(f"::error::COUPLING-1: {p}", file=sys.stderr)
+        print("\ncoupled skills:", file=sys.stderr)
+        for name, reasons in breakdown:
+            print(f"  {name}: {', '.join(reasons)}", file=sys.stderr)
+        return 1
+    note = ""
+    if total < ceiling:
+        note = (
+            f" — below ceiling; lower coupling_occurrences_max to {total} in "
+            f"registry/coupling-baseline.json to lock the reduction"
+        )
+    print(
+        f"coupling-ratchet: OK — {total} Claude-coupling occurrence(s) across "
+        f"{len(breakdown)} skill(s), ceiling {ceiling}{note}"
+    )
+    return 0
+
+
+def coupling_ratchet_self_test() -> int:
+    checks = [
+        ("growth above ceiling rejected", bool(_coupling_problems(11, 10))),
+        ("count at ceiling accepted", not _coupling_problems(10, 10)),
+        ("count below ceiling accepted", not _coupling_problems(7, 10)),
+        ("rejection names the ceiling", any("ceiling 10" in p for p in _coupling_problems(11, 10))),
+    ]
+    failures = 0
+    for label, ok in checks:
+        print(f"  {'ok  ' if ok else 'FAIL'}  {label}")
+        failures += 0 if ok else 1
+    if failures:
+        print(f"coupling-ratchet --self-test FAILED ({failures} check(s))", file=sys.stderr)
+        return 1
+    print("coupling-ratchet --self-test: ratchet correctly rejects synthetic coupling growth")
+    return 0
 
 
 def parse_frontmatter(text: str) -> tuple[str, str, str]:
@@ -229,7 +316,17 @@ def main() -> int:
                         help="Build into a throwaway temp dir, validate the "
                              "manifest, and clean up. Touches nothing in dist/. "
                              "Exit non-zero on any export/lint/manifest problem.")
+    parser.add_argument("--coupling-ratchet", action="store_true",
+                        help="COUPLING-1: assert catalog-wide Claude-coupling "
+                             "occurrences do not exceed the ratchet ceiling in "
+                             "registry/coupling-baseline.json. Exports nothing.")
+    parser.add_argument("--self-test", action="store_true",
+                        help="With --coupling-ratchet: prove the ratchet rejects "
+                             "synthetic coupling growth.")
     args = parser.parse_args()
+
+    if args.coupling_ratchet:
+        return coupling_ratchet_self_test() if args.self_test else coupling_ratchet_check()
 
     def display(p: pathlib.Path) -> pathlib.Path | str:
         try:

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "_comment": "DEADCONF-1 declare-or-exempt ledger for registry/schemas/project.schema.json. Every top-level property and its named children must be read by a real consumer (a skill consumption contract, a hook, a Python runner, or a tool) — admission into KNOWN_TOP_KEYS and shape/enum validation in the loader do NOT count, nor do *.sh scaffolders that merely emit the key into generated files. A property with no consumer must either gain one in the same change or be listed here with a reason. These are declarative keys: surfaced in the project-context snapshot for humans and future skills, but not yet read by name. Each is a standing 'wire a consumer or delete' candidate, not a permanent grant.",
+  "exemptions": {
+    "stack.package_manager": "Declarative stack metadata in the snapshot; no skill reads package_manager by name yet (bumpDependency resolves the manager from the repo, not this key). Wire a consumer or delete.",
+    "conventions.commit_style": "Declarative house rule in the snapshot; polymath-release:commit applies the project's commit discipline from its own conventions doc and does not branch on this enum today. Wire commit to honor it or delete.",
+    "conventions.branch_strategy": "Declarative house rule in the snapshot; no skill branches on it yet. Wire a consumer or delete.",
+    "conventions.language_specific": "Per-language style-file pointers in the snapshot; skills resolve style docs via conventions_docs roles, not this key, today. Wire a consumer or delete.",
+    "polymath.recommended_workflows": "Declarative activation hint; the SessionStart welcome surfaces recommended_plugins but not workflows yet. Wire surfacing or delete.",
+    "polymath.compatible_agents": "Declarative portability hint surfaced for humans (see docs/PORTABILITY.md); no tool gates on it. Wire a consumer or delete."
+  }
+}

@@ -846,6 +846,141 @@ def routing_self_test() -> int:
     return _self_test_verdict("routing", checks)
 
 
+# ---------------------------------------------------------------------------
+# deadconfig — DEADCONF-1: every project.schema.json property has a consumer
+# ---------------------------------------------------------------------------
+
+PROJECT_SCHEMA = ROOT / "registry" / "schemas" / "project.schema.json"
+DEADCONFIG_EXEMPTIONS = ROOT / "registry" / "deadconfig-exemptions.json"
+PROJECT_LOADER = PLUGINS_DIR / "polymath-core" / "hooks" / "scripts" / "load-project-context.py"
+
+_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+_KNOWN_KEYS_RE = re.compile(r"KNOWN_TOP_KEYS\s*=\s*\{.*?\n\}", re.DOTALL)
+_VALIDATE_FN_RE = re.compile(r"\ndef _validate\(.*?\n(?=\ndef )", re.DOTALL)
+
+
+def _schema_property_paths(schema: dict) -> list[str]:
+    """Top-level named properties plus one level of named child properties.
+    `patternProperties` (free-form keys like conventions_docs roles or smoke
+    per-language recipes) have no fixed names to check, so they are skipped."""
+    out: list[str] = []
+    for key, sub in (schema.get("properties") or {}).items():
+        out.append(key)
+        child = (sub.get("properties") or {}) if isinstance(sub, dict) else {}
+        for ckey in child:
+            out.append(f"{key}.{ckey}")
+    return out
+
+
+def _loader_consumer_text() -> str:
+    """The project loader with its two NON-consuming surfaces stripped:
+    `KNOWN_TOP_KEYS` (admits keys for generic load) and `_validate`
+    (shape/enum-checks values). Reading a value only to admit or type-check it
+    is not consumption — that is exactly how a dead key (the former
+    `artifact_matrix`) masqueraded as used. What remains — summary surfacing,
+    snapshot writing — is real consumption."""
+    text = PROJECT_LOADER.read_text(errors="ignore")
+    text = _KNOWN_KEYS_RE.sub("", text)
+    text = _VALIDATE_FN_RE.sub("\n", text)
+    return text
+
+
+def _deadconfig_corpus() -> str:
+    """Files that can legitimately CONSUME a project key: skill consumption
+    contracts (SKILL.md prose — fenced code stripped so illustrative snapshot
+    JSON does not count), hooks (loader specially processed), Python runners,
+    and tools. The schema, project.yaml declarations/examples, `*.sh`
+    scaffolders (which EMIT keys into generated files), tests, docs, and
+    changelogs declare or describe keys; they do not consume them."""
+    parts: list[str] = []
+    for skill in PLUGINS_DIR.glob("*/skills/*/SKILL.md"):
+        parts.append(_FENCE_RE.sub("", skill.read_text(errors="ignore")))
+    for script in PLUGINS_DIR.glob("*/hooks/scripts/*.py"):
+        parts.append(
+            _loader_consumer_text() if script.name == "load-project-context.py"
+            else script.read_text(errors="ignore")
+        )
+    for runner in PLUGINS_DIR.glob("*/bin/*"):
+        if runner.is_file() and runner.suffix != ".sh":
+            parts.append(runner.read_text(errors="ignore"))
+    for tool in (ROOT / "tools").glob("*.py"):
+        parts.append(tool.read_text(errors="ignore"))
+    return "\n".join(parts)
+
+
+def _deadconfig_problems(paths: list[str], corpus: str, exemptions: dict) -> list[str]:
+    problems: list[str] = []
+    for path in paths:
+        leaf = path.split(".")[-1]
+        consumed = re.search(rf"\b{re.escape(leaf)}\b", corpus) is not None
+        exempt = path in exemptions
+        if not consumed and not exempt:
+            problems.append(
+                f"{path}: project.schema.json declares it but no skill contract, "
+                f"hook, runner, or tool reads it — wire a consumer in the same "
+                f"change, or list it in registry/deadconfig-exemptions.json with a reason"
+            )
+        if consumed and exempt:
+            problems.append(
+                f"{path}: exempt as dead config but a consumer now references it "
+                f"— remove the stale deadconfig exemption"
+            )
+    for path in sorted(exemptions):
+        if path not in paths:
+            problems.append(
+                f"deadconfig exemption {path!r} names a property absent from "
+                f"project.schema.json — remove the stale exemption"
+            )
+    return problems
+
+
+def deadconfig_check() -> int:
+    try:
+        exemptions = json.loads(DEADCONFIG_EXEMPTIONS.read_text()).get("exemptions") or {}
+    except Exception as e:
+        print(f"check-deadconfig: cannot read {DEADCONFIG_EXEMPTIONS}: {e}", file=sys.stderr)
+        return 1
+    try:
+        schema = json.loads(PROJECT_SCHEMA.read_text())
+    except Exception as e:
+        print(f"check-deadconfig: cannot read {PROJECT_SCHEMA}: {e}", file=sys.stderr)
+        return 1
+    paths = _schema_property_paths(schema)
+    problems = _deadconfig_problems(paths, _deadconfig_corpus(), exemptions)
+    for p in problems:
+        print(f"  FAIL  {p}")
+    if problems:
+        print(f"check-deadconfig: FAILED ({len(problems)} problem(s))")
+        return 1
+    print(
+        f"check-deadconfig: OK — {len(paths)} project.schema.json properties: "
+        f"{len(paths) - len(exemptions)} wired to a consumer, {len(exemptions)} "
+        f"exempt (declarative, awaiting a consumer or deletion)"
+    )
+    return 0
+
+
+def deadconfig_self_test() -> int:
+    corpus = "the loader reads cfg.get('alpha') and surfaces alpha in the welcome"
+    paths = ["alpha", "beta", "gamma.delta"]
+    checks = [
+        ("unconsumed + unexempt property rejected",
+         any("no skill contract" in p for p in _deadconfig_problems(paths, corpus, {}))),
+        ("consumed property needs no exemption",
+         not any(p.startswith("alpha:") for p in _deadconfig_problems(["alpha"], corpus, {}))),
+        ("consumed + exempt contradiction rejected",
+         any("stale deadconfig exemption" in p
+             for p in _deadconfig_problems(["alpha"], corpus, {"alpha": "x"}))),
+        ("exemption for absent property rejected",
+         any("absent from" in p
+             for p in _deadconfig_problems(paths, corpus, {"ghost.key": "x"}))),
+        ("clean state passes",
+         not _deadconfig_problems(
+             ["alpha", "beta"], corpus, {"beta": "declarative, no consumer yet"})),
+    ]
+    return _self_test_verdict("deadconfig", checks)
+
+
 def _self_test_verdict(name: str, checks: list[tuple[str, bool]]) -> int:
     failures = 0
     for label, ok in checks:
@@ -887,6 +1022,7 @@ def main() -> int:
         ("docpaths", "relative doc links resolve (DOCPATH-1)"),
         ("gates", "gates.json bijective with conformance.sh; selftests run (GATES-1)"),
         ("routing", "declare-or-exempt + hard-tier ratchet (SURFACE-1)"),
+        ("deadconfig", "every project.schema.json property has a consumer (DEADCONF-1)"),
     ):
         p = sub.add_parser(name, help=help_text)
         p.add_argument(
@@ -913,6 +1049,8 @@ def main() -> int:
         return gates_self_test() if self_test else gates_check()
     if args.cmd == "routing":
         return routing_self_test() if self_test else routing_check()
+    if args.cmd == "deadconfig":
+        return deadconfig_self_test() if self_test else deadconfig_check()
     raise AssertionError(args.cmd)
 
 

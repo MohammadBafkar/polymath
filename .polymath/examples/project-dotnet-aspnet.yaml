@@ -50,9 +50,6 @@ external_skills:
     plugins: [dotnet, dotnet-aspnet, dotnet-test, dotnet-data, dotnet-msbuild]
     install: marketplace
 
-capabilities:
-  inherit_from: .polymath/capabilities.yaml
-
 skill_overrides:
   polymath-engineering:code-review:
     additional_context:

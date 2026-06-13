@@ -1,0 +1,79 @@
+name: platform-canary
+
+# Platform-churn early warning. CI everywhere else pins
+# `@anthropic-ai/claude-code@2.1.175` (the known-good CLI), so a CLI release
+# that changes `claude plugin validate --strict` behavior is invisible until
+# someone bumps the pin. This canary runs the exact MANIFEST-1 validation
+# surface against `@latest` once a week: if a new CLI rejects manifests the
+# pinned version accepts, the job goes red and the team learns about the drift
+# before adopting it. Purely structural — no model token, no model spend.
+#
+# Scheduled + manual only: never a PR gate, so platform churn never blocks
+# day-to-day work. The signal is the weekly run's status.
+
+on:
+  schedule:
+    - cron: "0 6 * * 3"  # Wednesdays 06:00 UTC (off-set from model-ci's Monday tier)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: platform-canary
+  cancel-in-progress: true
+
+jobs:
+  validate-latest:
+    name: claude plugin validate --strict @latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install claude CLI @latest (unpinned — the canary's whole point)
+        run: npm install -g @anthropic-ai/claude-code@latest
+      - name: Record version vs the pinned baseline
+        run: |
+          PINNED="2.1.175"
+          LATEST="$(claude --version 2>/dev/null || echo unknown)"
+          echo "pinned baseline: @${PINNED}" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "latest tested:   ${LATEST}" | tee -a "$GITHUB_STEP_SUMMARY"
+          if echo "${LATEST}" | grep -q "${PINNED}"; then
+            echo "note: @latest still resolves to the pinned version — canary is a no-op this week." \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Validate marketplace root + every plugin against @latest
+        run: |
+          set -euo pipefail
+          fail=0
+          echo "::group::marketplace root"
+          if claude plugin validate --strict .; then
+            echo "  OK: marketplace root"
+          else
+            echo "::error::@latest rejects the marketplace root that the pinned CLI accepts"
+            fail=1
+          fi
+          echo "::endgroup::"
+          for dir in plugins/*/; do
+            [ -f "${dir}.claude-plugin/plugin.json" ] || continue
+            echo "::group::${dir}"
+            if claude plugin validate --strict "${dir}"; then
+              echo "  OK: ${dir}"
+            else
+              echo "::error::@latest rejects ${dir} that the pinned CLI accepts — platform churn"
+              fail=1
+            fi
+            echo "::endgroup::"
+          done
+          if [ "$fail" -ne 0 ]; then
+            {
+              echo ""
+              echo "**FAIL** — \`@latest\` rejects manifests the pinned \`@2.1.175\` accepts."
+              echo "Investigate the CLI changelog before bumping the pin in validate.yml / model-ci.yml."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "**OK** — \`@latest\` validates every plugin cleanly; no platform churn this week." \
+            >> "$GITHUB_STEP_SUMMARY"

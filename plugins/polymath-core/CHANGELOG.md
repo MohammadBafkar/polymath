@@ -1,6 +1,23 @@
 # Changelog — polymath-core
 
+<!-- markdownlint-disable MD024 -->
+
 ## [Unreleased]
+
+### Removed
+
+- **Dead `project.yaml` schema keys.** Removed keys that promised
+  behavior nothing delivered: `artifact_matrix` (no workflow guard read
+  it), the `capabilities` block (its only key, `inherit_from`, was a
+  pointer nothing followed — `capabilities.yaml` resolves by its
+  conventional path), and nine unconsumed `prompts.*` artifact-template
+  keys (`pr_description_template` and `postmortem_template`, the two
+  actually wired into `polymath-release:pr` and
+  `polymath-incident:postmortem-blameless`, stay). Dropped from
+  `project.schema.json`, the loader's `KNOWN_TOP_KEYS` and validation,
+  the shipped `.polymath/project.yaml` + examples, and the docs. The
+  repo-level DEADCONF-1 gate now keeps every remaining schema property
+  tied to a real consumer.
 
 ### Added
 

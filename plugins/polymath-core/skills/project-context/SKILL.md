@@ -72,7 +72,6 @@ The file mirrors `.polymath/project.yaml` with the original keys preserved plus 
   "stack": { "languages": [{ "lang": "dotnet", "version": "8", "framework": "aspnet-core" }], ... },
   "conventions": { "commit_style": "conventional-commits", ... },
   "external_skills": [{ "source": "github.com/dotnet/skills", ... }],
-  "capabilities": { "inherit_from": ".polymath/capabilities.yaml" },
   "setup": { "required_tools": [...], "environment": [...], "first_steps": [...] },
   "polymath": { "recommended_plugins": [...], "recommended_workflows": [...] },
   "skill_overrides": { "polymath-engineering:code-review": { ... } },

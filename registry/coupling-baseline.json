@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "coupling_occurrences_max": 45,
+  "_note": "COUPLING-1 occurrence ratchet. The count is the catalog-wide sum, over every skill SKILL.md, of the distinct Claude-Code-only surfaces it depends on (the CLAUDE_COUPLING set in tools/export-agents-skills.py: MCP server, SessionStart hook / plugin data, polymath-flows runner, hook script path). A skill that references a surface a generic agentskills.io host does not provide cannot fully run when exported. This ceiling freezes that portability cost: it may only ratchet DOWN. A change that adds coupling must either make the skill portable or consciously raise this number (a reviewed decision), so coupling never grows silently. Per-occurrence enumeration (which skill, which line) is COUPLING-2, deferred until the first external adopter or a canary failure. Lower the ceiling whenever the live count drops."
+}
