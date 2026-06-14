@@ -45,7 +45,11 @@ if [[ -d "$plugin_dir" ]]; then
   exit 1
 fi
 
-mkdir -p "$plugin_dir/.claude-plugin" "$plugin_dir/skills" "$plugin_dir/commands" "$plugin_dir/agents" "$plugin_dir/hooks/scripts" "$plugin_dir/tests"
+# Pre-create only the surfaces every plugin has. agents/ and hooks/ are
+# "only when justified" (AGENTS.md, PLUGIN-AUTHORING §6) — scaffolding empty
+# dirs for them contradicts the skill-only default and leaves cruft. Add them
+# via new-skill/new-command or by hand when a plugin actually earns one.
+mkdir -p "$plugin_dir/.claude-plugin" "$plugin_dir/skills" "$plugin_dir/commands" "$plugin_dir/tests"
 
 cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
 {
@@ -96,5 +100,10 @@ MD
 echo "Scaffolded $plugin_dir"
 echo "Next steps:"
 echo "  1. Edit $plugin_dir/.claude-plugin/plugin.json"
-echo "  2. Add skills/commands/agents under $plugin_dir/"
-echo "  3. Register in .claude-plugin/marketplace.json"
+echo "  2. Add skills/commands under $plugin_dir/ (agents/hooks only when justified)"
+echo "  3. Register in ALL THREE of these or conformance fails:"
+echo "       - .claude-plugin/marketplace.json   (Claude's catalog)"
+echo "       - registry/polymath-catalog.json    (status: experimental|beta|stable — MANIFEST-3)"
+echo "       - registry/stability-evidence.json  (evidence ledger entry — STABILITY-1)"
+echo "  4. If it ships .mcp.json or bindings/: add a row to docs/INTEGRATION-POLICY.md (INTEGRATION-2)"
+echo "  5. Run: tools/conformance.sh plugins/$full"
