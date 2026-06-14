@@ -4,17 +4,18 @@
 Renders the catalog workflow index (data/workflow-index.min.json, built by
 tools/build-workflow-index.py) and extends it with a machine-local, tiered
 fragment indexing workflows the catalog cannot see: the project layer
-(./.claude/polymath/workflows/) and the user layer
-(${CLAUDE_CONFIG_DIR}/polymath/workflows/, fallback ~/.claude/polymath/
-workflows/) — the same directories bin/polymath-flow resolves at `start`.
+(./.polymath/workflows/, with ./.claude/polymath/workflows/ as a legacy
+fallback) and the user layer (${POLYMATH_CONFIG_DIR}/polymath/workflows/,
+${CLAUDE_CONFIG_DIR}/polymath/workflows/, fallback ~/.polymath/workflows/ and
+legacy ~/.claude/polymath/workflows/) — the same directories bin/polymath-flow
+resolves at `start`.
 Without this, project/user workflows are runnable but invisible: the agent
 can never propose what it was never told exists.
 
 The fragment is written to <data_root>/polymath-flows/
 workflow-index.project.json — machine-local plugin data, never the checked-in
-data/ dir (which the WORKFLOW-INDEX conformance gate byte-diffs). Producer and
-consumer are both this plugin, so the per-plugin namespacing of
-CLAUDE_PLUGIN_DATA never splits them.
+data/ dir (which a conformance test byte-diffs). Producer and
+consumer are both this plugin, so per-plugin data namespacing never splits them.
 
 Tier and collision rules:
   - project tier wins over user tier on a name collision (runner resolution
@@ -23,8 +24,8 @@ Tier and collision rules:
   - a trigger phrase colliding with a catalog trigger (from the full
     workflow-index.json) or an earlier-tier entry is DROPPED from the
     fragment and recorded in dropped_triggers — never an error, the catalog
-    keeps the phrase. This mirrors WORKFLOW-2's uniqueness rule with the
-    asymmetry localization needs (project config must not fail the session).
+    keeps the phrase. This mirrors the catalog's trigger-uniqueness rule with
+    the asymmetry localization needs (project config must not fail the session).
 
 The catalog block (header / entry lines / footer) is kept byte-identical to
 tools/build-workflow-index.py's render_injection() so the builder's
@@ -208,17 +209,25 @@ def _normalize_when(when: object) -> str | None:
 
 def _tier_dirs() -> list[tuple[str, pathlib.Path]]:
     """Mirror bin/polymath-flow's _resolve_workflow layers exactly: project,
-    then ${CLAUDE_CONFIG_DIR} user dir, then the ~/.claude user fallback
-    (the runner checks BOTH user locations, so both are indexed)."""
+    then user config dirs, then home fallbacks (legacy Claude paths included)."""
     tiers: list[tuple[str, pathlib.Path]] = [
+        ("project", pathlib.Path.cwd() / ".polymath" / "workflows"),
         ("project", pathlib.Path.cwd() / ".claude" / "polymath" / "workflows"),
     ]
-    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
-    if config_dir:
-        tiers.append(("user", pathlib.Path(config_dir) / "polymath" / "workflows"))
-    fallback = pathlib.Path.home() / ".claude" / "polymath" / "workflows"
-    if not any(d == fallback for _, d in tiers):
-        tiers.append(("user", fallback))
+    for config_dir in (
+        os.environ.get("POLYMATH_CONFIG_DIR"),
+        os.environ.get("CLAUDE_CONFIG_DIR"),
+    ):
+        if config_dir:
+            path = pathlib.Path(config_dir) / "polymath" / "workflows"
+            if not any(d == path for _, d in tiers):
+                tiers.append(("user", path))
+    for fallback in (
+        pathlib.Path.home() / ".polymath" / "workflows",
+        pathlib.Path.home() / ".claude" / "polymath" / "workflows",
+    ):
+        if not any(d == fallback for _, d in tiers):
+            tiers.append(("user", fallback))
     return tiers
 
 

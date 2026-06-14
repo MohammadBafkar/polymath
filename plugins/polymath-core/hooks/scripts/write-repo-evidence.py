@@ -4,8 +4,8 @@
 Evaluates the repo-state probes declared by routing sidecars (`repo_state:`,
 compiled into the `repo_probes` list of data/route-signals.json — plus any
 declared by the project overlay .polymath/route-signals.project.json) against
-the current repo root, and caches the booleans in
-``${CLAUDE_PLUGIN_DATA}/polymath-core/repo-evidence.json``.
+the current repo root, and caches the booleans in the Polymath data root:
+``${POLYMATH_PLUGIN_DATA:-${POLYMATH_DATA_DIR}/polymath-core}/repo-evidence.json``.
 
 route-hint.py reads that cache at prompt time and gives a rule a +1 soft
 boost when one of its declared probes is true — repo context (a Dockerfile,
@@ -46,16 +46,19 @@ def repo_root(start: Path) -> Path | None:
 
 
 def data_path() -> Path:
-    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    plugin_base = os.environ.get("POLYMATH_PLUGIN_DATA")
+    if plugin_base:
+        return Path(plugin_base) / "repo-evidence.json"
+    base = os.environ.get("POLYMATH_DATA_DIR")
     if base:
-        root = Path(base)
-        # Layouts vary: some harnesses point CLAUDE_PLUGIN_DATA at the
-        # per-plugin dir, some at the shared parent. Write under
-        # polymath-core/ unless we're already inside it.
+        return Path(base) / "polymath-core" / "repo-evidence.json"
+    legacy_base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy_base:
+        root = Path(legacy_base)
         if root.name != "polymath-core":
             root = root / "polymath-core"
         return root / "repo-evidence.json"
-    return Path.home() / ".claude" / "plugins" / "data" / "polymath-core" / "repo-evidence.json"
+    return Path.home() / ".polymath" / "data" / "polymath-core" / "repo-evidence.json"
 
 
 def load_probes(root: Path) -> list[str]:

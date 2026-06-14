@@ -1,31 +1,16 @@
 # Changelog — polymath-writing
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- **Summary-first checkpoints.** `architecture-doc` and `rfc` confirm a
-  one-screen skeleton (purpose/containers/decisions; change/motivation/
-  alternatives) before writing the full document.
+Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- `adr`, `rfc`, `runbook`, `architecture-doc`, and `editorial-pass`
-  skills.
-- `ADR.md`, `RFC.md`, `Runbook.md`, `Architecture-doc.md` templates
-  under `templates/`.
-- Frontmatter on each template is validated by its matching schema
-  under `registry/schemas/artifacts/`:
-  [`ADR`](../../registry/schemas/artifacts/ADR.schema.json),
-  [`RFC`](../../registry/schemas/artifacts/RFC.schema.json),
-  [`Runbook`](../../registry/schemas/artifacts/Runbook.schema.json)
-  (load-bearing `last_reviewed` staleness field), and
-  [`ArchitectureDoc`](../../registry/schemas/artifacts/ArchitectureDoc.schema.json)
-  (`levels` enum mirrors the skill's "skip C4 L4 by default"
-  constraint).
-- `editorial-pass` takes a markdown artifact + target tone
-  (terse / formal / friendly) + optional length budget and returns a
-  tightened copy without rewriting quotations or dropping load-bearing
-  constraints.
+- **adr** — Write an Architecture Decision Record (Michael Nygard format) to docs/adrs/NNNN-<slug>.md; frontmatter validated by the ADR artifact schema. Records a made decision, not a proposal to debate (rfc).
+- **architecture-doc** — Write a C4-style architecture document; System Context + Containers (+ Components when interesting) with mermaid diagrams. Describes structure, not a decision (adr) or proposal (rfc).
+- **architecture-review-facilitation** — Run an architecture review as a process — entry criteria, reviewer checklist, decision log, and follow-up actions — pairing the design artifact with a red-team pass.
+- **editorial-pass** — Review and tighten prose in a Markdown artifact for a target tone (terse, formal, friendly) without dropping information; preserve quotations and load-bearing constraints.
+- **rfc** — Draft a lightweight design RFC to docs/rfcs/<slug>.md; Summary, Motivation, Detailed design, Drawbacks, Alternatives, Unresolved questions. A proposal to debate, not a recorded decision (adr).
+- **runbook** — Write or refresh an operational runbook for an alert/symptom; structured as TL;DR + Pre-checks + Steps + Verification + Rollback + Escalation.

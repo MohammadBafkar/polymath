@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Read .polymath/project.yaml, validate the minimal-subset shape, and emit
-the resolved context as JSON to ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json.
+the resolved context as JSON to the Polymath data root.
 
 This script is invoked by polymath-core's SessionStart hook. It runs quietly
 when no project file exists (exit 0, no output) and surfaces a one-line
@@ -10,8 +10,9 @@ opening context per the Claude Code SessionStart hook contract.
 Inputs:
   Searched in order, first hit wins:
     1. ./.polymath/project.yaml (project, repo-root)
-    2. ${CLAUDE_CONFIG_DIR}/polymath/project.yaml (user/team default)
-    3. ~/.polymath/project.yaml (last-resort user default)
+    2. ${POLYMATH_CONFIG_DIR}/polymath/project.yaml (user/team default)
+    3. ${CLAUDE_CONFIG_DIR}/polymath/project.yaml (legacy Claude Code default)
+    4. ~/.polymath/project.yaml (last-resort user default)
   Overlay (optional, machine-local, gitignored):
     ./.polymath/project.local.yaml — deep-merged on top of the winning file
     (mappings merge per key with the overlay winning; lists and scalars are
@@ -19,7 +20,9 @@ Inputs:
     invalid overlay is warned to stderr and skipped.
 
 Outputs:
-  ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json — full snapshot
+  ${POLYMATH_PLUGIN_DATA:-${POLYMATH_DATA_DIR}/polymath-core}/project-context.json
+  — full snapshot. ${CLAUDE_PLUGIN_DATA}/polymath-core remains a supported
+  compatibility path when Claude Code supplies it.
   the file plus a `_meta` block describing where the source file lives and
   when it was loaded (plus `overlay` when one applied and `ignored_keys`
   when unknown top-level keys were dropped). Skills consume this file to
@@ -60,9 +63,14 @@ def _debug(msg: str) -> None:
 
 def _project_candidates() -> list[pathlib.Path]:
     out = [pathlib.Path.cwd() / ".polymath" / "project.yaml"]
-    cfg = os.environ.get("CLAUDE_CONFIG_DIR")
-    if cfg:
-        out.append(pathlib.Path(cfg) / "polymath" / "project.yaml")
+    for cfg in (
+        os.environ.get("POLYMATH_CONFIG_DIR"),
+        os.environ.get("CLAUDE_CONFIG_DIR"),
+    ):
+        if cfg:
+            candidate = pathlib.Path(cfg) / "polymath" / "project.yaml"
+            if candidate not in out:
+                out.append(candidate)
     out.append(pathlib.Path.home() / ".polymath" / "project.yaml")
     return out
 
@@ -72,10 +80,16 @@ def _overlay_candidate() -> pathlib.Path:
 
 
 def _data_root() -> pathlib.Path:
-    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    plugin_base = os.environ.get("POLYMATH_PLUGIN_DATA")
+    if plugin_base:
+        return pathlib.Path(plugin_base)
+    base = os.environ.get("POLYMATH_DATA_DIR")
     if base:
         return pathlib.Path(base) / "polymath-core"
-    return pathlib.Path.home() / ".claude" / "plugins" / "data" / "polymath-core"
+    legacy_base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy_base:
+        return pathlib.Path(legacy_base) / "polymath-core"
+    return pathlib.Path.home() / ".polymath" / "data" / "polymath-core"
 
 
 # ---------------------------------------------------------------------------

@@ -17,26 +17,23 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 ## How it works
 
 1. The polymath-core SessionStart hook runs `hooks/scripts/load-project-context.py` at every session start.
-2. The loader reads `.polymath/project.yaml` in the project → user (`${CLAUDE_CONFIG_DIR}/polymath/project.yaml`) → home order (first hit wins), then deep-merges the machine-local `./.polymath/project.local.yaml` overlay on top when one exists.
-3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time).
+2. The loader reads `.polymath/project.yaml` in the project → user (`${POLYMATH_CONFIG_DIR}/polymath/project.yaml`) → home order (first hit wins), then deep-merges the machine-local `./.polymath/project.local.yaml` overlay on top when one exists.
+3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time).
 4. Skills read that JSON file directly.
 
 ## Procedure
 
-To consume the context inside a skill. The data dir is namespaced per
-plugin+marketplace when harness-managed, so resolve the snapshot by glob
-(newest wins), never by a single hardcoded path:
+To consume the context inside a skill, read the portable data-root snapshot:
 
 ```bash
-ctx="$(ls -t "$HOME"/.claude/plugins/data/*/polymath-core/project-context.json \
-            "$HOME"/.claude/plugins/data/polymath-core/project-context.json 2>/dev/null | head -1)"
-if [[ -n "$ctx" ]]; then
+ctx="${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json"
+if [[ -f "$ctx" ]]; then
   primary_lang="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); s=d.get('stack',{}).get('languages',[]); print(s[0]['lang'] if s else '')" "$ctx")"
   # ...
 fi
 ```
 
-Inside a markdown skill (no shell), Read the same glob-resolved JSON file as the procedure's first step; if it is absent, skip silently and use built-in defaults.
+Inside a markdown skill (no shell), read the same JSON file as the procedure's first step; if it is absent, skip silently and use built-in defaults.
 
 ### The consumption contract
 

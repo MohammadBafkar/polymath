@@ -1,14 +1,15 @@
 # Changelog — polymath-vuln-scan
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).
 
-## [0.1.0]
+### Skills
 
-### Added
+- **triage-vulns** — Triage Snyk findings — classify exploitable / reachable / dev-only, propose upgrade or accept-with-justification, never auto-ignore.
 
-- Initial v0.1 components: `.mcp.json` referencing a Snyk MCP server; `triage-vulns` skill; Stop hook reading `.snyk.last.json` and nudging on open criticals; `references/snyk-tools.md`.
-- `userConfig.snykToken` (sensitive); `snykOrg` optional.
+### Integrations
+
+- Ships a Model Context Protocol (MCP) connector. The server definition is portable; configure credentials and client registration per host.

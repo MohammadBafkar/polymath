@@ -1,14 +1,17 @@
 # Changelog — polymath-chat
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Incident-comms integration: Slack channels/threads + Statuspage public updates — internal + external incident communication.
 
-## [0.1.0]
+### Skills
 
-### Added
+- **post-async-update** — Post an async standup / status update to a Slack channel — short, structured (yesterday / today / blockers), threaded under a daily anchor.
+- **post-incident-comms** — Post an incident-comms update to the right Slack channel + thread; pairs with polymath-incident:comms-update for the body and respondToIncident for context.
+- **post-statuspage-update** — Post a customer-facing Statuspage incident update — maps internal severity to public status, scopes components, and re-writes the comms body for customers.
 
-- Initial v0.1 components: `.mcp.json` referencing `@modelcontextprotocol/server-slack`; `post-incident-comms` skill (channel-ID resolution, thread-root tracking, sev1/2 status-page mirror); `post-async-update` skill (daily-anchor-threaded standups in the canonical 3-section structure); `references/slack-tools.md`.
-- `userConfig.slackBotToken` (sensitive); `defaultIncidentChannel` optional.
+### Integrations
+
+- Ships a Model Context Protocol (MCP) connector. The server definition is portable; configure credentials and client registration per host.

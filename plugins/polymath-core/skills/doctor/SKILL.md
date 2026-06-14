@@ -19,7 +19,7 @@ description: Check the Polymath environment — required and optional tools, and
 
 1. Run the bundled checker from the repo root:
    ```bash
-   bash "${CLAUDE_PLUGIN_ROOT}/skills/doctor/scripts/doctor.sh"
+   bash "${POLYMATH_PLUGIN_ROOT}/skills/doctor/scripts/doctor.sh"
    ```
    (From inside this marketplace repo:
    `bash plugins/polymath-core/skills/doctor/scripts/doctor.sh`.)

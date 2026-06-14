@@ -35,7 +35,7 @@ description: Define shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustP
 - **`invoke:`** — Routing label of the form `<plugin>:<capability>`. v0.1 is a label, not a programmatic slash-command call.
 - **Guard** — Precondition (e.g., `git status` clean) checked before the first step.
 - **`mustPass:`** — Deterministic checks (`fileExists`, `fileMatches`, `commandSucceeds`, `stepSummaryMatches`) run after the last step. Failure pauses the workflow.
-- **Workflow state** — `${CLAUDE_PLUGIN_DATA}/workflows/<id>/state.json`. Owned by `bin/polymath-flow`.
+- **Workflow state** — `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/workflows/<id>/state.json`. Owned by `bin/polymath-flow`.
 
 ## Marketplace
 

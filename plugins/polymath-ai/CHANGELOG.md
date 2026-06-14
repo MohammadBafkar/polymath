@@ -1,19 +1,16 @@
 # Changelog — polymath-ai
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- Three skills closing the agent/production-LLM gap (whetstone-coverage program, P2):
-  `agent-design` (control patterns, tool contract, memory, stop/budget conditions,
-  multi-agent), `llm-guardrails` (input validation, prompt-injection defense, output
-  validation, propose-vs-authorize, fail-closed), and `llm-cost-latency` (model
-  routing/cascade, prompt caching, token/call-count cuts, per-request budget). Each
-  declares a soft-tier `routing.yaml`. LLM-security *review* lands separately in
-  `polymath-security` (P4).
+AI craft: prompt engineering, RAG, eval design, agent design, LLM guardrails, cost/latency tuning.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `prompt-engineer`, `rag-design`, `eval-plan` skills.
+- **agent-design** — Design an LLM agent — architecture (ReAct, plan-execute, reflexion), tool/function-calling contract, memory, multi-agent orchestration, and the stop/budget conditions.
+- **eval-plan** — Design an evaluation for an LLM feature — task type, dataset shape, automated vs human rubric, regression set, decision threshold.
+- **llm-cost-latency** — Cut LLM cost and latency — model routing/cascade, prompt caching, batching, streaming, context trimming, output-token control, and a per-request cost/latency budget.
+- **llm-guardrails** — Design guardrails for an LLM feature — input validation, prompt-injection defenses, output filtering/schema validation, allow-deny policy, and human-in-the-loop gates.
+- **prompt-engineer** — Author or improve an LLM prompt — clarify task, constrain output shape, place worked examples, bound calibration; vendor-agnostic.
+- **rag-design** — Design a retrieval-augmented generation pipeline — chunking, embeddings, retriever, reranker, prompt assembly — with the right cuts for the use case.

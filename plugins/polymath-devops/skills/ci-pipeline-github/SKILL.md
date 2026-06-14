@@ -21,7 +21,7 @@ description: Author a GitHub Actions workflow — lint/test/build/deploy with ca
 ## Project localization
 
 Before the procedure, resolve the project snapshot — glob
-`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (newest
 wins; absent → skip and use built-in defaults). Then apply (contract:
 `polymath-core:project-context`):
 

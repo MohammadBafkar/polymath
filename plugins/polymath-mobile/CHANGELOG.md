@@ -1,13 +1,13 @@
 # Changelog — polymath-mobile
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Mobile craft: mobile perf budgets, push notification design, deep-link routing.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `mobile-perf` (4 axes: cold/warm TTI, scroll FPS, memory, audience-device-tier-aware), `push-notifications` (opt-in moment, two-channel min, quiet hours, unsub path), `deep-links` (Universal/App Links + AASA/assetlinks + deferred + signed-param verification) skills.
+- **deep-links** — Design deep-link routing — universal/app links over custom schemes, deferred deep-link for install path, fallback web URL, signed param verification.
+- **mobile-perf** — Set mobile perf budgets — cold start (TTI), warm start, scroll FPS, memory; per audience device tier (low-end Android baseline); identify the dominant cost. Native only; not web CWV.
+- **push-notifications** — Design push notifications — opt-in moment, payload shape, tap-deep-link, silent vs visible, quiet hours, unsub path; respect the OS bucket constraints.

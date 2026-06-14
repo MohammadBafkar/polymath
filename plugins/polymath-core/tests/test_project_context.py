@@ -566,6 +566,37 @@ class LoaderEndToEndTests(unittest.TestCase):
         self.assertEqual(cp.returncode, 0)
         self.assertIn("ruby", cp.stdout)
 
+    def test_polymath_config_and_data_dirs_are_used(self) -> None:
+        cfg = self.work / "polyconfig"
+        data = self.work / "polydata"
+        (cfg / "polymath").mkdir(parents=True)
+        (cfg / "polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\n"
+            "stack:\n"
+            "  languages:\n"
+            "    - lang: elixir\n"
+        )
+        env = {
+            **os.environ,
+            "POLYMATH_DATA_DIR": str(data),
+            "POLYMATH_CONFIG_DIR": str(cfg),
+            "CLAUDE_CONFIG_DIR": str(self.work / "no-such-claude-config"),
+            "HOME": str(self.work / "fake-home"),
+        }
+        env.pop("CLAUDE_PLUGIN_DATA", None)
+        cp = subprocess.run(
+            ["python3", str(LOADER)],
+            cwd=self.work,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(cp.returncode, 0, cp.stderr)
+        self.assertIn("elixir", cp.stdout)
+        self.assertTrue(
+            (data / "polymath-core" / "project-context.json").is_file()
+        )
+
 
 class ExampleFilesTests(unittest.TestCase):
     """Every shipped example must parse, validate, and produce a summary."""

@@ -170,7 +170,7 @@ policy and must be demoted to `experimental` at the next release.
   [`tools/lint-skills.sh`](../tools/lint-skills.sh).
 - Tier says nothing about portability to non-Claude-Code harnesses.
   See [`docs/PORTABILITY.md`](PORTABILITY.md) for the agentskills.io
-  v1.0 export path and the surfaces that do not port.
+  v1.0 export path, converted surfaces, and adapter-required surfaces.
 
 ## See also
 

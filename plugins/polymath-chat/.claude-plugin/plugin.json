@@ -1,6 +1,6 @@
 {
   "name": "polymath-chat",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Slack connector: MCP for channels/messages/threads + skill for posting incident comms updates with the right channel + thread routing.",
   "license": "MIT",
   "author": {

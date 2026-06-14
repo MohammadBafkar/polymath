@@ -49,7 +49,7 @@ Not for authoring Polymath plugins/skills (`new-plugin`, `new-skill`,
    show the conflict — scaffolding never overwrites.
 6. **Close the loop.** If the component adds tools or env vars, update
    `setup` in `.polymath/project.yaml` and regenerate the onboarding
-   checklist: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/gen-prerequisites.py"
+   checklist: `python3 "${POLYMATH_PLUGIN_ROOT}/bin/gen-prerequisites.py"
    --out docs/onboarding/prerequisites.md`. Finish with a summary:
    generator command used, files created, conventions applied,
    follow-ups.

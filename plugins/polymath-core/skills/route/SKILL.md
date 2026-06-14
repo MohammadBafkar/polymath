@@ -18,7 +18,7 @@ description: Choose the right Polymath workflow, skill, connector, agent, or ext
 
 - The user's prompt and any attached file paths, URLs, ticket keys, diffs, or logs.
 - Installed Polymath skill/command/agent descriptions already visible in context.
-- If available, read `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`.
+- If available, read `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`.
 - For workflow candidates, read `../../../polymath-flows/data/workflow-index.min.json`; if two workflows tie, read `../../../polymath-flows/data/workflow-detect.json`.
 - For provider-dependent work, read `.polymath/capabilities.yaml` or [`docs/CAPABILITIES.md`](../../../../docs/CAPABILITIES.md).
 
@@ -27,7 +27,7 @@ Do not bulk-load every `SKILL.md`. Load the chosen target's body only after rout
 ## Procedure
 
 0. **Read the deterministic shortlist first.** Run
-   `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/route-hint.py" --shortlist "<the user's request text>"`
+   `python3 "${POLYMATH_PLUGIN_ROOT}/hooks/scripts/route-hint.py" --shortlist "<the user's request text>"`
    and treat its `candidates` as the constrained choice set: the scorer
    has already done the narrowing the model is bad at, so
    reason *inside* the top-3 before reasoning outside it. Candidates with

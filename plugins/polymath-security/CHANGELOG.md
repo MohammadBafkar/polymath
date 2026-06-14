@@ -1,27 +1,18 @@
 # Changelog — polymath-security
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- Five skills closing the security-breadth gap (whetstone-coverage program, P4):
-  `auth-design` (OAuth2/OIDC, tokens/sessions, RBAC/ABAC, SSO, revocation),
-  `compliance-mapping` (SOC 2 / GDPR / ISO 27001 / HIPAA requirement→control→evidence),
-  `devsecops-pipeline` (SAST/DAST/SCA/secret/IaC scanning as CI gates),
-  `crypto-review` (encryption, key management, algorithm choice, foot-guns), and
-  `llm-security-review` (OWASP LLM Top 10 audit — pairs with `polymath-ai:llm-guardrails`).
-  Each declares a soft-tier `routing.yaml`.
-- **Summary-first checkpoint.** `stride-threat-model` confirms scope,
-  trust boundaries, and the highest-risk STRIDE candidates on one screen
-  before drafting the full model.
+Security craft: STRIDE, OWASP review, supply-chain, auth design, compliance mapping, DevSecOps pipeline, crypto review, LLM-security audit.
 
-### Changed
+### Skills
 
-- `supply-chain-review` skill folded in from the former `polymath-supply-chain` plugin — SBOM/SLSA/provenance are appsec.
-
-## [0.1.0]
-
-### Added
-
-- Initial v0.1 components: `stride-threat-model` skill (writes a Threat-model artifact validated by the ThreatModel JSON schema) and `owasp-review` skill (diff-driven Top 10 review keyed to file:line).
-- Ships `Threat-model.md` template under `templates/`.
+- **auth-design** — Design authentication/authorization — OAuth2/OIDC flow choice, JWT vs opaque/session tokens, RBAC vs ABAC, SSO, token lifetime/refresh/revocation.
+- **compliance-mapping** — Map a compliance framework (SOC 2 / GDPR / ISO 27001 / HIPAA) to concrete technical controls and the evidence/artifacts each control needs for audit.
+- **crypto-review** — Review a cryptography choice — encryption at rest/in transit, key management + rotation, algorithm/mode selection, and common foot-guns (IV reuse, ECB, home-rolled crypto).
+- **devsecops-pipeline** — Design security gates into CI/CD — SAST, DAST, SCA/dependency, secret, and IaC scanning — with severity thresholds, a triage flow, and noise control.
+- **llm-security-review** — Audit an LLM system for security — OWASP LLM Top 10, direct/indirect prompt injection, sensitive-data leakage, insecure output handling, RAG and agent-action risks.
+- **owasp-review** — Review a code diff against the current OWASP Top 10; report findings keyed to file:line with severity (high/medium/low) and a fix recommendation.
+- **stride-threat-model** — Model a system with STRIDE; writes docs/threat-models/<slug>.md with frontmatter validated by the ThreatModel artifact schema.
+- **supply-chain-review** — Review supply-chain integrity — SBOM, dependency provenance/lockfiles, license audit, signing/SLSA attestation, build trust. Supply-chain posture, not runtime vuln triage (snyk:triage-vulns).

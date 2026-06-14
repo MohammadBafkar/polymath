@@ -1,26 +1,16 @@
 # Changelog — polymath-product
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- `product-strategy` skill folded in from the former `polymath-product-strategy` plugin.
+Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.
 
-### Added
+### Skills
 
-- **PRD template upgrades.** `templates/PRD.md` gains **Locked
-  decisions** (with sources; never relitigated silently) and a
-  **Deferral registry** (deferred scope with revisit conditions;
-  distinct from non-goals). The `prd` skill fills both and adds a
-  summary-first checkpoint before drafting the full document.
-- `roadmap` skill — sequence a Now/Next/Later roadmap grouped by outcome, with
-  confidence, dependencies, and explicit non-commitments per horizon.
-- `groom-backlog` skill — refine backlog items to a Definition of Ready
-  (clarify, acceptance criteria, estimate, split oversized, flag blockers).
-- Skill-triggering tests for both.
-
-## [0.1.0]
-
-### Added
-
-- Initial v0.1 components: `prd`, `acceptance-criteria`, `decompose-epic` skills with materialized `PRD.md` and `User-story-map.md` templates.
+- **acceptance-criteria** — Draft or refine Given/When/Then acceptance criteria for a PRD; each criterion is independently testable and maps to a test case.
+- **decompose-epic** — Decompose a PRD or epic into vertically-sliced user stories using a Jeff Patton-style user story map; produces docs/maps/<slug>.md. Story slices, not an engineering WBS (work-breakdown).
+- **groom-backlog** — Review backlog items into ready — clarify stories, add acceptance criteria + estimate, split oversized items, flag blockers; not ranking (prioritize) or epic story-mapping (decompose-epic).
+- **prd** — Draft a PRD from a problem statement plus user/context inputs; populates docs/prds/<slug>.md from the canonical PRD template.
+- **product-strategy** — Define product strategy and GTM — vision, ICP/segmentation, positioning, pricing/packaging, moat, launch. The market/strategy layer, not a feature PRD (prd) or exec brief (exec-brief).
+- **roadmap** — Map a Now/Next/Later roadmap grouped by outcome — confidence, dependencies, explicit non-commitments; a ranked set, not the ranking (prioritize) or a plan (write-plan).

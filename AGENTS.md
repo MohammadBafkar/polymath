@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Polymath is an open-source Claude Code marketplace: <!-- count:plugins -->40<!-- /count --> work-shaped plugins covering the full SDLC, <!-- count:workflows -->32<!-- /count --> YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format; most export and run unchanged on other hosts (Cursor, Codex, Goose, Gemini CLI, JetBrains Junie), while the subset that depends on a Claude Code surface (MCP, SessionStart, the flows runner) carries a portability banner — see [docs/PORTABILITY.md](docs/PORTABILITY.md).
+Polymath is an open-source Claude Code marketplace: <!-- count:plugins -->40<!-- /count --> work-shaped plugins covering the full SDLC, <!-- count:workflows -->32<!-- /count --> YAML-driven workflows that compose plugins into end-to-end scenarios, and strict per-plugin token budgets (≤400 tokens always-on). Skills are authored in [agentskills.io v1.0](https://agentskills.io) format and export to a portable bundle via `tools/export-agents-skills.py` — verified to load all 212 skills natively on Gemini CLI; other hosts (Codex, Copilot, Cursor) consume them via their own skill/MCP/`AGENTS.md` mechanisms. The subset that depends on a Claude Code surface (MCP, SessionStart, the flows runner) carries a portability banner — see [docs/PORTABILITY.md](docs/PORTABILITY.md).
 
 ## Local validation commands
 

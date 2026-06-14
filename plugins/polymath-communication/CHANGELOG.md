@@ -1,22 +1,16 @@
 # Changelog — polymath-communication
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- **Summary-first checkpoint.** `six-pager` confirms a one-screen
-  skeleton (question, tenets, recommendation) before writing six pages.
-### Changed
+Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.
 
-- `write-release-notes`, `write-advisory`, and `write-sunset-notice` skills
-  folded in from the former `polymath-content` plugin — customer-facing prose
-  is the same audience-first craft as the internal briefs.
-- Added the missing `Advisory.md` and `Sunset-notice.md` templates referenced
-  by the folded-in skills so the workflow link-check passes.
+### Skills
 
-## [0.1.0]
-
-### Added
-
-- Initial v0.1 components: `exec-brief` (BLUF, one recommendation), `six-pager` (Amazon-style narrative with tenets + FAQ), `meeting-notes` (3 sections only: decisions / actions / open questions) skills.
-- Ships `Exec-brief.md` + `Six-pager.md` templates under `templates/`.
+- **exec-brief** — Write a BLUF exec brief — TL;DR first, one recommendation (not menu of three), unambiguous ask, "what if no" cost stated.
+- **meeting-notes** — Capture meeting notes in three sections — decisions, action-items with owners + dates, open questions; not a transcript.
+- **six-pager** — Author an Amazon-style six-page narrative — prose not bullets, tenets up front, FAQ at the end; the FAQ is where objections live.
+- **write-advisory** — Author a security or breaking-change advisory — severity, affected/fixed versions, action required (prioritized), workaround, verification step, credit.
+- **write-release-notes** — Author customer-facing release notes — headline, user-benefit framing, breaking changes called out, no internal-jargon component names.
+- **write-sunset-notice** — Author a deprecation / sunset notice — two dates (warn, remove), concrete migration with before/after code, exception path, FAQ.

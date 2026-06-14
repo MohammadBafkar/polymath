@@ -1,20 +1,16 @@
 # Changelog — polymath-qa
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- `test-smell` skill — detect test smells/anti-patterns (over-mocking, fragile
-  assertions, slow setup, flaky timing) in an existing suite, each flagged with
-  its layer and a refactor.
-- `integration-contract` skill — design integration and consumer-driven contract
-  tests for a service boundary (stub-vs-hit, fixtures, failure modes).
-- `assertion-quality` skill — strengthen assertions to test behavior not
-  implementation, with one clear reason-to-fail per test.
-- Skill-triggering tests for all three.
+Quality craft: test strategy, coverage-gap analysis, unit-test authoring.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `test-strategy`, `coverage-gap`, `unit-tests` skills.
+- **assertion-quality** — Review test assertions — assert behavior not implementation; kill snapshot/tautological checks; one reason-to-fail per test; improves existing tests, not authoring them (unit-tests).
+- **coverage-gap** — Review a diff for missing test coverage; pairs every changed behavior with an existing test or a flagged gap plus a recommended layer; finds gaps, not authoring (unit-tests).
+- **integration-contract** — Design integration/contract tests for a service boundary — consumer-driven contracts, stub-vs-hit, fixtures, failure modes. Boundary tests, not unit tests (unit-tests) or the plan (test-strategy).
+- **test-smell** — Detect test smells/anti-patterns — over-mocking, fragile assertions, slow setup, flaky timing; flag each with its layer and a refactor. Reviews existing tests, not authoring them (unit-tests).
+- **test-strategy** — Design a layered test strategy (pyramid) for a feature or repo; recommends unit/integration/e2e split and the cheapest set that covers the acceptance criteria. Plans layers; doesn't write tests.
+- **unit-tests** — Author unit tests using the repo's existing framework; one test per behavior, no mocking of internal collaborators. Writes tests; not gap analysis (coverage-gap) or strategy (test-strategy).

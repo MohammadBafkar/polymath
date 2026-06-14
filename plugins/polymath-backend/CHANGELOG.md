@@ -1,24 +1,21 @@
 # Changelog — polymath-backend
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- `api-versioning` skill (whetstone-coverage program, P5): API versioning strategy —
-  mechanism choice (URL/header/media-type), breaking vs compatible classification,
-  consumer-driven contracts, and the parallel-support + deprecation path. Soft-tier
-  `routing.yaml`. Deprecation notices/migration guides remain in `polymath-release`.
-- `api-design-rest` and `db-schema` consume project localization: `conventions_docs` roles `api-style`/`backend-stack`/`database` from the project-context snapshot.
+Backend craft: REST API design, API versioning strategy, relational schema design, safe online migrations.
 
-### Changed
+### Skills
 
-- Added Postgres migration-safety skills `review-migration` and
-  `audit-pg-config` (and their `/review-migration` and `/audit-config`
-  commands) — migration safety belongs next to `db-schema` and
-  `migration-plan`.
+- **api-design-rest** — Design a REST endpoint or resource — URL, method, status codes, request/response shape, errors, idempotency, versioning.
+- **api-versioning** — Plan an API versioning strategy — URL vs header vs media-type versioning, semantic rules, backward-compatible change classification, consumer-driven contracts, deprecation path.
+- **audit-pg-config** — Audit Postgres server config — shared_buffers, work_mem, max_connections vs pgbouncer pool, autovacuum tuning, WAL retention.
+- **db-schema** — Design or review a relational schema — tables, columns, types, indexes, constraints, naming, soft-delete and audit decisions.
+- **migration-plan** — Plan a safe online database migration in expand-migrate-contract phases; outputs the ordered steps and the rollback for each.
+- **review-migration** — Review a Postgres migration for lock surface, online/offline safety, backfill strategy — flags ACCESS EXCLUSIVE locks and unsafe defaults on large tables.
 
-## [0.1.0]
+### Commands
 
-### Added
-
-- Initial v0.1 components: `api-design-rest`, `db-schema`, `migration-plan` skills.
+- **/audit-config** — Audit Postgres server config — memory, connections, WAL, autovacuum, logging.
+- **/review-migration** — Review a pending DB migration before merging; command entry point for the review-migration skill.

@@ -798,7 +798,7 @@ def _eval_classify(case: dict, fired: bool, cands: list[str], out: str = "") -> 
         return "FALSE-POSITIVE" if fired else "ok-silent"
     if cat == "partial-install":
         plugin = target.split(":", 1)[0]
-        affordance = f"not installed; install: claude plugin install {plugin}@polymath"
+        affordance = f"not installed; install: add {plugin} to this host's Polymath bundle"
         if case["expect"] == "install-affordance":
             if not fired:
                 return "MISS"
@@ -1064,7 +1064,7 @@ def route_eval_self_test() -> int:
         {"id": "st-pi2", "category": "partial-install", "expect": "fire",
          "target": "polymath-data:sql-optimize"},
         True, ["polymath-data:sql-optimize"],
-        out="not installed; install: claude plugin install polymath-data@polymath",
+        out="not installed; install: add polymath-data to this host's Polymath bundle",
     )
     check("synthetic spurious affordance classifies as AFFORDANCE-SPURIOUS",
           spurious == "AFFORDANCE-SPURIOUS")

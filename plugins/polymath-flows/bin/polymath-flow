@@ -17,7 +17,7 @@ Does NOT own (those live in the skill / lead model context):
   - composing summaries
 
 State layout:
-  ${CLAUDE_PLUGIN_DATA}/workflows/<run_id>/
+  ${POLYMATH_PLUGIN_DATA:-${POLYMATH_DATA_DIR}/polymath-flows}/workflows/<run_id>/
     ├── state.json        (includes last_active for stale-run detection)
     ├── inputs.json
     ├── trace.jsonl
@@ -306,9 +306,14 @@ def _load_project_capabilities() -> tuple[dict, pathlib.Path | None]:
     """Read .polymath/capabilities.yaml from project → user → home."""
     candidates: list[pathlib.Path] = []
     candidates.append(pathlib.Path.cwd() / ".polymath" / "capabilities.yaml")
-    cfg = os.environ.get("CLAUDE_CONFIG_DIR")
-    if cfg:
-        candidates.append(pathlib.Path(cfg) / "polymath" / "capabilities.yaml")
+    for cfg in (
+        os.environ.get("POLYMATH_CONFIG_DIR"),
+        os.environ.get("CLAUDE_CONFIG_DIR"),
+    ):
+        if cfg:
+            candidate = pathlib.Path(cfg) / "polymath" / "capabilities.yaml"
+            if candidate not in candidates:
+                candidates.append(candidate)
     candidates.append(pathlib.Path.home() / ".polymath" / "capabilities.yaml")
     for p in candidates:
         if p.exists():
@@ -426,10 +431,16 @@ def _resolve_capability_requirements(
 
 
 def _data_root() -> pathlib.Path:
-    base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    plugin_base = os.environ.get("POLYMATH_PLUGIN_DATA")
+    if plugin_base:
+        return pathlib.Path(plugin_base)
+    base = os.environ.get("POLYMATH_DATA_DIR")
     if base:
-        return pathlib.Path(base)
-    return pathlib.Path.home() / ".claude" / "plugins" / "data" / "polymath-flows"
+        return pathlib.Path(base) / "polymath-flows"
+    legacy_base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy_base:
+        return pathlib.Path(legacy_base)
+    return pathlib.Path.home() / ".polymath" / "data" / "polymath-flows"
 
 
 def _workflow_runs_dir() -> pathlib.Path:
@@ -460,17 +471,27 @@ def _parse_iso(ts: str | None) -> datetime.datetime | None:
 
 def _resolve_workflow(name: str) -> pathlib.Path:
     """Three-layer resolution: project → user → marketplace."""
-    project = pathlib.Path.cwd() / ".claude" / "polymath" / "workflows" / f"{name}.yaml"
-    if project.exists():
-        return project
-    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
-    if config_dir:
-        user = pathlib.Path(config_dir) / "polymath" / "workflows" / f"{name}.yaml"
-        if user.exists():
-            return user
-    user_fallback = pathlib.Path.home() / ".claude" / "polymath" / "workflows" / f"{name}.yaml"
-    if user_fallback.exists():
-        return user_fallback
+    candidates = [
+        pathlib.Path.cwd() / ".polymath" / "workflows" / f"{name}.yaml",
+        pathlib.Path.cwd() / ".claude" / "polymath" / "workflows" / f"{name}.yaml",
+    ]
+    for config_dir in (
+        os.environ.get("POLYMATH_CONFIG_DIR"),
+        os.environ.get("CLAUDE_CONFIG_DIR"),
+    ):
+        if config_dir:
+            candidate = pathlib.Path(config_dir) / "polymath" / "workflows" / f"{name}.yaml"
+            if candidate not in candidates:
+                candidates.append(candidate)
+    candidates.extend(
+        [
+            pathlib.Path.home() / ".polymath" / "workflows" / f"{name}.yaml",
+            pathlib.Path.home() / ".claude" / "polymath" / "workflows" / f"{name}.yaml",
+        ]
+    )
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
     marketplace = PLUGIN_ROOT / "workflows" / f"{name}.yaml"
     if marketplace.exists():
         return marketplace
@@ -937,17 +958,19 @@ def _slugify(text: str) -> str:
 def _project_context_snapshot() -> dict | None:
     """Locate and parse polymath-core's project-context.json snapshot.
 
-    The snapshot is written by polymath-core's SessionStart hook into ITS
-    data dir — which, when CLAUDE_PLUGIN_DATA is harness-provided, is
-    namespaced per plugin AND marketplace (data/polymath-core-<mkt>/...),
-    a different directory from this binary's own data root. Candidates:
+    The snapshot is written by polymath-core's session-start hook into its data
+    dir, which may be a Polymath-native path or a legacy Claude Code path.
+    Candidates:
 
-    With CLAUDE_PLUGIN_DATA set (the harness-provided, per-plugin data root):
-      1. ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json
-      2. sibling dirs: ${CLAUDE_PLUGIN_DATA}/../*/polymath-core/project-context.json
-    With it unset (e.g. invoked via the Bash tool):
-      3. ~/.claude/plugins/data/polymath-core/project-context.json
-      4. ~/.claude/plugins/data/polymath-core-*/polymath-core/project-context.json
+    With POLYMATH_PLUGIN_DATA / CLAUDE_PLUGIN_DATA set:
+      1. <env>/polymath-core/project-context.json
+      2. sibling dirs: <env>/../*/polymath-core/project-context.json
+    With POLYMATH_DATA_DIR set:
+      3. ${POLYMATH_DATA_DIR}/polymath-core/project-context.json
+      4. ${POLYMATH_DATA_DIR}/polymath-core-*/polymath-core/project-context.json
+    With no env:
+      5. ~/.polymath/data/polymath-core/project-context.json
+      6. legacy ~/.claude/plugins/data/polymath-core/project-context.json
 
     The two groups never mix — when the env var is set it defines the data
     root and the home layout is irrelevant (this also keeps tests hermetic).
@@ -955,7 +978,7 @@ def _project_context_snapshot() -> dict | None:
     the live namespaced one). Degrade quiet: unreadable/missing → None.
     """
     candidates: list[pathlib.Path] = []
-    env = os.environ.get("CLAUDE_PLUGIN_DATA")
+    env = os.environ.get("POLYMATH_PLUGIN_DATA") or os.environ.get("CLAUDE_PLUGIN_DATA")
     if env:
         env_path = pathlib.Path(env)
         candidates.append(env_path / "polymath-core" / "project-context.json")
@@ -966,14 +989,19 @@ def _project_context_snapshot() -> dict | None:
         except OSError:
             pass
     else:
-        home_data = pathlib.Path.home() / ".claude" / "plugins" / "data"
-        candidates.append(home_data / "polymath-core" / "project-context.json")
-        try:
-            candidates.extend(
-                sorted(home_data.glob("polymath-core-*/polymath-core/project-context.json"))
-            )
-        except OSError:
-            pass
+        data_roots: list[pathlib.Path] = []
+        if os.environ.get("POLYMATH_DATA_DIR"):
+            data_roots.append(pathlib.Path(os.environ["POLYMATH_DATA_DIR"]))
+        data_roots.append(pathlib.Path.home() / ".polymath" / "data")
+        data_roots.append(pathlib.Path.home() / ".claude" / "plugins" / "data")
+        for home_data in data_roots:
+            candidates.append(home_data / "polymath-core" / "project-context.json")
+            try:
+                candidates.extend(
+                    sorted(home_data.glob("polymath-core-*/polymath-core/project-context.json"))
+                )
+            except OSError:
+                pass
 
     existing: list[pathlib.Path] = []
     seen: set[str] = set()
@@ -1218,7 +1246,7 @@ _FLATTEN_KEY_ORDER = [
 
 def _flatten(partial: dict, parent: dict, ref: str) -> tuple[dict | None, list[str]]:
     """Compose parent + partial into a standalone workflow dict.
-    Semantics (docs/WORKFLOW-SCHEMA.md § 3): override.steps replaces parent
+    Semantics: override.steps replaces parent
     steps by id; insertAfter.<anchor> inserts after the named anchor;
     partial steps append; mustPass/guards append to the parent's;
     override.removeSteps drops steps LAST, guarded by the strong-gate

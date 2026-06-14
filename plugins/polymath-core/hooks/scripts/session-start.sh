@@ -5,7 +5,7 @@
 #   1. Project context loaded from .polymath/project.yaml — one line.
 #   2. Paused flows-lite workflow runs.
 #   3. "Due now" items from the scheduled-work queue
-#      (${CLAUDE_PLUGIN_DATA}/polymath-core/queue.json — § 11.6).
+#      (${POLYMATH_DATA_DIR}/polymath-core/queue.json).
 #
 # Polymath does not ship a scheduler. Whoever owns the schedule
 # (Anthropic Cloud Routine, GitHub Action, OS cron, …) writes to
@@ -15,7 +15,19 @@
 # Quiet by default — only prints when there is something to surface.
 set -euo pipefail
 
-data_root="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}"
+if [[ -n "${POLYMATH_DATA_DIR:-}" ]]; then
+  data_root="$POLYMATH_DATA_DIR"
+elif [[ -n "${POLYMATH_PLUGIN_DATA:-}" ]]; then
+  if [[ "$(basename "$POLYMATH_PLUGIN_DATA")" == "polymath-core" ]]; then
+    data_root="$(dirname "$POLYMATH_PLUGIN_DATA")"
+  else
+    data_root="$POLYMATH_PLUGIN_DATA"
+  fi
+elif [[ -n "${CLAUDE_PLUGIN_DATA:-}" ]]; then
+  data_root="$CLAUDE_PLUGIN_DATA"
+else
+  data_root="$HOME/.polymath/data"
+fi
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 
 # The hook payload arrives once on stdin; capture it for the consumers below.
@@ -31,7 +43,7 @@ fi
 
 # --- project context ---
 # Refresh the project-context snapshot under
-# ${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json from
+# ${POLYMATH_DATA_DIR}/polymath-core/project-context.json from
 # .polymath/project.yaml (project → user → home). The loader script
 # prints a one-line summary on stdout when a project file exists; we
 # capture it and surface alongside the other notes below. A bad project

@@ -1,14 +1,13 @@
 # Changelog — polymath-kubernetes
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `write-manifest`, `audit-rbac-grants`, `propose-pod-security-standards` skills.
-- Hook: `PreToolUse(Bash)` blocks mutating kubectl commands on prod-named contexts; bypass via `POLYMATH_ACK_PROD` token.
+- **audit-rbac-grants** — Audit RBAC roles and bindings — find overbroad verbs (*), cluster-wide grants that should be namespaced, stale ServiceAccounts, anonymous access.
+- **propose-pod-security-standards** — Propose Kubernetes Pod Security Standards (privileged/baseline/restricted) per namespace; identify violating workloads and remediations.
+- **write-manifest** — Write a Kubernetes Deployment + Service + PDB manifest with safe defaults — resource requests/limits, probes, security context, topology spread.

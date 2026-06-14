@@ -8,20 +8,32 @@
 # (repo-relevant workflows first — detectionSignals paths probed against the
 # repo — alphabetical fill, ≤400-token block), a one-line Tier B pointer for
 # the rest, and a machine-local fragment for project-/user-layer workflows
-# (written to ${CLAUDE_PLUGIN_DATA}/polymath-flows/workflow-index.project.json
+# (written to ${POLYMATH_DATA_DIR}/polymath-flows/workflow-index.project.json
 # together with the tiering record doctor renders). The propose/confirm
 # contract is documented in skills/run-workflow/SKILL.md.
 #
 # Quiet by default: prints nothing if there is nothing to index, the index is
 # muted, or python3 is unavailable. Suppress per-machine with:
-#   touch "${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}/polymath-flows/index-muted"
+#   touch "${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/index-muted"
 set -euo pipefail
 
-root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
+root="${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}}"
 min_index="${root}/data/workflow-index.min.json"
 full_index="${root}/data/workflow-index.json"
 detect_index="${root}/data/workflow-detect.json"
-data_root="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}"
+if [[ -n "${POLYMATH_DATA_DIR:-}" ]]; then
+  data_root="$POLYMATH_DATA_DIR"
+elif [[ -n "${POLYMATH_PLUGIN_DATA:-}" ]]; then
+  if [[ "$(basename "$POLYMATH_PLUGIN_DATA")" == "polymath-flows" ]]; then
+    data_root="$(dirname "$POLYMATH_PLUGIN_DATA")"
+  else
+    data_root="$POLYMATH_PLUGIN_DATA"
+  fi
+elif [[ -n "${CLAUDE_PLUGIN_DATA:-}" ]]; then
+  data_root="$CLAUDE_PLUGIN_DATA"
+else
+  data_root="$HOME/.polymath/data"
+fi
 mute_marker="${data_root}/polymath-flows/index-muted"
 
 [[ -f "$mute_marker" ]] && exit 0

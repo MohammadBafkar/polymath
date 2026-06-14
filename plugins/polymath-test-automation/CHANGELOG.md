@@ -1,13 +1,12 @@
 # Changelog — polymath-test-automation
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- `e2e-flow` skill — author a browser end-to-end test for a critical user
-  journey: role/text selectors, web-first (state-based) waits, deterministic
-  per-test data, one journey per spec, trace on failure.
-- `load-test` skill — design a load/stress/soak/spike test with a realistic
-  workload model, ramp + think time, and explicit pass/fail thresholds on
-  percentiles (k6/JMeter/Locust).
-- Golden fixtures and skill-triggering tests for both.
+Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.
+
+### Skills
+
+- **e2e-flow** — Author a browser end-to-end (e2e) test for a critical user journey — stable selectors, web-first waits, deterministic data. Full-stack UI flows, not unit tests or service contracts.
+- **load-test** — Design a load/stress/soak test — k6/JMeter/Locust profile, realistic workload, ramp + think time, percentile thresholds. Generates load to find limits, not setting a budget (perf-budget).

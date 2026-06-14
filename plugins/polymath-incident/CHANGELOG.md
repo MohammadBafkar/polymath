@@ -1,16 +1,18 @@
 # Changelog — polymath-incident
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- `postmortem-blameless` uses the project's `prompts.postmortem_template` from the project-context snapshot when set.
+Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.
 
-## [0.1.0]
+### Skills
 
-### Added
+- **comms-update** — Draft an incident communication update — plain language, status (investigating/identified/monitoring/resolved), impact, next-update ETA.
+- **incident-triage** — Triage an inbound alert or report — classify severity, name the IC, open comms, and decide whether to mitigate or investigate first.
+- **postmortem-blameless** — Write a blameless postmortem to docs/postmortems/<incident-id>.md; frontmatter validated by the Postmortem artifact schema.
 
-- Initial v0.1 components: `incident-triage`, `postmortem-blameless`, `comms-update` skills.
-- Commands: `/incident-start`, `/postmortem` (thin aliases).
-- Ships `Postmortem.md` + `Comms-update.md` templates under `templates/`.
-- Postmortem frontmatter validates against the `Postmortem` artifact schema.
+### Commands
+
+- **/incident-start** — Triage an incident — assess severity, name IC/operator/comms/scribe, open comms; alias for polymath-incident:incident-triage.
+- **/postmortem** — Draft a blameless postmortem from incident notes; alias for polymath-incident:postmortem-blameless.

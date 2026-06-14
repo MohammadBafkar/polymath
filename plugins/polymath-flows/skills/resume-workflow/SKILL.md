@@ -23,8 +23,8 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 1. If no `run_id` was supplied, list both resumable buckets:
 
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow list --status paused
-   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow list --status active
+   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status paused
+   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status active
    ```
 
    Surface the combined table (`run_id` + status + `last_active`) and ask the user to
@@ -34,7 +34,7 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 2. Resume the chosen run:
 
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow resume <run_id>
+   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow resume <run_id>
    ```
 
    The executable flips status from `paused` to `active` and prints the next step JSON.

@@ -1,30 +1,17 @@
 # Changelog — polymath-tracker
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- All three skills consume the project's `tracker` block
-  (`polymath-core:project-context` contract): destination defaults
-  (`project`/`area_path`/`iteration`, `work_item_types`), 3-layer
-  provenance marking on every created item (title prefix, tag,
-  traceability footer), post-create readback verification, and HITL-only
-  pushes — `file-bug-from-incident` presents the full ticket set for one
-  explicit confirmation before any create call.
+Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.
 
-### Changed
+### Skills
 
-- One `issue_tracker` umbrella plugin: ships both the Jira and Linear MCP
-  servers (each activated by its own credentials), both detect hooks, and the
-  `jira-triage` / `linear-triage` skills. A single provider-agnostic
-  `file-bug-from-incident` skill resolves Jira vs Linear from
-  `${capabilities.issue_tracker.provider}`. The capability vocabulary maps both
-  `jira` and `linear` → `polymath-tracker`. All `userConfig` keys are optional —
-  supply the set for your tracker.
+- **file-bug-from-incident** — File tracker bug tickets from a postmortem's action items — one per action, severity/priority mapped from incident sev, postmortem updated with the keys. Provider-agnostic (Jira or Linear).
+- **jira-triage** — Triage a Jira issue — fetch via MCP, classify type/priority/component, ask for missing repro, transition state, route owner. Jira only — not other trackers.
+- **linear-triage** — Triage a Linear issue — classify type/priority/state, ask for missing repro, transition through the workflow state machine, route to the right team. Linear only — not other trackers.
 
-## [0.1.0]
+### Integrations
 
-### Added
-
-- Initial v0.1 components: `.mcp.json` referencing an Atlassian MCP server; `jira-triage` + `file-bug-from-incident` skills; UserPromptSubmit ticket-key detection hook (matches `PROJ-123` and `*.atlassian.net/browse/...`); `references/jira-tools.md`.
-- `userConfig` for `jiraUrl`, `jiraEmail`, `jiraApiToken` (sensitive).
+- Ships a Model Context Protocol (MCP) connector. The server definition is portable; configure credentials and client registration per host.

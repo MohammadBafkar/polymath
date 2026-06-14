@@ -61,12 +61,21 @@ def _load_config(root: pathlib.Path) -> dict | None:
         return None
     # No PyYAML: fall back to the loader's resolved snapshot (JSON).
     candidates: list[pathlib.Path] = []
-    env = os.environ.get("CLAUDE_PLUGIN_DATA")
+    env = os.environ.get("POLYMATH_PLUGIN_DATA")
     if env:
         base = pathlib.Path(env)
+        candidates.append(base / "project-context.json")
+    data_dir = os.environ.get("POLYMATH_DATA_DIR")
+    if data_dir:
+        base = pathlib.Path(data_dir)
+        candidates.append(base / "polymath-core" / "project-context.json")
+        candidates.extend(base.glob("polymath-core-*/polymath-core/project-context.json"))
+    legacy = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy:
+        base = pathlib.Path(legacy)
         candidates.append(base / "polymath-core" / "project-context.json")
         candidates.extend(base.parent.glob("*/polymath-core/project-context.json"))
-    home = pathlib.Path.home() / ".claude" / "plugins" / "data"
+    home = pathlib.Path.home() / ".polymath" / "data"
     candidates.append(home / "polymath-core" / "project-context.json")
     candidates.extend(home.glob("polymath-core-*/polymath-core/project-context.json"))
     existing = [c for c in candidates if c.is_file()]

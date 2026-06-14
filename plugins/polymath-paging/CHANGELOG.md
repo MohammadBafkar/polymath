@@ -1,14 +1,15 @@
 # Changelog — polymath-paging
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).
 
-## [0.1.0]
+### Skills
 
-### Added
+- **page-context** — Fetch the full context for an active PagerDuty incident — log entries, oncall, related services, recent deploys — before responders join.
 
-- Initial v0.1 components: `.mcp.json` referencing a PagerDuty MCP server; `page-context` skill that front-loads the incident state for the on-call; UserPromptSubmit incident-URL / incident-ID detection hook; `references/pagerduty-tools.md`.
-- `userConfig.pagerdutyApiKey` (sensitive).
+### Integrations
+
+- Ships a Model Context Protocol (MCP) connector. The server definition is portable; configure credentials and client registration per host.

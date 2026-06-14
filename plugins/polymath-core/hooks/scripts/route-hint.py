@@ -39,6 +39,20 @@ DIFF_RE = re.compile(r"(?m)^(?:diff --git |@@ .*@@|\+\+\+ |--- |index [0-9a-f]{7
 URL_RE = re.compile(r"https?://[^\s)>\]\"']+")
 
 
+def polymath_data_root(plugin: str) -> Path:
+    plugin_base = os.environ.get("POLYMATH_PLUGIN_DATA")
+    if plugin_base:
+        return Path(plugin_base)
+    base = os.environ.get("POLYMATH_DATA_DIR")
+    if base:
+        return Path(base) / plugin
+    legacy_base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy_base:
+        root = Path(legacy_base)
+        return root if root.name == plugin else root / plugin
+    return Path.home() / ".polymath" / "data" / plugin
+
+
 def repo_root() -> Path | None:
     here = Path.cwd()
     for d in (here, *here.parents):
@@ -52,14 +66,7 @@ def load_evidence() -> dict:
     Only honored when the cache was written for THIS repo root — stale
     evidence from another repo must never boost anything (and that root
     guard is also what keeps hermetic fixture runs inert)."""
-    base = os.environ.get("CLAUDE_PLUGIN_DATA")
-    if base:
-        root = Path(base)
-        if root.name != "polymath-core":
-            root = root / "polymath-core"
-        cache = root / "repo-evidence.json"
-    else:
-        cache = Path.home() / ".claude" / "plugins" / "data" / "polymath-core" / "repo-evidence.json"
+    cache = polymath_data_root("polymath-core") / "repo-evidence.json"
     try:
         doc = json.loads(cache.read_text())
     except Exception:
@@ -147,10 +154,10 @@ def load_project_rules() -> list[dict]:
     found by walking cwd up to the repo root (same walk as the mute marker).
     Same `rules` shape as the bundled table. Lenient by design — a rule
     missing `surface` or carrying no signal is skipped, a malformed file is
-    ignored entirely; project config must never break a turn. The SURFACE-2
-    uniqueness gate stays marketplace-internal: an overlay may duplicate a
-    catalog intent, and scoring (with project rules sorted first on ties)
-    resolves it at runtime."""
+    ignored entirely; project config must never break a turn. Catalog
+    intents must be unique within the marketplace, but an overlay may
+    duplicate one: scoring (with project rules sorted first on ties)
+    resolves the collision at runtime."""
     here = Path.cwd()
     path = None
     for d in (here, *here.parents):
@@ -380,8 +387,7 @@ def main() -> int:
             plugin = surface_plugin(rule["surface"])
             print(
                 f"  - {rule['surface']}  ({kind} — {why(fired)}) — plugin "
-                f"not installed; install: claude plugin install "
-                f"{plugin}@polymath"
+                f"not installed; install: add {plugin} to this host's Polymath bundle"
             )
             continue
         print(f"  - {rule['surface']}  ({kind} — {why(fired)})")
@@ -394,8 +400,8 @@ def main() -> int:
     # propose-first contract (run-workflow SKILL.md still owns "never
     # auto-start"). polymath-pipeline honors auto-headless for read-only
     # surfaces when the project declares routing.mode classify|enforce.
-    # Wording is budgeted: HINT-BUDGET gates the worst single-candidate
-    # render (build-surface-index.py --hint-budget).
+    # This line's wording is kept short because the builder caps the
+    # token cost of the worst single-candidate render.
     top_trust = top[0][1].get("trust")
     if top_trust == "auto-headless":
         print("    trust: auto-headless — read-only may run unconfirmed in classify/enforce mode; otherwise propose-first.")
@@ -418,10 +424,7 @@ def _log_emission(surfaces: list[str]) -> None:
     try:
         import datetime
 
-        base = os.environ.get("CLAUDE_PLUGIN_DATA")
-        root = Path(base) if base else Path.home() / ".claude" / "plugins" / "data"
-        if root.name != "polymath-core":
-            root = root / "polymath-core"
+        root = polymath_data_root("polymath-core")
         log = root / "hint-log.jsonl"
         root.mkdir(parents=True, exist_ok=True)
         ts = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()

@@ -1,14 +1,17 @@
 # Changelog — polymath-research
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.
 
-## [0.1.0]
+### Skills
 
-### Added
+- **customer-journey** — Map one persona's path through one JTBD — stages, what they're doing/thinking/feeling, touchpoints, pain; mark evidence vs assumption.
+- **interview-guide** — Write a Mom-Test-shaped interview guide for one research question; past behavior over hypothetical, specifics over generalities.
+- **persona** — Author a persona grounded in ≥ 5 real interviews; verbatim quotes, named anti-persona, no composite stock personas.
 
-- Initial v0.1 components: `interview-guide` (Mom-Test framing), `persona` (≥ 5 verbatim quotes; no composites), `customer-journey` skills.
-- Ships `Interview-guide.md`, `Persona.md`, `Customer-journey.md` templates under `templates/`.
+### Subagents
+
+- **research-scout** — Surface primary-source evidence for a product or technical claim in a forked context; separates known facts, unknowns, and tests.

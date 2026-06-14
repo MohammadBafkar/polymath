@@ -16,7 +16,7 @@ description: Design or review a relational schema — tables, columns, types, in
 ## Project localization
 
 Before the procedure, resolve the project snapshot — glob
-`~/.claude/plugins/data/*/polymath-core/project-context.json` (newest
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (newest
 wins; absent → skip and use built-in defaults). Then apply (contract:
 `polymath-core:project-context`):
 

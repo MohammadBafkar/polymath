@@ -91,7 +91,7 @@ The plugin templates have frontmatter that the corresponding artifact schema
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/<script>.sh"
+            "command": "${POLYMATH_PLUGIN_ROOT}/hooks/scripts/<script>.sh"
           }
         ]
       }
@@ -105,9 +105,11 @@ Hook scripts read the tool-input JSON payload from stdin. Exit codes:
 - `0` — allow + continue (stdout is shown as context).
 - `2` — block; stdout becomes the user-visible reason.
 
-Use `${CLAUDE_PLUGIN_ROOT}` to refer to your plugin's directory at runtime.
-Use `${CLAUDE_PLUGIN_DATA}` to write per-plugin state (paused workflows,
-queue.json, etc.).
+Use `${POLYMATH_PLUGIN_ROOT}` to refer to your plugin's directory at runtime.
+Use `${POLYMATH_DATA_DIR}` to write per-plugin state (paused workflows,
+queue.json, etc.). Claude Code hook manifests may still require
+`${CLAUDE_PLUGIN_ROOT}` in `hooks/hooks.json`; the portable exporter rewrites
+hook metadata to `_polymath/support/<plugin>/...`.
 
 ## 6. .mcp.json (connector plugins)
 

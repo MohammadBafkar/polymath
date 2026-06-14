@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0]
+
 ### Security
 
 - **Flows runner shell trust boundary.**
@@ -28,6 +30,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Portable export frontmatter.** Commands whose source frontmatter
+  carried only a `description` (no `name`) exported a malformed
+  `---name:` fence on 14 skills, which broke YAML frontmatter parsing on
+  agentskills.io hosts. `tools/export-agents-skills.py` now injects the
+  `name` on its own line, and `--check` fails closed on any skill whose
+  `SKILL.md` does not open with a `---` fence or lacks a `name`.
+- **Self-contained portable bundle.** Skill-local `scripts/` and
+  `references/` are now mirrored under
+  `_polymath/support/<plugin>/skills/<skill>/`, so
+  `${POLYMATH_PLUGIN_ROOT}/skills/.../scripts/...` references resolve —
+  including cross-skill references (e.g. `initialize-project` invoking
+  `doctor`'s script, which previously dangled). A reference-host load
+  pass now resolves every relative and `_polymath/` reference and fails
+  the build on any dangling target.
 - **Flows runner correctness.** `needs`
   references are validated at `validate` time (dangling, self, and forward
   references rejected) and enforced at runtime: `complete` refuses an
@@ -55,6 +71,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cross-agent portability, verified on a live host.** The exported
+  bundle was run against Gemini CLI 0.41, which discovered and loaded all
+  212 portable units (skills, converted commands, converted subagents),
+  each `[Enabled]`, from `~/.agents/skills/`; `gemini mcp add` accepted
+  the exported MCP server shape. `docs/PORTABILITY.md` records the
+  per-agent consumption mechanism (Gemini native; Codex via
+  `AGENTS.md`/`codex mcp`/`codex plugin`) and which were live-run.
+- **Runnable hook dispatcher + one-command install.** The bundle ships
+  `_polymath/hooks/run-hook.py`, a host-agnostic dispatcher that runs the
+  matching hook commands for a lifecycle event (so hooks execute on any
+  host that can call a command on its events, not just as inert
+  metadata). `tools/export-agents-skills.py --install <dir>` deploys the
+  bundle into a target host's discovery directory and host-load-verifies
+  the deployed copy in place.
 - **Opt-in per-PR bakeoff smoke + documented coverage targets.** A new
   double-gated `bakeoff-smoke` workflow judge-scores representative cases on
   each PR — only when a Claude auth secret is present and the repo variable

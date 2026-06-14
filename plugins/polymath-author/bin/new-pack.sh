@@ -158,7 +158,7 @@ repo config always wins.
 ## Procedure
 
 1. Resolve this plugin's root (the directory containing this skill, two
-   levels up — `${CLAUDE_PLUGIN_ROOT}` when available).
+   levels up — `${POLYMATH_PLUGIN_ROOT}` when available).
 2. If the repo has NO `.polymath/project.yaml`: copy
    `starter/.polymath/project.yaml` there. If one EXISTS: merge only the
    keys the repo file does not set — never overwrite repo intent.

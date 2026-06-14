@@ -23,7 +23,7 @@ exactly polymath-core's ambient route-hint behavior.
     findings only as proposed patch files under
     `.polymath/feedback/catalog-proposals/` — never auto-committed.
 - Executable: `bin/polymath-pipeline` — the engine: shared project-root
-  resolver (refuses `$HOME` and `${CLAUDE_CONFIG_DIR}` as roots),
+  resolver (refuses `$HOME` and `${POLYMATH_CONFIG_DIR}` as roots),
   `routing.mode` reader (overlay-aware line-scan, no PyYAML dependency),
   session-namespaced markers, append-only decision log + retention sweep,
   the `mode` / `mark` / `status` / `sweep` CLI, and the feedback store
@@ -85,14 +85,14 @@ are ignored and audited to the decision log
 
 `POLYMATH_PIPELINE_OFF=1` or `touch .polymath/pipeline-off` switches the
 pipeline off; every use is appended to the decision log
-(`${CLAUDE_PLUGIN_DATA}/decisions.jsonl`), as is every enforce denial and
+(`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-pipeline/decisions.jsonl`), as is every enforce denial and
 every internal fail-open. The pipeline never breaks a turn: any error in a
 hook fails open and is logged.
 
 ## State
 
 ```text
-${CLAUDE_PLUGIN_DATA}/
+${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-pipeline/
   markers/<session>.json   # per-invocation stamps + classified_at
   decisions.jsonl          # audit: classify-directive, classified,
                            # enforce-deny, kill-switch, fail-open, sweep

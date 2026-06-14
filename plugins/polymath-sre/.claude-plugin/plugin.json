@@ -1,6 +1,6 @@
 {
   "name": "polymath-sre",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "SRE craft: SLO design, error-budget policy, chaos experiments, capacity planning + demand forecasting, on-call program design.",
   "license": "MIT",
   "author": {

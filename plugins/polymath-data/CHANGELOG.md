@@ -1,14 +1,14 @@
 # Changelog — polymath-data
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `sql-write`, `sql-optimize`, `metrics-tree` skills.
-- `run-experiment` skill — A/B plan with hypothesis, primary + ≤ 3 guardrails, MDE-derived sample size + duration, randomization unit, stop conditions, pre-registration.
+- **metrics-tree** — Decompose a North Star metric into a tree of input metrics so each team can see the lever they own; output is a tree, not a dashboard.
+- **run-experiment** — Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardrail metrics, MDE + sample size + duration, randomization, stop conditions.
+- **sql-optimize** — Read EXPLAIN ANALYZE output and propose targeted optimizations — index, predicate, join order, or query shape changes.
+- **sql-write** — Write a SQL query that answers a specific question; parameterized, dialect-aware, readable, with the assumed schema documented inline.

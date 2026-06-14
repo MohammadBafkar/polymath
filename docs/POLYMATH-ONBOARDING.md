@@ -156,22 +156,24 @@ captured as open questions, not guessed.
 
 ## Agent compatibility
 
-Skills are portable through the agentskills.io format. Commands, hooks,
-workflows, and MCP connector config are Claude Code surfaces.
+Skills are portable through the agentskills.io format. Commands and subagents
+export as converted skills. Hooks, MCP connector config, and workflows export as
+support files or metadata that need target-host adapter wiring.
 
 | Surface | Portable to other agents | Notes |
 | --- | --- | --- |
 | Skills | yes | Export with `python3 tools/export-agents-skills.py --clean`. |
-| Templates and references | mostly | Travel with skills when bundled or copied. |
-| Commands | no | Claude Code slash-command surface. |
-| Hooks | no | Claude Code hook lifecycle. |
-| Workflows | no | The YAML is readable elsewhere, but only the bundled `polymath-flows` runner executes it. |
-| MCP config | partial | Depends on target agent MCP support. |
+| Templates, references, scripts | yes | Copied into `dist/agents-skills/` and tracked in `manifest.json`. |
+| Commands | converted | Exported as `<plugin>-command-<command>/SKILL.md`; slash syntax is host-specific. |
+| Subagents | converted | Exported as `<plugin>-agent-<agent>/SKILL.md`; forked context depends on the host. |
+| Hooks | adapter required | Normalized metadata lands in `_polymath/hooks/`; scripts land in `_polymath/support/`. |
+| Workflows | runner required | YAML and `polymath-flow` are copied, but other hosts do not auto-discover workflows. |
+| MCP config | adapter required | Aggregate and per-plugin MCP config land in `_polymath/mcp/`; client registration is host-specific. |
+| Paths | yes | Prefer `POLYMATH_DATA_DIR`, `POLYMATH_CONFIG_DIR`, `POLYMATH_PLUGIN_ROOT`, and `.polymath/`; Claude envs are compatibility fallbacks. |
 
-> On a non-Claude agent, `init-project` (a command), `activateProject` (a
-> workflow), and automatic project-context loading (a hook) do **not** run.
-> Export the skills with `tools/export-agents-skills.py` and create
-> `.polymath/project.yaml` by hand from the schema.
+> On a non-Claude agent, converted commands can be invoked as skills. Automatic
+> project-context loading and workflow routing require a hook adapter or an
+> explicit runner invocation.
 
 See [PORTABILITY.md](PORTABILITY.md) for current drop locations and limitations.
 

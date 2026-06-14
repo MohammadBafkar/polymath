@@ -5,7 +5,7 @@ description: Run a flows-lite workflow end-to-end; the skill drives the loop whi
 
 # run-workflow
 
-> Drive a flows-lite workflow from start to completion. This skill is the human-facing presenter; the deterministic state machine lives in `${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow`.
+> Drive a flows-lite workflow from start to completion. This skill is the human-facing presenter; the deterministic state machine lives in `${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow`.
 
 ## When to use
 
@@ -51,7 +51,7 @@ in one line unless the user said "just do it".
 1. **Start the run.** Execute:
 
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow start <name> --input key=value [--input key=value ...]
+   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow start <name> --input key=value [--input key=value ...]
    ```
 
    Parse the returned `run_id`. If the executable reports validation errors, surface them and stop.
@@ -61,7 +61,7 @@ in one line unless the user said "just do it".
    a. Ask the executable for the next step:
 
       ```bash
-      ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow next <run_id>
+      ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow next <run_id>
       ```
 
       The output JSON contains `step_id`, `invoke` (routing label), `prompt`, and any expected `artifacts`.
@@ -75,7 +75,7 @@ in one line unless the user said "just do it".
    e. Compose a one-paragraph **step summary** describing what changed and pointing to files. Save to a temporary file and tell the executable:
 
       ```bash
-      ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow complete <run_id> <step_id> --summary <summary-file>
+      ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow complete <run_id> <step_id> --summary <summary-file>
       ```
 
       The summary must include the words "test", "tests", "verified", or "verification" for the `verify` step so the `shipFeature` workflow's `stepSummaryMatches` check passes.
@@ -83,7 +83,7 @@ in one line unless the user said "just do it".
    f. If a step fails or the user wants to pause, run:
 
       ```bash
-      ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow fail <run_id> <step_id> --summary <reason>
+      ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow fail <run_id> <step_id> --summary <reason>
       ```
 
       Then stop the loop and report.
@@ -91,7 +91,7 @@ in one line unless the user said "just do it".
 3. **Assert.** After all steps are complete, run:
 
    ```bash
-   ${CLAUDE_PLUGIN_ROOT}/bin/polymath-flow assert <run_id>
+   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow assert <run_id>
    ```
 
    This evaluates all `mustPass` checks. If any fail, the workflow is paused; report the failures and stop. The user can resume with `/polymath-flows:resume-workflow <run_id>` after addressing them.

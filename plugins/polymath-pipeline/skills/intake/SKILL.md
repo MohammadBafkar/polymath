@@ -65,7 +65,7 @@ that); intake decides *where the request goes*, in one screen.
 6. **Record the classification** so the gate opens (1h validity): run the
    exact mark command the directive/deny message carries (absolute path
    plus `--session <id>`), filling in the surface:
-   `"${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" mark --session <id> --surface <choice>`.
+   `"${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" mark --session <id> --surface <choice>`.
    The surface is validated against the catalog — a typo'd or invented
    name is rejected and does not open the gate.
 7. **Output one screen**: the 4 scores with one-line justifications, open

@@ -1,76 +1,13 @@
 # Changelog — polymath-pipeline
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- **Enforce-gate hole closure.** The PreToolUse matcher now also covers
-  `Task` and `mcp__.*`. MCP tools default to gated unless their name
-  classifies as read-only (first verb segment wins; `get_file_contents`
-  passes, `push_files` and unknown names are gated). `Task` requires a
-  fresh classification. The Bash modify-pattern blacklist gains nine
-  patterns covering the eleven sampled mutators it previously missed
-  (`make`, interpreter-runs-script, `npx`, `gh`/`az`/`gcloud`/`aws`
-  mutating subcommands, database CLIs, `rsync`/`scp`/`sftp`/`unzip`,
-  command-position `patch`, `tar` create/extract) — each pinned by a
-  fixture, with command-position anchors keeping argument words exempt
-  and a deadlock-guard test pinning that the `mark` recovery command
-  itself always passes.
-- **Intake reads the deterministic shortlist.** `intake` gains a step 0:
-  run `route-hint.py --shortlist` (sibling polymath-core; skipped
-  silently when absent) and treat its top-3 as the constrained choice
-  set for routing — route outside a non-empty shortlist only with a
-  stated reason.
-- **Validated, session-attributed `mark`.** `mark --surface` is checked
-  against the sibling-plugin catalog (skills, workflow names, `direct`;
-  the `polymath-flows:run-workflow <name>` form accepted) — an unknown
-  surface is rejected (exit 2, `mark-rejected` audited) and does not
-  open the gate; unresolvable siblings fail open. The classify
-  directive and the deny message bake `--session <id>` into the mark
-  command so markers are attributed to the issuing session.
-- **`status` summarizes recent decisions.** `status` output gains
-  `recent_events` — per-event counts over the newest 200 decision-log
-  lines scoped to the resolved root (rootless events such as
-  `fail-open` always count) — consumed by `polymath-core:doctor`'s
-  Routing pipeline section.
-- **Loud config errors.** Flow-style `routing: {…}` and unknown
-  `routing.mode` values no longer read silently as `hint`: SessionStart
-  prints a `config error` line, `mode`/`status` expose `config_errors`,
-  and a `config-error` event is audited. Trailing comments on
-  `routing:` / `mode:` lines now parse instead of breaking the scan.
-- **Data-driven tool policy.** Base policy ships in
-  `data/tool-policy.json` (mirrored by engine constants as the
-  fail-safe; a unit test pins the two equal). Projects can strengthen it
-  via `.polymath/tool-policy.json` (`gatedTools`, `bashModifyPatterns`,
-  `mcpGatedPatterns`, `mcpMutatingVerbs`); weakening keys are ignored
-  and audited (`policy-overlay-ignored`, `policy-overlay-invalid`,
-  `policy-bad-pattern` decision events).
-- **Feedback loop (capture → evaluate → apply).**
-  `polymath-pipeline feedback capture|digest|evaluate|resolve`: an
-  event-sourced JSONL store with a 180-day TTL (digest sweeps expired
-  items). `feedback-capture` skill: conservative criteria — named
-  surface, user-confirmed, localization fix conceivable, never secrets.
-  `feedback-digest` skill: every item gets a verdict with evidence
-  (valid-constructive / valid-not-actionable / invalid); project-local
-  fixes (conventions docs, `skill_overrides`,
-  `route-signals.project.json`) are applied behind ONE confirmation;
-  catalog-level findings are emitted only as proposed patch files under
-  `.polymath/feedback/catalog-proposals/` — never auto-committed.
-- Initial plugin (Phase 3 of `docs/plans/generalized-localization.md`,
-  plan file since removed).
-  Opt-in on `routing.mode: classify|enforce`:
-  - `bin/polymath-pipeline` engine: shared root resolver (refusing `$HOME`
-    and `${CLAUDE_CONFIG_DIR}`), overlay-aware `routing.mode` line-scan,
-    per-invocation session-namespaced markers, append-only decision log
-    with retention sweep, `mode`/`mark`/`status`/`sweep` CLI.
-  - Classify directive (UserPromptSubmit): emitted while the session has no
-    fresh classification; route-hint precedence; honors
-    `trust: auto-headless` for read-only surfaces (first consumer of the
-    declared trust axis); audited kill switch
-    (`POLYMATH_PIPELINE_OFF=1` / `.polymath/pipeline-off`).
-  - Enforce gate (PreToolUse): blocks mutating tool calls (modify-pattern
-    Bash blacklist with accepted false positives; Edit/Write always gated)
-    until `mark` recorded a classification (1 h validity); every deny,
-    kill-switch use, and fail-open is audited.
-  - `intake` skill: 4 confidence dimensions, batched questions, plateau
-    stop, never-ask list, smallest-surface routing, ends with `mark`.
+Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.
+
+### Skills
+
+- **feedback-capture** — Capture one localization-feedback item (correction, gap, friction) tied to a named Polymath surface — 180d TTL, evaluated later via feedback-digest; not a general note-taker.
+- **feedback-digest** — Score captured localization feedback (valid/constructive verdict with evidence) and apply fixes — project-local edits behind one confirm; catalog changes only as proposed patch files.
+- **intake** — Classify an ambiguous or multi-step request before work starts — score 4 confidence dimensions, ask only what the repo can't answer, stop at plateau, record the route via pipeline mark.

@@ -28,7 +28,8 @@ name="polymath-$service"
 
 # Locate the *caller's* marketplace root, not this plugin's bin/.
 # Walk up from $PWD looking for .claude-plugin/marketplace.json (the
-# caller's marketplace). Fall back to $CLAUDE_PROJECT_DIR, then to $PWD.
+# caller's marketplace). Fall back to $POLYMATH_PROJECT_DIR, then the legacy
+# $CLAUDE_PROJECT_DIR, then to $PWD.
 find_marketplace_root() {
   local dir="$PWD"
   while [[ "$dir" != "/" ]]; do
@@ -38,6 +39,10 @@ find_marketplace_root() {
     fi
     dir="$(dirname "$dir")"
   done
+  if [[ -n "${POLYMATH_PROJECT_DIR:-}" && -f "${POLYMATH_PROJECT_DIR}/.claude-plugin/marketplace.json" ]]; then
+    printf '%s' "$POLYMATH_PROJECT_DIR"
+    return 0
+  fi
   if [[ -n "${CLAUDE_PROJECT_DIR:-}" && -f "${CLAUDE_PROJECT_DIR}/.claude-plugin/marketplace.json" ]]; then
     printf '%s' "$CLAUDE_PROJECT_DIR"
     return 0

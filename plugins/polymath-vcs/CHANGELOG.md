@@ -1,14 +1,17 @@
 # Changelog — polymath-vcs
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).
 
-## [0.1.0]
+### Skills
 
-### Added
+- **diagnose-ci-failure** — Diagnose a failed GitHub Actions run — fetch logs via MCP, identify the failing step, classify (flake / real / config), propose next action.
+- **open-pr** — Open a GitHub PR via the github MCP server — push current branch, draft from polymath-release:pr template, set base, add reviewers, never force-push.
+- **triage-issue** — Triage an inbound GitHub issue — label, severity, area, ask for missing repro details if needed, route to the right team. GitHub issues only — not other trackers.
 
-- Initial v0.1 components: `.mcp.json` referencing `@modelcontextprotocol/server-github`; `open-pr` + `triage-issue` skills; UserPromptSubmit PR-URL detection hook; Stop "unpushed commits" nudge; `references/github-tools.md`.
-- `userConfig.githubToken` (sensitive) — fine-grained PAT.
+### Integrations
+
+- Ships a Model Context Protocol (MCP) connector. The server definition is portable; configure credentials and client registration per host.

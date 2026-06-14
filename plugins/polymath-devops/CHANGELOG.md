@@ -1,19 +1,20 @@
 # Changelog — polymath-devops
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Added
+## [0.8.0]
 
-- **`references/deployer-pattern.md`** — the deploy composition Polymath
-  supports instead of an autonomous deployer: agents design promotion
-  (env-promotion) and rollout (progressiveRollout), verify boots
-  (appStarts), and draft the pipeline files (canonical bodies); the
-  team's own CI/CD executes the mutation with its own credentials and
-  approvals.
-- `dockerize` and `ci-pipeline-github` consume project localization: `conventions_docs` role `deployment` from the project-context snapshot.
+DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.
 
-## [0.1.0]
+### Skills
 
-### Added
+- **audit-compose** — Audit docker-compose.yaml — image pinning, named volumes, networks, secret injection, depends_on health-conditioning.
+- **audit-dockerfile** — Audit a Dockerfile for base-image hygiene, layer order, multi-stage discipline, secret leakage, and missing healthcheck/USER directives.
+- **ci-pipeline-github** — Author a GitHub Actions workflow — lint/test/build/deploy with caching, concurrency control, OIDC for cloud auth, minimal permissions.
+- **dockerize** — Write a multi-stage Dockerfile — distroless or minimal base, build/runtime split, deterministic layer order, non-root user, no secrets baked in.
+- **env-promotion** — Design env-promotion (dev → staging → prod) — one artifact promoted, env-specific config injected, gates between stages, rollback path.
 
-- Initial v0.1 components: `dockerize`, `ci-pipeline-github`, `env-promotion` skills.
+### Commands
+
+- **/audit-compose** — Audit a Docker Compose file before you ship it; command entry point for the audit-compose skill.
+- **/audit-dockerfile** — Audit a Dockerfile for base-image, layer order, USER, healthcheck, secrets.

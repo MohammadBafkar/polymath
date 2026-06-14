@@ -1,13 +1,14 @@
 # Changelog — polymath-frontend
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- `i18n-audit` skill folded in from the former `polymath-i18n` plugin.
+Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `component-design`, `web-vitals-budget`, `bundle-analyze` skills.
+- **bundle-analyze** — Audit a JavaScript bundle for the biggest bytes and propose the cheapest cut; uses the bundler's report rather than guessing.
+- **component-design** — Design a UI component's contract — props, state, side effects, a11y, and the smallest set of tests that locks the contract.
+- **i18n-audit** — Audit software for i18n readiness — hardcoded strings, locale date/number/currency formatting, ICU plurals, pseudolocalization, RTL/bidi, fallback chain. Internationalization, not UX copywriting.
+- **web-vitals-budget** — Set Core Web Vitals budgets (LCP, INP, CLS) per route and propose the cheapest fix path when one is over budget. Web routes only; not mobile (mobile-perf) or backend (perf-budget).

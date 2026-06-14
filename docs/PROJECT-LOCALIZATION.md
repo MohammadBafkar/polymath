@@ -36,7 +36,7 @@ Capability resolution is owned by `.polymath/capabilities.yaml`
 
 The polymath-core SessionStart hook loads this file, validates it, and
 writes a resolved snapshot to
-`${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`. Skills read
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`. Skills read
 that snapshot and adapt.
 
 ## Quick start
@@ -278,7 +278,7 @@ not confirmed against its canonical source carries an inline
 The loader looks for `project.yaml` in this order, first hit wins:
 
 1. `./.polymath/project.yaml` (project, repo-root)
-2. `${CLAUDE_CONFIG_DIR}/polymath/project.yaml` (user / team default)
+2. `${POLYMATH_CONFIG_DIR}/polymath/project.yaml` (user / team default)
 3. `~/.polymath/project.yaml` (last-resort user default)
 
 There is no merge between these layers — the winning file is used whole.
@@ -302,12 +302,12 @@ break a session.
 
 ### Workflow discoverability
 
-Workflows in `./.claude/polymath/workflows/` (project layer) and
-`${CLAUDE_CONFIG_DIR}/polymath/workflows/` (user layer) have always been
+Workflows in `./.polymath/workflows/` (project layer) and
+`${POLYMATH_CONFIG_DIR}/polymath/workflows/` (user layer) have always been
 *runnable* — `polymath-flow start` resolves project → user → marketplace.
 The polymath-flows SessionStart hook also makes them *proposable*: it
 indexes both tiers into a machine-local fragment
-(`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflow-index.project.json`) and
+(`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/workflow-index.project.json`) and
 appends a "Project workflows" block to the injected catalog index. Rules:
 
 - A workflow needs a one-line `whenToUse` to be indexed (same grace rule
@@ -401,12 +401,12 @@ to fix if you would rather edit by hand.
 
 ## How skills consume the context
 
-Skills read `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`.
+Skills read `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`.
 The file mirrors the user's `.polymath/project.yaml` with a `_meta`
 block added (source path, load time, schema version). Example:
 
 ```bash
-ctx="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}/polymath-core/project-context.json"
+ctx="${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json"
 if [[ -f "$ctx" ]]; then
   primary_lang="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get('stack',{}).get('languages',[{}])[0].get('lang',''))" "$ctx")"
 fi

@@ -19,7 +19,7 @@ description: Score captured localization feedback (valid/constructive verdict wi
 1. **Get the queue** (this also sweeps expired items — 180d TTL):
 
    ```bash
-   "${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" feedback digest
+   "${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" feedback digest
    ```
 
 2. **Evaluate every pending item — verdict with evidence.** Check the
@@ -27,7 +27,7 @@ description: Score captured localization feedback (valid/constructive verdict wi
    conventions docs, the run/artifact in `evidence`. Then record:
 
    ```bash
-   "${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" feedback evaluate <id> \
+   "${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" feedback evaluate <id> \
      --verdict valid-constructive|valid-not-actionable|invalid \
      --evidence "<what you checked and what it showed>"
    ```
@@ -46,7 +46,7 @@ description: Score captured localization feedback (valid/constructive verdict wi
    a single confirmation. On yes: apply the edits, then for each id:
 
    ```bash
-   "${CLAUDE_PLUGIN_ROOT}/bin/polymath-pipeline" feedback resolve <id> \
+   "${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" feedback resolve <id> \
      --outcome applied --detail "<file: what changed>"
    ```
 

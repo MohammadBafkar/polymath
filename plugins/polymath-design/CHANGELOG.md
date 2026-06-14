@@ -1,13 +1,13 @@
 # Changelog — polymath-design
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- Initial v0.1 components: `a11y-audit` (WCAG 2.2 AA, SC-cited), `ui-critique`, `design-system-conformance` skills.
+- **a11y-audit** — Audit a UI against WCAG 2.2 AA — perceivable, operable, understandable, robust; cite SC numbers + element selectors per finding.
+- **design-system-conformance** — Check a UI surface against the project's design system — tokens, components, patterns; flag bespoke values that should be tokens.
+- **ui-critique** — Critique a UI surface — hierarchy, density, error/empty/loading states, microcopy; findings keyed to specific elements with concrete corrections.

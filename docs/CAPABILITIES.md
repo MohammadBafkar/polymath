@@ -94,7 +94,7 @@ for the full annotated template.
 Resolution searches in this order, first hit wins:
 
 1. `./.polymath/capabilities.yaml` (project, repo-root)
-2. `${CLAUDE_CONFIG_DIR}/polymath/capabilities.yaml` (user / team default)
+2. `${POLYMATH_CONFIG_DIR}/polymath/capabilities.yaml` (user / team default)
 3. `~/.polymath/capabilities.yaml` (last-resort user default)
 
 There is no merge between layers.

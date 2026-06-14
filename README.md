@@ -192,14 +192,14 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [polymath-author](plugins/p
 
 ## Use outside Claude Code
 
-Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the portable skills bundle and drop it into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
+Polymath skills are written to the [agentskills.io v1.0](https://agentskills.io) standard. Export the portable bundle and drop it into Codex CLI, Cursor, GitHub Copilot, VS Code, Gemini CLI, Goose, JetBrains Junie, and other listed clients:
 
 ```bash
 python3 tools/export-agents-skills.py --clean
-# → dist/agents-skills/<plugin>-<skill>/SKILL.md + manifest.json
+# -> skills, converted commands/subagents, _polymath support files, manifest.json
 ```
 
-See [docs/PORTABILITY.md](docs/PORTABILITY.md) for the drop-location per harness and the honest list of surfaces that do **not** port (commands, hooks, MCP config, workflows, agents).
+See [docs/PORTABILITY.md](docs/PORTABILITY.md) for drop locations, path contracts, and the honest limits: hooks and MCP servers export as adapter metadata, and workflows require the bundled `polymath-flow` runner.
 
 ## License
 

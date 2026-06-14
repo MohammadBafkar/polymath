@@ -1,17 +1,13 @@
-# Changelog
+# Changelog — polymath-iac
 
-All notable changes to this plugin will be documented in this file.
+<!-- markdownlint-disable MD024 -->
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.8.0]
 
-## [0.7.0]
+Infrastructure-as-Code authoring: reusable Terraform modules, state/backends/drift, policy-as-code guardrails (OPA/Sentinel/Checkov).
 
-### Added
+### Skills
 
-- Infrastructure-as-Code authoring plugin (whetstone-coverage program, P4) with three
-  sibling skills: `terraform-module` (reusable module interface design),
-  `terraform-state` (backend/locking/isolation/drift/state-surgery), and
-  `policy-as-code` (OPA/Sentinel/Checkov guardrails enforced pre-apply). Each declares
-  a soft-tier `routing.yaml`. Plan/diff review intentionally stays in
-  `polymath-cloud:plan-review` (no duplication).
+- **policy-as-code** — Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/tfsec) — enforce tagging, security, and cost rules in CI/plan with severity gates and exemptions.
+- **terraform-module** — Author a reusable Terraform module — input variables with validation, typed outputs, sane defaults, versioning, provider constraints, and composition boundaries.
+- **terraform-state** — Design Terraform state — remote backend, locking, state isolation/segmentation, drift detection, and safe import/move/rm operations without destroying live infra.

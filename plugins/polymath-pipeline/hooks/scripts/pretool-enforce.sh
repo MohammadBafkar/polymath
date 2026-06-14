@@ -4,7 +4,7 @@
 # Anything unexpected fails open (exit 0); the engine audits its own
 # fail-opens to the decision log.
 set -uo pipefail
-root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
+root="${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}}"
 command -v python3 >/dev/null 2>&1 || exit 0
 python3 "${root}/bin/polymath-pipeline" hook-pretool
 code=$?

@@ -139,6 +139,25 @@ class ProjectIndexTests(unittest.TestCase):
             self.mod.estimate_tokens(out.rstrip("\n")), self.mod.TIER_A_BUDGET
         )
 
+    def test_polymath_project_workflows_are_indexed(self) -> None:
+        wf_dir = self.work / ".polymath" / "workflows"
+        wf_dir.mkdir(parents=True)
+        (wf_dir / "localFlow.yaml").write_text(
+            WORKFLOW_TMPL.format(
+                name="localFlow",
+                when="Use for the local Polymath workflow fixture.",
+                triggers='triggers:\n  - "local polymath workflow"\n',
+            )
+        )
+        out = self._run()
+        self.assertIn("Project workflows", out)
+        self.assertIn("localFlow: Use for the local Polymath workflow fixture.", out)
+        fragment = self._fragment()
+        self.assertEqual(
+            pathlib.Path(fragment["entries"][0]["path"]).resolve(),
+            (wf_dir / "localFlow.yaml").resolve(),
+        )
+
     def test_project_workflow_indexed_and_injected(self) -> None:
         self._write_project_workflow(
             "deployAcme", "Deploy the Acme stack to staging.", ["deploy acme to staging"]

@@ -6,8 +6,8 @@
 # only when a REQUIRED tool is missing, so it can gate init-project as step 0.
 #
 # Required:    bash, python3
-# Recommended: git (workflows + first-run nudge), claude CLI (strict validate,
-#              live golden fixtures)
+# Recommended: git (workflows + first-run nudge), claude CLI (only for Claude
+#              plugin validation and live golden fixtures)
 # Optional:    PyYAML (the loader has a hand-rolled fallback), jq
 set -uo pipefail
 
@@ -43,7 +43,7 @@ fi
 if command -v claude >/dev/null 2>&1; then
   pass "claude" "$(claude --version 2>&1 | head -1)"
 else
-  warn "claude" "not found — needed for 'claude plugin validate --strict' and live golden fixtures"
+  warn "claude" "not found — only Claude-specific validation and live golden fixtures are skipped"
 fi
 
 echo
@@ -64,7 +64,7 @@ echo "Project context:"
 if [[ -f ".polymath/project.yaml" ]]; then
   if command -v python3 >/dev/null 2>&1 && [[ -x "$loader" ]]; then
     tmp_data="$(mktemp -d)"
-    if out="$(CLAUDE_PLUGIN_DATA="$tmp_data" python3 "$loader" 2>&1)"; then
+    if out="$(POLYMATH_DATA_DIR="$tmp_data" python3 "$loader" 2>&1)"; then
       pass "project.yaml" "valid — ${out#Polymath: }"
     else
       fail "project.yaml" "present but the loader rejected it:"
@@ -147,8 +147,9 @@ elif mode != "hint":
 # "hint emitted ⇒ surface invoked within N turns".
 import datetime, pathlib
 
-base = pathlib.Path(os.environ.get("CLAUDE_PLUGIN_DATA")
-                    or pathlib.Path.home() / ".claude" / "plugins" / "data")
+base = pathlib.Path(os.environ.get("POLYMATH_DATA_DIR")
+                    or os.environ.get("CLAUDE_PLUGIN_DATA")
+                    or pathlib.Path.home() / ".polymath" / "data")
 hint_log = (base if base.name == "polymath-core" else base / "polymath-core") / "hint-log.jsonl"
 if hint_log.is_file():
     def parse_ts(value):
@@ -193,7 +194,7 @@ PY
 fi
 
 # --- workflow injection tiering (written by polymath-flows at SessionStart) ---
-tiering_file="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data}/polymath-flows/workflow-index.project.json"
+tiering_file="${POLYMATH_DATA_DIR:-${CLAUDE_PLUGIN_DATA:-$HOME/.polymath/data}}/polymath-flows/workflow-index.project.json"
 if [[ -f "$tiering_file" ]] && command -v python3 >/dev/null 2>&1; then
   echo
   echo "Workflow injection:"

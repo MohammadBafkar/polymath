@@ -8,7 +8,7 @@ is owned by whichever external scheduler the team uses:
 - GitHub Actions `schedule:` triggers
 - OS cron / launchd + `claude -p`
 
-That scheduler writes JSON to `${CLAUDE_PLUGIN_DATA}/polymath-core/queue.json`:
+That scheduler writes JSON to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/queue.json`:
 
 ```jsonc
 [

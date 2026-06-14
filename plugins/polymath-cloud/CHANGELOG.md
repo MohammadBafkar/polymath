@@ -1,25 +1,23 @@
-# Changelog
+# Changelog — polymath-cloud
 
-All notable changes to this plugin will be documented in this file.
+<!-- markdownlint-disable MD024 -->
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.8.0]
 
-## [0.7.0]
+Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.
 
-### Added
+### Skills
 
-- Added the `plan-review` skill — a CLI-only Terraform review skill (no MCP server) that reads a `terraform plan` and flags destructive actions, drift, and unsafe diffs before apply; it lives with the IaC design skills. Tool reference at `skills/plan-review/references/terraform-tools.md`.
+- **cloud-cost-review** — Review cloud spend — rightsizing/waste, cost budgets + anomaly alerts, unit economics (cost per request/tenant), reserved coverage. Cloud cost, not internal token budgets (plugin-budget).
+- **design-aws-pattern** — Pick the right AWS primitive for a workload — compute (Lambda/ECS/EKS/EC2), storage (S3/EFS/FSx), database (RDS/Aurora/DynamoDB) with cost + ops + scale tradeoffs.
+- **design-azure-pattern** — Pick the right Azure primitive — compute (Functions / Container Apps / App Service / AKS), database (Azure SQL / Cosmos DB / Postgres Flex), storage (Blob / Files / Disk).
+- **design-gcp-pattern** — Pick the right GCP primitive — compute (Cloud Run / GKE / Functions / GCE), database (Cloud SQL / Spanner / Firestore / Bigtable), storage (GCS) with cost + ops + scale tradeoffs.
+- **design-stack-composition** — Design Terraform stack composition — module boundaries, state layout, workspace strategy, remote-state plumbing, blast radius per apply.
+- **plan-review** — Read a terraform plan (binary or JSON) and surface destructive actions, drift, and unsafe diffs before apply.
 
-### Changed
+### Commands
 
-- `cloud-cost-review` skill folded in from the former `polymath-finops` plugin — cloud cost is a property of the cloud-pattern choice.
-
-## [0.1.0]
-
-### Added
-
-- Cloud-design plugin with four sibling skills:
-  `design-aws-pattern`, `design-gcp-pattern`, `design-azure-pattern`,
-  `design-stack-composition` (Terraform). Projects pick a cloud once
-  in `.polymath/project.yaml`; the skills adapt.
+- **/design-aws** — Pick an AWS pattern for a workload — compute, storage, database, networking, cost, ops, flip conditions.
+- **/design-azure** — Pick an Azure pattern for a workload — compute, database, storage, messaging, networking, cost, ops.
+- **/design-gcp** — Pick a GCP pattern for a workload — compute, database, storage, messaging, networking, cost, ops, flip conditions.
+- **/design-terraform-stack** — Design Terraform module and state layout up front; command entry point for the design-terraform-stack skill.

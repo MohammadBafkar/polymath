@@ -1,20 +1,14 @@
 # Changelog — polymath-decisions
 
-## [0.7.0]
+<!-- markdownlint-disable MD024 -->
 
-### Changed
+## [0.8.0]
 
-- Version aligned to 0.7.0 as part of the marketplace-wide 0.7.0 release; no functional change to this plugin.
+Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.
 
-## [0.1.0]
+### Skills
 
-### Added
-
-- `daci`, `tradeoff-matrix`, `cynefin-frame` skills.
-- `DACI-decision.md` + `Tradeoff-matrix.md` templates under `templates/`.
-- Frontmatter on both templates is validated by
-  [`DACIDecision.schema.json`](../../registry/schemas/artifacts/DACIDecision.schema.json)
-  (exactly one Approver, Approver ≠ Driver, real due date — no "TBD")
-  and [`TradeoffMatrix.schema.json`](../../registry/schemas/artifacts/TradeoffMatrix.schema.json)
-  (minimum criteria/options counts, optional `would_flip_when`
-  falsifiability anchor).
+- **cynefin-frame** — Classify a decision context — Clear / Complicated / Complex / Chaotic — and pick the response that fits the domain instead of forcing one shape on all problems.
+- **daci** — Run a DACI decision (Driver, Approver, Contributors, Informed) for a non-trivial decision; assigns one Approver, names the deadline.
+- **evidence-ledger** — Frame a decision's evidence — separate facts, assumptions, and unknowns; per unknown name confidence and what would resolve it; not a full decision record (daci) or tradeoff scoring (tradeoff-matrix).
+- **tradeoff-matrix** — Score options against weighted criteria; surfaces where the numeric ranking disagrees with the gut call and names the tie-breaker.

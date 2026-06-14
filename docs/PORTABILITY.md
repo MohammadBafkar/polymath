@@ -1,148 +1,140 @@
-# Portability — using Polymath skills outside Claude Code
+# Portability - using Polymath outside Claude Code
 
-Polymath's [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json)
-declares conformance with the
-[agentskills.io v1.0](https://agentskills.io) open standard for the
-`SKILL.md` format. This page documents the practical export path and,
-just as importantly, **what does not port**.
+Polymath's source tree is still a Claude Code marketplace because Claude Code
+defines the plugin manifest shape in `.claude-plugin/`. The portable output is
+the generated bundle from `tools/export-agents-skills.py`.
 
-## TL;DR
-
-Skills port. Everything else (commands, hooks, MCP config, workflows,
-agents, artifact JSON schemas) is Claude-Code-specific and does
-**not** port via the SKILL.md standard.
-
-A subset of skills *reference* a Claude-only surface in their body — a
-connector's MCP server, the SessionStart project-context snapshot, or the
-polymath-flows runner. The file still copies, but those steps cannot run on a
-generic host, so the exporter marks each skill `portable` or `claude-coupled`
-in `manifest.json` and prepends a one-line portability banner to every
-`claude-coupled` SKILL.md. The export fails closed (`tools/export-agents-skills.py`
-returns non-zero) if a coupled skill is missing its banner or any cross-skill /
-`../` link did not get rewritten to the flat bundle layout.
+The exporter is evidence-backed by the live tree: it walks every plugin and
+materializes skills, commands, subagents, hooks, MCP config, templates, scripts,
+and path contracts into `dist/agents-skills/`. The generated `manifest.json`
+records the exact counts and source paths for the current checkout.
 
 ```bash
-# From a Polymath checkout:
 python3 tools/export-agents-skills.py --clean
-# → dist/agents-skills/<plugin>-<skill>/SKILL.md
-# → dist/agents-skills/manifest.json
+# -> dist/agents-skills/<plugin>-<skill>/SKILL.md
+# -> dist/agents-skills/<plugin>-command-<command>/SKILL.md
+# -> dist/agents-skills/<plugin>-agent-<agent>/SKILL.md
+# -> dist/agents-skills/_polymath/{support,hooks,mcp}/...
+# -> dist/agents-skills/_polymath/hooks/run-hook.py   (runnable hook dispatcher)
+# -> dist/agents-skills/manifest.json
 
-# CI runs this on every PR/push (no artifacts, builds into a temp dir):
 python3 tools/export-agents-skills.py --check
+# temp build + lint + manifest validation + reference-host load, no dist/ writes
+
+python3 tools/export-agents-skills.py --install .agents/skills
+# export, copy the bundle into a target host's discovery directory, and
+# host-load-verify the deployed copy in place
 ```
 
-The `--check` mode (wired into `.github/workflows/portability-export.yml`)
-builds the bundle into a throwaway temp directory, runs the same fail-closed
-lint, and validates `manifest.json`, so a frontmatter change or template move
-that would break the export is caught in CI rather than the first time a user
-runs it.
+Every run ends with a reference agentskills.io host-load pass: each exported
+skill is loaded the way a compliant host would (frontmatter parsed, `name` +
+`description` required) and every relative and `_polymath/` reference is
+resolved against the bundle on disk. The build fails closed if any skill is
+unloadable or any referenced script/template is missing. This is a stand-in for
+a live host — it proves the bundle is loadable and self-contained, short of
+installing each proprietary agent.
 
-Drop the contents of `dist/agents-skills/` into whichever well-known
-directory your harness reads from (table below). Run the harness; it
-will pick up the skills.
+## What Ports
 
-## What ports vs. what doesn't
-
-| Surface | Ports to other agents? | Why |
+| Surface | Export result | Activation outside Claude Code |
 | --- | --- | --- |
-| `skills/<slug>/SKILL.md` | **Yes** | agentskills.io v1.0 standard. |
-| `skills/<slug>/references/` | **Yes** | Copied alongside the SKILL.md. |
-| `skills/<slug>/scripts/` | **Yes** | Copied alongside; activation depends on harness. |
-| Plugin `templates/<file>` | **Yes**, on-demand | Copied when a skill body links them via `../../templates/`. Links are rewritten to `templates/<file>` relative to the exported skill. |
-| `commands/<slug>.md` | No | Slash commands are a Claude Code surface. Each target harness has its own syntax (Cursor uses `.cursor/rules/*.mdc`, Codex uses its own slash registry). |
-| `agents/<role>.md` | No | Subagents are Claude Code's forked-context mechanism. |
-| `hooks/hooks.json` | No | Event-driven gates are Claude-Code-only. |
-| `.mcp.json` | No | The Model Context Protocol server *can* be used by other clients, but the `.mcp.json` discovery layout is Claude-Code-specific. Configure the MCP server directly in your client (Codex: `codex mcp add`; Cursor: `mcp.json`). |
-| `workflows/*.yaml` | No | The polymath-flows runner is a Polymath executable. |
-| `bin/<exe>` | No | Plugin-shipped binaries are Claude Code's plugin surface. |
-| `registry/schemas/artifacts/*.json` | No | Polymath's artifact validation tooling is not portable; the schemas themselves are public and can be reused by any JSON-schema validator. |
-| `.polymath/project.yaml` | No | Loaded by polymath-core's SessionStart hook into a snapshot at `${CLAUDE_PLUGIN_DATA}/polymath-core/project-context.json`. Other harnesses have their own per-project conventions. |
+| `skills/<slug>/SKILL.md` | Native `SKILL.md`, namespaced as `<plugin>-<skill>` | Automatic on hosts that implement agentskills.io. |
+| `skills/<slug>/references/` | Copied beside the exported skill | Available to the skill body. |
+| `skills/<slug>/scripts/` | Copied beside the exported skill | Runnable when the host permits local scripts. |
+| `commands/<slug>.md` | Converted to `<plugin>-command-<slug>/SKILL.md` | Invoked as a skill. Slash-command syntax is host-specific and is not preserved. |
+| `agents/<role>.md` | Converted to `<plugin>-agent-<role>/SKILL.md` | Invoked as a skill. Forked-context execution depends on the target host. |
+| `templates/` | All plugin templates copied to `_polymath/support/<plugin>/templates/`; referenced templates are also copied into the skill directory | Usable by instructions and scripts. |
+| Plugin `bin/` scripts | Copied to `_polymath/support/<plugin>/bin/` | Runnable by path from exported instructions. |
+| Hook scripts | Copied to `_polymath/support/<plugin>/hooks/scripts/` | Runnable by a target-host hook adapter. |
+| `hooks/hooks.json` | Normalized to `_polymath/hooks/<plugin>.hooks.json`, plus a runnable `_polymath/hooks/run-hook.py` dispatcher | The host calls `run-hook.py <Event> [matcher]` on its lifecycle events; the dispatcher matches and runs the right commands. Only the event-name mapping is host-specific. |
+| `.mcp.json` | Per-plugin files plus aggregate `_polymath/mcp/mcp.json` | Client-specific MCP wiring required. The MCP protocol ports; discovery files do not. |
+| `workflows/*.yaml` | Copied with the `polymath-flow` runner under `_polymath/support/polymath-flows/` | Runnable explicitly with the bundled runner. No non-Claude host auto-discovers these workflows today. |
 
-## Target harnesses
+## Portable Paths
 
-Confirmed clients of the agentskills.io v1.0 standard
-(per [agentskills.io](https://agentskills.io)). Each lists its own
-discovery paths in its docs; the column below names the path that
-back-compat-reads SKILL.md unchanged.
+Exported instructions use Polymath-owned path variables:
 
-| Harness | Discovery path | Source |
+| Purpose | Portable variable | Default |
 | --- | --- | --- |
-| **Claude Code** (local) | `~/.claude/skills/` or `<repo>/.claude/skills/` | [code.claude.com/docs](https://code.claude.com/docs/en/skills) |
-| **Codex CLI** | `<repo>/.agents/skills/` or `<repo>/.codex/skills/` or `~/.agents/skills/` | [developers.openai.com/codex/skills](https://developers.openai.com/codex/skills/) |
-| **Cursor** | `<repo>/.cursor/skills/`, `<repo>/.agents/skills/`, or back-compat `<repo>/.claude/skills/` and `<repo>/.codex/skills/` | [cursor.com/docs/skills](https://cursor.com/docs/skills) |
-| **GitHub Copilot / VS Code** | `<repo>/.github/skills/`, `<repo>/.claude/skills/`, or `<repo>/.agents/skills/`; user-level at `~/.copilot/skills/` | [docs.github.com/copilot](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) |
-| **Gemini CLI** | `<repo>/.agents/skills/` (verify against current docs) | [agentskills.io clients](https://agentskills.io) |
-| **Goose / OpenCode / Roo Code / Amp / JetBrains Junie / others** | See vendor docs from the [agentskills.io clients page](https://agentskills.io). |
+| Plugin support root | `POLYMATH_PLUGIN_ROOT` | `_polymath/support/<plugin>/` in the bundle |
+| Mutable data | `POLYMATH_DATA_DIR` | `~/.polymath/data` |
+| User/team config | `POLYMATH_CONFIG_DIR` | `~/.polymath` |
+| Project root | `POLYMATH_PROJECT_DIR` | `$PWD` |
 
-The lowest-common-denominator drop point is `.agents/skills/` — every
-harness on the list above reads from it.
+Runtime scripts prefer `POLYMATH_*` variables and `.polymath/` paths. They keep
+`CLAUDE_*` variables and `.claude/` lookup as compatibility fallbacks for
+existing Claude Code installs. The exporter lints generated `SKILL.md` files so
+Claude-specific path tokens such as `CLAUDE_PLUGIN_ROOT`,
+`CLAUDE_PLUGIN_DATA`, `CLAUDE_CONFIG_DIR`, `CLAUDE_PROJECT_DIR`, and
+`~/.claude/plugins/data` do not survive in portable instructions.
 
-## Concrete steps
+## Bundle Layout
 
-### 1. Generate the bundle
+```text
+dist/agents-skills/
+  manifest.json
+  PORTABILITY.md
+  polymath-core-route/SKILL.md
+  polymath-core-command-route/SKILL.md
+  polymath-thinking-agent-architecture-critic/SKILL.md
+  _polymath/
+    support/<plugin>/
+      templates/
+      bin/
+      hooks/
+    hooks/<plugin>.hooks.json
+    mcp/<plugin>.mcp.json
+    mcp/mcp.json
+```
+
+The top-level directories with `SKILL.md` are the discoverable units. The
+`_polymath/` directory is support material for scripts, templates, hook
+adapters, MCP client configuration, and provenance.
+
+## Target Harnesses
+
+How each agent consumes the bundle differs. The table records the mechanism and
+whether it has been run against the live agent in this repo.
+
+| Harness | Skill discovery | Verified |
+| --- | --- | --- |
+| Gemini CLI | Native `gemini skills` discovers `~/.agents/skills/` (user) and project `.agents/skills/` (trusted folder). Install with `gemini skills link <path>` / `gemini skills install <src>`. Hooks: `gemini hooks migrate` (from Claude Code). MCP: `gemini mcp add`. | Yes — Gemini CLI 0.41 loaded all 212 exported skills, each `[Enabled]`; `gemini mcp add` accepted the exported stdio MCP shape. |
+| Codex CLI | No native skill auto-discovery (no `skills` subcommand). Reference skills from `AGENTS.md`; register integrations with `codex plugin` and `codex mcp`. | Partial — Codex 0.139 confirmed to have `plugin`/`mcp`/`AGENTS.md`, not skill discovery. |
+| GitHub Copilot CLI | MCP-based tools (`--add-github-mcp-*`) and custom `--agent`; reads `AGENTS.md`. | Not run. |
+| Cursor | `.cursor/rules` and `AGENTS.md`; `.agents/skills/` for agentskills.io-aware versions. | Not run (GUI agent; CLI is the editor launcher). |
+| Claude Code | `.claude/skills/` or installed marketplace plugins. | Native. |
+
+The lowest-friction cross-host path is `~/.agents/skills/` (user scope) or
+`.agents/skills/` (project scope), which Gemini CLI discovers natively.
 
 ```bash
+python3 /path/to/polymath/tools/export-agents-skills.py --install ~/.agents/skills
+# Gemini then discovers every skill:
+gemini skills list        # -> 212 polymath-* skills, Enabled
+
+# or, manually:
 python3 tools/export-agents-skills.py --clean
-```
-
-This writes `dist/agents-skills/` with one directory per skill. Each
-directory's `SKILL.md` has its frontmatter `name:` rewritten to
-`<plugin>-<skill>` so two plugins shipping a skill with the same slug
-(e.g. a `triage` skill in more than one connector) don't collide.
-
-### 2. Drop into your target harness
-
-Pick the right destination directory from the table above. For most
-harnesses:
-
-```bash
-# Codex CLI / Cursor / Copilot project-scoped
 mkdir -p .agents
 cp -R /path/to/polymath/dist/agents-skills .agents/skills
-
-# Cursor user-scoped, alternative drop
-mkdir -p .cursor
-cp -R /path/to/polymath/dist/agents-skills .cursor/skills
 ```
 
-The `manifest.json` in the bundle lets you recover the source mapping
-(namespaced name → `<plugin>:<skill>`) if you need to cite or update
-a specific skill.
+## Honest Limits
 
-### 3. Verify activation
-
-Start your target harness and prompt with one of the trigger phrases
-from `tests/skill-triggering/`. The host should select the matching
-namespaced skill. If activation does not happen, check the harness's
-own SKILL.md discovery logs — frontmatter parsing differs by vendor.
-
-## What this does NOT do
-
-- **No live test against every listed harness.** As of the most recent
-  Polymath bakeoff run, only Claude Code is exercised against the full
-  skill set. Other harnesses are presumed-compatible by virtue of the
-  agentskills.io v1.0 contract; cross-vendor parity is *unverified*
-  and contributions are welcome.
-- **No automated re-import.** The exported `<plugin>-<skill>` slugs do
-  not feed back into Polymath's bakeoff or skill-triggering tests; the
-  tests still use the in-tree `polymath-<plugin>:<skill>` invocation
-  form.
-- **No vendor-specific frontmatter extensions.** Some harnesses (e.g.
-  VS Code) document optional fields (`argument-hint`,
-  `user-invocable`, `context: fork`). Polymath does not emit these.
-  If a target harness requires them, add a vendor-specific
-  post-export rewrite step in your own toolchain.
-
-## Open questions
-
-- **Continue.dev / Aider** are not listed on agentskills.io's clients
-  page. Exported skills may still be usable as plain
-  Markdown context, but discovery semantics are vendor-specific.
-- **Frontmatter `name` length**: agentskills.io v1.0 does not document
-  a hard upper bound. Polymath's longest namespaced name is
-  ~50 characters; if a target harness imposes a stricter limit,
-  shorten via a custom post-export step.
-- **Description budget**: vendors report different SKILL.md discovery
-  budgets (Codex ~8K characters). Polymath's per-skill description is
-  ≤ 200 characters by `tools/lint-skills.sh`, well below any
-  documented budget.
+- The exporter validates structure, link rewriting, path rewriting, manifest
+  consistency, and a reference-host load of the deployed bundle. The bundle has
+  been run against the live Gemini CLI (all 212 skills loaded and `[Enabled]`;
+  MCP add accepted). Codex, Copilot, and Cursor have not been live-run end to
+  end; for those the table above records the documented consumption mechanism,
+  and the reference-host load is a spec-conformant stand-in.
+- Hooks ship with a runnable `run-hook.py` dispatcher, so they execute on any
+  host that can call a command on a lifecycle event. The remaining host-specific
+  step is wiring that host's events (`SessionStart`, `UserPromptSubmit`,
+  `PreToolUse`, `PostToolUse`, `Stop`) to invoke the dispatcher — payload shapes
+  still differ by host.
+- MCP server definitions are exported, but credentials and client registration
+  remain target-host concerns.
+- Converted subagents run as ordinary skills unless the target host has an
+  equivalent forked-context/subagent feature.
+- Claude-coupled skills are still exported, but they carry a banner naming the
+  required surface, such as MCP, project-context data, hooks, or
+  `polymath-flow`.

@@ -63,9 +63,9 @@ Existence is the per-step bar — content quality stays with the strong
 
 A workflow by `name` resolves in this order (highest priority first):
 
-1. Project: `.claude/polymath/workflows/<name>.yaml`
-2. User: `${CLAUDE_CONFIG_DIR}/polymath/workflows/<name>.yaml`
-   (fallback `~/.claude/polymath/workflows/`)
+1. Project: `.polymath/workflows/<name>.yaml`
+2. User: `${POLYMATH_CONFIG_DIR}/polymath/workflows/<name>.yaml`
+   (fallback `~/.polymath/workflows/`)
 3. Marketplace: installed `polymath-flows/workflows/<name>.yaml`
 
 ## 3. Inheritance — build-time flattening
@@ -78,7 +78,7 @@ on any workflow still carrying `extends` / `override` / `insertAfter` at
 make a run's behavior depend on a parent file that can change underneath
 it.
 
-A partial (e.g. `.claude/polymath/partials/shipFeatureAcme.yaml` —
+A partial (e.g. `.polymath/partials/shipFeatureAcme.yaml` —
 anywhere outside the runner's workflow resolution directories):
 
 ```yaml
@@ -105,10 +105,10 @@ Flatten it into the project workflow layer, and keep it fresh with the
 drift lint:
 
 ```bash
-polymath-flow flatten .claude/polymath/partials/shipFeatureAcme.yaml \
-  --out .claude/polymath/workflows/shipFeature.yaml
-polymath-flow flatten .claude/polymath/partials/shipFeatureAcme.yaml \
-  --out .claude/polymath/workflows/shipFeature.yaml --check   # exit 1 when stale
+polymath-flow flatten .polymath/partials/shipFeatureAcme.yaml \
+  --out .polymath/workflows/shipFeature.yaml
+polymath-flow flatten .polymath/partials/shipFeatureAcme.yaml \
+  --out .polymath/workflows/shipFeature.yaml --check   # exit 1 when stale
 ```
 
 Composition semantics:
@@ -230,10 +230,10 @@ resolves it against the agent definition and fails on a dangling label.
 ## 6. State
 
 Each run gets a directory under
-`${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/`:
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/workflows/`:
 
 ```text
-${CLAUDE_PLUGIN_DATA}/polymath-flows/workflows/2026-05-23T14-22-shipFeature-rate-limit/
+${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/workflows/2026-05-23T14-22-shipFeature-rate-limit/
   ├── state.json
   ├── inputs.json
   ├── trace.jsonl

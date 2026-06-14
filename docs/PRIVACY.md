@@ -47,7 +47,7 @@ The complete current surface, satisfying contract item 3.
 `polymath-flow` (the workflow runner) appends one line per invocation to
 
 ```text
-${CLAUDE_PLUGIN_DATA}/telemetry.jsonl     # polymath-flows' own data dir
+${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-flows/telemetry.jsonl
 ```
 
 **only** when the environment carries exactly `POLYMATH_TELEMETRY=1`.
@@ -83,7 +83,7 @@ Under the same `POLYMATH_TELEMETRY=1` opt-in, the route-hint hook appends
 one line per *emitted* hint to
 
 ```text
-${CLAUDE_PLUGIN_DATA}/polymath-core/hint-log.jsonl
+${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/hint-log.jsonl
 ```
 
 ```json
