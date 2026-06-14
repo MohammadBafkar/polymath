@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   metacharacters are refused instead of interpolated into
   `subprocess.run(..., shell=True)`. New `SECURITY.md` documents the
   boundary.
+- **SessionStart context sanitization.** Free-text project/run fields
+  (workflow pause reasons, scheduled-queue notes/ids) surfaced in the
+  agent's opening context are stripped of control characters and newlines
+  and length-capped, closing an indirect prompt-injection channel.
 
 ### Fixed
 
@@ -33,6 +37,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   uncaught traceback, `list` skips a single unreadable run rather than
   aborting the whole listing, and every state write is atomic
   (`.tmp` + `os.replace`).
+
+### Changed
+
+- **Honest provider + portability disclosure.** `docs/CAPABILITIES.md` now
+  carries a generated wired-vs-aspirational provider table (kept in sync by
+  `build-capability-index.py --check`); the README/AGENTS portability lines
+  and the `polymath-engineering` secret-scan note state their real scope;
+  and the `route` skill drops a stale hard-coded shortlist count.
 
 ### Added
 

@@ -88,8 +88,15 @@ fi
 flows_section=""
 if [[ -d "$flows_workflows_dir" ]]; then
   flows_section="$(python3 - "$flows_workflows_dir" <<'PY' 2>/dev/null || true
-import json, sys, pathlib, datetime
+import json, re, sys, pathlib, datetime
 base = pathlib.Path(sys.argv[1])
+def _san(s, n=120):
+    # Untrusted project/run text is surfaced in the agent's opening context:
+    # strip control chars + newlines and cap length so it stays one display
+    # token and cannot inject instructions or break the list layout.
+    s = re.sub(r"[\x00-\x1f\x7f]", " ", str(s))
+    s = re.sub(r"\s+", " ", s).strip()
+    return (s[: n - 1] + "…") if len(s) > n else s
 now = datetime.datetime.now(datetime.timezone.utc)
 def parse(ts):
     if not ts:
@@ -123,7 +130,7 @@ out = []
 if paused:
     out.append(f"Polymath: {len(paused)} paused workflow(s):")
     for rid, reason in paused[:5]:
-        tail = f" — {reason}" if reason else ""
+        tail = f" — {_san(reason)}" if reason else ""
         out.append(f"  - {rid}{tail}  (resume: /polymath-flows:resume-workflow {rid})")
     if len(paused) > 5:
         out.append(f"  …and {len(paused) - 5} more")
@@ -133,7 +140,7 @@ if active:
     out.append(f"Polymath: {len(active)} in-progress workflow(s):")
     for rid, age, step in active[:5]:
         stale = f", stale ({age}d)" if (age is not None and age >= 2) else ""
-        mid = f", mid-step: {step}" if step else ""
+        mid = f", mid-step: {_san(step, 60)}" if step else ""
         out.append(f"  - {rid}{stale}{mid}  (continue: /polymath-flows:resume-workflow {rid})")
     if len(active) > 5:
         out.append(f"  …and {len(active) - 5} more")
@@ -145,7 +152,11 @@ fi
 # --- scheduled-work queue ---
 queue_file="${data_root}/polymath-core/queue.json"
 due_now="$(python3 - "$queue_file" 2>/dev/null <<'PY' || true
-import json, pathlib, sys, datetime
+import json, re, pathlib, sys, datetime
+def _san(s, n=120):
+    s = re.sub(r"[\x00-\x1f\x7f]", " ", str(s))
+    s = re.sub(r"\s+", " ", s).strip()
+    return (s[: n - 1] + "…") if len(s) > n else s
 p = pathlib.Path(sys.argv[1])
 if not p.exists():
     sys.exit(0)
@@ -170,7 +181,7 @@ for it in items:
     if when <= now:
         skill = it.get("skill") or "?"
         note = it.get("note") or ""
-        out.append(f"  - {it.get('id','(no id)')}  → {skill}  {note}".rstrip())
+        out.append(f"  - {_san(it.get('id','(no id)'), 60)}  → {_san(skill, 60)}  {_san(note)}".rstrip())
 print("\n".join(out))
 PY
 )"

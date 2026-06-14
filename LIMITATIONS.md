@@ -145,6 +145,9 @@ elsewhere is intentional.
   Substituted `inputs`/`project`/`capabilities` values carrying shell
   metacharacters are refused rather than interpolated. See
   [`SECURITY.md`](SECURITY.md).
+- **The secret-scan hook covers only Write/Edit content.** Secrets written
+  via Bash, MultiEdit, or NotebookEdit are not scanned by the local hook;
+  the pinned gitleaks CI gate is the catch-all before merge.
 - **No autonomous deployer.** Deployment mutates infrastructure, which
   flows-lite's contract excludes. Polymath ships the composition as a
   pattern doc

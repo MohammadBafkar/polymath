@@ -131,7 +131,7 @@ For language-specific depth (`.NET`, Python, Laravel, …), Polymath defers to e
 - **Connectors share a shape.** `.mcp.json` for the upstream MCP server, `userConfig` for credentials (`sensitive: true`), hooks for event-driven reactions, a `references/<service>-tools.md` doc.
 - **No native scheduler.** Recurring work lives in external schedulers (Cloud Routines, GitHub Actions, OS cron) that write to a queue file the `polymath-core` SessionStart hook surfaces.
 - **No telemetry.** See [docs/PRIVACY.md](docs/PRIVACY.md).
-- **agentskills.io v1.0 compatible.** Skills are portable across any harness implementing the open standard (Claude Code, Codex, Cursor, Gemini CLI, Goose, JetBrains Junie).
+- **agentskills.io v1.0 compatible.** Most skills export and run unchanged on any harness implementing the open standard (Claude Code, Codex, Cursor, Gemini CLI, Goose, JetBrains Junie); the subset that depends on a Claude Code surface (MCP, SessionStart, the flows runner) carries a portability banner — see [docs/PORTABILITY.md](docs/PORTABILITY.md).
 
 ## Repo layout
 

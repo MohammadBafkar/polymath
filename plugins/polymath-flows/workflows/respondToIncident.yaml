@@ -28,8 +28,8 @@ requires:
   capabilities:
     # Three capabilities. v0.2 routes each through the project's
     # .polymath/capabilities.yaml choice rather than hard-coding pagerduty +
-    # datadog + jira. Set the providers in that file and the workflow runs
-    # end-to-end against opsgenie + honeycomb + linear if that is the stack.
+    # datadog + jira. Set the providers in that file; any provider that ships
+    # an adapter runs end-to-end (see docs/CAPABILITIES.md for which do).
     pager: true
     observability: true
     issue_tracker: true

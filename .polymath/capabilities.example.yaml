@@ -19,6 +19,8 @@
 schemaVersion: 1
 
 capabilities:
+  # Not every provider in the vocabulary ships an adapter yet — see
+  # docs/CAPABILITIES.md for which providers are wired vs aspirational.
   # Issue tracker — invoked by incidentRetroToActions, respondToIncident.
   issue_tracker:
     provider: jira
