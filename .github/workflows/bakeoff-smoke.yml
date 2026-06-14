@@ -1,0 +1,72 @@
+name: bakeoff-smoke
+
+# Opt-in per-PR behavioral smoke. Judge-scores a few representative bakeoff
+# cases so a behavioral regression surfaces on the PR instead of waiting for
+# the weekly model-ci rotation. Double-gated so it never spends budget unless
+# the maintainer opts in:
+#   1. a Claude auth secret is present (CLAUDE_CODE_OAUTH_TOKEN preferred), AND
+#   2. the repo variable BAKEOFF_SMOKE_ENABLED == 'true'.
+# Forks (no secret access) and repos that have not opted in skip cleanly.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bakeoff-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Gate (auth secret + opt-in variable)
+        id: gate
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ENABLED: ${{ vars.BAKEOFF_SMOKE_ENABLED }}
+        run: |
+          if [[ "$ENABLED" != "true" ]]; then
+            echo "::warning::bakeoff-smoke disabled (set repo variable BAKEOFF_SMOKE_ENABLED=true to enable)."
+            echo "run=no" >> "$GITHUB_OUTPUT"
+          elif [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" && -z "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "::warning::No Claude auth available; skipping the bakeoff smoke."
+            echo "run=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=yes" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install Claude Code CLI (pinned)
+        if: steps.gate.outputs.run == 'yes'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: steps.gate.outputs.run == 'yes'
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.175
+          claude --version
+      - name: Bakeoff smoke (judge-scored representative cases)
+        if: steps.gate.outputs.run == 'yes'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/bakeoff.py run \
+            code-review-red-team security-owasp-review red-team-solo \
+            --judge --out-dir .pdata/bakeoff-smoke
+      - name: Upload smoke reports
+        if: always() && hashFiles('.pdata/bakeoff-smoke/*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: bakeoff-smoke-${{ github.run_id }}
+          path: .pdata/bakeoff-smoke/
+          retention-days: 30

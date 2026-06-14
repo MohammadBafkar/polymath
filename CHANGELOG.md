@@ -55,6 +55,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Opt-in per-PR bakeoff smoke + documented coverage targets.** A new
+  double-gated `bakeoff-smoke` workflow judge-scores representative cases on
+  each PR — only when a Claude auth secret is present and the repo variable
+  `BAKEOFF_SMOKE_ENABLED` is `true` — shortening the behavioral-regression
+  loop from the weekly model-ci rotation. `docs/QUALITY-SCORECARD.md`
+  documents the behavioral coverage targets (a bakeoff case per flagship
+  plugin; triggering fixtures for beta-track surfaces).
 - **Output-shape ratchet.** A SKILL.md's `## Output` section must show the
   shape it produces (a fenced example, a `templates/` link, a `*.schema.json`
   reference, or a `docs/<area>` path). The currently-shapeless skills are

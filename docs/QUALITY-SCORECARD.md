@@ -149,6 +149,33 @@ on a rubric token fails `bakeoff check` with a `rubric leak` error
 naming the token and the offending side. This is the structural
 defence against rubric-aware prompt engineering.
 
+## Behavioral coverage and per-PR smoke
+
+Behavioral proof is the gating constraint on `stable`, not catalog size.
+Current coverage and the targets it must reach:
+
+- **Bakeoff cases** — `tests/bakeoff/<plugin>/<scenario>/case.json`.
+  Target: at least one case per flagship plugin. A plugin cannot promote to
+  `stable` until one of its cases clears the [`MATURITY.md`](MATURITY.md) bar
+  in a published run.
+- **Triggering fixtures** — `tests/skill-triggering/`,
+  `tests/workflow-triggering/`. Target: a fixture for every `beta`-track
+  skill and workflow.
+
+The weekly `model-ci` rotation spends most of the live-model budget, so a
+regression in a given suite can hide for up to three weeks. To shorten that
+loop, an **opt-in per-PR smoke** judge-scores a few representative cases on
+each PR:
+[`.github/workflows/bakeoff-smoke.yml`](../.github/workflows/bakeoff-smoke.yml).
+It is double-gated and zero-cost by default — it runs only when a Claude auth
+secret is present AND the repo variable `BAKEOFF_SMOKE_ENABLED` is `true`.
+Forks and un-opted repos skip cleanly.
+
+Publishing the first scoring run — recording `distinct_value_url` in
+[`registry/stability-evidence.json`](../registry/stability-evidence.json) —
+requires the maintainer's Claude auth secret; see
+[`LIMITATIONS.md`](../LIMITATIONS.md) § 4.1.
+
 ## LLM-judge
 
 In addition to the regex scorer, the bakeoff can run an LLM-judge for
