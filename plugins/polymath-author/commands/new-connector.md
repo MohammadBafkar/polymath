@@ -1,6 +1,6 @@
 ---
 name: new-connector
-description: Scaffold an integration (MCP) plugin named by capability (polymath-<concept>) with .mcp.json + userConfig via new-connector.sh. Not a generic plugin (new-plugin).
+description: Generate an integration (MCP) plugin named by capability (polymath-<concept>) with .mcp.json + userConfig via new-connector.sh; not a generic plugin (new-plugin).
 ---
 
 # /new-connector

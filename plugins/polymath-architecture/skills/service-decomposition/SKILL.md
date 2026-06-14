@@ -1,6 +1,6 @@
 ---
 name: service-decomposition
-description: Find service boundaries in a monolith or split proposal — seam analysis by subdomain, a strangler-fig sequence, what stays a monolith, and a characterization-test plan.
+description: Map service boundaries in a monolith or split proposal — seam analysis by subdomain, a strangler-fig sequence, what stays, and a characterization-test plan.
 ---
 
 # service-decomposition

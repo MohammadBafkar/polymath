@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: Slash entry point when cutting a version — produces docs/release-notes/<version>.md.
+description: Draft release notes to docs/release-notes/<version>.md when cutting a version.
 ---
 
 # /release-notes

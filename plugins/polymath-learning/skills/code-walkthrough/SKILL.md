@@ -1,6 +1,6 @@
 ---
 name: code-walkthrough
-description: Walk through a piece of code in execution order for a given audience — entry point, branches, side effects, the surprising line; cite file:line.
+description: Explain a piece of code in execution order — entry point, branches, side effects, the surprising line; cite file:line; not a line-by-line rewrite.
 ---
 
 # code-walkthrough

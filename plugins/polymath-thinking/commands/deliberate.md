@@ -1,5 +1,5 @@
 ---
-description: Slash entry point to think a hard or ambiguous call through before you commit to it.
+description: Run a deliberation on a hard or ambiguous call before you commit; alias for polymath-thinking:deliberate.
 ---
 
 Invoke `polymath-thinking:deliberate`.

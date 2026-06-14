@@ -1,6 +1,6 @@
 ---
 name: conventions
-description: Load Polymath project conventions (commit style, PR shape, plugin layout) when starting a task that touches the marketplace.
+description: Read Polymath project conventions (commit style, PR shape, plugin layout) when starting a task that touches the marketplace.
 ---
 
 # conventions

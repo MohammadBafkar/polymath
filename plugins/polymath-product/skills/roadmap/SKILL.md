@@ -1,6 +1,6 @@
 ---
 name: roadmap
-description: Sequence a Now/Next/Later roadmap grouped by outcome, with confidence, dependencies, and explicit non-commitments. Communicates a ranked set, not the ranking (prioritize) or a plan (write-plan).
+description: Map a Now/Next/Later roadmap grouped by outcome — confidence, dependencies, explicit non-commitments; a ranked set, not the ranking (prioritize) or a plan (write-plan).
 ---
 
 # roadmap

@@ -1,6 +1,6 @@
 ---
 name: acceptance-criteria
-description: Add or refine Given/When/Then acceptance criteria for a PRD; each criterion is independently testable and maps to a test case.
+description: Draft or refine Given/When/Then acceptance criteria for a PRD; each criterion is independently testable and maps to a test case.
 ---
 
 # acceptance-criteria

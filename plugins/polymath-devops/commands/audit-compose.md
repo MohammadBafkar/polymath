@@ -1,5 +1,5 @@
 ---
-description: Slash entry point to review a compose file before you ship it.
+description: Audit a Docker Compose file before you ship it; command entry point for the audit-compose skill.
 ---
 
 Invoke `polymath-devops:audit-compose`.

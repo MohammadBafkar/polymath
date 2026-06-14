@@ -1,6 +1,6 @@
 ---
 name: feynman-technique
-description: Self-test understanding of a concept by attempting an undergrad-level explanation; surface exactly the places the explanation cracks and study those.
+description: Verify your understanding of a concept by attempting an undergrad-level explanation; surface exactly where the explanation cracks and study those.
 ---
 
 # feynman-technique

@@ -1,6 +1,6 @@
 ---
 name: feature-dev
-description: Implement the smallest safe change satisfying a PRD/acceptance criteria using a TDD loop; produces a code diff plus tests.
+description: Build the smallest safe change satisfying a PRD/acceptance criteria via a TDD loop; produces a code diff plus tests.
 ---
 
 # feature-dev

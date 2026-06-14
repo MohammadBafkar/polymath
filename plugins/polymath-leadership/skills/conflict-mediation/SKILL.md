@@ -1,6 +1,6 @@
 ---
 name: conflict-mediation
-description: Work through a team conflict — separate positions from interests, structure a difficult conversation, find the shared goal, and land concrete commitments.
+description: Frame a team conflict — separate positions from interests, structure a difficult conversation, find the shared goal, land concrete commitments; not a perf-review.
 ---
 
 # conflict-mediation

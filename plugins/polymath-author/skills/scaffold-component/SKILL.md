@@ -1,6 +1,6 @@
 ---
 name: scaffold-component
-description: Scaffold a component/service/module in the CURRENT repo per its conventions — native generator first (tool-spec handoff), canonical infra bodies from the owning skills, no freehand boilerplate.
+description: Generate a component/service/module in the CURRENT repo per its conventions — native generator first (tool-spec handoff), canonical infra bodies from owning skills, no freehand boilerplate.
 ---
 
 # scaffold-component

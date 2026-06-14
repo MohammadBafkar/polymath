@@ -1,6 +1,6 @@
 ---
 name: plugin-budget
-description: Report current Polymath always-on listing token cost per plugin and totals; flags overruns vs the ≤ 400/plugin and ≤ 1,500 MVP targets.
+description: List current Polymath always-on listing-token cost per plugin and totals; flags overruns vs the ≤400/plugin and ≤1,500 MVP targets.
 ---
 
 # /plugin-budget

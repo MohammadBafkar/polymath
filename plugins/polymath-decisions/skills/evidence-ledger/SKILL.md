@@ -1,6 +1,6 @@
 ---
 name: evidence-ledger
-description: Separate facts from assumptions from unknowns for a decision; per unknown name confidence, the evidence that would resolve it, and how the recommendation flips; mark reversibility.
+description: Frame a decision's evidence — separate facts, assumptions, and unknowns; per unknown name confidence and what would resolve it; not a full decision record (daci) or tradeoff scoring (tradeoff-matrix).
 ---
 
 # evidence-ledger

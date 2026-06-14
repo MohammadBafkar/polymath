@@ -1,6 +1,6 @@
 ---
 name: feedback-digest
-description: Evaluate captured localization feedback (valid/constructive verdict with evidence) and apply fixes — project-local edits behind one confirm; catalog-level changes only as proposed patch files.
+description: Score captured localization feedback (valid/constructive verdict with evidence) and apply fixes — project-local edits behind one confirm; catalog changes only as proposed patch files.
 ---
 
 # feedback-digest

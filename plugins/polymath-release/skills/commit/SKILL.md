@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Stage and craft a Conventional Commits message for the current diff; never commits without showing the user the staged changes and the message first.
+description: Draft a Conventional Commits message for the current diff; never commits without showing the user the staged changes and the message first.
 ---
 
 # commit

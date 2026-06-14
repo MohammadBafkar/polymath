@@ -1,6 +1,6 @@
 ---
 name: feedback-capture
-description: Conservatively record one localization-feedback item (correction, gap, friction) tied to a named Polymath surface — 180d TTL, evaluated later via feedback-digest. Not a general note-taker.
+description: Capture one localization-feedback item (correction, gap, friction) tied to a named Polymath surface — 180d TTL, evaluated later via feedback-digest; not a general note-taker.
 ---
 
 # feedback-capture

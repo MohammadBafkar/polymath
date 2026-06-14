@@ -1,6 +1,6 @@
 ---
 name: estimate
-description: Apply a lightweight three-point estimate (optimistic, expected, pessimistic) to a work breakdown; surfaces uncertainty rather than a single date.
+description: Estimate a work breakdown with a lightweight three-point method (optimistic, expected, pessimistic); surfaces uncertainty rather than a single date.
 ---
 
 # estimate

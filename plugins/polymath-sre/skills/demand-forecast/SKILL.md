@@ -1,6 +1,6 @@
 ---
 name: demand-forecast
-description: Forecast capacity demand — model growth (linear/compound/seasonal), translate to resource needs + headroom, and flag the lead time before a saturation breach.
+description: Model capacity demand — growth (linear/compound/seasonal), translate to resource needs + headroom, and flag the lead time before a saturation breach.
 ---
 
 # demand-forecast

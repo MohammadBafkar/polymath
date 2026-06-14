@@ -1,6 +1,6 @@
 ---
 name: new-pack
-description: Scaffold a defaults pack (standalone marketplace + conventions plugin + apply-defaults copy-in) for any scope — org, team, or project archetype — via new-pack.sh. Not a generic plugin (new-plugin).
+description: Generate a defaults pack (standalone marketplace + conventions plugin + apply-defaults copy-in) for an org/team/project scope via new-pack.sh; not a generic plugin (new-plugin).
 ---
 
 # /new-pack

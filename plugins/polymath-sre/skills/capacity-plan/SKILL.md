@@ -1,6 +1,6 @@
 ---
 name: capacity-plan
-description: Produce a forward-looking capacity plan for a service or resource — current utilization, growth model, headroom, scaling triggers, and cost.
+description: Plan forward capacity for a service or resource — current utilization, a growth model, headroom, scaling triggers, and cost; not short-term demand forecasting (demand-forecast).
 ---
 
 # capacity-plan

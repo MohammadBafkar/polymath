@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Slash entry point after committing — writes a PR body to docs/pr/<slug>.md; opens no real PR.
+description: Draft a PR body to docs/pr/<slug>.md after committing; opens no real PR.
 ---
 
 # /pr

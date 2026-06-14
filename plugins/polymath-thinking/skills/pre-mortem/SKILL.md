@@ -1,6 +1,6 @@
 ---
 name: pre-mortem
-description: Imagine the project has already failed; list the most plausible reasons why so they can be mitigated before launch. Imagines failure pre-launch; not adversarial critique (red-team).
+description: Frame the project as already failed and list the most plausible reasons why, so they can be mitigated before launch; not adversarial critique (red-team).
 ---
 
 # pre-mortem

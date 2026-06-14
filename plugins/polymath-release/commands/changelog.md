@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Slash entry point after a change lands — adds one [Unreleased] line to the changelog.
+description: Write one [Unreleased] CHANGELOG line after a change lands.
 ---
 
 # /changelog

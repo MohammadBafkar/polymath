@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Slash entry point at commit time — shows the staged diff and proposed message before anything lands.
+description: Review the staged diff and craft a Conventional Commits message before anything lands.
 ---
 
 # /commit

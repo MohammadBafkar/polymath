@@ -1,6 +1,6 @@
 ---
 name: incident-triage
-description: Triage an inbound alert or report — classify severity, name the incident commander, open comms, decide whether to mitigate or investigate first.
+description: Triage an inbound alert or report — classify severity, name the IC, open comms, and decide whether to mitigate or investigate first.
 ---
 
 # incident-triage

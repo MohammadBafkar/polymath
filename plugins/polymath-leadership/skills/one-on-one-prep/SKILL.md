@@ -1,6 +1,6 @@
 ---
 name: one-on-one-prep
-description: Prepare a 1:1 — direct-report agenda first, manager agenda second, rotating pulse question, carryover commitments; never cancel for "no agenda".
+description: Draft a 1:1 agenda — direct-report items first, manager items second, a rotating pulse question, carryover commitments; never cancel for "no agenda".
 ---
 
 # one-on-one-prep

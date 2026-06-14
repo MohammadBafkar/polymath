@@ -1,5 +1,5 @@
 ---
-description: Slash entry point to preflight your environment when Polymath misbehaves or before first init.
+description: Run the doctor preflight on your Polymath environment before first init or when it misbehaves; alias for polymath-core:doctor.
 ---
 
 Invoke `polymath-core:doctor`.

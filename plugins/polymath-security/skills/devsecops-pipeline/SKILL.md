@@ -1,6 +1,6 @@
 ---
 name: devsecops-pipeline
-description: Embed security into CI/CD — SAST, DAST, SCA/dependency scanning, secret scanning, IaC scanning — as gates with severity thresholds, triage flow, and noise control.
+description: Design security gates into CI/CD — SAST, DAST, SCA/dependency, secret, and IaC scanning — with severity thresholds, a triage flow, and noise control.
 ---
 
 # devsecops-pipeline

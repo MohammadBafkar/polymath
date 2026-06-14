@@ -1,6 +1,6 @@
 ---
 name: trace-investigate
-description: Walk a Honeycomb trace by trace.id — surface the offending span, its dependency chain, error context, and a candidate root-cause hypothesis.
+description: Investigate a Honeycomb trace by trace.id — surface the offending span, its dependency chain, error context, and a candidate root-cause hypothesis.
 ---
 
 # trace-investigate

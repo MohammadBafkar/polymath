@@ -1,6 +1,6 @@
 ---
 name: research-scout
-description: Fork context to scout primary-source evidence for a product or technical claim; separates known facts, unknowns, and tests.
+description: Surface primary-source evidence for a product or technical claim in a forked context; separates known facts, unknowns, and tests.
 ---
 
 # research-scout

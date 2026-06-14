@@ -1,6 +1,6 @@
 ---
 name: editorial-pass
-description: Tighten prose in a markdown artifact for a target tone (terse, formal, friendly) without dropping information; preserve quotations and load-bearing constraints.
+description: Review and tighten prose in a Markdown artifact for a target tone (terse, formal, friendly) without dropping information; preserve quotations and load-bearing constraints.
 ---
 
 # editorial-pass

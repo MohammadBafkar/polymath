@@ -1,6 +1,6 @@
 ---
 name: tracing-strategy-otel
-description: Adopt OpenTelemetry tracing — sampling, attribute discipline, span hygiene, context propagation, baggage, cost-aware exporter config.
+description: Design an OpenTelemetry tracing strategy — sampling, attribute discipline, span hygiene, context propagation, baggage, cost-aware exporter config.
 ---
 
 # tracing-strategy-otel

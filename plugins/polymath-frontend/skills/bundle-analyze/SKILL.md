@@ -1,6 +1,6 @@
 ---
 name: bundle-analyze
-description: Find the biggest bytes in a JavaScript bundle and propose the cheapest cut; uses the bundler's report rather than guessing.
+description: Audit a JavaScript bundle for the biggest bytes and propose the cheapest cut; uses the bundler's report rather than guessing.
 ---
 
 # bundle-analyze

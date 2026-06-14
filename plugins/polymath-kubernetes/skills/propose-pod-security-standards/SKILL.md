@@ -1,6 +1,6 @@
 ---
 name: propose-pod-security-standards
-description: Adopt Kubernetes Pod Security Standards (privileged / baseline / restricted) per namespace; identify violating workloads and propose remediations.
+description: Propose Kubernetes Pod Security Standards (privileged/baseline/restricted) per namespace; identify violating workloads and remediations.
 ---
 
 # propose-pod-security-standards

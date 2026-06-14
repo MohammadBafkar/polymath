@@ -1,6 +1,6 @@
 ---
 name: architecture-critic
-description: Fork context to challenge an ADR or design; hunts invariants, failure modes, and cheaper alternatives the lead may miss.
+description: Critique an ADR or design in a forked context; hunts invariants, failure modes, and cheaper alternatives the lead may miss.
 ---
 
 # architecture-critic

@@ -1,6 +1,6 @@
 ---
 name: query-during-incident
-description: During an incident, run the right Datadog queries to narrow cause — error rates, latency percentiles, deploys, recent changes — and surface them concisely.
+description: Run the right Datadog queries during an incident to narrow cause — error rates, latency percentiles, deploys, recent changes — and surface them concisely.
 ---
 
 # query-during-incident

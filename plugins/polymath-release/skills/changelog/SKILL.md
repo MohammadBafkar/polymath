@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Append a user-facing entry to CHANGELOG.md under [Unreleased] using the Keep-a-Changelog format mapped from Conventional Commits.
+description: Write a user-facing CHANGELOG entry under [Unreleased] in Keep-a-Changelog format, mapped from Conventional Commits.
 ---
 
 # changelog

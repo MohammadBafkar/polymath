@@ -1,6 +1,6 @@
 ---
 name: resilience-design
-description: Select and tune resilience patterns for a dependency call path — timeout, retry with backoff + jitter, circuit breaker, bulkhead, fallback, load-shedding — with a failure-mode table.
+description: Design resilience for a dependency call path — timeout, retry with backoff+jitter, circuit breaker, bulkhead, fallback, load-shedding — with a failure-mode table.
 ---
 
 # resilience-design

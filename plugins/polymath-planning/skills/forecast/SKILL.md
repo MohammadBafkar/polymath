@@ -1,6 +1,6 @@
 ---
 name: forecast
-description: Forecast a delivery date/scope as a probability range — reference-class, throughput/Monte-Carlo, cone of uncertainty. Range forecasting from data, not per-item estimation (estimate).
+description: Model a delivery date/scope as a probability range — reference-class, throughput/Monte-Carlo, cone of uncertainty; range forecasting from data, not per-item estimation (estimate).
 ---
 
 # forecast

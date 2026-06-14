@@ -1,6 +1,6 @@
 ---
 name: assertion-quality
-description: Strengthen test assertions — assert behavior not implementation; kill snapshot/tautological checks; one reason-to-fail per test. Improves existing tests, not authoring them (unit-tests).
+description: Review test assertions — assert behavior not implementation; kill snapshot/tautological checks; one reason-to-fail per test; improves existing tests, not authoring them (unit-tests).
 ---
 
 # assertion-quality

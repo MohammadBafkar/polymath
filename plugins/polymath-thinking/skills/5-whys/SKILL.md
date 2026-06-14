@@ -1,6 +1,6 @@
 ---
 name: 5-whys
-description: Root-cause an incident or bug via the 5-whys technique; stop early if a system cause emerges before five iterations.
+description: Investigate an incident or bug via the 5-whys technique — iterative root-cause drill-down; stop early if a system cause emerges before five iterations.
 ---
 
 # 5-whys

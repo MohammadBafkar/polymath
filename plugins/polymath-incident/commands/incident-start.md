@@ -1,6 +1,6 @@
 ---
 name: incident-start
-description: Start an incident triage — assess severity, name IC/operator/comms/scribe, open comms; alias for polymath-incident:incident-triage.
+description: Triage an incident — assess severity, name IC/operator/comms/scribe, open comms; alias for polymath-incident:incident-triage.
 ---
 
 # /incident-start

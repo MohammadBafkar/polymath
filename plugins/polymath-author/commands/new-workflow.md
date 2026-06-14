@@ -1,6 +1,6 @@
 ---
 name: new-workflow
-description: Scaffold a new flows-lite workflow via the bundled new-workflow.sh.
+description: Generate a new flows-lite workflow via the bundled new-workflow.sh; not a plugin or skill.
 ---
 
 # /new-workflow

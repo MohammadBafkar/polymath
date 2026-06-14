@@ -1,6 +1,6 @@
 ---
 name: glossary
-description: Shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustPass, flows-lite, …). Use when terms need disambiguating.
+description: Define shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustPass, flows-lite); use when terms need disambiguating.
 ---
 
 # glossary

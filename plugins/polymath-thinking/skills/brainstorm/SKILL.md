@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Generate divergent ideas (≥ 10) for a problem before converging; quantity beats quality in the divergent phase.
+description: Generate divergent options (≥10) for a problem before converging — quantity beats quality; not convergent down-selection or ranking (prioritize).
 ---
 
 # brainstorm

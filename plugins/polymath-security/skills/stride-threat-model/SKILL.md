@@ -1,6 +1,6 @@
 ---
 name: stride-threat-model
-description: Produce a STRIDE threat model for a system/scope; writes docs/threat-models/<slug>.md with frontmatter validated by the ThreatModel artifact schema.
+description: Model a system with STRIDE; writes docs/threat-models/<slug>.md with frontmatter validated by the ThreatModel artifact schema.
 ---
 
 # stride-threat-model

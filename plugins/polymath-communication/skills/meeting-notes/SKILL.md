@@ -1,6 +1,6 @@
 ---
 name: meeting-notes
-description: Capture meeting notes in three sections — decisions made, action items with owners + dates, open questions; never a transcript.
+description: Capture meeting notes in three sections — decisions, action-items with owners + dates, open questions; not a transcript.
 ---
 
 # meeting-notes

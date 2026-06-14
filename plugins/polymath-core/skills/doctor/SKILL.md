@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: Preflight the Polymath environment — check required and optional tools and validate any .polymath/project.yaml, with PASS/WARN/FAIL and fix hints.
+description: Check the Polymath environment — required and optional tools, and validate any .polymath/project.yaml — reporting PASS/WARN/FAIL and fix hints.
 ---
 
 # doctor

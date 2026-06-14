@@ -1,6 +1,6 @@
 ---
 name: groom-backlog
-description: Refine backlog items to ready — clarify stories, add acceptance criteria + estimate, split oversized items, flag blockers. Not ranking (prioritize) or epic story-mapping (decompose-epic).
+description: Review backlog items into ready — clarify stories, add acceptance criteria + estimate, split oversized items, flag blockers; not ranking (prioritize) or epic story-mapping (decompose-epic).
 ---
 
 # groom-backlog

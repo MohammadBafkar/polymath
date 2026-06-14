@@ -1,6 +1,6 @@
 ---
 name: token-budget-report
-description: Measure listing-token cost per plugin via claude plugin details; flag over-cap plugins and the heaviest descriptions.
+description: Check listing-token cost per plugin via claude plugin details; flag over-cap plugins and the heaviest descriptions.
 ---
 
 # token-budget-report

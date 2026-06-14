@@ -1,6 +1,6 @@
 ---
 name: first-principles
-description: Reason from first principles — strip to fundamentals, drop inherited assumptions, rebuild from bedrock. Decompose-to-fundamentals, not option generation (brainstorm) or framing (problem-framing).
+description: Decompose a problem to first principles — strip to fundamentals, drop inherited assumptions, rebuild from bedrock; not option generation (brainstorm) or framing (problem-framing).
 ---
 
 # first-principles

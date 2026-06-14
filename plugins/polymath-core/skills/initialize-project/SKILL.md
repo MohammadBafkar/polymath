@@ -1,6 +1,6 @@
 ---
 name: initialize-project
-description: Inspect a repository and create .polymath/project.yaml, capability mapping, and onboarding notes for Polymath-aware agents.
+description: Map a repository to .polymath/project.yaml — capability mapping and onboarding notes for Polymath-aware agents.
 ---
 
 # initialize-project

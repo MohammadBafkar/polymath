@@ -1,6 +1,6 @@
 ---
 name: design-patterns-apply
-description: Apply SOLID and GoF/architectural patterns to a design sketch and flag anti-patterns — design-time pattern selection, distinct from line-level code review.
+description: Review a design sketch against SOLID, GoF, and architectural patterns; flag anti-patterns at design time; not line-level code review (code-review).
 ---
 
 # design-patterns-apply

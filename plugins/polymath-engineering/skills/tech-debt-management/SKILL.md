@@ -1,6 +1,6 @@
 ---
 name: tech-debt-management
-description: Inventory and prioritize technical debt — classify (deliberate/accidental), quantify principal vs interest, and sequence paydown against feature work with a payback rationale.
+description: Triage technical debt — classify (deliberate/accidental), quantify principal vs interest, and sequence paydown against feature work with a payback rationale.
 ---
 
 # tech-debt-management
