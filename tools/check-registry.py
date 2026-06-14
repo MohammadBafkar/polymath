@@ -367,7 +367,7 @@ def stability_check() -> int:
 COUNT_MARKER_RE = re.compile(
     r"<!--\s*count:([a-z][a-z-]*)\s*-->(.*?)<!--\s*/count\s*-->", re.DOTALL
 )
-COUNTED_FILES = ("README.md",)
+COUNTED_FILES = ("README.md", "AGENTS.md")
 
 
 def _computed_counts() -> dict[str, int]:
