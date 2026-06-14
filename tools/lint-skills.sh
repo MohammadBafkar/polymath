@@ -50,6 +50,41 @@ while IFS= read -r -d '' f; do
   esac
 done < <(find "$plugins_dir" -type f -path "*/commands/*.md" -print0 2>/dev/null)
 
+# Output-shape ratchet: a SKILL.md's `## Output` section should show the exact
+# shape it produces (a fenced example, a templates/ link, a *.schema.json ref,
+# or a docs/<area> path) so the model has something to imitate. Existing
+# shapeless skills are grandfathered in the baseline; this fails on any NEW
+# shapeless skill and on any baselined skill that has since gained a shape
+# (remove it — the baseline only shrinks).
+baseline_file="$root/registry/output-shape-baseline.txt"
+if [[ -f "$baseline_file" ]]; then
+  current="$(mktemp)"; baseline_sorted="$(mktemp)"
+  while IFS= read -r -d '' f; do
+    awk '
+      /^##[[:space:]]/        { in_out = ($0 ~ /[Oo]utput/) ? 1 : 0; next }
+      in_out && /```/         { found=1 }
+      in_out && /templates\// { found=1 }
+      in_out && /\.schema\.json/ { found=1 }
+      in_out && /docs\/[a-z]/ { found=1 }
+      END { exit (found ? 0 : 1) }
+    ' "$f" || echo "$f" | sed -E 's#.*/plugins/([^/]+)/skills/([^/]+)/SKILL.md#\1:\2#'
+  done < <(find "$plugins_dir" -type f -name SKILL.md -print0) | sort > "$current"
+  grep -vE '^[[:space:]]*(#|$)' "$baseline_file" | sort > "$baseline_sorted"
+  new_viol="$(comm -23 "$current" "$baseline_sorted")"
+  fixed="$(comm -13 "$current" "$baseline_sorted")"
+  if [[ -n "$new_viol" ]]; then
+    echo "✗ output-shape: these skills' '## Output' section shows no shape (add a fenced example, a templates/ link, a *.schema.json ref, or a docs/<area> path):"
+    echo "$new_viol" | sed 's/^/    /'
+    fail=1
+  fi
+  if [[ -n "$fixed" ]]; then
+    echo "✗ output-shape: these baselined skills now show a shape — delete them from registry/output-shape-baseline.txt (the baseline only shrinks):"
+    echo "$fixed" | sed 's/^/    /'
+    fail=1
+  fi
+  rm -f "$current" "$baseline_sorted"
+fi
+
 if [[ "$fail" -ne 0 ]]; then
   echo "lint-skills: FAILED"
   exit 1

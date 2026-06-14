@@ -45,9 +45,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `build-capability-index.py --check`); the README/AGENTS portability lines
   and the `polymath-engineering` secret-scan note state their real scope;
   and the `route` skill drops a stale hard-coded shortlist count.
+- **Faster validation; self-completing skill scaffold.** The per-plugin
+  `claude plugin validate` loop is parallelized in `conformance.sh` and the
+  discarded duplicate loop is dropped from `validate-all.sh` (locally
+  validate-all ~16s→~4s, conformance ~36s→~25s). `new-skill.sh` now registers
+  the new skill's routing posture (a `routing-exemptions.json` entry) and
+  prints the remaining README step, so a fresh scaffold is one edit from
+  passing conformance.
 
 ### Added
 
+- **Output-shape ratchet.** A SKILL.md's `## Output` section must show the
+  shape it produces (a fenced example, a `templates/` link, a `*.schema.json`
+  reference, or a `docs/<area>` path). The currently-shapeless skills are
+  grandfathered in `registry/output-shape-baseline.txt`; `lint-skills.sh`
+  fails on any new shapeless skill and on a baselined skill that has since
+  gained a shape (the baseline only shrinks). `new-skill.sh` scaffolds a
+  fenced Output block so new skills comply by default.
 - **P5 right-sized longevity: dead-config deletion, DEADCONF-1,
   COUPLING-1, platform canary.** Deleted verified-dead `project.yaml`
   schema keys that promised behavior nothing delivered — `artifact_matrix`

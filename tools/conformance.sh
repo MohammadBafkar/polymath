@@ -58,7 +58,16 @@ if s not in allowed:
       || { echo "  ✗ MANIFEST-3: status missing or invalid in registry/polymath-catalog.json"; fail=1; }
   fi
   if command -v claude >/dev/null 2>&1; then
-    if claude plugin validate --strict "$plugin_dir" >/dev/null 2>&1; then
+    if [[ -n "${MANIFEST1_FAIL_FILE:-}" ]]; then
+      # The --all pre-pass already ran `claude plugin validate` in parallel;
+      # read its cached result instead of spawning the validator again.
+      if grep -qxF "$plugin_dir" "$MANIFEST1_FAIL_FILE"; then
+        echo "  ✗ MANIFEST-1: claude plugin validate --strict failed"
+        fail=1
+      else
+        echo "  ✓ MANIFEST-1: claude plugin validate --strict"
+      fi
+    elif claude plugin validate --strict "$plugin_dir" >/dev/null 2>&1; then
       echo "  ✓ MANIFEST-1: claude plugin validate --strict"
     else
       echo "  ✗ MANIFEST-1: claude plugin validate --strict failed"
@@ -194,9 +203,21 @@ for k, v in uc.items():
 mode="${1:---all}"
 overall=0
 if [[ "$mode" == "--all" ]]; then
+  # MANIFEST-1 (`claude plugin validate`) is the dominant cost and is
+  # embarrassingly parallel. Run it across all plugins up front; check_one
+  # then reads the cached pass/fail via MANIFEST1_FAIL_FILE.
+  MANIFEST1_FAIL_FILE=""
+  if command -v claude >/dev/null 2>&1; then
+    MANIFEST1_FAIL_FILE="$(mktemp)"
+    printf '%s\0' "$root/plugins"/*/ \
+      | xargs -0 -P "$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)" -I{} \
+          sh -c 'd="${1%/}"; claude plugin validate --strict "$d" >/dev/null 2>&1 || printf "%s\n" "$d"' _ {} \
+      > "$MANIFEST1_FAIL_FILE"
+  fi
   for plugin in "$root/plugins"/*/; do
     if ! check_one "${plugin%/}"; then overall=1; fi
   done
+  [[ -n "$MANIFEST1_FAIL_FILE" ]] && rm -f "$MANIFEST1_FAIL_FILE"
   # Cross-plugin: marketplace.json, every plugin.json, and
   # registry/polymath-catalog.json must agree on the plugin set and on
   # per-plugin versions. Independent of whether the Claude CLI is

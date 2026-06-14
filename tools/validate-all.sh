@@ -79,11 +79,8 @@ for plugin in "$plugins_dir"/*/; do
   fi
   check_json "$manifest" || fail=1
 
-  if command -v claude >/dev/null 2>&1; then
-    if ! claude plugin validate --strict "$plugin" 2>/dev/null; then
-      echo "  ⚠ claude plugin validate returned non-zero (continuing)"
-    fi
-  fi
+  # Per-plugin `claude plugin validate --strict` is the fatal MANIFEST-1 check
+  # owned by conformance.sh; not repeated here (its result was discarded).
 
   while IFS= read -r -d '' skill_md; do
     if ! check_frontmatter_lines "$skill_md"; then

@@ -72,7 +72,11 @@ description: $description
 
 ## Output
 
-What this skill is expected to produce. List concrete files, frontmatter, or summary fields.
+Show the exact shape the skill produces (the model imitates this):
+
+\`\`\`text
+<output skeleton — replace with the concrete files, frontmatter, or fields>
+\`\`\`
 
 ## References
 
@@ -80,3 +84,32 @@ What this skill is expected to produce. List concrete files, frontmatter, or sum
 MD
 
 echo "Scaffolded $skill_dir"
+
+# Register the skill's routing posture (SURFACE-1). Knowledge skills default to
+# a routing exemption so a fresh scaffold passes conformance; replace it with a
+# skills/<skill>/routing.yaml if the skill has a deterministic prompt signal.
+exemptions="$root/registry/routing-exemptions.json"
+surface="$plugin:$skill"
+if [[ -f "$exemptions" ]] && command -v python3 >/dev/null 2>&1; then
+  if python3 - "$exemptions" "$surface" <<'PY'; then
+import json, sys
+path, surface = sys.argv[1], sys.argv[2]
+data = json.load(open(path))
+ex = data.setdefault("exemptions", {})
+if surface in ex:
+    raise SystemExit(1)  # already present — nothing to do
+ex[surface] = ("knowledge/procedure surface routed by its description; no "
+               "deterministic prompt signal declared yet — declare routing.yaml "
+               "or keep this entry")
+data["exemptions"] = dict(sorted(ex.items()))
+open(path, "w").write(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+PY
+    echo "Registered routing exemption for $surface."
+  fi
+fi
+
+echo
+echo "Next steps:"
+echo "  1. Flesh out $skill_dir/SKILL.md (description, procedure, output shape)."
+echo "  2. Add \`$skill\` to the 'Skills:' list in plugins/$plugin/README.md (DOCS-2)."
+echo "  3. Run: tools/conformance.sh $plugin"
