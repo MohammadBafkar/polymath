@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polymath — Marketplace Atlas</title>
+<style>
+  :root {
+    --bg: #07080d;
+    --bg2: #0c0e16;
+    --panel: #11141f;
+    --panel2: #161a28;
+    --line: #232838;
+    --line2: #2e3447;
+    --txt: #e7eaf3;
+    --txt2: #9aa3bd;
+    --txt3: #6b7390;
+    --accent: #a78bfa;
+    --accent2: #60a5fa;
+    --beta: #34d399;
+    --exp: #fbbf24;
+    --shadow: 0 10px 40px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 700px at 80% -10%, #16182a 0%, var(--bg) 55%) fixed, var(--bg);
+    color: var(--txt);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  ::selection { background: rgba(167,139,250,.35); }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: rgba(8,9,15,.82);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar { max-width: 1280px; margin: 0 auto; padding: 12px 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 19px; letter-spacing: .2px; }
+  .gem { width: 26px; height: 26px; flex: none; filter: drop-shadow(0 0 10px rgba(167,139,250,.6)); }
+  .ver { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid rgba(167,139,250,.4); border-radius: 999px; padding: 2px 9px; background: rgba(167,139,250,.08); }
+  nav.tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  nav.tabs button {
+    background: none; border: 1px solid transparent; color: var(--txt2);
+    font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    padding: 7px 14px; border-radius: 9px; transition: .15s;
+  }
+  nav.tabs button:hover { color: var(--txt); background: var(--panel); }
+  nav.tabs button.on { color: #fff; background: linear-gradient(135deg, rgba(167,139,250,.28), rgba(96,165,250,.22)); border-color: var(--line2); }
+  .search { position: relative; }
+  .search input {
+    background: var(--panel); border: 1px solid var(--line2); border-radius: 9px;
+    color: var(--txt); font: inherit; font-size: 13.5px; padding: 7px 12px 7px 32px; width: 210px; transition: .15s;
+  }
+  .search input:focus { outline: none; border-color: var(--accent); width: 250px; }
+  .search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); opacity: .5; }
+
+  /* ---------- layout ---------- */
+  main { max-width: 1280px; margin: 0 auto; padding: 30px 22px 90px; }
+  .view { display: none; animation: fade .35s ease; }
+  .view.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h2.section { font-size: 14px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--txt3); margin: 38px 0 16px; font-weight: 700; }
+  h2.section:first-child { margin-top: 4px; }
+
+  /* ---------- hero ---------- */
+  .hero { text-align: center; padding: 26px 0 10px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 50px); margin: 0 0 12px; font-weight: 800; letter-spacing: -.5px;
+    background: linear-gradient(120deg, #fff 10%, #c9b6ff 50%, #8fb6ff 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { max-width: 720px; margin: 0 auto; color: var(--txt2); font-size: 16.5px; }
+  .interop { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .interop .tag { font-size: 11.5px; color: var(--txt2); border: 1px solid var(--line2); background: var(--panel); border-radius: 999px; padding: 4px 11px; }
+  .interop .lead { color: var(--txt3); align-self: center; font-size: 11.5px; }
+
+  /* ---------- stat tiles ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 30px; }
+  .stat { background: linear-gradient(160deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+  .stat::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .55; }
+  .stat .n { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+  .stat .l { color: var(--txt2); font-size: 13px; margin-top: 7px; font-weight: 500; }
+
+  /* ---------- generic card grids ---------- */
+  .grid { display: grid; gap: 14px; }
+  .cols3 { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .cols4 { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 17px; transition: .18s; }
+  .card:hover { border-color: var(--line2); transform: translateY(-2px); box-shadow: var(--shadow); }
+
+  /* lane legend */
+  .lanes { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; }
+  .lane { display: flex; align-items: center; gap: 11px; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; cursor: pointer; transition: .15s; }
+  .lane:hover { border-color: var(--line2); background: var(--panel2); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 9px currentColor; }
+  .lane .nm { font-weight: 650; font-size: 13.5px; }
+  .lane .ct { color: var(--txt3); font-size: 11.5px; margin-top: 1px; }
+
+  /* principles */
+  .princ { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 13px; }
+  .princ .card h4 { margin: 0 0 6px; font-size: 14.5px; }
+  .princ .card p { margin: 0; color: var(--txt2); font-size: 13px; }
+  .princ .ic { font-size: 20px; }
+
+  /* ---------- plugin cards ---------- */
+  .pcard { cursor: pointer; border-left: 3px solid var(--lane, var(--line2)); }
+  .pcard .top { display: flex; align-items: flex-start; gap: 9px; }
+  .pcard .nm { font-weight: 700; font-size: 15px; flex: 1; }
+  .pcard .nm small { display: block; color: var(--txt3); font-weight: 500; font-size: 11px; margin-top: 2px; }
+  .pcard .desc { color: var(--txt2); font-size: 12.8px; margin: 9px 0 11px; }
+  .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .badge.beta { color: var(--beta); background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.3); }
+  .badge.experimental { color: var(--exp); background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.28); }
+  .badge.mcp { color: #f0abfc; background: rgba(240,171,252,.1); border: 1px solid rgba(240,171,252,.3); }
+  .metrics { display: flex; gap: 14px; font-size: 12px; color: var(--txt2); border-top: 1px solid var(--line); padding-top: 10px; }
+  .metrics b { color: var(--txt); }
+  .laneTag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--txt2); }
+
+  /* ---------- modal ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 100; background: rgba(4,5,9,.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: none; align-items: flex-start; justify-content: center; padding: 5vh 18px; overflow-y: auto; }
+  .overlay.on { display: flex; animation: fade .2s; }
+  .modal { background: var(--bg2); border: 1px solid var(--line2); border-radius: 18px; max-width: 720px; width: 100%; box-shadow: var(--shadow); }
+  .modal .mh { padding: 22px 24px 16px; border-bottom: 1px solid var(--line); position: relative; }
+  .modal .mh h3 { margin: 0; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+  .modal .mh .sub { color: var(--txt2); font-size: 13.5px; margin-top: 8px; }
+  .modal .mh .chips { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; color: var(--txt2); background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+  .close { position: absolute; top: 16px; right: 18px; background: var(--panel); border: 1px solid var(--line2); color: var(--txt2); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 17px; line-height: 1; }
+  .close:hover { color: #fff; background: var(--panel2); }
+  .mb { padding: 18px 24px 26px; }
+  .mb h5 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt3); margin: 18px 0 10px; }
+  .mb h5:first-child { margin-top: 0; }
+  .skill { padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .skill:last-child { border-bottom: none; }
+  .skill .sn { font-weight: 650; font-size: 13.5px; color: var(--txt); }
+  .skill .sn code { color: var(--accent); background: rgba(167,139,250,.1); padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+  .skill .sd { color: var(--txt2); font-size: 12.5px; margin-top: 3px; }
+
+  /* ---------- workflow cards ---------- */
+  .wcard .wt { display: flex; align-items: baseline; gap: 9px; }
+  .wcard .wt h4 { margin: 0; font-size: 16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; }
+  .wcard .wt .sc { color: var(--txt3); font-size: 11.5px; margin-left: auto; }
+  .wcard .wd { color: var(--txt2); font-size: 13px; margin: 8px 0 13px; }
+  .pipe { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+  .step { font-size: 11px; border-radius: 7px; padding: 4px 8px; border: 1px solid var(--s, var(--line2)); background: var(--sb, var(--panel2)); white-space: nowrap; }
+  .step b { color: var(--txt); }
+  .step .sk { color: var(--txt2); }
+  .step.cap { border-style: dashed; }
+  .arrow { color: var(--txt3); font-size: 12px; }
+  .composes { display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 11px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--txt); background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+  .pill .pd { width: 7px; height: 7px; border-radius: 50%; }
+  .trig { margin-top: 11px; font-size: 12px; color: var(--txt3); font-style: italic; }
+
+  /* ---------- profiles ---------- */
+  .prof .pt { display: flex; align-items: baseline; gap: 9px; }
+  .prof h4 { margin: 0; font-size: 16px; }
+  .prof .key { font-family: ui-monospace, monospace; color: var(--accent); font-size: 12px; }
+  .prof .for { color: var(--txt2); font-size: 12.8px; margin: 8px 0 12px; }
+  .prof .budget { margin-top: 12px; font-size: 11.5px; color: var(--txt3); }
+  .bargd { height: 6px; background: var(--panel2); border-radius: 999px; margin-top: 5px; overflow: hidden; border: 1px solid var(--line); }
+  .barfl { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; }
+  .spine { font-size: 11px; color: var(--txt3); margin-bottom: 14px; }
+  .spine code { color: var(--accent2); }
+
+  /* ---------- galaxy ---------- */
+  .gwrap { position: relative; border: 1px solid var(--line); border-radius: 16px; background: radial-gradient(700px 500px at 50% 40%, #0e1120, var(--bg2)); overflow: hidden; }
+  #galaxySvg { display: block; width: 100%; height: 620px; cursor: grab; }
+  #galaxySvg.drag { cursor: grabbing; }
+  .gctrls { position: absolute; top: 14px; left: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .gctrls button { background: rgba(17,20,31,.85); border: 1px solid var(--line2); color: var(--txt2); font: inherit; font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 8px; cursor: pointer; }
+  .gctrls button:hover { color: #fff; border-color: var(--accent); }
+  .glegend { position: absolute; bottom: 14px; left: 14px; right: 14px; display: flex; gap: 9px 14px; flex-wrap: wrap; font-size: 11px; color: var(--txt2); pointer-events: none; }
+  .glegend span { display: inline-flex; align-items: center; gap: 5px; }
+  .gtip { position: absolute; pointer-events: none; background: rgba(8,9,15,.96); border: 1px solid var(--line2); border-radius: 9px; padding: 9px 12px; font-size: 12px; opacity: 0; transition: opacity .12s; max-width: 240px; box-shadow: var(--shadow); }
+  .gtip b { font-size: 13px; }
+  .gtip .gm { color: var(--txt2); margin-top: 3px; }
+  .ghint { color: var(--txt3); font-size: 12px; margin: 10px 2px 0; }
+  .nodeLabel { font-size: 9.5px; fill: var(--txt2); pointer-events: none; font-family: -apple-system, sans-serif; }
+  .empty { color: var(--txt3); text-align: center; padding: 50px; font-size: 14px; }
+  .filterNote { display:inline-flex; align-items:center; gap:8px; background: var(--panel2); border:1px solid var(--line2); border-radius:999px; padding:5px 13px; font-size:12.5px; color:var(--txt2); margin-bottom: 16px; }
+  .filterNote button { background:none;border:none;color:var(--accent);cursor:pointer;font:inherit;font-size:12.5px; }
+  .footer { text-align:center; color: var(--txt3); font-size: 12px; margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M12 2L22 8.5V15.5L12 22L2 15.5V8.5L12 2Z" stroke="url(#g)" stroke-width="1.6" fill="rgba(167,139,250,.12)"/><path d="M12 2V22M2 8.5L22 15.5M22 8.5L2 15.5" stroke="url(#g)" stroke-width=".7" opacity=".5"/><defs><linearGradient id="g" x1="2" y1="2" x2="22" y2="22"><stop stop-color="#c9b6ff"/><stop offset="1" stop-color="#60a5fa"/></linearGradient></defs></svg>
+      Polymath <span class="ver" id="verPill">v—</span>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" placeholder="Search plugins, skills…" autocomplete="off">
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- OVERVIEW -->
+  <section class="view on" id="v-overview">
+    <div class="hero">
+      <h1>The Polymath Atlas</h1>
+      <p id="heroDesc"></p>
+      <div class="interop" id="interop"></div>
+    </div>
+    <div class="stats" id="stats"></div>
+
+    <h2 class="section">The 12 lanes</h2>
+    <div class="lanes" id="laneLegend"></div>
+
+    <h2 class="section">How it is built</h2>
+    <div class="princ" id="principles"></div>
+  </section>
+
+  <!-- GALAXY -->
+  <section class="view" id="v-galaxy">
+    <h2 class="section">Plugin galaxy — clustered by lane, linked by shared workflows</h2>
+    <div class="gwrap">
+      <svg id="galaxySvg"></svg>
+      <div class="gctrls">
+        <button id="reheat">↻ Re-cluster</button>
+        <button id="toggleLabels">Labels: auto</button>
+      </div>
+      <div class="glegend" id="glegend"></div>
+      <div class="gtip" id="gtip"></div>
+    </div>
+    <p class="ghint">Each node is a plugin — size scales with skill count, color with lane. A line joins two plugins that co-occur in at least one workflow; thicker = more shared workflows. Drag nodes, hover to focus, click to open the plugin.</p>
+  </section>
+
+  <!-- PLUGINS -->
+  <section class="view" id="v-plugins">
+    <div id="pluginFilter"></div>
+    <div id="pluginGroups"></div>
+  </section>
+
+  <!-- WORKFLOWS -->
+  <section class="view" id="v-workflows">
+    <h2 class="section">32 workflows — end-to-end journeys that compose plugins</h2>
+    <div class="grid cols3" id="workflowGrid"></div>
+  </section>
+
+  <!-- PROFILES -->
+  <section class="view" id="v-profiles">
+    <h2 class="section">Install profiles — curated role spines</h2>
+    <div class="spine" id="spineNote"></div>
+    <div class="grid cols3" id="profileGrid"></div>
+  </section>
+
+  <div class="footer" id="footer"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+const DATA = {"meta":{"marketplace":"polymath","version":"0.7.0","description":"A public, open-source Claude Code marketplace of work-shaped plugins covering the full lifecycle of building software products.","pluginCount":40,"workflowCount":32,"skillCount":183,"commandCount":27,"agentCount":2,"connectorCount":6,"interop":["claude-code","claude-api","codex","copilot","cursor","gemini-cli","jetbrains-junie"]},"categoryOrder":["foundation","thinking","planning","product","research","decisions","engineering","architecture","qa","test-automation","security","vuln-scan","performance","platform","devops","infra","cloud","kubernetes","iac","sre","observability","incident","paging","data","ai","streaming","frontend","mobile","design","communication","writing","leadership","learning","release","vcs","tracker","chat","orchestration","authoring","other"],"plugins":{"polymath-core":{"name":"polymath-core","description":"Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.","category":"foundation","tags":["foundation","core","conventions"],"version":"0.7.0","status":"beta","skills":[{"name":"conventions","description":"Read Polymath project conventions (commit style, PR shape, plugin layout) when starting a task that touches the marketplace."},{"name":"doctor","description":"Check the Polymath environment \u2014 required and optional tools, and validate any .polymath/project.yaml \u2014 reporting PASS/WARN/FAIL and fix hints."},{"name":"glossary","description":"Define shared vocabulary for Polymath plugins (PRD, ADR, RFC, mustPass, flows-lite); use when terms need disambiguating."},{"name":"initialize-project","description":"Map a repository to .polymath/project.yaml \u2014 capability mapping and onboarding notes for Polymath-aware agents."},{"name":"project-context","description":"Read .polymath/project.yaml \u2014 language, framework, conventions, external skills, skill overrides \u2014 so a skill can adapt to this project instead of giving generic guidance."},{"name":"route","description":"Choose the right Polymath workflow, skill, connector, agent, or external catalog for a user prompt; returns JSON with confidence, evidence, and alternatives."}],"commands":[{"name":"doctor","description":"Run the doctor preflight on your Polymath environment before first init or when it misbehaves; alias for polymath-core:doctor."},{"name":"init-project","description":"Run the initialize-project skill from the CLI to bootstrap a repo's Polymath setup in one command."},{"name":"plugin-budget","description":"List current Polymath always-on listing-token cost per plugin and totals; flags overruns vs the \u2264400/plugin and \u22641,500 MVP targets."},{"name":"route","description":"Run a Router Report before work starts; command entry point for the selector, not the canonical routing procedure."}],"agents":[],"hasMcp":false},"polymath-cloud":{"name":"polymath-cloud","description":"Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.","category":"infra","tags":["infra","cloud","aws","gcp","azure","terraform","iac","patterns"],"version":"0.7.0","status":"experimental","skills":[{"name":"cloud-cost-review","description":"Review cloud spend \u2014 rightsizing/waste, cost budgets + anomaly alerts, unit economics (cost per request/tenant), reserved coverage. Cloud cost, not internal token budgets (plugin-budget)."},{"name":"design-aws-pattern","description":"Pick the right AWS primitive for a workload \u2014 compute (Lambda/ECS/EKS/EC2), storage (S3/EFS/FSx), database (RDS/Aurora/DynamoDB) with cost + ops + scale tradeoffs."},{"name":"design-azure-pattern","description":"Pick the right Azure primitive \u2014 compute (Functions / Container Apps / App Service / AKS), database (Azure SQL / Cosmos DB / Postgres Flex), storage (Blob / Files / Disk)."},{"name":"design-gcp-pattern","description":"Pick the right GCP primitive \u2014 compute (Cloud Run / GKE / Functions / GCE), database (Cloud SQL / Spanner / Firestore / Bigtable), storage (GCS) with cost + ops + scale tradeoffs."},{"name":"design-stack-composition","description":"Design Terraform stack composition \u2014 module boundaries, state layout, workspace strategy, remote-state plumbing, blast radius per apply."},{"name":"plan-review","description":"Read a terraform plan (binary or JSON) and surface destructive actions, drift, and unsafe diffs before apply."}],"commands":[{"name":"design-aws","description":"Pick an AWS pattern for a workload \u2014 compute, storage, database, networking, cost, ops, flip conditions."},{"name":"design-azure","description":"Pick an Azure pattern for a workload \u2014 compute, database, storage, messaging, networking, cost, ops."},{"name":"design-gcp","description":"Pick a GCP pattern for a workload \u2014 compute, database, storage, messaging, networking, cost, ops, flip conditions."},{"name":"design-terraform-stack","description":"Design Terraform module and state layout up front; command entry point for the design-terraform-stack skill."}],"agents":[],"hasMcp":false},"polymath-product":{"name":"polymath-product","description":"Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.","category":"product","tags":["product","prd","acceptance-criteria"],"version":"0.7.0","status":"beta","skills":[{"name":"acceptance-criteria","description":"Draft or refine Given/When/Then acceptance criteria for a PRD; each criterion is independently testable and maps to a test case."},{"name":"decompose-epic","description":"Decompose a PRD or epic into vertically-sliced user stories using a Jeff Patton-style user story map; produces docs/maps/<slug>.md. Story slices, not an engineering WBS (work-breakdown)."},{"name":"groom-backlog","description":"Review backlog items into ready \u2014 clarify stories, add acceptance criteria + estimate, split oversized items, flag blockers; not ranking (prioritize) or epic story-mapping (decompose-epic)."},{"name":"prd","description":"Draft a PRD from a problem statement plus user/context inputs; populates docs/prds/<slug>.md from the canonical PRD template."},{"name":"product-strategy","description":"Define product strategy and GTM \u2014 vision, ICP/segmentation, positioning, pricing/packaging, moat, launch. The market/strategy layer, not a feature PRD (prd) or exec brief (exec-brief)."},{"name":"roadmap","description":"Map a Now/Next/Later roadmap grouped by outcome \u2014 confidence, dependencies, explicit non-commitments; a ranked set, not the ranking (prioritize) or a plan (write-plan)."}],"commands":[],"agents":[],"hasMcp":false},"polymath-engineering":{"name":"polymath-engineering","description":"Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation, tech-debt management.","category":"engineering","tags":["engineering","tdd","code-review","tech-debt"],"version":"0.7.0","status":"beta","skills":[{"name":"code-review","description":"Review a code change for correctness, simplification, and missing tests; produces a structured review summary keyed to the diff. Reviews a diff; not test-gap hunting (coverage-gap)."},{"name":"feature-dev","description":"Build the smallest safe change satisfying a PRD/acceptance criteria via a TDD loop; produces a code diff plus tests."},{"name":"read-code","description":"Orient quickly in an unfamiliar codebase area; produce a one-page map of structure, entry points, and the most likely place a change should land."},{"name":"tech-debt-management","description":"Triage technical debt \u2014 classify (deliberate/accidental), quantify principal vs interest, and sequence paydown against feature work with a payback rationale."},{"name":"verify-change","description":"Run repository-appropriate verification (build, lint, type-check, tests) on the changed files; summarize pass/fail per category."}],"commands":[],"agents":[],"hasMcp":false},"polymath-release":{"name":"polymath-release","description":"Release craft: Conventional Commits, PR descriptions, CHANGELOG, release notes.","category":"release","tags":["release","changelog","conventional-commits"],"version":"0.7.0","status":"experimental","skills":[{"name":"changelog","description":"Write a user-facing CHANGELOG entry under [Unreleased] in Keep-a-Changelog format, mapped from Conventional Commits."},{"name":"commit","description":"Draft a Conventional Commits message for the current diff; never commits without showing the user the staged changes and the message first."},{"name":"deprecation-plan","description":"Plan a deprecation \u2014 two dates (warn + remove), telemetry-gated removal, comms cadence, exception path, code/header markers. The lifecycle plan, not the customer notice (write-sunset-notice)."},{"name":"migration-guide","description":"Write a consumer migration guide for a breaking change \u2014 before/after examples, ordered steps, gotchas, rollback. Consumer upgrade steps, not the deprecation timeline (deprecation-plan)."},{"name":"pr","description":"Draft a PR description for the current branch following the canonical PR template; saves the draft to docs/pr/<slug>.md without opening a real PR."},{"name":"release-notes","description":"Draft customer-facing release notes from CHANGELOG [Unreleased] entries; emphasizes user benefit over implementation detail."},{"name":"safe-rollout","description":"Design a safe progressive rollout \u2014 flags, canary/blue-green, ring stages, SLO health gates, automated rollback, kill switch. Rollout mechanics, not env promotion or A/B experiments."}],"commands":[{"name":"changelog","description":"Write one [Unreleased] CHANGELOG line after a change lands."},{"name":"commit","description":"Review the staged diff and craft a Conventional Commits message before anything lands."},{"name":"pr","description":"Draft a PR body to docs/pr/<slug>.md after committing; opens no real PR."},{"name":"release-notes","description":"Draft release notes to docs/release-notes/<version>.md when cutting a version."}],"agents":[],"hasMcp":false},"polymath-flows":{"name":"polymath-flows","description":"flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.","category":"orchestration","tags":["orchestration","workflow","shipFeature","reviewPR"],"version":"0.7.0","status":"beta","skills":[{"name":"list-workflows","description":"List active, paused, and completed flows-lite workflow runs from the local plugin data directory."},{"name":"resume-workflow","description":"Resume a paused flows-lite workflow run from the last completed step using bin/polymath-flow resume."},{"name":"run-workflow","description":"Run a flows-lite workflow end-to-end; the skill drives the loop while bin/polymath-flow owns YAML validation, state, and mustPass checks."}],"commands":[],"agents":[],"hasMcp":false},"polymath-pipeline":{"name":"polymath-pipeline","description":"Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.","category":"foundation","tags":["routing","pipeline","classify","enforce"],"version":"0.7.0","status":"experimental","skills":[{"name":"feedback-capture","description":"Capture one localization-feedback item (correction, gap, friction) tied to a named Polymath surface \u2014 180d TTL, evaluated later via feedback-digest; not a general note-taker."},{"name":"feedback-digest","description":"Score captured localization feedback (valid/constructive verdict with evidence) and apply fixes \u2014 project-local edits behind one confirm; catalog changes only as proposed patch files."},{"name":"intake","description":"Classify an ambiguous or multi-step request before work starts \u2014 score 4 confidence dimensions, ask only what the repo can't answer, stop at plateau, record the route via pipeline mark."}],"commands":[],"agents":[],"hasMcp":false},"polymath-thinking":{"name":"polymath-thinking","description":"Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.","category":"thinking","tags":["thinking","brainstorm","5-whys","pre-mortem","red-team"],"version":"0.7.0","status":"beta","skills":[{"name":"5-whys","description":"Investigate an incident or bug via the 5-whys technique \u2014 iterative root-cause drill-down; stop early if a system cause emerges before five iterations."},{"name":"brainstorm","description":"Generate divergent options (\u226510) for a problem before converging \u2014 quantity beats quality; not convergent down-selection or ranking (prioritize)."},{"name":"deliberate","description":"Run an iterative observe-frame-options-tradeoffs-risks-revise loop for a plan, design, doc, idea, or implementation; composes brainstorm, red-team, and pre-mortem."},{"name":"first-principles","description":"Decompose a problem to first principles \u2014 strip to fundamentals, drop inherited assumptions, rebuild from bedrock; not option generation (brainstorm) or framing (problem-framing)."},{"name":"pre-mortem","description":"Frame the project as already failed and list the most plausible reasons why, so they can be mitigated before launch; not adversarial critique (red-team)."},{"name":"problem-framing","description":"Frame the problem before any solution \u2014 symptom vs root need, who/what/why, constraints, premature-solution bias. A problem statement, not options (brainstorm) or root-cause (5-whys)."},{"name":"red-team","description":"Critique a plan, design, or PRD adversarially \u2014 objections with the strongest case the proposer hasn't refuted; not pre-launch failures (pre-mortem)."}],"commands":[{"name":"deliberate","description":"Run a deliberation on a hard or ambiguous call before you commit; alias for polymath-thinking:deliberate."}],"agents":[{"name":"architecture-critic","description":"Critique an ADR or design in a forked context; hunts invariants, failure modes, and cheaper alternatives the lead may miss."}],"hasMcp":false},"polymath-planning":{"name":"polymath-planning","description":"Planning craft: write-plan, work-breakdown, three-point estimate.","category":"planning","tags":["planning","wbs","estimate"],"version":"0.7.0","status":"beta","skills":[{"name":"estimate","description":"Estimate a work breakdown with a lightweight three-point method (optimistic, expected, pessimistic); surfaces uncertainty rather than a single date."},{"name":"forecast","description":"Model a delivery date/scope as a probability range \u2014 reference-class, throughput/Monte-Carlo, cone of uncertainty; range forecasting from data, not per-item estimation (estimate)."},{"name":"prioritize","description":"Prioritize a backlog or feature set \u2014 RICE, WSJF/cost-of-delay, MoSCoW, Kano, value-vs-effort 2x2, Now/Next/Later; exposes value/effort/confidence inputs, never an opaque score."},{"name":"work-breakdown","description":"Decompose a goal or plan into independently completable steps; each step produces an observable artifact. Engineering task WBS; not story slicing (decompose-epic) or the plan doc (write-plan)."},{"name":"write-plan","description":"Write a project / change plan to docs/plans/<slug>.md from the canonical Plan template; What, Why, Approach, Work breakdown, Risks, Verification, Out of scope. The full plan doc, not a standalone WBS."}],"commands":[],"agents":[],"hasMcp":false},"polymath-writing":{"name":"polymath-writing","description":"Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.","category":"writing","tags":["writing","adr","rfc","runbook","c4"],"version":"0.7.0","status":"beta","skills":[{"name":"adr","description":"Write an Architecture Decision Record (Michael Nygard format) to docs/adrs/NNNN-<slug>.md; frontmatter validated by the ADR artifact schema. Records a made decision, not a proposal to debate (rfc)."},{"name":"architecture-doc","description":"Write a C4-style architecture document; System Context + Containers (+ Components when interesting) with mermaid diagrams. Describes structure, not a decision (adr) or proposal (rfc)."},{"name":"architecture-review-facilitation","description":"Run an architecture review as a process \u2014 entry criteria, reviewer checklist, decision log, and follow-up actions \u2014 pairing the design artifact with a red-team pass."},{"name":"editorial-pass","description":"Review and tighten prose in a Markdown artifact for a target tone (terse, formal, friendly) without dropping information; preserve quotations and load-bearing constraints."},{"name":"rfc","description":"Draft a lightweight design RFC to docs/rfcs/<slug>.md; Summary, Motivation, Detailed design, Drawbacks, Alternatives, Unresolved questions. A proposal to debate, not a recorded decision (adr)."},{"name":"runbook","description":"Write or refresh an operational runbook for an alert/symptom; structured as TL;DR + Pre-checks + Steps + Verification + Rollback + Escalation."}],"commands":[],"agents":[],"hasMcp":false},"polymath-qa":{"name":"polymath-qa","description":"Quality craft: test strategy, coverage-gap analysis, unit-test authoring.","category":"quality","tags":["qa","tests","coverage"],"version":"0.7.0","status":"experimental","skills":[{"name":"assertion-quality","description":"Review test assertions \u2014 assert behavior not implementation; kill snapshot/tautological checks; one reason-to-fail per test; improves existing tests, not authoring them (unit-tests)."},{"name":"coverage-gap","description":"Review a diff for missing test coverage; pairs every changed behavior with an existing test or a flagged gap plus a recommended layer; finds gaps, not authoring (unit-tests)."},{"name":"integration-contract","description":"Design integration/contract tests for a service boundary \u2014 consumer-driven contracts, stub-vs-hit, fixtures, failure modes. Boundary tests, not unit tests (unit-tests) or the plan (test-strategy)."},{"name":"test-smell","description":"Detect test smells/anti-patterns \u2014 over-mocking, fragile assertions, slow setup, flaky timing; flag each with its layer and a refactor. Reviews existing tests, not authoring them (unit-tests)."},{"name":"test-strategy","description":"Design a layered test strategy (pyramid) for a feature or repo; recommends unit/integration/e2e split and the cheapest set that covers the acceptance criteria. Plans layers; doesn't write tests."},{"name":"unit-tests","description":"Author unit tests using the repo's existing framework; one test per behavior, no mocking of internal collaborators. Writes tests; not gap analysis (coverage-gap) or strategy (test-strategy)."}],"commands":[],"agents":[],"hasMcp":false},"polymath-security":{"name":"polymath-security","description":"Security craft: STRIDE, OWASP review, supply-chain, auth design, compliance mapping, DevSecOps pipeline, crypto review, LLM-security audit.","category":"security","tags":["security","stride","owasp","auth","compliance","devsecops"],"version":"0.7.0","status":"beta","skills":[{"name":"auth-design","description":"Design authentication/authorization \u2014 OAuth2/OIDC flow choice, JWT vs opaque/session tokens, RBAC vs ABAC, SSO, token lifetime/refresh/revocation."},{"name":"compliance-mapping","description":"Map a compliance framework (SOC 2 / GDPR / ISO 27001 / HIPAA) to concrete technical controls and the evidence/artifacts each control needs for audit."},{"name":"crypto-review","description":"Review a cryptography choice \u2014 encryption at rest/in transit, key management + rotation, algorithm/mode selection, and common foot-guns (IV reuse, ECB, home-rolled crypto)."},{"name":"devsecops-pipeline","description":"Design security gates into CI/CD \u2014 SAST, DAST, SCA/dependency, secret, and IaC scanning \u2014 with severity thresholds, a triage flow, and noise control."},{"name":"llm-security-review","description":"Audit an LLM system for security \u2014 OWASP LLM Top 10, direct/indirect prompt injection, sensitive-data leakage, insecure output handling, RAG and agent-action risks."},{"name":"owasp-review","description":"Review a code diff against the current OWASP Top 10; report findings keyed to file:line with severity (high/medium/low) and a fix recommendation."},{"name":"stride-threat-model","description":"Model a system with STRIDE; writes docs/threat-models/<slug>.md with frontmatter validated by the ThreatModel artifact schema."},{"name":"supply-chain-review","description":"Review supply-chain integrity \u2014 SBOM, dependency provenance/lockfiles, license audit, signing/SLSA attestation, build trust. Supply-chain posture, not runtime vuln triage (snyk:triage-vulns)."}],"commands":[],"agents":[],"hasMcp":false},"polymath-frontend":{"name":"polymath-frontend","description":"Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.","category":"engineering","tags":["frontend","web-vitals","bundle"],"version":"0.7.0","status":"experimental","skills":[{"name":"bundle-analyze","description":"Audit a JavaScript bundle for the biggest bytes and propose the cheapest cut; uses the bundler's report rather than guessing."},{"name":"component-design","description":"Design a UI component's contract \u2014 props, state, side effects, a11y, and the smallest set of tests that locks the contract."},{"name":"i18n-audit","description":"Audit software for i18n readiness \u2014 hardcoded strings, locale date/number/currency formatting, ICU plurals, pseudolocalization, RTL/bidi, fallback chain. Internationalization, not UX copywriting."},{"name":"web-vitals-budget","description":"Set Core Web Vitals budgets (LCP, INP, CLS) per route and propose the cheapest fix path when one is over budget. Web routes only; not mobile (mobile-perf) or backend (perf-budget)."}],"commands":[],"agents":[],"hasMcp":false},"polymath-backend":{"name":"polymath-backend","description":"Backend craft: REST API design, API versioning strategy, relational schema design, safe online migrations.","category":"engineering","tags":["backend","api","rest","versioning","migrations"],"version":"0.7.0","status":"experimental","skills":[{"name":"api-design-rest","description":"Design a REST endpoint or resource \u2014 URL, method, status codes, request/response shape, errors, idempotency, versioning."},{"name":"api-versioning","description":"Plan an API versioning strategy \u2014 URL vs header vs media-type versioning, semantic rules, backward-compatible change classification, consumer-driven contracts, deprecation path."},{"name":"audit-pg-config","description":"Audit Postgres server config \u2014 shared_buffers, work_mem, max_connections vs pgbouncer pool, autovacuum tuning, WAL retention."},{"name":"db-schema","description":"Design or review a relational schema \u2014 tables, columns, types, indexes, constraints, naming, soft-delete and audit decisions."},{"name":"migration-plan","description":"Plan a safe online database migration in expand-migrate-contract phases; outputs the ordered steps and the rollback for each."},{"name":"review-migration","description":"Review a Postgres migration for lock surface, online/offline safety, backfill strategy \u2014 flags ACCESS EXCLUSIVE locks and unsafe defaults on large tables."}],"commands":[{"name":"audit-config","description":"Audit Postgres server config \u2014 memory, connections, WAL, autovacuum, logging."},{"name":"review-migration","description":"Review a pending DB migration before merging; command entry point for the review-migration skill."}],"agents":[],"hasMcp":false},"polymath-architecture":{"name":"polymath-architecture","description":"Architecture design craft: DDD context maps + aggregates, event-driven/integration design, resilience, service decomposition, distributed consistency.","category":"architecture","tags":["architecture","ddd","event-driven","microservices","resilience","distributed-systems"],"version":"0.7.0","status":"experimental","skills":[{"name":"aggregate-design","description":"Design DDD tactical aggregates for a bounded context \u2014 aggregate roots, entities vs value objects, invariants, transaction/consistency boundaries, reference-by-id."},{"name":"bounded-context-map","description":"Map a domain into DDD bounded contexts + a context map (customer-supplier, conformist, anti-corruption layer, shared kernel) with per-context ubiquitous language."},{"name":"design-patterns-apply","description":"Review a design sketch against SOLID, GoF, and architectural patterns; flag anti-patterns at design time; not line-level code review (code-review)."},{"name":"distributed-consistency","description":"Choose a consistency model for a cross-node operation \u2014 strong/eventual/causal, CAP/PACELC trade-off, idempotency + dedup, and when consensus (Raft/quorum) is warranted vs simpler."},{"name":"event-driven-design","description":"Design an event-driven flow \u2014 event catalog, choreography vs orchestration, saga + compensation, the outbox pattern for dual-writes, idempotent consumers, and CQRS read models."},{"name":"integration-design","description":"Design integration between two services \u2014 sync vs async, API gateway / BFF placement, anti-corruption layer, contract + versioning, ports-and-adapters, and backpressure handling."},{"name":"resilience-design","description":"Design resilience for a dependency call path \u2014 timeout, retry with backoff+jitter, circuit breaker, bulkhead, fallback, load-shedding \u2014 with a failure-mode table."},{"name":"service-decomposition","description":"Map service boundaries in a monolith or split proposal \u2014 seam analysis by subdomain, a strangler-fig sequence, what stays, and a characterization-test plan."}],"commands":[],"agents":[],"hasMcp":false},"polymath-data":{"name":"polymath-data","description":"Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.","category":"data","tags":["sql","metrics","analytics"],"version":"0.7.0","status":"experimental","skills":[{"name":"metrics-tree","description":"Decompose a North Star metric into a tree of input metrics so each team can see the lever they own; output is a tree, not a dashboard."},{"name":"run-experiment","description":"Plan an A/B (or A/B/n) experiment \u2014 hypothesis, primary + guardrail metrics, MDE + sample size + duration, randomization, stop conditions."},{"name":"sql-optimize","description":"Read EXPLAIN ANALYZE output and propose targeted optimizations \u2014 index, predicate, join order, or query shape changes."},{"name":"sql-write","description":"Write a SQL query that answers a specific question; parameterized, dialect-aware, readable, with the assumed schema documented inline."}],"commands":[],"agents":[],"hasMcp":false},"polymath-streaming":{"name":"polymath-streaming","description":"Data & streaming engineering: streaming topology + delivery semantics, ETL/ELT pipelines, dimensional/lakehouse modeling, stream processing.","category":"data","tags":["streaming","kafka","data-engineering","etl","pipeline"],"version":"0.7.0","status":"experimental","skills":[{"name":"data-modeling","description":"Model analytical data \u2014 dimensional (star/snowflake) vs normalized vs lakehouse medallion layers, grain, partitioning, slowly-changing dimensions, and schema evolution."},{"name":"data-pipeline","description":"Design a data pipeline \u2014 ETL vs ELT, batch vs streaming, orchestration/DAG, idempotent backfills, schema handling, data-quality checks, and lineage."},{"name":"stream-processing","description":"Design stream processing \u2014 windowing (tumbling/sliding/session), watermarks for late data, stateful operators, exactly-once, stream-stream/table joins, and CEP."},{"name":"streaming-design","description":"Design a streaming topology (Kafka/Pulsar/Kinesis) \u2014 topics, partitioning key, delivery semantics, consumer groups, retention/compaction, ordering, and backpressure."}],"commands":[],"agents":[],"hasMcp":false},"polymath-ai":{"name":"polymath-ai","description":"AI craft: prompt engineering, RAG, eval design, agent design, LLM guardrails, cost/latency tuning.","category":"ai","tags":["ai","llm","rag","eval","agents","guardrails"],"version":"0.7.0","status":"experimental","skills":[{"name":"agent-design","description":"Design an LLM agent \u2014 architecture (ReAct, plan-execute, reflexion), tool/function-calling contract, memory, multi-agent orchestration, and the stop/budget conditions."},{"name":"eval-plan","description":"Design an evaluation for an LLM feature \u2014 task type, dataset shape, automated vs human rubric, regression set, decision threshold."},{"name":"llm-cost-latency","description":"Cut LLM cost and latency \u2014 model routing/cascade, prompt caching, batching, streaming, context trimming, output-token control, and a per-request cost/latency budget."},{"name":"llm-guardrails","description":"Design guardrails for an LLM feature \u2014 input validation, prompt-injection defenses, output filtering/schema validation, allow-deny policy, and human-in-the-loop gates."},{"name":"prompt-engineer","description":"Author or improve an LLM prompt \u2014 clarify task, constrain output shape, place worked examples, bound calibration; vendor-agnostic."},{"name":"rag-design","description":"Design a retrieval-augmented generation pipeline \u2014 chunking, embeddings, retriever, reranker, prompt assembly \u2014 with the right cuts for the use case."}],"commands":[],"agents":[],"hasMcp":false},"polymath-platform":{"name":"polymath-platform","description":"Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.","category":"platform","tags":["platform","devex","dora"],"version":"0.7.0","status":"experimental","skills":[{"name":"devex-metrics","description":"Define DORA + SPACE metrics for the team \u2014 what each measures, how to collect it, and the threshold that classifies elite/high/medium/low performance."},{"name":"golden-path","description":"Design a golden path / paved road for a team \u2014 the supported way to build, deploy, and operate one kind of service, with off-ramps documented."},{"name":"production-readiness-review","description":"Score a service's launch readiness across reliability, security, observability, and operability into a go / no-go / conditional-go verdict with owned remediation items."},{"name":"service-catalog-entry","description":"Author a service-catalog entry (Backstage/Cortex-shaped) \u2014 owner, tier, runbooks, dashboards, dependencies; populates catalog-info.yaml."}],"commands":[],"agents":[],"hasMcp":false},"polymath-devops":{"name":"polymath-devops","description":"DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.","category":"devops","tags":["devops","docker","ci"],"version":"0.7.0","status":"experimental","skills":[{"name":"audit-compose","description":"Audit docker-compose.yaml \u2014 image pinning, named volumes, networks, secret injection, depends_on health-conditioning."},{"name":"audit-dockerfile","description":"Audit a Dockerfile for base-image hygiene, layer order, multi-stage discipline, secret leakage, and missing healthcheck/USER directives."},{"name":"ci-pipeline-github","description":"Author a GitHub Actions workflow \u2014 lint/test/build/deploy with caching, concurrency control, OIDC for cloud auth, minimal permissions."},{"name":"dockerize","description":"Write a multi-stage Dockerfile \u2014 distroless or minimal base, build/runtime split, deterministic layer order, non-root user, no secrets baked in."},{"name":"env-promotion","description":"Design env-promotion (dev \u2192 staging \u2192 prod) \u2014 one artifact promoted, env-specific config injected, gates between stages, rollback path."}],"commands":[{"name":"audit-compose","description":"Audit a Docker Compose file before you ship it; command entry point for the audit-compose skill."},{"name":"audit-dockerfile","description":"Audit a Dockerfile for base-image, layer order, USER, healthcheck, secrets."}],"agents":[],"hasMcp":false},"polymath-kubernetes":{"name":"polymath-kubernetes","description":"Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.","category":"infra","tags":["kubernetes","k8s","rbac","pss"],"version":"0.7.0","status":"experimental","skills":[{"name":"audit-rbac-grants","description":"Audit RBAC roles and bindings \u2014 find overbroad verbs (*), cluster-wide grants that should be namespaced, stale ServiceAccounts, anonymous access."},{"name":"propose-pod-security-standards","description":"Propose Kubernetes Pod Security Standards (privileged/baseline/restricted) per namespace; identify violating workloads and remediations."},{"name":"write-manifest","description":"Write a Kubernetes Deployment + Service + PDB manifest with safe defaults \u2014 resource requests/limits, probes, security context, topology spread."}],"commands":[],"agents":[],"hasMcp":false},"polymath-iac":{"name":"polymath-iac","description":"Infrastructure-as-Code authoring: reusable Terraform modules, state/backends/drift, policy-as-code guardrails (OPA/Sentinel/Checkov).","category":"infra","tags":["iac","terraform","state","policy-as-code","opa"],"version":"0.7.0","status":"experimental","skills":[{"name":"policy-as-code","description":"Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/tfsec) \u2014 enforce tagging, security, and cost rules in CI/plan with severity gates and exemptions."},{"name":"terraform-module","description":"Author a reusable Terraform module \u2014 input variables with validation, typed outputs, sane defaults, versioning, provider constraints, and composition boundaries."},{"name":"terraform-state","description":"Design Terraform state \u2014 remote backend, locking, state isolation/segmentation, drift detection, and safe import/move/rm operations without destroying live infra."}],"commands":[],"agents":[],"hasMcp":false},"polymath-sre":{"name":"polymath-sre","description":"SRE craft: SLO design, error-budget policy, chaos experiments, capacity planning + demand forecasting, on-call program design.","category":"sre","tags":["sre","slo","chaos","capacity","on-call"],"version":"0.7.0","status":"beta","skills":[{"name":"capacity-plan","description":"Plan forward capacity for a service or resource \u2014 current utilization, a growth model, headroom, scaling triggers, and cost; not short-term demand forecasting (demand-forecast)."},{"name":"chaos-experiment","description":"Design a chaos experiment \u2014 hypothesis, blast radius, abort criteria, observation, rollback; small-radius first."},{"name":"demand-forecast","description":"Model capacity demand \u2014 growth (linear/compound/seasonal), translate to resource needs + headroom, and flag the lead time before a saturation breach."},{"name":"error-budget-policy","description":"Author an error-budget policy \u2014 what happens when budget is healthy, eroding, or exhausted; named consequences not vibes."},{"name":"oncall-design","description":"Design an on-call program \u2014 rotation + escalation, alert quality/actionability, runbook coverage, toil budget, handoff, and the operational-review loop."},{"name":"slo-design","description":"Design an SLO \u2014 pick the right SLI per critical user journey, set the threshold by the 28-day error-budget arithmetic, document the measurement."}],"commands":[],"agents":[],"hasMcp":false},"polymath-observability":{"name":"polymath-observability","description":"Observability concept plugin: RED/USE + logging + tracing design AND Datadog/Grafana/Honeycomb/Elastic/Sentry query integration.","category":"observability","tags":["observability","tracing","metrics","otel"],"version":"0.7.0","status":"experimental","skills":[{"name":"author-monitor","description":"Author a Datadog monitor \u2014 query, threshold, evaluation window, no-data behavior, notification routing; pair with polymath-sre:slo-design for SLO burn-rate monitors."},{"name":"dashboard-snapshot","description":"Capture a Grafana dashboard snapshot for incident timelines + postmortem evidence \u2014 public-snapshot URL, time-range pinned, variables resolved."},{"name":"log-search","description":"Run a typed, time-bounded log search against Elasticsearch \u2014 refuses unbounded scans, aggregates by trace id / status / route, returns a short evidence packet."},{"name":"logging-strategy","description":"Define a service's logging strategy \u2014 structured JSON, level discipline, redaction, sampling for noisy paths, cost-aware retention."},{"name":"metrics-design","description":"Design service metrics using RED (services) and USE (resources) \u2014 name, type, labels, cardinality budget; the smallest set that supports the SLO."},{"name":"query-during-incident","description":"Run the right Datadog queries during an incident to narrow cause \u2014 error rates, latency percentiles, deploys, recent changes \u2014 and surface them concisely."},{"name":"trace-investigate","description":"Investigate a Honeycomb trace by trace.id \u2014 surface the offending span, its dependency chain, error context, and a candidate root-cause hypothesis."},{"name":"tracing-strategy-otel","description":"Design an OpenTelemetry tracing strategy \u2014 sampling, attribute discipline, span hygiene, context propagation, baggage, cost-aware exporter config."},{"name":"triage-error","description":"Triage a Sentry issue \u2014 group context, frequency trend, recent-deploy correlation, blast radius, suggested next action (fix / ignore / re-prioritize)."}],"commands":[],"agents":[],"hasMcp":true},"polymath-incident":{"name":"polymath-incident","description":"Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.","category":"incident","tags":["incident","postmortem","comms"],"version":"0.7.0","status":"beta","skills":[{"name":"comms-update","description":"Draft an incident communication update \u2014 plain language, status (investigating/identified/monitoring/resolved), impact, next-update ETA."},{"name":"incident-triage","description":"Triage an inbound alert or report \u2014 classify severity, name the IC, open comms, and decide whether to mitigate or investigate first."},{"name":"postmortem-blameless","description":"Write a blameless postmortem to docs/postmortems/<incident-id>.md; frontmatter validated by the Postmortem artifact schema."}],"commands":[{"name":"incident-start","description":"Triage an incident \u2014 assess severity, name IC/operator/comms/scribe, open comms; alias for polymath-incident:incident-triage."},{"name":"postmortem","description":"Draft a blameless postmortem from incident notes; alias for polymath-incident:postmortem-blameless."}],"agents":[],"hasMcp":false},"polymath-vcs":{"name":"polymath-vcs","description":"Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).","category":"connector","tags":["connector","github","mcp"],"version":"0.7.0","status":"experimental","skills":[{"name":"diagnose-ci-failure","description":"Diagnose a failed GitHub Actions run \u2014 fetch logs via MCP, identify the failing step, classify (flake / real / config), propose next action."},{"name":"open-pr","description":"Open a GitHub PR via the github MCP server \u2014 push current branch, draft from polymath-release:pr template, set base, add reviewers, never force-push."},{"name":"triage-issue","description":"Triage an inbound GitHub issue \u2014 label, severity, area, ask for missing repro details if needed, route to the right team. GitHub issues only \u2014 not other trackers."}],"commands":[],"agents":[],"hasMcp":true},"polymath-paging":{"name":"polymath-paging","description":"On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).","category":"connector","tags":["connector","pagerduty","incident"],"version":"0.7.0","status":"experimental","skills":[{"name":"page-context","description":"Fetch the full context for an active PagerDuty incident \u2014 log entries, oncall, related services, recent deploys \u2014 before responders join."}],"commands":[],"agents":[],"hasMcp":true},"polymath-vuln-scan":{"name":"polymath-vuln-scan","description":"Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).","category":"connector","tags":["connector","snyk","security"],"version":"0.7.0","status":"experimental","skills":[{"name":"triage-vulns","description":"Triage Snyk findings \u2014 classify exploitable / reachable / dev-only, propose upgrade or accept-with-justification, never auto-ignore."}],"commands":[],"agents":[],"hasMcp":true},"polymath-author":{"name":"polymath-author","description":"Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.","category":"author","tags":["author","governance","conformance"],"version":"0.7.0","status":"beta","skills":[{"name":"scaffold-component","description":"Generate a component/service/module in the CURRENT repo per its conventions \u2014 native generator first (tool-spec handoff), canonical infra bodies from owning skills, no freehand boilerplate."},{"name":"skill-author-critic","description":"Review a SKILL.md against the style guide \u2014 frontmatter, procedure, output, anti-patterns; verdict ACCEPT/REVISE/REWRITE."},{"name":"token-budget-report","description":"Check listing-token cost per plugin via claude plugin details; flag over-cap plugins and the heaviest descriptions."},{"name":"validate-plugin","description":"Run every Polymath gate against a plugin \u2014 claude plugin validate, lint-skills, token-budget, workflow schema."}],"commands":[{"name":"new-command","description":"Generate a thin /slash-command alias file inside an existing plugin via new-command.sh; not a capability or workflow."},{"name":"new-connector","description":"Generate an integration (MCP) plugin named by capability (polymath-<concept>) with .mcp.json + userConfig via new-connector.sh; not a generic plugin (new-plugin)."},{"name":"new-pack","description":"Generate a defaults pack (standalone marketplace + conventions plugin + apply-defaults copy-in) for an org/team/project scope via new-pack.sh; not a generic plugin (new-plugin)."},{"name":"new-plugin","description":"Generate a new top-level Polymath plugin (plugin.json, README, CHANGELOG) via new-plugin.sh; not for adding a skill or command to an existing plugin."},{"name":"new-skill","description":"Generate the SKILL.md and directories for a new skill inside an existing plugin via new-skill.sh; not a whole plugin."},{"name":"new-workflow","description":"Generate a new flows-lite workflow via the bundled new-workflow.sh; not a plugin or skill."}],"agents":[],"hasMcp":false},"polymath-decisions":{"name":"polymath-decisions","description":"Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.","category":"decisions","tags":["decisions","daci","tradeoff","cynefin"],"version":"0.7.0","status":"experimental","skills":[{"name":"cynefin-frame","description":"Classify a decision context \u2014 Clear / Complicated / Complex / Chaotic \u2014 and pick the response that fits the domain instead of forcing one shape on all problems."},{"name":"daci","description":"Run a DACI decision (Driver, Approver, Contributors, Informed) for a non-trivial decision; assigns one Approver, names the deadline."},{"name":"evidence-ledger","description":"Frame a decision's evidence \u2014 separate facts, assumptions, and unknowns; per unknown name confidence and what would resolve it; not a full decision record (daci) or tradeoff scoring (tradeoff-matrix)."},{"name":"tradeoff-matrix","description":"Score options against weighted criteria; surfaces where the numeric ranking disagrees with the gut call and names the tie-breaker."}],"commands":[],"agents":[],"hasMcp":false},"polymath-research":{"name":"polymath-research","description":"Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.","category":"research","tags":["research","interview","persona","journey"],"version":"0.7.0","status":"experimental","skills":[{"name":"customer-journey","description":"Map one persona's path through one JTBD \u2014 stages, what they're doing/thinking/feeling, touchpoints, pain; mark evidence vs assumption."},{"name":"interview-guide","description":"Write a Mom-Test-shaped interview guide for one research question; past behavior over hypothetical, specifics over generalities."},{"name":"persona","description":"Author a persona grounded in \u2265 5 real interviews; verbatim quotes, named anti-persona, no composite stock personas."}],"commands":[],"agents":[{"name":"research-scout","description":"Surface primary-source evidence for a product or technical claim in a forked context; separates known facts, unknowns, and tests."}],"hasMcp":false},"polymath-design":{"name":"polymath-design","description":"Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.","category":"design","tags":["design","a11y","wcag","ui"],"version":"0.7.0","status":"experimental","skills":[{"name":"a11y-audit","description":"Audit a UI against WCAG 2.2 AA \u2014 perceivable, operable, understandable, robust; cite SC numbers + element selectors per finding."},{"name":"design-system-conformance","description":"Check a UI surface against the project's design system \u2014 tokens, components, patterns; flag bespoke values that should be tokens."},{"name":"ui-critique","description":"Critique a UI surface \u2014 hierarchy, density, error/empty/loading states, microcopy; findings keyed to specific elements with concrete corrections."}],"commands":[],"agents":[],"hasMcp":false},"polymath-communication":{"name":"polymath-communication","description":"Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.","category":"communication","tags":["communication","exec-brief","six-pager"],"version":"0.7.0","status":"experimental","skills":[{"name":"exec-brief","description":"Write a BLUF exec brief \u2014 TL;DR first, one recommendation (not menu of three), unambiguous ask, \"what if no\" cost stated."},{"name":"meeting-notes","description":"Capture meeting notes in three sections \u2014 decisions, action-items with owners + dates, open questions; not a transcript."},{"name":"six-pager","description":"Author an Amazon-style six-page narrative \u2014 prose not bullets, tenets up front, FAQ at the end; the FAQ is where objections live."},{"name":"write-advisory","description":"Author a security or breaking-change advisory \u2014 severity, affected/fixed versions, action required (prioritized), workaround, verification step, credit."},{"name":"write-release-notes","description":"Author customer-facing release notes \u2014 headline, user-benefit framing, breaking changes called out, no internal-jargon component names."},{"name":"write-sunset-notice","description":"Author a deprecation / sunset notice \u2014 two dates (warn, remove), concrete migration with before/after code, exception path, FAQ."}],"commands":[],"agents":[],"hasMcp":false},"polymath-leadership":{"name":"polymath-leadership","description":"Leadership craft: 1:1 prep, performance reviews, OKR setting, hiring-loop design, conflict mediation, coaching/growth plans.","category":"leadership","tags":["leadership","1on1","perf-review","okr","hiring","coaching"],"version":"0.7.0","status":"experimental","skills":[{"name":"coaching-plan","description":"Build a coaching/growth plan for a report \u2014 assess current vs next-level expectations, pick 1\u20132 growth areas, concrete practice + sponsorship, and a check-in cadence."},{"name":"conflict-mediation","description":"Frame a team conflict \u2014 separate positions from interests, structure a difficult conversation, find the shared goal, land concrete commitments; not a perf-review."},{"name":"hiring-loop","description":"Design a hiring loop \u2014 role scorecard, structured interview stages mapped to signals, interviewer calibration, evidence-based debrief, and a bias-resistant decision."},{"name":"okr-setting","description":"Set OKRs \u2014 one ambitious Objective, 3\u20135 measurable Key Results with baselines + targets + confidence, named Anti-OKRs, weekly confidence cadence."},{"name":"one-on-one-prep","description":"Draft a 1:1 agenda \u2014 direct-report items first, manager items second, a rotating pulse question, carryover commitments; never cancel for \"no agenda\"."},{"name":"perf-review","description":"Write a perf review \u2014 evidence-anchored, calibrated against level expectations, no surprises; areas-for-growth section already heard from 1:1s."}],"commands":[],"agents":[],"hasMcp":false},"polymath-learning":{"name":"polymath-learning","description":"Learning craft: tiered explanations, code walkthroughs, Feynman-style self-test.","category":"learning","tags":["learning","explain","feynman"],"version":"0.7.0","status":"experimental","skills":[{"name":"code-walkthrough","description":"Explain a piece of code in execution order \u2014 entry point, branches, side effects, the surprising line; cite file:line; not a line-by-line rewrite."},{"name":"explain","description":"Explain a concept at a specified audience tier (ELI5 / curious-undergrad / experienced-peer / domain-expert); pick the analogy and abandon it before it lies."},{"name":"feynman-technique","description":"Verify your understanding of a concept by attempting an undergrad-level explanation; surface exactly where the explanation cracks and study those."}],"commands":[],"agents":[],"hasMcp":false},"polymath-performance":{"name":"polymath-performance","description":"Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.","category":"performance","tags":["performance","latency","caching"],"version":"0.7.0","status":"experimental","skills":[{"name":"audit-redis-config","description":"Audit a live Redis instance's config \u2014 maxmemory + eviction, persistence (RDB/AOF), replication, slow-log, ACL, TLS. Audits existing settings; not cache design (design-cache-layer)."},{"name":"backend-tail-latency","description":"Investigate backend P99/P999 tail latency \u2014 coordinated GC, lock contention, queue depth, slow downstream, retry storms; surface ONE dominant cause."},{"name":"caching-tradeoffs","description":"Design a cache \u2014 what's cached, where (local / regional / shared), invalidation strategy, staleness tolerance, named failure modes (stampede, poisoning, drift). Strategy, not Redis key/TTL design."},{"name":"design-cache-layer","description":"Design a Redis cache layer \u2014 key schema, TTLs, eviction policy, stampede + thundering-herd protection, hot-key + big-key avoidance. Use after caching-tradeoffs picks where; not Redis server config."},{"name":"perf-budget","description":"Set a perf budget \u2014 per critical user journey, single percentile + threshold, explicit budget components (network / compute / dependencies), tripwire alerts. Backend journeys; not web CWV or mobile."}],"commands":[{"name":"audit-redis-config","description":"Audit a live Redis instance's settings; command entry point for the audit-redis-config skill."},{"name":"design-cache","description":"Design a Redis cache layer \u2014 key schema, TTL strategy, stampede protection, eviction."}],"agents":[],"hasMcp":false},"polymath-mobile":{"name":"polymath-mobile","description":"Mobile craft: mobile perf budgets, push notification design, deep-link routing.","category":"mobile","tags":["mobile","push","deeplinks"],"version":"0.7.0","status":"experimental","skills":[{"name":"deep-links","description":"Design deep-link routing \u2014 universal/app links over custom schemes, deferred deep-link for install path, fallback web URL, signed param verification."},{"name":"mobile-perf","description":"Set mobile perf budgets \u2014 cold start (TTI), warm start, scroll FPS, memory; per audience device tier (low-end Android baseline); identify the dominant cost. Native only; not web CWV."},{"name":"push-notifications","description":"Design push notifications \u2014 opt-in moment, payload shape, tap-deep-link, silent vs visible, quiet hours, unsub path; respect the OS bucket constraints."}],"commands":[],"agents":[],"hasMcp":false},"polymath-chat":{"name":"polymath-chat","description":"Incident-comms integration: Slack channels/threads + Statuspage public updates \u2014 internal + external incident communication.","category":"connector","tags":["connector","slack","comms"],"version":"0.7.0","status":"experimental","skills":[{"name":"post-async-update","description":"Post an async standup / status update to a Slack channel \u2014 short, structured (yesterday / today / blockers), threaded under a daily anchor."},{"name":"post-incident-comms","description":"Post an incident-comms update to the right Slack channel + thread; pairs with polymath-incident:comms-update for the body and respondToIncident for context."},{"name":"post-statuspage-update","description":"Post a customer-facing Statuspage incident update \u2014 maps internal severity to public status, scopes components, and re-writes the comms body for customers."}],"commands":[],"agents":[],"hasMcp":true},"polymath-test-automation":{"name":"polymath-test-automation","description":"Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.","category":"quality","tags":["e2e","load-testing","playwright"],"version":"0.7.0","status":"experimental","skills":[{"name":"e2e-flow","description":"Author a browser end-to-end (e2e) test for a critical user journey \u2014 stable selectors, web-first waits, deterministic data. Full-stack UI flows, not unit tests or service contracts."},{"name":"load-test","description":"Design a load/stress/soak test \u2014 k6/JMeter/Locust profile, realistic workload, ramp + think time, percentile thresholds. Generates load to find limits, not setting a budget (perf-budget)."}],"commands":[],"agents":[],"hasMcp":false},"polymath-tracker":{"name":"polymath-tracker","description":"Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.","category":"connector","tags":["connector","issue-tracker","jira","linear","atlassian"],"version":"0.7.0","status":"experimental","skills":[{"name":"file-bug-from-incident","description":"File tracker bug tickets from a postmortem's action items \u2014 one per action, severity/priority mapped from incident sev, postmortem updated with the keys. Provider-agnostic (Jira or Linear)."},{"name":"jira-triage","description":"Triage a Jira issue \u2014 fetch via MCP, classify type/priority/component, ask for missing repro, transition state, route owner. Jira only \u2014 not other trackers."},{"name":"linear-triage","description":"Triage a Linear issue \u2014 classify type/priority/state, ask for missing repro, transition through the workflow state machine, route to the right team. Linear only \u2014 not other trackers."}],"commands":[],"agents":[],"hasMcp":true}},"workflows":[{"name":"activateProject","description":"Generate project context, capability mapping, and onboarding notes for a repo.","whenToUse":"Set up Polymath: project.yaml + onboarding notes.","triggers":["set up polymath for this repo","onboard this project","initialize project context","generate onboarding docs"],"requires":["polymath-core"],"inputs":["projectName"],"steps":[{"id":"initialize","invoke":"polymath-core:initialize-project","needs":[]}],"stepCount":1},{"name":"bugTriage","description":"Triage an inbound bug \u2014 clarify symptom, locate suspect code, review recent diff, decompose the fix.","whenToUse":"Root-cause a reported bug and plan the fix.","triggers":["help me triage this bug","figure out why this is broken","investigate this defect and plan the fix","there's a bug, where do I start"],"requires":["polymath-core","polymath-thinking","polymath-engineering","polymath-planning"],"inputs":["title","severity"],"steps":[{"id":"clarify","invoke":"polymath-thinking:5-whys","needs":[]},{"id":"orient","invoke":"polymath-engineering:read-code","needs":["clarify"]},{"id":"review-diff","invoke":"polymath-engineering:code-review","needs":["orient"]},{"id":"decompose","invoke":"polymath-planning:work-breakdown","needs":["review-diff"]}],"stepCount":4},{"name":"bumpDependency","description":"Bump a dependency safely \u2014 vuln triage first, scoped read-code, smallest update, lint + tests, review.","whenToUse":"Upgrade one dependency safely and fix call-sites.","triggers":["bump this dependency to the latest","upgrade this package safely","is it safe to bump this library","patch this CVE in a dependency"],"requires":["polymath-core","polymath-engineering"],"inputs":["dependency","targetVersion"],"steps":[{"id":"vuln-triage","invoke":"${capabilities.vulnerability_scanner.plugin}:triage-vulns","needs":[]},{"id":"orient","invoke":"polymath-engineering:read-code","needs":["vuln-triage"]},{"id":"bump","invoke":"polymath-engineering:feature-dev","needs":["orient"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["bump"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["review"]}],"stepCount":5},{"name":"capacityReview","description":"Run a capacity review \u2014 forecast demand forward, size the resources with headroom, then write the provisioning plan with a must-act-by date.","whenToUse":"Forecast demand, size capacity, plan provisioning.","triggers":["do a capacity review","will we run out of capacity before","forecast and plan our capacity","capacity plan for the upcoming growth"],"requires":["polymath-core","polymath-sre","polymath-planning"],"inputs":["title","service","horizon"],"steps":[{"id":"forecast","invoke":"polymath-sre:demand-forecast","needs":[]},{"id":"size","invoke":"polymath-sre:capacity-plan","needs":["forecast"]},{"id":"plan","invoke":"polymath-planning:write-plan","needs":["size"]}],"stepCount":3},{"name":"dataPipelineBuild","description":"Build a data pipeline end to end \u2014 model the target tables, design the idempotent pipeline, then verify the load and data-quality gates.","whenToUse":"Model, build, and verify a data pipeline.","triggers":["build a data pipeline from","set up the etl into our warehouse","ingest this source into the lakehouse","design and build the pipeline and tables"],"requires":["polymath-core","polymath-streaming","polymath-engineering"],"inputs":["title","source","destination"],"steps":[{"id":"model","invoke":"polymath-streaming:data-modeling","needs":[]},{"id":"pipeline","invoke":"polymath-streaming:data-pipeline","needs":["model"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["pipeline"]}],"stepCount":3},{"name":"decideUnderAmbiguity","description":"Frame the context, ledger the unknowns, compare options, red-team, govern with DACI, and record an ADR.","whenToUse":"Frame a hard decision, govern it, record an ADR.","triggers":["help me decide between these options","we need to make a call on this","should we do A or B","run a DACI and record the decision"],"requires":["polymath-core","polymath-decisions","polymath-thinking","polymath-writing"],"inputs":["decision","options","reversibility"],"steps":[{"id":"frame","invoke":"polymath-decisions:cynefin-frame","needs":[]},{"id":"evidence","invoke":"polymath-decisions:evidence-ledger","needs":["frame"]},{"id":"compare","invoke":"polymath-decisions:tradeoff-matrix","needs":["evidence"]},{"id":"challenge","invoke":"polymath-thinking:red-team","needs":["compare"]},{"id":"govern","invoke":"polymath-decisions:daci","needs":["challenge"]},{"id":"record","invoke":"polymath-writing:adr","needs":["govern"]}],"stepCount":6},{"name":"deliberationLoop","description":"Observe, frame, compare options, red-team, and produce a revised plan.","whenToUse":"Pressure-test a plan and emit a revised one.","triggers":["pressure-test my approach","red-team my idea before I commit","critique this and give me a better plan","stress-test this and revise it"],"requires":["polymath-core","polymath-thinking","polymath-decisions","polymath-planning"],"inputs":["subject","mode","artifactPath"],"steps":[{"id":"deliberate","invoke":"polymath-thinking:deliberate","needs":[]},{"id":"tradeoffs","invoke":"polymath-decisions:tradeoff-matrix","needs":["deliberate"]},{"id":"revised-plan","invoke":"polymath-planning:write-plan","needs":["tradeoffs"]}],"stepCount":3},{"name":"deprecationToRemoval","description":"Multi-quarter capability removal \u2014 announce, deprecate-in-code, midterm usage-decline check, then remove only when usage is below threshold and the removal date has arrived.","whenToUse":"Multi-quarter, usage-gated capability removal. Not the simple two-stage notice-then-remove \u2014 use sunsetCapability for that.","triggers":["deprecate this over time","plan a multi-quarter sunset","kill this API once usage drops","retire this feature on a schedule"],"requires":["polymath-core","polymath-communication","polymath-engineering","polymath-observability","polymath-release"],"inputs":["capability","announceDate","removalDate","replacement","usageThreshold","stage"],"steps":[{"id":"notice","invoke":"polymath-communication:write-sunset-notice","needs":[]},{"id":"baseline-or-recheck","invoke":"polymath-observability:metrics-design","needs":["notice"]},{"id":"deprecate-in-code","invoke":"polymath-engineering:feature-dev","needs":["baseline-or-recheck"]},{"id":"midterm-gate","invoke":"polymath-engineering:read-code","needs":["deprecate-in-code"]},{"id":"removal","invoke":"polymath-engineering:feature-dev","needs":["midterm-gate"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["removal"]},{"id":"release-comms","invoke":"polymath-release:release-notes","needs":["verify"]}],"stepCount":7},{"name":"designSystem","description":"Orient, frame, deliberate, trade off, document, threat-model, record, and red-team a system design under uncertainty.","whenToUse":"Design a system: arch doc + threat model + ADR.","triggers":["design this system","write an architecture doc for this","how should I architect this","draft an RFC for this change"],"requires":["polymath-core","polymath-engineering","polymath-decisions","polymath-thinking","polymath-writing","polymath-security"],"inputs":["subject","scope","docKind","assumptions","codePath"],"steps":[{"id":"orient","invoke":"polymath-engineering:read-code","needs":[]},{"id":"frame","invoke":"polymath-decisions:cynefin-frame","needs":["orient"]},{"id":"options","invoke":"polymath-thinking:deliberate","needs":["frame"]},{"id":"compare","invoke":"polymath-decisions:tradeoff-matrix","needs":["options"]},{"id":"design-doc","invoke":"polymath-writing:architecture-doc","needs":["compare"]},{"id":"threat-model","invoke":"polymath-security:stride-threat-model","needs":["design-doc"]},{"id":"decision","invoke":"polymath-writing:adr","needs":["threat-model"]},{"id":"challenge","invoke":"polymath-thinking:red-team","needs":["decision"]}],"stepCount":8},{"name":"estimateAndPlan","description":"Turn a well-specified goal into a work breakdown, a three-point estimate, and an executable plan \u2014 skips fuzzy-goal disambiguation.","whenToUse":"Scope a clear goal \u2014 work breakdown, estimate, plan.","triggers":["scope and estimate this, then write the plan","break this down, estimate it, and plan it","give me a WBS, estimate, and an executable plan","turn this clear goal into an estimated plan"],"requires":["polymath-core","polymath-planning"],"inputs":["goal"],"steps":[{"id":"breakdown","invoke":"polymath-planning:work-breakdown","needs":[]},{"id":"estimate","invoke":"polymath-planning:estimate","needs":["breakdown"]},{"id":"plan","invoke":"polymath-planning:write-plan","needs":["estimate"]}],"stepCount":3},{"name":"evalDrivenDevelopment","description":"Build an LLM feature eval-first \u2014 define the eval harness and regression set, implement against it, then measure and report pass/fail before shipping.","whenToUse":"Define evals first, then build the LLM feature to pass them.","triggers":["build this llm feature eval-first","set up evals before we change the prompt","eval-driven development for this agent","define the eval suite then implement"],"requires":["polymath-core","polymath-ai","polymath-engineering"],"inputs":["title","feature"],"steps":[{"id":"define-evals","invoke":"polymath-ai:eval-plan","needs":[]},{"id":"implement","invoke":"polymath-ai:prompt-engineer","needs":["define-evals"]},{"id":"measure","invoke":"polymath-engineering:verify-change","needs":["implement"]}],"stepCount":3},{"name":"experimentToGA","description":"Take a feature from experiment plan through pre-registration, flag rollout staging, results analysis, and GA decision artifact.","whenToUse":"A/B + flag rollout from pre-registration to GA.","triggers":["plan an A/B test to GA","pre-register an experiment then decide GA","stage a percentage rollout","should we GA this feature"],"requires":["polymath-core","polymath-data","polymath-product","polymath-release"],"inputs":["title","scope"],"steps":[{"id":"plan","invoke":"polymath-data:run-experiment","needs":[]},{"id":"rollout-plan","invoke":"polymath-product:acceptance-criteria","needs":["plan"]},{"id":"launch-checklist","invoke":"polymath-product:acceptance-criteria","needs":["rollout-plan"]},{"id":"results-analysis","invoke":"polymath-data:run-experiment","needs":["launch-checklist"]},{"id":"ga-decision","invoke":"polymath-release:pr","needs":["results-analysis"]}],"stepCount":5},{"name":"featureFromIdea","description":"Extend shipFeature with discovery \u2014 interview guide, persona refresh, then PRD \u2192 acceptance \u2192 implement \u2192 review \u2192 verify \u2192 changelog \u2192 PR draft.","whenToUse":"Discovery (interviews/persona) then ship a feature.","triggers":["do discovery then ship this","interview users then build it","take this from research to PR","validate this idea then build it"],"requires":["polymath-core","polymath-research","polymath-product","polymath-engineering","polymath-release"],"inputs":["title","researchQuestion","scope"],"steps":[{"id":"interview-guide","invoke":"polymath-research:interview-guide","needs":[]},{"id":"persona-refresh","invoke":"polymath-research:persona","needs":["interview-guide"]},{"id":"prd","invoke":"polymath-product:prd","needs":["persona-refresh"]},{"id":"acceptance","invoke":"polymath-product:acceptance-criteria","needs":["prd"]},{"id":"implement","invoke":"polymath-engineering:feature-dev","needs":["acceptance"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["implement"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["review"]},{"id":"release","invoke":"polymath-release:changelog","needs":["verify"]},{"id":"pr","invoke":"polymath-release:pr","needs":["release"]}],"stepCount":9},{"name":"fuzzyGoalToPlan","description":"Disambiguate a vague goal, then story-map, break down, estimate, and write an executable plan that carries its assumptions.","whenToUse":"Turn a vague goal into an estimated, mapped plan.","triggers":["I have a fuzzy goal, help me plan it","turn this vague idea into a plan","story-map and estimate this","help me scope and estimate this work"],"requires":["polymath-core","polymath-thinking","polymath-product","polymath-planning"],"inputs":["goal","releases","contextPath"],"steps":[{"id":"frame-goal","invoke":"polymath-thinking:deliberate","needs":[]},{"id":"story-map","invoke":"polymath-product:decompose-epic","needs":["frame-goal"]},{"id":"work-breakdown","invoke":"polymath-planning:work-breakdown","needs":["story-map"]},{"id":"estimate","invoke":"polymath-planning:estimate","needs":["work-breakdown"]},{"id":"write-plan","invoke":"polymath-planning:write-plan","needs":["estimate"]}],"stepCount":5},{"name":"gameDay","description":"Run a resilience game day \u2014 design a chaos experiment with a hypothesis + abort, observe the live behavior, then capture findings as a blameless write-up with actions.","whenToUse":"Design, run, and learn from a chaos game day.","triggers":["run a game day","design a chaos experiment for","test our resilience with a controlled failure","game day for the failover"],"requires":["polymath-core","polymath-sre","polymath-observability","polymath-incident"],"inputs":["title","target"],"steps":[{"id":"design","invoke":"polymath-sre:chaos-experiment","needs":[]},{"id":"observe","invoke":"polymath-observability:query-during-incident","needs":["design"]},{"id":"learn","invoke":"polymath-incident:postmortem-blameless","needs":["observe"]}],"stepCount":3},{"name":"incidentRetroToActions","description":"Decompose a written postmortem into trackable action items \u2014 owners, due dates, estimates, tickets filed, postmortem back-linked to the resulting tickets.","whenToUse":"Turn a postmortem into filed action tickets.","triggers":["turn this postmortem into tickets","file action items from the retro","track the follow-ups from this incident","make tickets from this postmortem"],"requires":["polymath-core","polymath-engineering","polymath-incident","polymath-planning"],"inputs":["postmortemPath"],"steps":[{"id":"read-postmortem","invoke":"polymath-engineering:read-code","needs":[]},{"id":"classify","invoke":"polymath-incident:postmortem-blameless","needs":["read-postmortem"]},{"id":"breakdown","invoke":"polymath-planning:work-breakdown","needs":["classify"]},{"id":"estimate","invoke":"polymath-planning:estimate","needs":["breakdown"]},{"id":"file-tickets","invoke":"${capabilities.issue_tracker.plugin}:file-bug-from-incident","needs":["estimate"]},{"id":"backlink","invoke":"polymath-engineering:feature-dev","needs":["file-tickets"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["backlink"]}],"stepCount":7},{"name":"migrateLanguageVersion","description":"Migrate a codebase to a new language / runtime version in phases (pin \u2192 fix \u2192 strict) with explicit gates between phases; language-agnostic.","whenToUse":"Phased migration to a new language/runtime version.","triggers":["upgrade us to the new runtime version","migrate to the new language version","bump the language version across the repo","do a phased runtime migration"],"requires":["polymath-core","polymath-engineering"],"inputs":["language","targetVersion","currentVersion"],"steps":[{"id":"plan","invoke":"polymath-engineering:read-code","needs":[]},{"id":"pin","invoke":"polymath-engineering:feature-dev","needs":["plan"]},{"id":"fix","invoke":"polymath-engineering:feature-dev","needs":["pin"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["fix"]},{"id":"strict","invoke":"polymath-engineering:feature-dev","needs":["verify"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["strict"]}],"stepCount":6},{"name":"migrationPlaybook","description":"Run a phased migration \u2014 assess seams and a strangler sequence, plan the phases, write the consumer migration guide, then roll out gated by usage.","whenToUse":"Assess, plan, guide, and safely roll out a migration.","triggers":["plan the migration off the old system","strangler-fig migration playbook","migrate consumers to the new service safely","phased migration plan and rollout"],"requires":["polymath-core","polymath-architecture","polymath-planning","polymath-release"],"inputs":["title","from","to"],"steps":[{"id":"assess","invoke":"polymath-architecture:service-decomposition","needs":[]},{"id":"plan","invoke":"polymath-planning:write-plan","needs":["assess"]},{"id":"guide","invoke":"polymath-release:migration-guide","needs":["plan"]},{"id":"rollout","invoke":"polymath-release:safe-rollout","needs":["guide"]}],"stepCount":4},{"name":"perfRegression","description":"Diagnose a performance regression \u2014 observability signals, review the diff that landed, implement the fix, verify the metric recovered.","whenToUse":"Fix a perf regression and verify it recovered.","triggers":["latency went up, find out why","p99 regressed after the last deploy","this got slow, fix it","throughput dropped, investigate and fix"],"requires":["polymath-core","polymath-engineering"],"inputs":["title","metric","suspectSha"],"steps":[{"id":"signals","invoke":"${capabilities.observability.plugin}:query-during-incident","needs":[]},{"id":"review-diff","invoke":"polymath-engineering:code-review","needs":["signals"]},{"id":"fix","invoke":"polymath-engineering:feature-dev","needs":["review-diff"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["fix"]}],"stepCount":4},{"name":"prdToShip","description":"Ship from an existing PRD \u2014 skip drafting and go acceptance \u2192 implement \u2192 review \u2192 verify \u2192 changelog \u2192 PR draft.","whenToUse":"Ship from an existing PRD \u2014 acceptance through PR draft.","triggers":["we already have a PRD, build and ship it","implement this existing spec end to end","take this PRD to a PR","build from the spec we already wrote"],"requires":["polymath-core","polymath-product","polymath-engineering","polymath-release"],"inputs":["prd"],"steps":[{"id":"acceptance","invoke":"polymath-product:acceptance-criteria","needs":[]},{"id":"implement","invoke":"polymath-engineering:feature-dev","needs":["acceptance"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["implement"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["review"]},{"id":"changelog","invoke":"polymath-release:changelog","needs":["verify"]},{"id":"pr","invoke":"polymath-release:pr","needs":["changelog"]}],"stepCount":6},{"name":"progressiveRollout","description":"Stage a feature-flag rollout with SLO guardrails and rollback \u2014 without experimentToGA's A/B pre-registration apparatus.","whenToUse":"Flag rollout with SLO health gates (no A/B).","triggers":["roll this out behind a flag in stages with guardrails","progressively release this without an A/B test","ramp this feature from 1% to 100% safely","flag rollout with SLO health gates and rollback"],"requires":["polymath-core","polymath-product","polymath-sre","polymath-release"],"inputs":["feature"],"steps":[{"id":"acceptance","invoke":"polymath-product:acceptance-criteria","needs":[]},{"id":"slo","invoke":"polymath-sre:slo-design","needs":["acceptance"]},{"id":"rollout","invoke":"polymath-release:safe-rollout","needs":["slo"]},{"id":"notes","invoke":"polymath-release:release-notes","needs":["rollout"]}],"stepCount":4},{"name":"refactorWithSafety","description":"Refactor with a safety net \u2014 orient, surface coverage gaps, pin current behavior with tests, refactor, verify, review.","whenToUse":"Pin behavior in tests, then refactor safely.","triggers":["refactor this safely","clean up this module without breaking it","restructure this code with a safety net","pin behavior then refactor"],"requires":["polymath-core","polymath-engineering","polymath-qa"],"inputs":["title","scope"],"steps":[{"id":"orient","invoke":"polymath-engineering:read-code","needs":[]},{"id":"coverage-pre","invoke":"polymath-qa:coverage-gap","needs":["orient"]},{"id":"pin-behavior","invoke":"polymath-qa:unit-tests","needs":["coverage-pre"]},{"id":"refactor","invoke":"polymath-engineering:feature-dev","needs":["pin-behavior"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["refactor"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["verify"]}],"stepCount":6},{"name":"requirementsToBacklog","description":"Turn a PRD/requirements doc into a decomposed, groomed, estimated backlog of ready work items \u2014 the product-side analogue of incidentRetroToActions.","whenToUse":"PRD to a decomposed, groomed, ready backlog.","triggers":["turn this PRD into a backlog","break this requirements doc into ready stories","decompose and groom this spec into work items","go from PRD to a sprint-ready backlog"],"requires":["polymath-core","polymath-product","polymath-planning"],"inputs":["prd"],"steps":[{"id":"decompose","invoke":"polymath-product:decompose-epic","needs":[]},{"id":"groom","invoke":"polymath-product:groom-backlog","needs":["decompose"]},{"id":"breakdown","invoke":"polymath-planning:work-breakdown","needs":["groom"]}],"stepCount":3},{"name":"respondToIncident","description":"Drive incident response \u2014 context, triage, query, mitigation note, postmortem, follow-up tickets.","whenToUse":"Drive a live incident end-to-end to postmortem.","triggers":["we have an incident","prod is down, help","page just fired, walk me through response","sev1, what do I do","take this incident from response all the way to action items"],"requires":["polymath-core","polymath-incident"],"inputs":["incidentId","sev"],"steps":[{"id":"context","invoke":"${capabilities.pager.plugin}:page-context","needs":[]},{"id":"triage","invoke":"polymath-incident:incident-triage","needs":["context"]},{"id":"signals","invoke":"${capabilities.observability.plugin}:query-during-incident","needs":["triage"]},{"id":"postmortem","invoke":"polymath-incident:postmortem-blameless","needs":["signals"]},{"id":"tickets","invoke":"${capabilities.issue_tracker.plugin}:file-bug-from-incident","needs":["postmortem"]}],"stepCount":5},{"name":"reviewPR","description":"Review a PR diff with parallel critics (security, qa, simplification) and a synthesizer; produces a structured review report.","whenToUse":"Multi-critic review of a PR/diff + synthesis.","triggers":["review this PR","do a thorough review of my diff","run all the critics on this change","review the working tree before I push"],"requires":["polymath-core","polymath-engineering","polymath-qa","polymath-security","polymath-thinking"],"inputs":["pr","diffPath"],"steps":[{"id":"orient","invoke":"polymath-engineering:read-code","needs":[]},{"id":"correctness","invoke":"polymath-engineering:code-review","needs":["orient"]},{"id":"coverage","invoke":"polymath-qa:coverage-gap","needs":["orient"]},{"id":"security","invoke":"polymath-security:owasp-review","needs":["orient"]},{"id":"challenge","invoke":"polymath-thinking:red-team","needs":["orient"]},{"id":"synthesize","invoke":"polymath-engineering:code-review","needs":["correctness","coverage","security","challenge"]}],"stepCount":6},{"name":"reviewPlan","description":"Critique an existing plan/design doc with parallel critics (red-team, pre-mortem, tradeoffs) and synthesize a findings report \u2014 no revised plan, no governance.","whenToUse":"Critique an existing plan; findings only, no rewrite.","triggers":["review this plan","is this plan any good before I start","poke holes in this plan","what's wrong with my design doc"],"requires":["polymath-core","polymath-engineering","polymath-thinking","polymath-decisions"],"inputs":["plan","planPath"],"steps":[{"id":"orient","invoke":"polymath-engineering:read-code","needs":[]},{"id":"challenge","invoke":"polymath-thinking:red-team","needs":["orient"]},{"id":"premortem","invoke":"polymath-thinking:pre-mortem","needs":["orient"]},{"id":"tradeoffs","invoke":"polymath-decisions:tradeoff-matrix","needs":["orient"]},{"id":"synthesize","invoke":"polymath-thinking:red-team","needs":["challenge","premortem","tradeoffs"]}],"stepCount":5},{"name":"rootCauseAnalysis","description":"Drill to a system root cause, anticipate the fix failing, challenge the cause, and synthesize a confidence-labelled RCA.","whenToUse":"Drive to a system root cause; write an RCA.","triggers":["do a root cause analysis","why did this really happen","run a 5-whys on this","write an RCA for this symptom"],"requires":["polymath-core","polymath-thinking","polymath-writing"],"inputs":["title","symptom","evidence"],"steps":[{"id":"frame-symptom","invoke":"polymath-thinking:5-whys","needs":[]},{"id":"anticipate-failure","invoke":"polymath-thinking:pre-mortem","needs":["frame-symptom"]},{"id":"challenge-cause","invoke":"polymath-thinking:red-team","needs":["anticipate-failure"]},{"id":"synthesize-rca","invoke":"polymath-writing:editorial-pass","needs":["challenge-cause"]}],"stepCount":4},{"name":"securityFinding","description":"Address a security finding end-to-end \u2014 OWASP review of the implicated diff, STRIDE-model the system if scope warrants, implement, code review, verify.","whenToUse":"Fix a security finding end-to-end and verify.","triggers":["fix this security finding","we have a vuln, patch it","address this OWASP issue","remediate this security report"],"requires":["polymath-core","polymath-security","polymath-engineering"],"inputs":["title","severity","scope"],"steps":[{"id":"owasp","invoke":"polymath-security:owasp-review","needs":[]},{"id":"threat-model","invoke":"polymath-security:stride-threat-model","needs":["owasp"]},{"id":"implement","invoke":"polymath-engineering:feature-dev","needs":["threat-model"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["implement"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["review"]}],"stepCount":5},{"name":"shipFeature","description":"Ship a small feature from PRD to PR draft.","whenToUse":"Ship a small feature from PRD to PR draft.","triggers":["ship this feature","build and ship this end to end","take this from PRD to PR","implement this small feature properly"],"requires":["polymath-core","polymath-product","polymath-engineering","polymath-release"],"inputs":["title","scope"],"steps":[{"id":"prd","invoke":"polymath-product:prd","needs":[]},{"id":"acceptance","invoke":"polymath-product:acceptance-criteria","needs":["prd"]},{"id":"implement","invoke":"polymath-engineering:feature-dev","needs":["acceptance"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["implement"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["review"]},{"id":"changelog","invoke":"polymath-release:changelog","needs":["verify"]},{"id":"pr","invoke":"polymath-release:pr","needs":["changelog"]}],"stepCount":7},{"name":"sunsetCapability","description":"Sunset a capability \u2014 write the customer-facing notice, deprecate in code with warnings, then later remove + release-note the change.","whenToUse":"Two-stage sunset: notice + deprecate, remove later. Not usage-gated \u2014 use deprecationToRemoval for multi-quarter, usage-gated removal.","triggers":["sunset this endpoint","deprecate this with a customer notice","add deprecation warnings and a sunset notice","write the sunset notice and deprecate"],"requires":["polymath-core","polymath-communication","polymath-engineering","polymath-release"],"inputs":["capability","sunsetDate","removalDate","replacement","stage"],"steps":[{"id":"notice","invoke":"polymath-communication:write-sunset-notice","needs":[]},{"id":"deprecate-in-code","invoke":"polymath-engineering:feature-dev","needs":["notice"]},{"id":"remove-if-stage","invoke":"polymath-engineering:feature-dev","needs":["deprecate-in-code"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["remove-if-stage"]},{"id":"release-comms","invoke":"polymath-release:release-notes","needs":["verify"]}],"stepCount":5},{"name":"techDebtPaydown","description":"Identify technical debt, plan the paydown, then address the top item behind a test safety net \u2014 inventory, prioritize, plan, pin, refactor, verify, review.","whenToUse":"Find, plan, and pay down technical debt.","triggers":["pay down our tech debt","find and address our technical debt","tackle the tech debt in this area","make a technical-debt paydown plan and start it"],"requires":["polymath-core","polymath-engineering","polymath-planning","polymath-qa"],"inputs":["title","scope","capacity"],"steps":[{"id":"identify","invoke":"polymath-engineering:tech-debt-management","needs":[]},{"id":"plan","invoke":"polymath-planning:write-plan","needs":["identify"]},{"id":"pin-behavior","invoke":"polymath-qa:unit-tests","needs":["plan"]},{"id":"address","invoke":"polymath-engineering:feature-dev","needs":["pin-behavior"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["address"]},{"id":"review","invoke":"polymath-engineering:code-review","needs":["verify"]}],"stepCount":6},{"name":"weeklyReleaseTrain","description":"Bundle the week's merged changes into a release \u2014 CHANGELOG audit, release-notes draft, verify, internal heads-up, PR for the tag.","whenToUse":"Cut a release: notes, verify, tag PR.","triggers":["cut this week's release","prep the release train","draft release notes for this version","do the weekly release"],"requires":["polymath-core","polymath-engineering","polymath-release","polymath-communication"],"inputs":["version","since","dryRun"],"steps":[{"id":"collect","invoke":"polymath-engineering:read-code","needs":[]},{"id":"changelog-audit","invoke":"polymath-release:changelog","needs":["collect"]},{"id":"release-notes","invoke":"polymath-release:release-notes","needs":["changelog-audit"]},{"id":"verify","invoke":"polymath-engineering:verify-change","needs":["release-notes"]},{"id":"internal-heads-up","invoke":"polymath-communication:write-advisory","needs":["verify"]},{"id":"tag-pr","invoke":"polymath-release:pr","needs":["internal-heads-up"]}],"stepCount":6}],"profiles":{"description":"Curated install profiles (role/stack spines) for the Polymath marketplace. Solves discovery-before-install: a user picks ONE profile instead of choosing from the full plugin catalog, then installs more a-la-carte on top. Every profile is a starting set, not a lock. Plugin names are validated against .claude-plugin/marketplace.json by tools/check-registry.py profiles (PROFILE-1).","version":1,"_spine":["polymath-core","polymath-flows"],"_note":"Every profile implicitly includes the _spine (core = routing/conventions/project-context; flows = workflow runner). check-registry.py profiles treats the spine as always present.","profiles":{"backend":{"title":"Backend engineer","for":"API/service developers shipping changes against a server + database.","plugins":["polymath-engineering","polymath-backend","polymath-qa","polymath-security","polymath-release","polymath-vcs"],"alwaysOnBudget":2250},"frontend":{"title":"Frontend / web engineer","for":"UI developers who care about components, Web Vitals, bundles, a11y, and i18n.","plugins":["polymath-engineering","polymath-frontend","polymath-design","polymath-qa","polymath-release","polymath-vcs"],"alwaysOnBudget":1900},"sre":{"title":"SRE / on-call","for":"Reliability and incident response \u2014 SLOs, observability, live incidents, postmortems.","plugins":["polymath-sre","polymath-observability","polymath-incident","polymath-performance","polymath-paging","polymath-chat"],"alwaysOnBudget":1750},"platform":{"title":"Platform / DevOps engineer","for":"Golden paths, CI/CD, containers, cloud and Kubernetes infra.","plugins":["polymath-platform","polymath-devops","polymath-cloud","polymath-kubernetes","polymath-sre","polymath-release"],"alwaysOnBudget":2050},"pm":{"title":"Product manager","for":"Discovery through delivery \u2014 PRDs, prioritization, roadmaps, research, comms.","plugins":["polymath-product","polymath-research","polymath-planning","polymath-communication","polymath-decisions","polymath-tracker"],"alwaysOnBudget":1800},"staff":{"title":"Staff+ / tech lead","for":"Thinking, architecture, decisions, planning, and review across the SDLC.","plugins":["polymath-thinking","polymath-architecture","polymath-decisions","polymath-writing","polymath-planning","polymath-engineering","polymath-communication","polymath-leadership"],"alwaysOnBudget":2650},"author":{"title":"Polymath plugin author","for":"Building and validating new Polymath plugins, skills, and connectors.","plugins":["polymath-author","polymath-engineering","polymath-writing"],"alwaysOnBudget":1400}},"_budget_note":"alwaysOnBudget: per-profile ceiling (tokens) on the summed always-on listing cost of the profile's plugins plus the _spine, gated by tools/token-report.py profiles (PROFILE-2). Ratchet: lower it when descriptions shrink; raising it is a reviewed decision."}};
+
+/* ---------------- lane model ---------------- */
+const LANES = [
+  { id:"foundation", label:"Foundation & Flows", color:"#a78bfa", cats:["foundation","orchestration"] },
+  { id:"craft",      label:"Thinking & Craft",   color:"#818cf8", cats:["thinking","decisions","architecture","writing","learning"] },
+  { id:"product",    label:"Product & Discovery",color:"#f472b6", cats:["product","research","planning"] },
+  { id:"engineering",label:"Engineering",        color:"#60a5fa", cats:["engineering","mobile"] },
+  { id:"quality",    label:"Quality & Safety",   color:"#34d399", cats:["quality","security","performance"] },
+  { id:"operate",    label:"Platform & Operate", color:"#2dd4bf", cats:["platform","devops","sre","observability","incident"] },
+  { id:"infra",      label:"Infra & Cloud",      color:"#22d3ee", cats:["infra"] },
+  { id:"data",       label:"Data & AI",          color:"#fbbf24", cats:["data","ai"] },
+  { id:"people",     label:"People & Content",   color:"#fb923c", cats:["design","communication","leadership"] },
+  { id:"release",    label:"Release & Delivery", color:"#f87171", cats:["release"] },
+  { id:"connectors", label:"Connectors (MCP)",   color:"#94a3b8", cats:["connector"] },
+  { id:"authoring",  label:"Authoring",          color:"#e879f9", cats:["author"] },
+];
+const CAT2LANE = {};
+LANES.forEach(l => l.cats.forEach(c => CAT2LANE[c] = l));
+const laneOf = p => CAT2LANE[p.category] || LANES[LANES.length-1];
+const PLUGINS = Object.values(DATA.plugins);
+PLUGINS.forEach(p => { p.lane = laneOf(p); });
+const byName = DATA.plugins;
+
+/* ---------------- helpers ---------------- */
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => (s||"").replace(/[&<>]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+const $ = s => document.querySelector(s);
+
+/* ---------------- tabs ---------------- */
+const TABS = [
+  { id:"overview", label:"Overview" },
+  { id:"galaxy", label:"Galaxy" },
+  { id:"plugins", label:"Plugins" },
+  { id:"workflows", label:"Workflows" },
+  { id:"profiles", label:"Profiles" },
+];
+let activeTab = "overview";
+const tabsEl = $("#tabs");
+TABS.forEach(t => {
+  const b = el("button", t.id===activeTab?"on":"", t.label);
+  b.onclick = () => showTab(t.id);
+  b.dataset.tab = t.id;
+  tabsEl.appendChild(b);
+});
+let galaxyStarted = false;
+function showTab(id) {
+  activeTab = id;
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab===id));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id==="v-"+id));
+  if (id==="galaxy" && !galaxyStarted) { galaxyStarted = true; setTimeout(initGalaxy, 30); }
+  window.scrollTo({top:0});
+}
+
+/* ---------------- overview ---------------- */
+const M = DATA.meta;
+$("#verPill").textContent = "v"+M.version;
+$("#heroDesc").textContent = M.description;
+const interop = $("#interop");
+interop.appendChild(el("span","lead","Portable SKILL.md · agentskills.io v1.0 →"));
+M.interop.forEach(i => interop.appendChild(el("span","tag",i)));
+
+const betaCt = PLUGINS.filter(p=>p.status==="beta").length;
+const STATS = [
+  ["pluginCount","Plugins"], ["skillCount","Skills"], ["workflowCount","Workflows"],
+  ["commandCount","Slash commands"], ["connectorCount","MCP connectors"], ["agentCount","Sub-agents"],
+];
+const statsEl = $("#stats");
+STATS.forEach(([k,l]) => {
+  const c = el("div","stat");
+  c.innerHTML = `<div class="n" data-to="${M[k]}">0</div><div class="l">${l}</div>`;
+  statsEl.appendChild(c);
+});
+{ // extra tile: lanes
+  const c = el("div","stat");
+  c.innerHTML = `<div class="n" data-to="${LANES.length}">0</div><div class="l">Lanes</div>`;
+  statsEl.appendChild(c);
+  const c2 = el("div","stat");
+  c2.innerHTML = `<div class="n"><span style="color:var(--beta)">${betaCt}</span><span style="color:var(--txt3);font-size:24px"> / ${PLUGINS.length-betaCt}</span></div><div class="l">Beta / experimental</div>`;
+  statsEl.appendChild(c2);
+}
+// count-up animation
+function countUp() {
+  document.querySelectorAll("#stats .n[data-to]").forEach(n => {
+    const to = +n.dataset.to; let cur = 0; const step = Math.max(1, Math.round(to/28));
+    const t = setInterval(()=>{ cur += step; if (cur>=to){cur=to;clearInterval(t);} n.textContent = cur; }, 22);
+  });
+}
+countUp();
+
+// lane legend
+const laneLegend = $("#laneLegend");
+LANES.forEach(l => {
+  const plugs = PLUGINS.filter(p => p.lane.id===l.id);
+  const sk = plugs.reduce((a,p)=>a+p.skills.length,0);
+  const d = el("div","lane");
+  d.innerHTML = `<span class="dot" style="color:${l.color};background:${l.color}"></span>
+    <div><div class="nm">${l.label}</div><div class="ct">${plugs.length} plugin${plugs.length>1?"s":""} · ${sk} skills</div></div>`;
+  d.onclick = () => { showTab("plugins"); filterLane = l.id; $("#search").value=""; renderPlugins(); };
+  laneLegend.appendChild(d);
+});
+
+const PRINCIPLES = [
+  ["🧩","A-la-carte","40 independent plugins. Install only what you need — most teams run 5–10. Nothing is bundled or load-bearing on the rest."],
+  ["🪶","Token-budgeted","Every plugin keeps its always-on listing under 400 tokens; profiles are ratcheted against a summed ceiling. Capability lives in skills loaded on demand."],
+  ["🛠️","Work-shaped","Plugins map to how work is actually done — a lane per discipline, a skill per craft move, not per tool or API."],
+  ["🔗","Workflows compose plugins","The unit of value is the workflow: an SDLC journey that chains plugin skills into a step DAG, with some steps bound to dynamic capability slots."],
+  ["✅","Deterministic gates","Workflows carry mustPass checks — artifact-schema and diff constraints — so a run can't pass on hollow stubs."],
+  ["🔌","Open & portable","SKILL.md conforms to the agentskills.io v1.0 standard, portable across Claude, Codex, Copilot, Cursor, Gemini CLI and more."],
+];
+const princ = $("#principles");
+PRINCIPLES.forEach(([ic,h,p]) => {
+  princ.appendChild(el("div","card",`<div class="ic">${ic}</div><h4>${h}</h4><p>${p}</p>`));
+});
+
+/* ---------------- plugins ---------------- */
+let filterLane = null;
+function pluginMatch(p, q) {
+  if (!q) return true;
+  q = q.toLowerCase();
+  if (p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)) return true;
+  if (p.tags.some(t => t.includes(q))) return true;
+  return p.skills.some(s => s.name.toLowerCase().includes(q) || (s.description||"").toLowerCase().includes(q));
+}
+function renderPlugins() {
+  const q = $("#search").value.trim();
+  const wrap = $("#pluginGroups"); wrap.innerHTML = "";
+  const fEl = $("#pluginFilter"); fEl.innerHTML = "";
+  if (filterLane) {
+    const l = LANES.find(x=>x.id===filterLane);
+    const n = el("div","filterNote");
+    n.innerHTML = `<span class="dot" style="color:${l.color};background:${l.color}"></span> Lane: <b>${l.label}</b>`;
+    const b = el("button",null,"clear ✕"); b.onclick = ()=>{filterLane=null;renderPlugins();};
+    n.appendChild(b); fEl.appendChild(n);
+  }
+  let shown = 0;
+  LANES.forEach(l => {
+    if (filterLane && filterLane!==l.id) return;
+    let plugs = PLUGINS.filter(p => p.lane.id===l.id && pluginMatch(p,q));
+    if (!plugs.length) return;
+    plugs.sort((a,b)=> (a.status===b.status? b.skills.length-a.skills.length : a.status==="beta"?-1:1));
+    const h = el("h2","section",`<span style="color:${l.color}">●</span> ${l.label} <span style="color:var(--txt3);font-weight:500;text-transform:none;letter-spacing:0">· ${plugs.length}</span>`);
+    wrap.appendChild(h);
+    const g = el("div","grid cols3");
+    plugs.forEach(p => { g.appendChild(pluginCard(p)); shown++; });
+    wrap.appendChild(g);
+  });
+  if (!shown) wrap.appendChild(el("div","empty","No plugins match “"+esc(q)+"”."));
+}
+function pluginCard(p) {
+  const c = el("div","card pcard");
+  c.style.setProperty("--lane", p.lane.color);
+  const mcp = p.hasMcp ? `<span class="badge mcp">MCP</span>` : "";
+  c.innerHTML = `
+    <div class="top">
+      <div class="nm">${p.name}<small>${p.category}</small></div>
+      <span class="badge ${p.status}">${p.status}</span>${mcp}
+    </div>
+    <div class="desc">${esc(p.description)}</div>
+    <div class="metrics">
+      <span><b>${p.skills.length}</b> skills</span>
+      ${p.commands.length?`<span><b>${p.commands.length}</b> cmd</span>`:""}
+      ${p.agents.length?`<span><b>${p.agents.length}</b> agent</span>`:""}
+      <span class="laneTag" style="margin-left:auto"><span class="dot" style="width:8px;height:8px;color:${p.lane.color};background:${p.lane.color}"></span>${p.lane.label}</span>
+    </div>`;
+  c.onclick = () => openPlugin(p);
+  return c;
+}
+
+/* ---------------- plugin modal ---------------- */
+const overlay = $("#overlay"), modal = $("#modal");
+overlay.onclick = e => { if (e.target===overlay) closeModal(); };
+document.addEventListener("keydown", e => { if (e.key==="Escape") closeModal(); });
+function closeModal(){ overlay.classList.remove("on"); }
+function openPlugin(p) {
+  const mcp = p.hasMcp ? `<span class="badge mcp">MCP connector</span>` : "";
+  const tags = p.tags.map(t=>`<span class="chip">${t}</span>`).join("");
+  const wfs = DATA.workflows.filter(w => workflowPlugins(w).has(p.name)).map(w=>w.name);
+  let body = "";
+  if (p.skills.length) {
+    body += `<h5>${p.skills.length} skills</h5>`;
+    p.skills.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (p.commands.length) {
+    body += `<h5>${p.commands.length} slash command${p.commands.length>1?"s":""}</h5>`;
+    p.commands.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>/${p.name}:${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (p.agents.length) {
+    body += `<h5>${p.agents.length} sub-agent${p.agents.length>1?"s":""}</h5>`;
+    p.agents.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (wfs.length) {
+    body += `<h5>Used by ${wfs.length} workflow${wfs.length>1?"s":""}</h5><div style="display:flex;gap:6px;flex-wrap:wrap">` +
+      wfs.map(w=>`<span class="chip" style="cursor:pointer" onclick="gotoWorkflow('${w}')">${w}</span>`).join("") + `</div>`;
+  }
+  modal.innerHTML = `
+    <div class="mh">
+      <button class="close" onclick="closeModal()">✕</button>
+      <h3><span class="dot" style="color:${p.lane.color};background:${p.lane.color}"></span>${p.name}</h3>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="badge ${p.status}">${p.status}</span>${mcp}
+        <span class="laneTag"><span class="dot" style="width:8px;height:8px;color:${p.lane.color};background:${p.lane.color}"></span>${p.lane.label}</span>
+      </div>
+      <div class="sub">${esc(p.description)}</div>
+      <div class="chips">${tags}</div>
+    </div>
+    <div class="mb">${body || '<p style="color:var(--txt3)">No components.</p>'}</div>`;
+  overlay.classList.add("on");
+}
+window.gotoWorkflow = name => { closeModal(); showTab("workflows"); setTimeout(()=>{ const card = document.getElementById("wf-"+name); if(card){card.scrollIntoView({block:"center"}); card.animate([{boxShadow:"0 0 0 2px var(--accent)"},{boxShadow:"0 0 0 2px transparent"}],{duration:1400});} },60); };
+
+/* ---------------- workflows ---------------- */
+function resolvePlugin(invoke) {
+  if (invoke.startsWith("${")) {
+    const m = invoke.match(/capabilities\.([a-z_]+)\.plugin/);
+    return { cap:true, label: m ? ("cap: "+m[1].replace(/_/g," ")) : "capability", skill: invoke.split(":").pop(), color:"#94a3b8" };
+  }
+  const [pl, sk] = invoke.split(":");
+  const p = byName[pl];
+  return { cap:false, plugin:pl, skill:sk||"", color: p?p.lane.color:"#94a3b8", short: pl.replace("polymath-","") };
+}
+function workflowPlugins(w) {
+  const set = new Set(w.requires.filter(x=>byName[x]));
+  w.steps.forEach(s => { if (!s.invoke.startsWith("${")) { const pl=s.invoke.split(":")[0]; if (byName[pl]) set.add(pl); } });
+  return set;
+}
+function renderWorkflows() {
+  const grid = $("#workflowGrid"); grid.innerHTML = "";
+  const q = $("#search").value.trim().toLowerCase();
+  let shown = 0;
+  DATA.workflows.forEach(w => {
+    if (q && !(w.name.toLowerCase().includes(q) || w.description.toLowerCase().includes(q) || w.triggers.join(" ").toLowerCase().includes(q))) return;
+    shown++;
+    const c = el("div","card wcard"); c.id = "wf-"+w.name;
+    // pipeline
+    let pipe = "";
+    w.steps.forEach((s,i) => {
+      const r = resolvePlugin(s.invoke);
+      const bg = `${r.color}1a`, br = `${r.color}66`;
+      pipe += `<span class="step${r.cap?" cap":""}" style="--s:${br};--sb:${bg}">`+
+        (r.cap ? `<b>${r.label}</b>${r.skill?` <span class="sk">:${esc(r.skill)}</span>`:""}`
+               : `<b>${r.short}</b><span class="sk">:${esc(r.skill)}</span>`) + `</span>`;
+      if (i < w.steps.length-1) pipe += `<span class="arrow">→</span>`;
+    });
+    // composes
+    const plugs = [...workflowPlugins(w)].map(n=>byName[n]).filter(Boolean)
+      .sort((a,b)=>DATA.categoryOrder.indexOf(a.category)-DATA.categoryOrder.indexOf(b.category));
+    const composes = plugs.map(p=>`<span class="pill"><span class="pd" style="background:${p.lane.color}"></span>${p.name.replace("polymath-","")}</span>`).join("");
+    const trig = w.triggers[0] ? `<div class="trig">“${esc(w.triggers[0])}”</div>` : "";
+    c.innerHTML = `
+      <div class="wt"><h4>${w.name}</h4><span class="sc">${w.stepCount} steps</span></div>
+      <div class="wd">${esc(w.description)}</div>
+      <div class="pipe">${pipe}</div>
+      <div class="composes">${composes}</div>
+      ${trig}`;
+    grid.appendChild(c);
+  });
+  if (!shown) grid.appendChild(el("div","empty","No workflows match the search."));
+}
+
+/* ---------------- profiles ---------------- */
+function renderProfiles() {
+  const P = DATA.profiles;
+  $("#spineNote").innerHTML = `Every profile implicitly includes the spine: ${P._spine.map(s=>`<code>${s}</code>`).join(" + ")} — routing/conventions/project-context plus the workflow runner.`;
+  const grid = $("#profileGrid"); grid.innerHTML = "";
+  const maxB = Math.max(...Object.values(P.profiles).map(p=>p.alwaysOnBudget||0));
+  Object.entries(P.profiles).forEach(([key,pr]) => {
+    const c = el("div","card prof");
+    const chips = pr.plugins.map(n=>{ const p=byName[n]; const col=p?p.lane.color:"#94a3b8"; return `<span class="pill"><span class="pd" style="background:${col}"></span>${n.replace("polymath-","")}</span>`; }).join("");
+    const pct = Math.round(100*(pr.alwaysOnBudget||0)/maxB);
+    c.innerHTML = `
+      <div class="pt"><h4>${pr.title}</h4><span class="key">${key}</span></div>
+      <div class="for">${esc(pr.for)}</div>
+      <div class="composes" style="border:none;padding:0">${chips}</div>
+      <div class="budget">Always-on budget ceiling · ${pr.alwaysOnBudget} tokens<div class="bargd"><div class="barfl" style="width:${pct}%"></div></div></div>`;
+    grid.appendChild(c);
+  });
+}
+
+/* ---------------- search wiring ---------------- */
+$("#search").addEventListener("input", () => {
+  if (activeTab==="plugins") renderPlugins();
+  else if (activeTab==="workflows") renderWorkflows();
+  else { showTab("plugins"); renderPlugins(); }
+});
+
+/* ---------------- galaxy (force graph) ---------------- */
+let G = null;
+function buildGraph() {
+  const nodes = PLUGINS.map(p => ({
+    id:p.name, p, lane:p.lane, color:p.lane.color,
+    r: 7 + Math.sqrt(p.skills.length)*3.4,
+    x: 0, y: 0, vx:0, vy:0
+  }));
+  const idx = {}; nodes.forEach((n,i)=> idx[n.id]=i);
+  const ew = {};
+  DATA.workflows.forEach(w => {
+    const ps = [...workflowPlugins(w)];
+    for (let i=0;i<ps.length;i++) for (let j=i+1;j<ps.length;j++) {
+      const k = [ps[i],ps[j]].sort().join("|");
+      ew[k] = (ew[k]||0)+1;
+    }
+  });
+  const links = Object.entries(ew).map(([k,wt]) => {
+    const [a,b] = k.split("|");
+    return { s:idx[a], t:idx[b], w:wt };
+  }).filter(l => l.s!=null && l.t!=null);
+  return { nodes, links, idx };
+}
+function initGalaxy() {
+  const svg = $("#galaxySvg");
+  const W = svg.clientWidth, H = svg.clientHeight;
+  G = buildGraph();
+  const { nodes, links } = G;
+  // seed positions: cluster by lane around a ring
+  const laneAngle = {}; LANES.forEach((l,i)=> laneAngle[l.id] = (i/LANES.length)*Math.PI*2);
+  nodes.forEach(n => {
+    const a = laneAngle[n.lane.id] + (Math.sin(n.id.length)*.5);
+    const rad = Math.min(W,H)*0.30;
+    n.x = W/2 + Math.cos(a)*rad*(.6+ (n.id.length%5)/9);
+    n.y = H/2 + Math.sin(a)*rad*(.6+ (n.id.length%7)/11);
+  });
+  // legend
+  const gl = $("#glegend"); gl.innerHTML = "";
+  LANES.forEach(l => gl.appendChild(el("span",null,`<span class="dot" style="width:9px;height:9px;color:${l.color};background:${l.color}"></span>${l.label}`)));
+
+  // build svg elements
+  const NS = "http://www.w3.org/2000/svg";
+  svg.innerHTML = "";
+  const gLinks = document.createElementNS(NS,"g");
+  const gNodes = document.createElementNS(NS,"g");
+  svg.appendChild(gLinks); svg.appendChild(gNodes);
+  const linkEls = links.map(l => {
+    const ln = document.createElementNS(NS,"line");
+    ln.setAttribute("stroke","#39405a");
+    ln.setAttribute("stroke-width", Math.min(3.5, .6+l.w*0.5));
+    ln.setAttribute("stroke-opacity", .35);
+    gLinks.appendChild(ln); return ln;
+  });
+  const nodeEls = nodes.map((n,i) => {
+    const g = document.createElementNS(NS,"g"); g.style.cursor="pointer";
+    const halo = document.createElementNS(NS,"circle");
+    halo.setAttribute("r", n.r+5); halo.setAttribute("fill", n.color); halo.setAttribute("opacity",".0");
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("r", n.r); c.setAttribute("fill", n.color);
+    c.setAttribute("stroke", "#0a0c14"); c.setAttribute("stroke-width","1.5");
+    c.setAttribute("fill-opacity",".92");
+    const t = document.createElementNS(NS,"text");
+    t.setAttribute("class","nodeLabel"); t.setAttribute("text-anchor","middle");
+    t.setAttribute("dy", n.r+11); t.textContent = n.id.replace("polymath-","");
+    g.appendChild(halo); g.appendChild(c); g.appendChild(t);
+    gNodes.appendChild(g);
+    n._g=g; n._c=c; n._t=t; n._halo=halo;
+    g.addEventListener("mouseenter", ()=>focusNode(i,true));
+    g.addEventListener("mouseleave", ()=>focusNode(i,false));
+    g.addEventListener("click", (e)=>{ if(!dragMoved) openPlugin(n.p); });
+    // drag
+    g.addEventListener("mousedown", e => startDrag(e,n));
+    return g;
+  });
+  let labelMode = "auto"; // auto|all|none
+  $("#toggleLabels").onclick = () => {
+    labelMode = labelMode==="auto"?"all":labelMode==="all"?"none":"auto";
+    $("#toggleLabels").textContent = "Labels: "+labelMode;
+    applyLabels();
+  };
+  function applyLabels(){
+    nodes.forEach(n=>{
+      n._t.style.display = labelMode==="all"?"block":labelMode==="none"?"none":(n.r>12?"block":"none");
+    });
+  }
+  applyLabels();
+
+  // tooltip
+  const tip = $("#gtip");
+  function focusNode(i, on) {
+    const neigh = new Set([i]);
+    links.forEach(l => { if(l.s===i)neigh.add(l.t); if(l.t===i)neigh.add(l.s); });
+    nodes.forEach((n,j)=>{
+      const dim = on && !neigh.has(j);
+      n._c.setAttribute("fill-opacity", dim?".12":".92");
+      n._t.style.opacity = dim?".15":"1";
+      if(j===i) n._halo.setAttribute("opacity", on?".25":"0");
+    });
+    linkEls.forEach((ln,k)=>{
+      const rel = links[k].s===i||links[k].t===i;
+      ln.setAttribute("stroke-opacity", on?(rel?.8:.05):.35);
+      ln.setAttribute("stroke", on&&rel?nodes[i].color:"#39405a");
+    });
+    if (on) {
+      const n = nodes[i];
+      const wfCt = DATA.workflows.filter(w=>workflowPlugins(w).has(n.id)).length;
+      tip.innerHTML = `<b>${n.id}</b><div class="gm">${n.lane.label} · <span style="color:var(--${n.p.status==='beta'?'beta':'exp'})">${n.p.status}</span></div><div class="gm">${n.p.skills.length} skills · in ${wfCt} workflows</div>`;
+      tip.style.opacity = "1";
+      const r = svg.getBoundingClientRect();
+      tip.style.left = Math.min(r.width-250, n.x+14)+"px";
+      tip.style.top = Math.max(6, n.y-10)+"px";
+    } else tip.style.opacity = "0";
+  }
+
+  // ---- simulation ----
+  let alpha = 1;
+  function tick() {
+    alpha *= 0.992;
+    const k = alpha;
+    // repulsion
+    for (let i=0;i<nodes.length;i++) for (let j=i+1;j<nodes.length;j++) {
+      const a=nodes[i], b=nodes[j];
+      let dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy||1;
+      let d=Math.sqrt(d2);
+      const minD = a.r+b.r+6;
+      let f = 2600/d2;
+      if (d<minD) f += (minD-d)*0.6/d; // collision
+      const fx=dx/d*f, fy=dy/d*f;
+      a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
+    }
+    // links (springs)
+    links.forEach(l => {
+      const a=nodes[l.s], b=nodes[l.t];
+      let dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+      const ideal = 90;
+      const f = (d-ideal)*0.015*Math.min(2,l.w);
+      const fx=dx/d*f, fy=dy/d*f;
+      a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
+    });
+    // lane gravity (cluster same lane) + centering
+    const laneCenter = {};
+    LANES.forEach((l,i)=>{ const ang=(i/LANES.length)*Math.PI*2; laneCenter[l.id]={x:W/2+Math.cos(ang)*W*0.20, y:H/2+Math.sin(ang)*H*0.24}; });
+    nodes.forEach(n => {
+      const lc = laneCenter[n.lane.id];
+      n.vx += (lc.x-n.x)*0.006;
+      n.vy += (lc.y-n.y)*0.006;
+      n.vx += (W/2-n.x)*0.002;
+      n.vy += (H/2-n.y)*0.002;
+      n.vx*=0.85; n.vy*=0.85;
+      if (n!==dragNode) { n.x+=n.vx; n.y+=n.vy; }
+      n.x=Math.max(n.r+4,Math.min(W-n.r-4,n.x));
+      n.y=Math.max(n.r+4,Math.min(H-n.r-18,n.y));
+    });
+    // paint
+    nodes.forEach(n => n._g.setAttribute("transform",`translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`));
+    links.forEach((l,k)=>{ const a=nodes[l.s],b=nodes[l.t],ln=linkEls[k];
+      ln.setAttribute("x1",a.x.toFixed(1));ln.setAttribute("y1",a.y.toFixed(1));
+      ln.setAttribute("x2",b.x.toFixed(1));ln.setAttribute("y2",b.y.toFixed(1)); });
+    if (alpha>0.02 || dragNode) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  $("#reheat").onclick = () => { alpha=1; nodes.forEach(n=>{n.vx+=(Math.sin(n.x)*6);n.vy+=(Math.cos(n.y)*6);}); requestAnimationFrame(tick); };
+
+  // ---- drag ----
+  let dragNode=null, dragMoved=false;
+  function startDrag(e,n){ dragNode=n; dragMoved=false; svg.classList.add("drag"); alpha=Math.max(alpha,.3); requestAnimationFrame(tick); e.preventDefault(); }
+  svg.addEventListener("mousemove", e => {
+    if(!dragNode) return; dragMoved=true;
+    const r=svg.getBoundingClientRect();
+    dragNode.x=e.clientX-r.left; dragNode.y=e.clientY-r.top; dragNode.vx=0; dragNode.vy=0;
+  });
+  window.addEventListener("mouseup", ()=>{ dragNode=null; svg.classList.remove("drag"); });
+}
+
+/* ---------------- initial render ---------------- */
+renderPlugins(); renderWorkflows(); renderProfiles();
+$("#footer").innerHTML = `Polymath v${M.version} · ${M.pluginCount} plugins · ${M.skillCount} skills · ${M.workflowCount} workflows · generated atlas — open-source under MIT`;
+</script>
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polymath — Marketplace Atlas</title>
+<style>
+  :root {
+    --bg: #07080d;
+    --bg2: #0c0e16;
+    --panel: #11141f;
+    --panel2: #161a28;
+    --line: #232838;
+    --line2: #2e3447;
+    --txt: #e7eaf3;
+    --txt2: #9aa3bd;
+    --txt3: #6b7390;
+    --accent: #a78bfa;
+    --accent2: #60a5fa;
+    --beta: #34d399;
+    --exp: #fbbf24;
+    --shadow: 0 10px 40px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 700px at 80% -10%, #16182a 0%, var(--bg) 55%) fixed, var(--bg);
+    color: var(--txt);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  ::selection { background: rgba(167,139,250,.35); }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: rgba(8,9,15,.82);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar { max-width: 1280px; margin: 0 auto; padding: 12px 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 19px; letter-spacing: .2px; }
+  .gem { width: 26px; height: 26px; flex: none; filter: drop-shadow(0 0 10px rgba(167,139,250,.6)); }
+  .ver { font-size: 11px; font-weight: 600; color: var(--accent); border: 1px solid rgba(167,139,250,.4); border-radius: 999px; padding: 2px 9px; background: rgba(167,139,250,.08); }
+  nav.tabs { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  nav.tabs button {
+    background: none; border: 1px solid transparent; color: var(--txt2);
+    font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    padding: 7px 14px; border-radius: 9px; transition: .15s;
+  }
+  nav.tabs button:hover { color: var(--txt); background: var(--panel); }
+  nav.tabs button.on { color: #fff; background: linear-gradient(135deg, rgba(167,139,250,.28), rgba(96,165,250,.22)); border-color: var(--line2); }
+  .search { position: relative; }
+  .search input {
+    background: var(--panel); border: 1px solid var(--line2); border-radius: 9px;
+    color: var(--txt); font: inherit; font-size: 13.5px; padding: 7px 12px 7px 32px; width: 210px; transition: .15s;
+  }
+  .search input:focus { outline: none; border-color: var(--accent); width: 250px; }
+  .search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); opacity: .5; }
+
+  /* ---------- layout ---------- */
+  main { max-width: 1280px; margin: 0 auto; padding: 30px 22px 90px; }
+  .view { display: none; animation: fade .35s ease; }
+  .view.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h2.section { font-size: 14px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--txt3); margin: 38px 0 16px; font-weight: 700; }
+  h2.section:first-child { margin-top: 4px; }
+
+  /* ---------- hero ---------- */
+  .hero { text-align: center; padding: 26px 0 10px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 50px); margin: 0 0 12px; font-weight: 800; letter-spacing: -.5px;
+    background: linear-gradient(120deg, #fff 10%, #c9b6ff 50%, #8fb6ff 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { max-width: 720px; margin: 0 auto; color: var(--txt2); font-size: 16.5px; }
+  .interop { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .interop .tag { font-size: 11.5px; color: var(--txt2); border: 1px solid var(--line2); background: var(--panel); border-radius: 999px; padding: 4px 11px; }
+  .interop .lead { color: var(--txt3); align-self: center; font-size: 11.5px; }
+
+  /* ---------- stat tiles ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 30px; }
+  .stat { background: linear-gradient(160deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+  .stat::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .55; }
+  .stat .n { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+  .stat .l { color: var(--txt2); font-size: 13px; margin-top: 7px; font-weight: 500; }
+
+  /* ---------- generic card grids ---------- */
+  .grid { display: grid; gap: 14px; }
+  .cols3 { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .cols4 { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 17px; transition: .18s; }
+  .card:hover { border-color: var(--line2); transform: translateY(-2px); box-shadow: var(--shadow); }
+
+  /* lane legend */
+  .lanes { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; }
+  .lane { display: flex; align-items: center; gap: 11px; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; cursor: pointer; transition: .15s; }
+  .lane:hover { border-color: var(--line2); background: var(--panel2); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 9px currentColor; }
+  .lane .nm { font-weight: 650; font-size: 13.5px; }
+  .lane .ct { color: var(--txt3); font-size: 11.5px; margin-top: 1px; }
+
+  /* principles */
+  .princ { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 13px; }
+  .princ .card h4 { margin: 0 0 6px; font-size: 14.5px; }
+  .princ .card p { margin: 0; color: var(--txt2); font-size: 13px; }
+  .princ .ic { font-size: 20px; }
+
+  /* ---------- plugin cards ---------- */
+  .pcard { cursor: pointer; border-left: 3px solid var(--lane, var(--line2)); }
+  .pcard .top { display: flex; align-items: flex-start; gap: 9px; }
+  .pcard .nm { font-weight: 700; font-size: 15px; flex: 1; }
+  .pcard .nm small { display: block; color: var(--txt3); font-weight: 500; font-size: 11px; margin-top: 2px; }
+  .pcard .desc { color: var(--txt2); font-size: 12.8px; margin: 9px 0 11px; }
+  .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .badge.beta { color: var(--beta); background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.3); }
+  .badge.experimental { color: var(--exp); background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.28); }
+  .badge.mcp { color: #f0abfc; background: rgba(240,171,252,.1); border: 1px solid rgba(240,171,252,.3); }
+  .metrics { display: flex; gap: 14px; font-size: 12px; color: var(--txt2); border-top: 1px solid var(--line); padding-top: 10px; }
+  .metrics b { color: var(--txt); }
+  .laneTag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--txt2); }
+
+  /* ---------- modal ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 100; background: rgba(4,5,9,.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: none; align-items: flex-start; justify-content: center; padding: 5vh 18px; overflow-y: auto; }
+  .overlay.on { display: flex; animation: fade .2s; }
+  .modal { background: var(--bg2); border: 1px solid var(--line2); border-radius: 18px; max-width: 720px; width: 100%; box-shadow: var(--shadow); }
+  .modal .mh { padding: 22px 24px 16px; border-bottom: 1px solid var(--line); position: relative; }
+  .modal .mh h3 { margin: 0; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+  .modal .mh .sub { color: var(--txt2); font-size: 13.5px; margin-top: 8px; }
+  .modal .mh .chips { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; color: var(--txt2); background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+  .close { position: absolute; top: 16px; right: 18px; background: var(--panel); border: 1px solid var(--line2); color: var(--txt2); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 17px; line-height: 1; }
+  .close:hover { color: #fff; background: var(--panel2); }
+  .mb { padding: 18px 24px 26px; }
+  .mb h5 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt3); margin: 18px 0 10px; }
+  .mb h5:first-child { margin-top: 0; }
+  .skill { padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .skill:last-child { border-bottom: none; }
+  .skill .sn { font-weight: 650; font-size: 13.5px; color: var(--txt); }
+  .skill .sn code { color: var(--accent); background: rgba(167,139,250,.1); padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+  .skill .sd { color: var(--txt2); font-size: 12.5px; margin-top: 3px; }
+
+  /* ---------- workflow cards ---------- */
+  .wcard .wt { display: flex; align-items: baseline; gap: 9px; }
+  .wcard .wt h4 { margin: 0; font-size: 16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; }
+  .wcard .wt .sc { color: var(--txt3); font-size: 11.5px; margin-left: auto; }
+  .wcard .wd { color: var(--txt2); font-size: 13px; margin: 8px 0 13px; }
+  .pipe { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+  .step { font-size: 11px; border-radius: 7px; padding: 4px 8px; border: 1px solid var(--s, var(--line2)); background: var(--sb, var(--panel2)); white-space: nowrap; }
+  .step b { color: var(--txt); }
+  .step .sk { color: var(--txt2); }
+  .step.cap { border-style: dashed; }
+  .arrow { color: var(--txt3); font-size: 12px; }
+  .composes { display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 11px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--txt); background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; }
+  .pill .pd { width: 7px; height: 7px; border-radius: 50%; }
+  .trig { margin-top: 11px; font-size: 12px; color: var(--txt3); font-style: italic; }
+
+  /* ---------- profiles ---------- */
+  .prof .pt { display: flex; align-items: baseline; gap: 9px; }
+  .prof h4 { margin: 0; font-size: 16px; }
+  .prof .key { font-family: ui-monospace, monospace; color: var(--accent); font-size: 12px; }
+  .prof .for { color: var(--txt2); font-size: 12.8px; margin: 8px 0 12px; }
+  .prof .budget { margin-top: 12px; font-size: 11.5px; color: var(--txt3); }
+  .bargd { height: 6px; background: var(--panel2); border-radius: 999px; margin-top: 5px; overflow: hidden; border: 1px solid var(--line); }
+  .barfl { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; }
+  .spine { font-size: 11px; color: var(--txt3); margin-bottom: 14px; }
+  .spine code { color: var(--accent2); }
+
+  /* ---------- galaxy ---------- */
+  .gwrap { position: relative; border: 1px solid var(--line); border-radius: 16px; background: radial-gradient(700px 500px at 50% 40%, #0e1120, var(--bg2)); overflow: hidden; }
+  #galaxySvg { display: block; width: 100%; height: 620px; cursor: grab; }
+  #galaxySvg.drag { cursor: grabbing; }
+  .gctrls { position: absolute; top: 14px; left: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .gctrls button { background: rgba(17,20,31,.85); border: 1px solid var(--line2); color: var(--txt2); font: inherit; font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 8px; cursor: pointer; }
+  .gctrls button:hover { color: #fff; border-color: var(--accent); }
+  .glegend { position: absolute; bottom: 14px; left: 14px; right: 14px; display: flex; gap: 9px 14px; flex-wrap: wrap; font-size: 11px; color: var(--txt2); pointer-events: none; }
+  .glegend span { display: inline-flex; align-items: center; gap: 5px; }
+  .gtip { position: absolute; pointer-events: none; background: rgba(8,9,15,.96); border: 1px solid var(--line2); border-radius: 9px; padding: 9px 12px; font-size: 12px; opacity: 0; transition: opacity .12s; max-width: 240px; box-shadow: var(--shadow); }
+  .gtip b { font-size: 13px; }
+  .gtip .gm { color: var(--txt2); margin-top: 3px; }
+  .ghint { color: var(--txt3); font-size: 12px; margin: 10px 2px 0; }
+  .nodeLabel { font-size: 9.5px; fill: var(--txt2); pointer-events: none; font-family: -apple-system, sans-serif; }
+  .empty { color: var(--txt3); text-align: center; padding: 50px; font-size: 14px; }
+  .filterNote { display:inline-flex; align-items:center; gap:8px; background: var(--panel2); border:1px solid var(--line2); border-radius:999px; padding:5px 13px; font-size:12.5px; color:var(--txt2); margin-bottom: 16px; }
+  .filterNote button { background:none;border:none;color:var(--accent);cursor:pointer;font:inherit;font-size:12.5px; }
+  .footer { text-align:center; color: var(--txt3); font-size: 12px; margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M12 2L22 8.5V15.5L12 22L2 15.5V8.5L12 2Z" stroke="url(#g)" stroke-width="1.6" fill="rgba(167,139,250,.12)"/><path d="M12 2V22M2 8.5L22 15.5M22 8.5L2 15.5" stroke="url(#g)" stroke-width=".7" opacity=".5"/><defs><linearGradient id="g" x1="2" y1="2" x2="22" y2="22"><stop stop-color="#c9b6ff"/><stop offset="1" stop-color="#60a5fa"/></linearGradient></defs></svg>
+      Polymath <span class="ver" id="verPill">v—</span>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" placeholder="Search plugins, skills…" autocomplete="off">
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- OVERVIEW -->
+  <section class="view on" id="v-overview">
+    <div class="hero">
+      <h1>The Polymath Atlas</h1>
+      <p id="heroDesc"></p>
+      <div class="interop" id="interop"></div>
+    </div>
+    <div class="stats" id="stats"></div>
+
+    <h2 class="section">The 12 lanes</h2>
+    <div class="lanes" id="laneLegend"></div>
+
+    <h2 class="section">How it is built</h2>
+    <div class="princ" id="principles"></div>
+  </section>
+
+  <!-- GALAXY -->
+  <section class="view" id="v-galaxy">
+    <h2 class="section">Plugin galaxy — clustered by lane, linked by shared workflows</h2>
+    <div class="gwrap">
+      <svg id="galaxySvg"></svg>
+      <div class="gctrls">
+        <button id="reheat">↻ Re-cluster</button>
+        <button id="toggleLabels">Labels: auto</button>
+      </div>
+      <div class="glegend" id="glegend"></div>
+      <div class="gtip" id="gtip"></div>
+    </div>
+    <p class="ghint">Each node is a plugin — size scales with skill count, color with lane. A line joins two plugins that co-occur in at least one workflow; thicker = more shared workflows. Drag nodes, hover to focus, click to open the plugin.</p>
+  </section>
+
+  <!-- PLUGINS -->
+  <section class="view" id="v-plugins">
+    <div id="pluginFilter"></div>
+    <div id="pluginGroups"></div>
+  </section>
+
+  <!-- WORKFLOWS -->
+  <section class="view" id="v-workflows">
+    <h2 class="section">32 workflows — end-to-end journeys that compose plugins</h2>
+    <div class="grid cols3" id="workflowGrid"></div>
+  </section>
+
+  <!-- PROFILES -->
+  <section class="view" id="v-profiles">
+    <h2 class="section">Install profiles — curated role spines</h2>
+    <div class="spine" id="spineNote"></div>
+    <div class="grid cols3" id="profileGrid"></div>
+  </section>
+
+  <div class="footer" id="footer"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+const DATA = __POLYMATH_DATA__;
+
+/* ---------------- lane model ---------------- */
+const LANES = [
+  { id:"foundation", label:"Foundation & Flows", color:"#a78bfa", cats:["foundation","orchestration"] },
+  { id:"craft",      label:"Thinking & Craft",   color:"#818cf8", cats:["thinking","decisions","architecture","writing","learning"] },
+  { id:"product",    label:"Product & Discovery",color:"#f472b6", cats:["product","research","planning"] },
+  { id:"engineering",label:"Engineering",        color:"#60a5fa", cats:["engineering","mobile"] },
+  { id:"quality",    label:"Quality & Safety",   color:"#34d399", cats:["quality","security","performance"] },
+  { id:"operate",    label:"Platform & Operate", color:"#2dd4bf", cats:["platform","devops","sre","observability","incident"] },
+  { id:"infra",      label:"Infra & Cloud",      color:"#22d3ee", cats:["infra"] },
+  { id:"data",       label:"Data & AI",          color:"#fbbf24", cats:["data","ai"] },
+  { id:"people",     label:"People & Content",   color:"#fb923c", cats:["design","communication","leadership"] },
+  { id:"release",    label:"Release & Delivery", color:"#f87171", cats:["release"] },
+  { id:"connectors", label:"Connectors (MCP)",   color:"#94a3b8", cats:["connector"] },
+  { id:"authoring",  label:"Authoring",          color:"#e879f9", cats:["author"] },
+];
+const CAT2LANE = {};
+LANES.forEach(l => l.cats.forEach(c => CAT2LANE[c] = l));
+const laneOf = p => CAT2LANE[p.category] || LANES[LANES.length-1];
+const PLUGINS = Object.values(DATA.plugins);
+PLUGINS.forEach(p => { p.lane = laneOf(p); });
+const byName = DATA.plugins;
+
+/* ---------------- helpers ---------------- */
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => (s||"").replace(/[&<>]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+const $ = s => document.querySelector(s);
+
+/* ---------------- tabs ---------------- */
+const TABS = [
+  { id:"overview", label:"Overview" },
+  { id:"galaxy", label:"Galaxy" },
+  { id:"plugins", label:"Plugins" },
+  { id:"workflows", label:"Workflows" },
+  { id:"profiles", label:"Profiles" },
+];
+let activeTab = "overview";
+const tabsEl = $("#tabs");
+TABS.forEach(t => {
+  const b = el("button", t.id===activeTab?"on":"", t.label);
+  b.onclick = () => showTab(t.id);
+  b.dataset.tab = t.id;
+  tabsEl.appendChild(b);
+});
+let galaxyStarted = false;
+function showTab(id) {
+  activeTab = id;
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab===id));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id==="v-"+id));
+  if (id==="galaxy" && !galaxyStarted) { galaxyStarted = true; setTimeout(initGalaxy, 30); }
+  window.scrollTo({top:0});
+}
+
+/* ---------------- overview ---------------- */
+const M = DATA.meta;
+$("#verPill").textContent = "v"+M.version;
+$("#heroDesc").textContent = M.description;
+const interop = $("#interop");
+interop.appendChild(el("span","lead","Portable SKILL.md · agentskills.io v1.0 →"));
+M.interop.forEach(i => interop.appendChild(el("span","tag",i)));
+
+const betaCt = PLUGINS.filter(p=>p.status==="beta").length;
+const STATS = [
+  ["pluginCount","Plugins"], ["skillCount","Skills"], ["workflowCount","Workflows"],
+  ["commandCount","Slash commands"], ["connectorCount","MCP connectors"], ["agentCount","Sub-agents"],
+];
+const statsEl = $("#stats");
+STATS.forEach(([k,l]) => {
+  const c = el("div","stat");
+  c.innerHTML = `<div class="n" data-to="${M[k]}">0</div><div class="l">${l}</div>`;
+  statsEl.appendChild(c);
+});
+{ // extra tile: lanes
+  const c = el("div","stat");
+  c.innerHTML = `<div class="n" data-to="${LANES.length}">0</div><div class="l">Lanes</div>`;
+  statsEl.appendChild(c);
+  const c2 = el("div","stat");
+  c2.innerHTML = `<div class="n"><span style="color:var(--beta)">${betaCt}</span><span style="color:var(--txt3);font-size:24px"> / ${PLUGINS.length-betaCt}</span></div><div class="l">Beta / experimental</div>`;
+  statsEl.appendChild(c2);
+}
+// count-up animation
+function countUp() {
+  document.querySelectorAll("#stats .n[data-to]").forEach(n => {
+    const to = +n.dataset.to; let cur = 0; const step = Math.max(1, Math.round(to/28));
+    const t = setInterval(()=>{ cur += step; if (cur>=to){cur=to;clearInterval(t);} n.textContent = cur; }, 22);
+  });
+}
+countUp();
+
+// lane legend
+const laneLegend = $("#laneLegend");
+LANES.forEach(l => {
+  const plugs = PLUGINS.filter(p => p.lane.id===l.id);
+  const sk = plugs.reduce((a,p)=>a+p.skills.length,0);
+  const d = el("div","lane");
+  d.innerHTML = `<span class="dot" style="color:${l.color};background:${l.color}"></span>
+    <div><div class="nm">${l.label}</div><div class="ct">${plugs.length} plugin${plugs.length>1?"s":""} · ${sk} skills</div></div>`;
+  d.onclick = () => { showTab("plugins"); filterLane = l.id; $("#search").value=""; renderPlugins(); };
+  laneLegend.appendChild(d);
+});
+
+const PRINCIPLES = [
+  ["🧩","A-la-carte","40 independent plugins. Install only what you need — most teams run 5–10. Nothing is bundled or load-bearing on the rest."],
+  ["🪶","Token-budgeted","Every plugin keeps its always-on listing under 400 tokens; profiles are ratcheted against a summed ceiling. Capability lives in skills loaded on demand."],
+  ["🛠️","Work-shaped","Plugins map to how work is actually done — a lane per discipline, a skill per craft move, not per tool or API."],
+  ["🔗","Workflows compose plugins","The unit of value is the workflow: an SDLC journey that chains plugin skills into a step DAG, with some steps bound to dynamic capability slots."],
+  ["✅","Deterministic gates","Workflows carry mustPass checks — artifact-schema and diff constraints — so a run can't pass on hollow stubs."],
+  ["🔌","Open & portable","SKILL.md conforms to the agentskills.io v1.0 standard, portable across Claude, Codex, Copilot, Cursor, Gemini CLI and more."],
+];
+const princ = $("#principles");
+PRINCIPLES.forEach(([ic,h,p]) => {
+  princ.appendChild(el("div","card",`<div class="ic">${ic}</div><h4>${h}</h4><p>${p}</p>`));
+});
+
+/* ---------------- plugins ---------------- */
+let filterLane = null;
+function pluginMatch(p, q) {
+  if (!q) return true;
+  q = q.toLowerCase();
+  if (p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)) return true;
+  if (p.tags.some(t => t.includes(q))) return true;
+  return p.skills.some(s => s.name.toLowerCase().includes(q) || (s.description||"").toLowerCase().includes(q));
+}
+function renderPlugins() {
+  const q = $("#search").value.trim();
+  const wrap = $("#pluginGroups"); wrap.innerHTML = "";
+  const fEl = $("#pluginFilter"); fEl.innerHTML = "";
+  if (filterLane) {
+    const l = LANES.find(x=>x.id===filterLane);
+    const n = el("div","filterNote");
+    n.innerHTML = `<span class="dot" style="color:${l.color};background:${l.color}"></span> Lane: <b>${l.label}</b>`;
+    const b = el("button",null,"clear ✕"); b.onclick = ()=>{filterLane=null;renderPlugins();};
+    n.appendChild(b); fEl.appendChild(n);
+  }
+  let shown = 0;
+  LANES.forEach(l => {
+    if (filterLane && filterLane!==l.id) return;
+    let plugs = PLUGINS.filter(p => p.lane.id===l.id && pluginMatch(p,q));
+    if (!plugs.length) return;
+    plugs.sort((a,b)=> (a.status===b.status? b.skills.length-a.skills.length : a.status==="beta"?-1:1));
+    const h = el("h2","section",`<span style="color:${l.color}">●</span> ${l.label} <span style="color:var(--txt3);font-weight:500;text-transform:none;letter-spacing:0">· ${plugs.length}</span>`);
+    wrap.appendChild(h);
+    const g = el("div","grid cols3");
+    plugs.forEach(p => { g.appendChild(pluginCard(p)); shown++; });
+    wrap.appendChild(g);
+  });
+  if (!shown) wrap.appendChild(el("div","empty","No plugins match “"+esc(q)+"”."));
+}
+function pluginCard(p) {
+  const c = el("div","card pcard");
+  c.style.setProperty("--lane", p.lane.color);
+  const mcp = p.hasMcp ? `<span class="badge mcp">MCP</span>` : "";
+  c.innerHTML = `
+    <div class="top">
+      <div class="nm">${p.name}<small>${p.category}</small></div>
+      <span class="badge ${p.status}">${p.status}</span>${mcp}
+    </div>
+    <div class="desc">${esc(p.description)}</div>
+    <div class="metrics">
+      <span><b>${p.skills.length}</b> skills</span>
+      ${p.commands.length?`<span><b>${p.commands.length}</b> cmd</span>`:""}
+      ${p.agents.length?`<span><b>${p.agents.length}</b> agent</span>`:""}
+      <span class="laneTag" style="margin-left:auto"><span class="dot" style="width:8px;height:8px;color:${p.lane.color};background:${p.lane.color}"></span>${p.lane.label}</span>
+    </div>`;
+  c.onclick = () => openPlugin(p);
+  return c;
+}
+
+/* ---------------- plugin modal ---------------- */
+const overlay = $("#overlay"), modal = $("#modal");
+overlay.onclick = e => { if (e.target===overlay) closeModal(); };
+document.addEventListener("keydown", e => { if (e.key==="Escape") closeModal(); });
+function closeModal(){ overlay.classList.remove("on"); }
+function openPlugin(p) {
+  const mcp = p.hasMcp ? `<span class="badge mcp">MCP connector</span>` : "";
+  const tags = p.tags.map(t=>`<span class="chip">${t}</span>`).join("");
+  const wfs = DATA.workflows.filter(w => workflowPlugins(w).has(p.name)).map(w=>w.name);
+  let body = "";
+  if (p.skills.length) {
+    body += `<h5>${p.skills.length} skills</h5>`;
+    p.skills.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (p.commands.length) {
+    body += `<h5>${p.commands.length} slash command${p.commands.length>1?"s":""}</h5>`;
+    p.commands.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>/${p.name}:${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (p.agents.length) {
+    body += `<h5>${p.agents.length} sub-agent${p.agents.length>1?"s":""}</h5>`;
+    p.agents.forEach(s => {
+      body += `<div class="skill"><div class="sn"><code>${s.name}</code></div><div class="sd">${esc(s.description)}</div></div>`;
+    });
+  }
+  if (wfs.length) {
+    body += `<h5>Used by ${wfs.length} workflow${wfs.length>1?"s":""}</h5><div style="display:flex;gap:6px;flex-wrap:wrap">` +
+      wfs.map(w=>`<span class="chip" style="cursor:pointer" onclick="gotoWorkflow('${w}')">${w}</span>`).join("") + `</div>`;
+  }
+  modal.innerHTML = `
+    <div class="mh">
+      <button class="close" onclick="closeModal()">✕</button>
+      <h3><span class="dot" style="color:${p.lane.color};background:${p.lane.color}"></span>${p.name}</h3>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="badge ${p.status}">${p.status}</span>${mcp}
+        <span class="laneTag"><span class="dot" style="width:8px;height:8px;color:${p.lane.color};background:${p.lane.color}"></span>${p.lane.label}</span>
+      </div>
+      <div class="sub">${esc(p.description)}</div>
+      <div class="chips">${tags}</div>
+    </div>
+    <div class="mb">${body || '<p style="color:var(--txt3)">No components.</p>'}</div>`;
+  overlay.classList.add("on");
+}
+window.gotoWorkflow = name => { closeModal(); showTab("workflows"); setTimeout(()=>{ const card = document.getElementById("wf-"+name); if(card){card.scrollIntoView({block:"center"}); card.animate([{boxShadow:"0 0 0 2px var(--accent)"},{boxShadow:"0 0 0 2px transparent"}],{duration:1400});} },60); };
+
+/* ---------------- workflows ---------------- */
+function resolvePlugin(invoke) {
+  if (invoke.startsWith("${")) {
+    const m = invoke.match(/capabilities\.([a-z_]+)\.plugin/);
+    return { cap:true, label: m ? ("cap: "+m[1].replace(/_/g," ")) : "capability", skill: invoke.split(":").pop(), color:"#94a3b8" };
+  }
+  const [pl, sk] = invoke.split(":");
+  const p = byName[pl];
+  return { cap:false, plugin:pl, skill:sk||"", color: p?p.lane.color:"#94a3b8", short: pl.replace("polymath-","") };
+}
+function workflowPlugins(w) {
+  const set = new Set(w.requires.filter(x=>byName[x]));
+  w.steps.forEach(s => { if (!s.invoke.startsWith("${")) { const pl=s.invoke.split(":")[0]; if (byName[pl]) set.add(pl); } });
+  return set;
+}
+function renderWorkflows() {
+  const grid = $("#workflowGrid"); grid.innerHTML = "";
+  const q = $("#search").value.trim().toLowerCase();
+  let shown = 0;
+  DATA.workflows.forEach(w => {
+    if (q && !(w.name.toLowerCase().includes(q) || w.description.toLowerCase().includes(q) || w.triggers.join(" ").toLowerCase().includes(q))) return;
+    shown++;
+    const c = el("div","card wcard"); c.id = "wf-"+w.name;
+    // pipeline
+    let pipe = "";
+    w.steps.forEach((s,i) => {
+      const r = resolvePlugin(s.invoke);
+      const bg = `${r.color}1a`, br = `${r.color}66`;
+      pipe += `<span class="step${r.cap?" cap":""}" style="--s:${br};--sb:${bg}">`+
+        (r.cap ? `<b>${r.label}</b>${r.skill?` <span class="sk">:${esc(r.skill)}</span>`:""}`
+               : `<b>${r.short}</b><span class="sk">:${esc(r.skill)}</span>`) + `</span>`;
+      if (i < w.steps.length-1) pipe += `<span class="arrow">→</span>`;
+    });
+    // composes
+    const plugs = [...workflowPlugins(w)].map(n=>byName[n]).filter(Boolean)
+      .sort((a,b)=>DATA.categoryOrder.indexOf(a.category)-DATA.categoryOrder.indexOf(b.category));
+    const composes = plugs.map(p=>`<span class="pill"><span class="pd" style="background:${p.lane.color}"></span>${p.name.replace("polymath-","")}</span>`).join("");
+    const trig = w.triggers[0] ? `<div class="trig">“${esc(w.triggers[0])}”</div>` : "";
+    c.innerHTML = `
+      <div class="wt"><h4>${w.name}</h4><span class="sc">${w.stepCount} steps</span></div>
+      <div class="wd">${esc(w.description)}</div>
+      <div class="pipe">${pipe}</div>
+      <div class="composes">${composes}</div>
+      ${trig}`;
+    grid.appendChild(c);
+  });
+  if (!shown) grid.appendChild(el("div","empty","No workflows match the search."));
+}
+
+/* ---------------- profiles ---------------- */
+function renderProfiles() {
+  const P = DATA.profiles;
+  $("#spineNote").innerHTML = `Every profile implicitly includes the spine: ${P._spine.map(s=>`<code>${s}</code>`).join(" + ")} — routing/conventions/project-context plus the workflow runner.`;
+  const grid = $("#profileGrid"); grid.innerHTML = "";
+  const maxB = Math.max(...Object.values(P.profiles).map(p=>p.alwaysOnBudget||0));
+  Object.entries(P.profiles).forEach(([key,pr]) => {
+    const c = el("div","card prof");
+    const chips = pr.plugins.map(n=>{ const p=byName[n]; const col=p?p.lane.color:"#94a3b8"; return `<span class="pill"><span class="pd" style="background:${col}"></span>${n.replace("polymath-","")}</span>`; }).join("");
+    const pct = Math.round(100*(pr.alwaysOnBudget||0)/maxB);
+    c.innerHTML = `
+      <div class="pt"><h4>${pr.title}</h4><span class="key">${key}</span></div>
+      <div class="for">${esc(pr.for)}</div>
+      <div class="composes" style="border:none;padding:0">${chips}</div>
+      <div class="budget">Always-on budget ceiling · ${pr.alwaysOnBudget} tokens<div class="bargd"><div class="barfl" style="width:${pct}%"></div></div></div>`;
+    grid.appendChild(c);
+  });
+}
+
+/* ---------------- search wiring ---------------- */
+$("#search").addEventListener("input", () => {
+  if (activeTab==="plugins") renderPlugins();
+  else if (activeTab==="workflows") renderWorkflows();
+  else { showTab("plugins"); renderPlugins(); }
+});
+
+/* ---------------- galaxy (force graph) ---------------- */
+let G = null;
+function buildGraph() {
+  const nodes = PLUGINS.map(p => ({
+    id:p.name, p, lane:p.lane, color:p.lane.color,
+    r: 7 + Math.sqrt(p.skills.length)*3.4,
+    x: 0, y: 0, vx:0, vy:0
+  }));
+  const idx = {}; nodes.forEach((n,i)=> idx[n.id]=i);
+  const ew = {};
+  DATA.workflows.forEach(w => {
+    const ps = [...workflowPlugins(w)];
+    for (let i=0;i<ps.length;i++) for (let j=i+1;j<ps.length;j++) {
+      const k = [ps[i],ps[j]].sort().join("|");
+      ew[k] = (ew[k]||0)+1;
+    }
+  });
+  const links = Object.entries(ew).map(([k,wt]) => {
+    const [a,b] = k.split("|");
+    return { s:idx[a], t:idx[b], w:wt };
+  }).filter(l => l.s!=null && l.t!=null);
+  return { nodes, links, idx };
+}
+function initGalaxy() {
+  const svg = $("#galaxySvg");
+  const W = svg.clientWidth, H = svg.clientHeight;
+  G = buildGraph();
+  const { nodes, links } = G;
+  // seed positions: cluster by lane around a ring
+  const laneAngle = {}; LANES.forEach((l,i)=> laneAngle[l.id] = (i/LANES.length)*Math.PI*2);
+  nodes.forEach(n => {
+    const a = laneAngle[n.lane.id] + (Math.sin(n.id.length)*.5);
+    const rad = Math.min(W,H)*0.30;
+    n.x = W/2 + Math.cos(a)*rad*(.6+ (n.id.length%5)/9);
+    n.y = H/2 + Math.sin(a)*rad*(.6+ (n.id.length%7)/11);
+  });
+  // legend
+  const gl = $("#glegend"); gl.innerHTML = "";
+  LANES.forEach(l => gl.appendChild(el("span",null,`<span class="dot" style="width:9px;height:9px;color:${l.color};background:${l.color}"></span>${l.label}`)));
+
+  // build svg elements
+  const NS = "http://www.w3.org/2000/svg";
+  svg.innerHTML = "";
+  const gLinks = document.createElementNS(NS,"g");
+  const gNodes = document.createElementNS(NS,"g");
+  svg.appendChild(gLinks); svg.appendChild(gNodes);
+  const linkEls = links.map(l => {
+    const ln = document.createElementNS(NS,"line");
+    ln.setAttribute("stroke","#39405a");
+    ln.setAttribute("stroke-width", Math.min(3.5, .6+l.w*0.5));
+    ln.setAttribute("stroke-opacity", .35);
+    gLinks.appendChild(ln); return ln;
+  });
+  const nodeEls = nodes.map((n,i) => {
+    const g = document.createElementNS(NS,"g"); g.style.cursor="pointer";
+    const halo = document.createElementNS(NS,"circle");
+    halo.setAttribute("r", n.r+5); halo.setAttribute("fill", n.color); halo.setAttribute("opacity",".0");
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("r", n.r); c.setAttribute("fill", n.color);
+    c.setAttribute("stroke", "#0a0c14"); c.setAttribute("stroke-width","1.5");
+    c.setAttribute("fill-opacity",".92");
+    const t = document.createElementNS(NS,"text");
+    t.setAttribute("class","nodeLabel"); t.setAttribute("text-anchor","middle");
+    t.setAttribute("dy", n.r+11); t.textContent = n.id.replace("polymath-","");
+    g.appendChild(halo); g.appendChild(c); g.appendChild(t);
+    gNodes.appendChild(g);
+    n._g=g; n._c=c; n._t=t; n._halo=halo;
+    g.addEventListener("mouseenter", ()=>focusNode(i,true));
+    g.addEventListener("mouseleave", ()=>focusNode(i,false));
+    g.addEventListener("click", (e)=>{ if(!dragMoved) openPlugin(n.p); });
+    // drag
+    g.addEventListener("mousedown", e => startDrag(e,n));
+    return g;
+  });
+  let labelMode = "auto"; // auto|all|none
+  $("#toggleLabels").onclick = () => {
+    labelMode = labelMode==="auto"?"all":labelMode==="all"?"none":"auto";
+    $("#toggleLabels").textContent = "Labels: "+labelMode;
+    applyLabels();
+  };
+  function applyLabels(){
+    nodes.forEach(n=>{
+      n._t.style.display = labelMode==="all"?"block":labelMode==="none"?"none":(n.r>12?"block":"none");
+    });
+  }
+  applyLabels();
+
+  // tooltip
+  const tip = $("#gtip");
+  function focusNode(i, on) {
+    const neigh = new Set([i]);
+    links.forEach(l => { if(l.s===i)neigh.add(l.t); if(l.t===i)neigh.add(l.s); });
+    nodes.forEach((n,j)=>{
+      const dim = on && !neigh.has(j);
+      n._c.setAttribute("fill-opacity", dim?".12":".92");
+      n._t.style.opacity = dim?".15":"1";
+      if(j===i) n._halo.setAttribute("opacity", on?".25":"0");
+    });
+    linkEls.forEach((ln,k)=>{
+      const rel = links[k].s===i||links[k].t===i;
+      ln.setAttribute("stroke-opacity", on?(rel?.8:.05):.35);
+      ln.setAttribute("stroke", on&&rel?nodes[i].color:"#39405a");
+    });
+    if (on) {
+      const n = nodes[i];
+      const wfCt = DATA.workflows.filter(w=>workflowPlugins(w).has(n.id)).length;
+      tip.innerHTML = `<b>${n.id}</b><div class="gm">${n.lane.label} · <span style="color:var(--${n.p.status==='beta'?'beta':'exp'})">${n.p.status}</span></div><div class="gm">${n.p.skills.length} skills · in ${wfCt} workflows</div>`;
+      tip.style.opacity = "1";
+      const r = svg.getBoundingClientRect();
+      tip.style.left = Math.min(r.width-250, n.x+14)+"px";
+      tip.style.top = Math.max(6, n.y-10)+"px";
+    } else tip.style.opacity = "0";
+  }
+
+  // ---- simulation ----
+  let alpha = 1;
+  function tick() {
+    alpha *= 0.992;
+    const k = alpha;
+    // repulsion
+    for (let i=0;i<nodes.length;i++) for (let j=i+1;j<nodes.length;j++) {
+      const a=nodes[i], b=nodes[j];
+      let dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy||1;
+      let d=Math.sqrt(d2);
+      const minD = a.r+b.r+6;
+      let f = 2600/d2;
+      if (d<minD) f += (minD-d)*0.6/d; // collision
+      const fx=dx/d*f, fy=dy/d*f;
+      a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
+    }
+    // links (springs)
+    links.forEach(l => {
+      const a=nodes[l.s], b=nodes[l.t];
+      let dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+      const ideal = 90;
+      const f = (d-ideal)*0.015*Math.min(2,l.w);
+      const fx=dx/d*f, fy=dy/d*f;
+      a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
+    });
+    // lane gravity (cluster same lane) + centering
+    const laneCenter = {};
+    LANES.forEach((l,i)=>{ const ang=(i/LANES.length)*Math.PI*2; laneCenter[l.id]={x:W/2+Math.cos(ang)*W*0.20, y:H/2+Math.sin(ang)*H*0.24}; });
+    nodes.forEach(n => {
+      const lc = laneCenter[n.lane.id];
+      n.vx += (lc.x-n.x)*0.006;
+      n.vy += (lc.y-n.y)*0.006;
+      n.vx += (W/2-n.x)*0.002;
+      n.vy += (H/2-n.y)*0.002;
+      n.vx*=0.85; n.vy*=0.85;
+      if (n!==dragNode) { n.x+=n.vx; n.y+=n.vy; }
+      n.x=Math.max(n.r+4,Math.min(W-n.r-4,n.x));
+      n.y=Math.max(n.r+4,Math.min(H-n.r-18,n.y));
+    });
+    // paint
+    nodes.forEach(n => n._g.setAttribute("transform",`translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`));
+    links.forEach((l,k)=>{ const a=nodes[l.s],b=nodes[l.t],ln=linkEls[k];
+      ln.setAttribute("x1",a.x.toFixed(1));ln.setAttribute("y1",a.y.toFixed(1));
+      ln.setAttribute("x2",b.x.toFixed(1));ln.setAttribute("y2",b.y.toFixed(1)); });
+    if (alpha>0.02 || dragNode) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  $("#reheat").onclick = () => { alpha=1; nodes.forEach(n=>{n.vx+=(Math.sin(n.x)*6);n.vy+=(Math.cos(n.y)*6);}); requestAnimationFrame(tick); };
+
+  // ---- drag ----
+  let dragNode=null, dragMoved=false;
+  function startDrag(e,n){ dragNode=n; dragMoved=false; svg.classList.add("drag"); alpha=Math.max(alpha,.3); requestAnimationFrame(tick); e.preventDefault(); }
+  svg.addEventListener("mousemove", e => {
+    if(!dragNode) return; dragMoved=true;
+    const r=svg.getBoundingClientRect();
+    dragNode.x=e.clientX-r.left; dragNode.y=e.clientY-r.top; dragNode.vx=0; dragNode.vy=0;
+  });
+  window.addEventListener("mouseup", ()=>{ dragNode=null; svg.classList.remove("drag"); });
+}
+
+/* ---------------- initial render ---------------- */
+renderPlugins(); renderWorkflows(); renderProfiles();
+$("#footer").innerHTML = `Polymath v${M.version} · ${M.pluginCount} plugins · ${M.skillCount} skills · ${M.workflowCount} workflows · generated atlas — open-source under MIT`;
+</script>
+</body>
+</html>
