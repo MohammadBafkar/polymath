@@ -404,6 +404,10 @@ class GuardExecutionTests(IsolatedCwdTestCase):
             "    type: command\n"
             "    command: \"true\"\n",
         )
+        # A project-layer workflow's shell guard runs only when the repo opts
+        # into repo-supplied shell; mark it trusted.
+        (self.work / ".polymath").mkdir(exist_ok=True)
+        (self.work / ".polymath" / "trust").write_text("")
         code, out = self._capture("start", "cleanFlow")
         self.assertEqual(code, 0)
         result = json.loads(out)

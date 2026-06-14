@@ -135,6 +135,16 @@ elsewhere is intentional.
   PyYAML is absent, the SessionStart fragment builder falls back to a
   line-scan; a block-scalar `whenToUse` is skipped (the workflow stays
   runnable by name, it is just not proposed).
+- **Shell-executing checks require an explicit trust opt-in.** The
+  flows-lite runner runs a shell for `appStarts` smoke recipes (read from
+  `.polymath/project.yaml`) and for `command` / `commandSucceeds` checks.
+  Marketplace workflow commands are trusted; a project/user-layer workflow
+  and the project smoke recipe are not — they run only when the repo
+  declares a `.polymath/trust` marker (or `POLYMATH_ALLOW_SHELL=1`), so
+  cloning an untrusted repo cannot execute its shell on `start`/`resume`.
+  Substituted `inputs`/`project`/`capabilities` values carrying shell
+  metacharacters are refused rather than interpolated. See
+  [`SECURITY.md`](SECURITY.md).
 - **No autonomous deployer.** Deployment mutates infrastructure, which
   flows-lite's contract excludes. Polymath ships the composition as a
   pattern doc

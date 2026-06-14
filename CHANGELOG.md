@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Flows runner shell trust boundary.**
+  `polymath-flow` no longer executes repo-supplied shell on a fresh
+  checkout: `appStarts` smoke recipes (read from `.polymath/project.yaml`)
+  and `command` / `commandSucceeds` checks in project/user-layer workflows
+  now run only when the repo opts in via a `.polymath/trust` marker or
+  `POLYMATH_ALLOW_SHELL=1` (marketplace workflows stay trusted). Substituted
+  `inputs` / `project` / `capabilities` values that carry shell
+  metacharacters are refused instead of interpolated into
+  `subprocess.run(..., shell=True)`. New `SECURITY.md` documents the
+  boundary.
+
+### Fixed
+
+- **Flows runner correctness.** `needs`
+  references are validated at `validate` time (dangling, self, and forward
+  references rejected) and enforced at runtime: `complete` refuses an
+  out-of-order step (exit 2) instead of advancing the run index past unrun
+  steps and silently reporting "completed". A missing or corrupt
+  `state.json` now exits with code 3 and a clear message instead of an
+  uncaught traceback, `list` skips a single unreadable run rather than
+  aborting the whole listing, and every state write is atomic
+  (`.tmp` + `os.replace`).
+
 ### Added
 
 - **P5 right-sized longevity: dead-config deletion, DEADCONF-1,

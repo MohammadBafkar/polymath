@@ -556,6 +556,79 @@ def _err(msg: str, *, code: int = 2) -> None:
     sys.exit(code)
 
 
+# ---------------------------------------------------------------------------
+# Shell-execution trust boundary
+# ---------------------------------------------------------------------------
+#
+# Several checks run a shell on content that travels with a checkout: appStarts
+# executes a project's `smoke.<lang>.start` command verbatim, and command /
+# commandSucceeds checks run a workflow-authored command. Marketplace workflow
+# YAMLs are reviewed content; a project/user-layer workflow and the project's
+# smoke recipe are NOT — they arrive with an untrusted clone. Running either
+# without an explicit opt-in is arbitrary local code execution, so both are
+# gated on a per-repo trust acknowledgement.
+
+def _shell_trust_marker_present() -> bool:
+    """True when the repo has opted into running repo-supplied shell — a
+    `.polymath/trust` marker found by walking cwd upward (stopping at the .git
+    boundary), or POLYMATH_ALLOW_SHELL=1. Gates appStarts smoke commands and
+    project/user-layer workflow command checks."""
+    if os.environ.get("POLYMATH_ALLOW_SHELL") == "1":
+        return True
+    here = pathlib.Path.cwd()
+    for d in (here, *here.parents):
+        try:
+            if (d / ".polymath" / "trust").exists():
+                return True
+            if (d / ".git").exists():
+                return False
+        except OSError:
+            return False
+    return False
+
+
+def _workflow_shell_trusted(workflow_path: pathlib.Path | None) -> bool:
+    """A workflow's shell-executing checks (command / commandSucceeds) are
+    trusted when the workflow ships from the marketplace plugin tree (reviewed
+    content) OR the repo opted in via _shell_trust_marker_present(). A
+    project/user-layer workflow is untrusted content on a fresh checkout, so
+    its shell checks require the explicit marker."""
+    try:
+        if workflow_path is not None:
+            wp = pathlib.Path(workflow_path).resolve()
+            root = PLUGIN_ROOT.resolve()
+            if wp == root or root in wp.parents:
+                return True
+    except OSError:
+        pass
+    return _shell_trust_marker_present()
+
+
+# ---------------------------------------------------------------------------
+# Run-state persistence
+# ---------------------------------------------------------------------------
+
+def _load_state(run_dir: pathlib.Path) -> dict:
+    """Read a run's state.json, mapping a missing/corrupt/half-written file to
+    the documented exit-code-3 'state corrupt' contract instead of letting a
+    raw JSONDecodeError/OSError traceback escape."""
+    sp = run_dir / "state.json"
+    try:
+        return json.loads(sp.read_text())
+    except (OSError, json.JSONDecodeError) as e:
+        _err(f"run {run_dir.name}: state.json is missing or corrupt ({e})", code=3)
+        raise  # unreachable: _err() exits; satisfies type-checkers
+
+
+def _write_state(run_dir: pathlib.Path, state: dict) -> None:
+    """Persist state.json atomically (write a sibling .tmp then os.replace) so an
+    interrupted write can never leave a half-written file for the next read."""
+    sp = run_dir / "state.json"
+    tmp = sp.parent / (sp.name + ".tmp")
+    tmp.write_text(json.dumps(state, indent=2))
+    os.replace(tmp, sp)
+
+
 def _validate(workflow: dict) -> list[str]:
     errs: list[str] = []
     schema_version = workflow.get("schemaVersion")
@@ -678,6 +751,7 @@ def _validate(workflow: dict) -> list[str]:
         errs.append("workflow must declare steps")
     if isinstance(steps, list):
         seen = set()
+        prior_ids: set[str] = set()  # step ids declared before the current one
         for i, step in enumerate(steps):
             if not isinstance(step, dict):
                 errs.append(f"step #{i} is not a mapping")
@@ -709,6 +783,24 @@ def _validate(workflow: dict) -> list[str]:
                 errs.append(f"step {sid!r} has unknown keys: {sorted(unknown_keys)}")
             if "topology" in step and step["topology"] not in {"series", "fanout"}:
                 errs.append(f"step {sid!r} topology '{step['topology']}' not supported (allowed: series, fanout)")
+            # needs must reference an EARLIER step (serial model): catch
+            # dangling, self, and forward references at validate time so a
+            # typo'd dependency is a hard error, not a silently-inert field.
+            needs = step.get("needs")
+            if needs is not None:
+                if not isinstance(needs, list) or any(not isinstance(n, str) for n in needs):
+                    errs.append(f"step {sid!r} needs must be a list of step ids")
+                else:
+                    for n in needs:
+                        if n == sid:
+                            errs.append(f"step {sid!r} needs cannot reference itself")
+                        elif n not in prior_ids:
+                            errs.append(
+                                f"step {sid!r} needs {n!r}, which is not a prior step "
+                                f"(needs must reference an earlier step — flows-lite is serial)"
+                            )
+            if isinstance(sid, str):
+                prior_ids.add(sid)
 
     for section, items in (("guards", workflow.get("guards", [])), ("mustPass", workflow.get("mustPass", []))):
         if not isinstance(items, list):
@@ -929,6 +1021,21 @@ def _project_lookup(snapshot: dict, dotted: str) -> str | None:
     return str(cur)
 
 
+_SHELL_META = set(";&|$`()<>{}\n\r\"'\\")
+
+
+class _ShellInjectionError(Exception):
+    """A substituted value would inject shell syntax into a command check.
+    Raised by _substitute(shell_context=True); the caller surfaces it as a
+    refused (exit-2) check rather than running attacker-controlled syntax."""
+
+    def __init__(self, expr: str, value: str) -> None:
+        bad = "".join(sorted({c for c in value if c in _SHELL_META}))
+        super().__init__(
+            f"value for ${{{expr}}} contains shell metacharacter(s) {bad!r}"
+        )
+
+
 def _substitute(
     text: str,
     *,
@@ -936,6 +1043,7 @@ def _substitute(
     workflow_meta: dict,
     capabilities: dict | None = None,
     project: dict | None = None,
+    shell_context: bool = False,
 ) -> str:
     """Substitute `${inputs.x}`, `${workflow.x}`, (when capability
     resolution has run) `${capabilities.<cap>.<field>}`, and (when a
@@ -948,13 +1056,24 @@ def _substitute(
 
     caps = capabilities or {}
 
+    def guard(expr: str, value: str) -> str:
+        # In a shell context, refuse any substituted (untrusted) value that
+        # carries shell syntax — a typed refusal beats silently interpolating
+        # it into subprocess.run(..., shell=True). The command's own literal
+        # text (the workflow author's, trusted) is never inspected.
+        if shell_context and any(c in _SHELL_META for c in value):
+            raise _ShellInjectionError(expr, value)
+        return value
+
     def repl(match: re.Match[str]) -> str:
         expr = match.group(1).strip()
         if expr.startswith("inputs."):
             key = expr[len("inputs.") :]
-            return str(inputs.get(key, ""))
+            return guard(expr, str(inputs.get(key, "")))
         if expr.startswith("workflow."):
             key = expr[len("workflow.") :]
+            # workflow.* (id/slug/name) is runner-derived and shape-validated,
+            # never user free-text — safe to pass through unguarded.
             return str(workflow_meta.get(key, ""))
         if expr.startswith("capabilities."):
             # capabilities.<cap>.<field>
@@ -964,15 +1083,15 @@ def _substitute(
                 return match.group(0)
             cap_name, field = parts
             entry = caps.get(cap_name) or {}
-            return str(entry.get(field, ""))
+            return guard(expr, str(entry.get(field, "")))
         if expr.startswith("project."):
             rest = expr[len("project.") :]
             path, sep, fallback = rest.partition(":-")
             value = _project_lookup(project, path.strip()) if project else None
             if value is not None:
-                return value
+                return guard(expr, value)
             if sep:
-                return fallback
+                return fallback  # author-supplied literal, trusted
             return match.group(0)
         return match.group(0)
 
@@ -1450,10 +1569,12 @@ def cmd_start(args: argparse.Namespace) -> int:
     guard_blocking: list[dict] = []
     guard_advisories: list[dict] = []
     guard_na: list[dict] = []
+    guards_trusted = _workflow_shell_trusted(workflow_path)
     for check in workflow.get("guards", []) or []:
         outcome, detail = _run_check(
             check, run_dir, inputs, workflow_meta,
             capabilities=resolved_caps, project=project_snapshot,
+            workflow_trusted=guards_trusted,
         )
         if outcome is True:
             continue
@@ -1503,7 +1624,7 @@ def cmd_start(args: argparse.Namespace) -> int:
         "effective_plugins": effective_plugins,
         "project_context": project_snapshot,
     }
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
 
     _trace(run_dir, "start", {"inputs": inputs, "workflow": workflow["name"]})
     out = {"run_id": run_id, "status": "active"}
@@ -1519,7 +1640,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     # The source YAML is re-read on every call; refuse to continue a run
     # whose source gained build-time-only keys after start.
@@ -1551,8 +1672,12 @@ def cmd_next(args: argparse.Namespace) -> int:
     if idx >= len(steps):
         # All steps complete; clear the in-flight marker and assert mustPass.
         state["in_flight"] = None
-        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
-        result = _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities, project=project)
+        _write_state(run_dir, state)
+        result = _assert(
+            run_dir, workflow, inputs, workflow_meta,
+            capabilities=capabilities, project=project,
+            workflow_trusted=_workflow_shell_trusted(pathlib.Path(state["workflow_path"])),
+        )
         return 0 if result == 0 else 2
 
     step = steps[idx]
@@ -1560,7 +1685,7 @@ def cmd_next(args: argparse.Namespace) -> int:
     # SessionStart shows which step was open (resume re-issues it via `next`,
     # which always points at current_step_index — only `complete` advances it).
     state["in_flight"] = {"step": step["id"], "at": state["last_active"], "note": ""}
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
 
     topology = step.get("topology", "series")
     payload = {
@@ -1590,8 +1715,31 @@ def cmd_complete(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     step_id = args.step
+
+    # Serial ordering: only the current step may be completed. This is
+    # what stops an out-of-order `complete` from advancing current_step_index
+    # past steps that never ran and reporting the whole run "completed".
+    steps_state = state.get("steps", [])
+    cur_idx = state.get("current_step_index", 0)
+    pos = next((i for i, s in enumerate(steps_state) if s.get("id") == step_id), None)
+    if pos is None:
+        _err(f"step {step_id} not found in run {args.run_id}", code=3)
+    if steps_state[pos].get("status") == "complete":
+        # Idempotent re-complete of an already-finished step: succeed, no advance.
+        print(json.dumps({"step": step_id, "status": "complete", "note": "already complete"}, indent=2))
+        return 0
+    if pos != cur_idx:
+        current = steps_state[cur_idx]["id"] if 0 <= cur_idx < len(steps_state) else None
+        _trace(run_dir, "complete-refused", {"step": step_id, "current": current, "reason": "out-of-order"})
+        print(json.dumps({
+            "step": step_id,
+            "status": "refused",
+            "reason": f"out-of-order completion: the current step is {current!r}",
+            "hint": "complete steps in declared order; run `next` to see the current step",
+        }, indent=2))
+        return 2
 
     # Per-step artifact contract: a step that declares `artifacts:` may only
     # complete when every declared path exists — the smallest hollow-run
@@ -1620,6 +1768,20 @@ def cmd_complete(args: argparse.Namespace) -> int:
     except Exception:
         step_def = None  # unreadable sources: assert remains the backstop
     if step_def:
+        # Honor declared needs at runtime: every prerequisite must be complete.
+        unmet_needs = [
+            n for n in (step_def.get("needs") or [])
+            if not any(s.get("id") == n and s.get("status") == "complete" for s in steps_state)
+        ]
+        if unmet_needs:
+            _trace(run_dir, "complete-refused", {"step": step_id, "unmet_needs": unmet_needs})
+            print(json.dumps({
+                "step": step_id,
+                "status": "refused",
+                "unmet_needs": unmet_needs,
+                "hint": "complete the prerequisite step(s) first",
+            }, indent=2))
+            return 2
         missing = []
         for a in step_def.get("artifacts") or []:
             resolved = _substitute(
@@ -1679,7 +1841,7 @@ def cmd_complete(args: argparse.Namespace) -> int:
         state["status"] = "active"  # remain active until assert passes
     state["last_active"] = _now_iso()
     state["in_flight"] = None  # step finished; clear the mid-step breadcrumb
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
     _trace(run_dir, "complete", {"step": step_id})
     payload: dict = {"step": step_id, "status": "complete"}
     if artifact_warnings:
@@ -1699,7 +1861,7 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     inflight = state.get("in_flight") or {}
     step = args.step or inflight.get("step")
     if not step:
@@ -1707,7 +1869,7 @@ def cmd_checkpoint(args: argparse.Namespace) -> int:
     now = _now_iso()
     state["in_flight"] = {"step": step, "at": now, "note": args.note or inflight.get("note", "")}
     state["last_active"] = now
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
     _trace(run_dir, "checkpoint", {"step": step, "note": args.note or ""})
     print(json.dumps({"run_id": args.run_id, "in_flight": state["in_flight"]}, indent=2))
     return 0
@@ -1717,7 +1879,7 @@ def cmd_fail(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     state["status"] = "paused"
     state["pause_reason"] = args.summary or "step failed"
     for s in state["steps"]:
@@ -1730,7 +1892,7 @@ def cmd_fail(args: argparse.Namespace) -> int:
     # contradictory).
     state["last_active"] = _now_iso()
     state["in_flight"] = None
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
     _trace(run_dir, "fail", {"step": args.step, "reason": state["pause_reason"]})
     print(json.dumps({"status": "paused", "step": args.step}, indent=2))
     return 0
@@ -1740,11 +1902,11 @@ def cmd_resume(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     if state["status"] == "paused":
         state["status"] = "active"
         state["last_active"] = _now_iso()
-        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        _write_state(run_dir, state)
         _trace(run_dir, "resume", {})
     return cmd_next(argparse.Namespace(run_id=args.run_id))
 
@@ -1753,7 +1915,7 @@ def cmd_assert(args: argparse.Namespace) -> int:
     run_dir = _workflow_runs_dir() / args.run_id
     if not run_dir.exists():
         _err(f"unknown run: {args.run_id}", code=3)
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     workflow = _load_yaml(pathlib.Path(state["workflow_path"]).read_text())
     if isinstance(workflow, dict) and any(k in workflow for k in BUILD_TIME_ONLY_KEYS):
         _err(
@@ -1769,7 +1931,11 @@ def cmd_assert(args: argparse.Namespace) -> int:
         "slug": _slugify(str(inputs.get("title", state["workflow"]))),
         "name": state["workflow"],
     }
-    return _assert(run_dir, workflow, inputs, workflow_meta, capabilities=capabilities, project=project)
+    return _assert(
+        run_dir, workflow, inputs, workflow_meta,
+        capabilities=capabilities, project=project,
+        workflow_trusted=_workflow_shell_trusted(pathlib.Path(state["workflow_path"])),
+    )
 
 
 def cmd_list(args: argparse.Namespace) -> int:
@@ -1782,7 +1948,11 @@ def cmd_list(args: argparse.Namespace) -> int:
         sp = d / "state.json"
         if not sp.exists():
             continue
-        s = json.loads(sp.read_text())
+        try:
+            s = json.loads(sp.read_text())
+        except (OSError, json.JSONDecodeError):
+            print(f"polymath-flow: skipping unreadable run {d.name}", file=sys.stderr)
+            continue
         if args.status and s["status"] != args.status:
             continue
         results.append({"run_id": s["run_id"], "workflow": s["workflow"], "status": s["status"], "last_active": s.get("last_active")})
@@ -1888,12 +2058,13 @@ def _assert(
     *,
     capabilities: dict | None = None,
     project: dict | None = None,
+    workflow_trusted: bool = True,
 ) -> int:
     checks = workflow.get("mustPass", []) or []
     if not checks:
-        state = json.loads((run_dir / "state.json").read_text())
+        state = _load_state(run_dir)
         state["status"] = "completed"
-        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        _write_state(run_dir, state)
         out = {"status": "completed", "checks": 0}
         prov_dest = _persist_run_provenance(run_dir, project)
         if prov_dest:
@@ -1907,7 +2078,7 @@ def _assert(
     advisory_failures: list[dict] = []
     not_applicable: list[dict] = []
     for check in checks:
-        outcome, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities, project=project)
+        outcome, detail = _run_check(check, run_dir, inputs, workflow_meta, capabilities=capabilities, project=project, workflow_trusted=workflow_trusted)
         if outcome is True:
             continue
         if outcome == "not-applicable":
@@ -1929,13 +2100,13 @@ def _assert(
         else:
             blocking_failures.append(record)
 
-    state = json.loads((run_dir / "state.json").read_text())
+    state = _load_state(run_dir)
     if blocking_failures:
         state["status"] = "paused"
         state["pause_reason"] = (
             f"{len(blocking_failures)} blocking mustPass check(s) failed"
         )
-        (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+        _write_state(run_dir, state)
         trace_data = {"failures": blocking_failures, "advisories": advisory_failures}
         out = {
             "status": "paused",
@@ -1950,7 +2121,7 @@ def _assert(
         return 2
 
     state["status"] = "completed"
-    (run_dir / "state.json").write_text(json.dumps(state, indent=2))
+    _write_state(run_dir, state)
     trace_data = {"checks": len(checks), "advisories": advisory_failures}
     out = {
         "status": "completed",
@@ -1978,6 +2149,7 @@ def _run_check(
     *,
     capabilities: dict | None = None,
     project: dict | None = None,
+    workflow_trusted: bool = True,
 ) -> tuple[bool | str, str]:
     """Run one check. Returns (outcome, detail) where outcome is True
     (pass), False (fail — severity decides whether it blocks), or the
@@ -1996,7 +2168,18 @@ def _run_check(
         ok = bool(re.search(pattern, p.read_text(errors="ignore")))
         return ok, f"path={path} pattern={pattern!r} match={ok}"
     if t in {"commandSucceeds", "command"}:
-        cmd = _substitute(check["command"], inputs=inputs, workflow_meta=workflow_meta, capabilities=capabilities, project=project)
+        if not workflow_trusted:
+            return False, (
+                "refused: shell command from a project/user-layer workflow "
+                "needs a .polymath/trust marker (or POLYMATH_ALLOW_SHELL=1)"
+            )
+        try:
+            cmd = _substitute(
+                check["command"], inputs=inputs, workflow_meta=workflow_meta,
+                capabilities=capabilities, project=project, shell_context=True,
+            )
+        except _ShellInjectionError as e:
+            return False, f"refused: {e}"
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         ok = proc.returncode == 0
         return ok, f"exit={proc.returncode}"
@@ -2027,6 +2210,11 @@ def _run_check(
     if t == "connectorAvailable":
         return _run_connector_available(check)
     if t == "appStarts":
+        if not _shell_trust_marker_present():
+            return "not-applicable", (
+                "appStarts skipped: repo-supplied smoke command not run without "
+                "a .polymath/trust marker (or POLYMATH_ALLOW_SHELL=1)"
+            )
         return _run_app_starts(check, project)
     return False, f"unknown check type: {t}"
 
