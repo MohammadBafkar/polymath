@@ -2,6 +2,23 @@
 
 > A public, open-source Claude Code marketplace of work-shaped plugins covering the full lifecycle of building software products — from idea to incident, from thinking-craft to platform engineering. Installable a-la-carte.
 
+## Start here
+
+Find your goal, follow that row — each links one level deeper:
+
+| I want to… | Go to |
+| --- | --- |
+| Understand what Polymath is and install it | [Quick start](#quick-start), then [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md) |
+| Pick a handful of plugins to install | [Install profiles](#install-profiles) (curated role spines) |
+| Run an end-to-end task, not hand-pick plugins | [Start with a journey](#start-with-a-journey-not-a-plugin) — workflows |
+| Set Polymath up in my own repo | `/polymath-core:init-project`, then [`docs/PROJECT-LOCALIZATION.md`](docs/PROJECT-LOCALIZATION.md) |
+| Author a new plugin or skill | [`docs/PLUGIN-AUTHORING.md`](docs/PLUGIN-AUTHORING.md) — start at the component-decision matrix |
+| Wire up an MCP-backed connector | [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md) + [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) |
+| Author a workflow | [`docs/WORKFLOW-SCHEMA.md`](docs/WORKFLOW-SCHEMA.md) |
+| Validate a change before a PR | [Gates](#gates) + [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) |
+
+New to the model? Read [The marketplace](#the-marketplace) and [Design principles](#design-principles) below before installing — Polymath is a-la-carte, so knowing the plugin/skill/workflow shapes pays off fast.
+
 ## The marketplace
 
 **<!-- count:plugins -->40<!-- /count --> plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **<!-- count:workflows -->32<!-- /count --> workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
