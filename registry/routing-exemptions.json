@@ -5,6 +5,7 @@
     "polymath-ai:eval-plan": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-ai:prompt-engineer": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-ai:rag-design": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
+    "polymath-author:audit-marketplace": "maintainer ritual invoked deliberately, not ambiently routed in user repos; no deterministic prompt signal declared — declare routing.yaml or keep this entry",
     "polymath-author:skill-author-critic": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-author:token-budget-report": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-author:validate-plugin": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",

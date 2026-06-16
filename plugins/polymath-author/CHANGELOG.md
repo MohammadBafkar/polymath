@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [Unreleased]
+
+### Added
+
+- **audit-marketplace** — adversarially audit the whole marketplace for production readiness, gaps, and over-engineering; loops every plugin/tool/workflow off the deterministic inventory, delegates per-item critique to `skill-author-critic` / `red-team` / `validate-plugin`, and emits a ranked ADD/FIX/CONSOLIDATE/REMOVE scorecard with a net-surface-delta ≤ 0 simplicity bias.
+
 ## [0.8.0]
 
 Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.
