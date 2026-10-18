@@ -253,6 +253,20 @@ if [[ "$mode" == "--all" ]]; then
     overall=1
   fi
 
+  # MCP-BINDING (runs inside build-capability-index --strict): every kind=mcp
+  # binding declares a provider-identity `mcp` block (serverAliases/packages/
+  # remoteUrls) — the contract tools/mcp-registry.py uses to recognize an MCP
+  # server already registered in a host agent as THIS provider, so the host's
+  # server is reused instead of registering a polymath duplicate.
+  # See docs/MCP-REUSE.md.
+  echo
+  echo "── MCP-PKG cross-check (check-mcp-packages.py)"
+  if python3 "$root/tools/check-mcp-packages.py"; then
+    :
+  else
+    overall=1
+  fi
+
   # DOCS-2: every plugin README must mention every shipped first-class
   # surface (skill / command / agent / bin executable) by name. Catches
   # READMEs whose "What it ships" list lags the directory after a new

@@ -7,6 +7,8 @@ description: Fetch the full context for an active PagerDuty incident — log ent
 
 > Front-load context for the on-call before they're fully awake. One incident in, one summary out.
 
+> **MCP binding (read before any tool call):** resolve which server backs `pager` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.pagerduty` — when `source` is `host`, the CURRENT host agent's own `pagerduty` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A pager just fired and someone wants the situation at a glance.
@@ -64,3 +66,4 @@ First check:
 - Pasting the entire log_entries list. Summarize.
 - Speculating about root cause from the title alone.
 - Skipping the "what changed recently" step — fast cause-narrowing is the whole point.
+

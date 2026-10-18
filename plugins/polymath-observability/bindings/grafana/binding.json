@@ -10,5 +10,17 @@
     "grafanaApiKey"
   ],
   "title": "grafana",
-  "description": "grafana as observability provider, supplied by polymath-observability."
+  "description": "grafana as observability provider, supplied by polymath-observability.",
+  "mcp": {
+    "serverAliases": [
+      "grafana"
+    ],
+    "packages": [
+      "@grafana/mcp-server"
+    ],
+    "envKeys": [
+      "GRAFANA_URL",
+      "GRAFANA_API_KEY"
+    ]
+  }
 }

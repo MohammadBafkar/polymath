@@ -17,9 +17,7 @@ polymath-architecture:service-decomposition
 polymath-author:scaffold-component
 polymath-backend:api-versioning
 polymath-cloud:cloud-cost-review
-polymath-core:conventions
 polymath-core:doctor
-polymath-core:glossary
 polymath-core:initialize-project
 polymath-core:project-context
 polymath-engineering:feature-dev
@@ -36,17 +34,10 @@ polymath-leadership:hiring-loop
 polymath-pipeline:feedback-capture
 polymath-pipeline:feedback-digest
 polymath-pipeline:intake
-polymath-planning:forecast
 polymath-product:acceptance-criteria
-polymath-product:groom-backlog
-polymath-product:product-strategy
-polymath-product:roadmap
 polymath-qa:assertion-quality
 polymath-qa:integration-contract
 polymath-qa:test-smell
-polymath-qa:unit-tests
-polymath-release:changelog
-polymath-release:commit
 polymath-release:deprecation-plan
 polymath-release:migration-guide
 polymath-release:safe-rollout
@@ -64,8 +55,4 @@ polymath-streaming:stream-processing
 polymath-streaming:streaming-design
 polymath-test-automation:e2e-flow
 polymath-test-automation:load-test
-polymath-thinking:first-principles
-polymath-thinking:problem-framing
-polymath-tracker:file-bug-from-incident
-polymath-vcs:open-pr
 polymath-writing:editorial-pass

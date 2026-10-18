@@ -66,6 +66,6 @@ description: Draft customer-facing release notes from CHANGELOG [Unreleased] ent
 ## Cross-plugin pairing
 
 - For broader customer content (advisories, sunset notices, public
-  announcements), use `polymath-communication:write-{advisory, sunset-notice}`.
+  announcements), use `polymath-communication:write-advisory` or `polymath-communication:write-sunset-notice`.
 - For the PR description that ships with the release commit, use
   `polymath-release:pr`.

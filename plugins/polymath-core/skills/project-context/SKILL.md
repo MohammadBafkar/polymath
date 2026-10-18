@@ -82,6 +82,12 @@ The file mirrors `.polymath/project.yaml` with the original keys preserved plus 
 
 If no project file exists, the snapshot is absent and skills fall back to their built-in defaults.
 
+## Quality bar
+
+- A localizing skill reads the snapshot once and applies the five consumption blocks in order; it never re-derives project facts from scratch.
+- Absent snapshot or absent key is not an error — fall back to built-in defaults silently.
+- `[VERIFY: …]` content is surfaced, never silently treated as authoritative.
+
 ## What this skill does *not* do
 
 - It does not validate the project file (the loader does that).

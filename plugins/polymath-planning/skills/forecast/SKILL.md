@@ -32,6 +32,19 @@ This forecasts *aggregate delivery under uncertainty*. It is not per-item three-
 4. **Name the assumptions** that most move the forecast (scope stability, staffing, no big unknowns) and how sensitive the date is to each.
 5. **Re-forecast trigger** — what change (scope creep %, throughput drop) should trigger an update.
 
+## Output
+
+```text
+Forecast: <scope / date>            method: reference-class | throughput | cone
+
+Range (85% confidence): done by week 9–12
+Base rate:  <n> comparable efforts, median <x> weeks
+Adjustments: +<a> wk (<reason>), −<b> wk (<reason>)
+
+Most date-moving assumption: <assumption> — <sensitivity>
+Re-forecast trigger: scope grows > 20%, or weekly throughput drops below <y>.
+```
+
 ## Quality bar
 
 - The answer is a range with an explicit confidence level, never a bare single date.

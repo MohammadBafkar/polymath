@@ -6,8 +6,8 @@ description: Draft a PR description for the current branch following the canonic
 # pr
 
 > Draft a PR description from the current branch's commits. Writes to
-> `docs/pr/<slug>.md`. **Does not** open a real GitHub PR in v0.1;
-> that's `polymath-vcs:open-pr`.
+> `docs/pr/<slug>.md`. **Drafts only** — it never opens a real GitHub PR;
+> that's `polymath-vcs:open-pr`, which consumes this draft.
 
 ## When to use
 
@@ -61,7 +61,7 @@ The PR draft is **a file**, not an opened PR. Pair with
 ## Safety
 
 - Never push to a remote.
-- Never call `gh pr create` in v0.1.
+- Never call `gh pr create` — PR creation is `polymath-vcs:open-pr`'s job, after the user approves this draft.
 - Surface a unified diff if the target file already exists.
 - Do not invent reviewers — only suggest from CODEOWNERS or the diff.
 

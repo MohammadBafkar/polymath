@@ -7,6 +7,8 @@ description: Triage a Linear issue — classify type/priority/state, ask for mis
 
 > Triage one Linear issue via the linear MCP. Linear-specific: respects the team's workflow states (Backlog / Todo / In Progress / In Review / Done / Cancelled) and project-cycle awareness.
 
+> **MCP binding (read before any tool call):** resolve which server backs `issue_tracker` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.linear` — when `source` is `host`, the CURRENT host agent's own `linear` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A Linear key (TEAM-123 with "Linear" in the prompt) or `linear.app/.../issue/TEAM-123` URL surfaces in the prompt.
@@ -74,3 +76,4 @@ Routing: assigned @alice; component label drives payments-eng visibility.
 - Mass-assigning a cycle full of items in one pass without capacity review.
 - Inventing new labels per-triage. Drift sets in fast.
 - Closing as duplicate without `issueRelation.create` linking the original.
+

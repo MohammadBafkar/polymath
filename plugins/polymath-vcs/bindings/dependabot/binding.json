@@ -9,5 +9,21 @@
     "githubToken"
   ],
   "title": "dependabot",
-  "description": "dependabot as vulnerability_scanner provider, supplied by polymath-vcs."
+  "description": "dependabot as vulnerability_scanner provider, supplied by polymath-vcs.",
+  "mcp": {
+    "serverAliases": [
+      "github",
+      "github-dependabot"
+    ],
+    "packages": [
+      "@modelcontextprotocol/server-github",
+      "@github/mcp-server"
+    ],
+    "remoteUrls": [
+      "https://api.githubcopilot.com/mcp"
+    ],
+    "envKeys": [
+      "GITHUB_PERSONAL_ACCESS_TOKEN"
+    ]
+  }
 }

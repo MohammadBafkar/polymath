@@ -11,5 +11,26 @@
     "jiraApiToken"
   ],
   "title": "jira",
-  "description": "jira as issue_tracker provider, supplied by polymath-tracker."
+  "description": "jira as issue_tracker provider, supplied by polymath-tracker.",
+  "mcp": {
+    "serverAliases": [
+      "jira",
+      "atlassian",
+      "atlassian-rovo"
+    ],
+    "packages": [
+      "@modelcontextprotocol/server-atlassian",
+      "mcp-remote",
+      "mcp-atlassian"
+    ],
+    "remoteUrls": [
+      "https://mcp.atlassian.com/v1/mcp",
+      "https://mcp.atlassian.com/v2/mcp"
+    ],
+    "envKeys": [
+      "ATLASSIAN_URL",
+      "ATLASSIAN_EMAIL",
+      "ATLASSIAN_API_TOKEN"
+    ]
+  }
 }

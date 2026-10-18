@@ -7,6 +7,8 @@ description: Investigate a Honeycomb trace by trace.id — surface the offending
 
 > Given a trace ID, build the chain that explains the failure: which span errored, which span is the *cause* (not just the surface), and what bb.attributes characterize the failure.
 
+> **MCP binding (read before any tool call):** resolve which server backs `honeycomb` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.honeycomb` — when `source` is `host`, the CURRENT host agent's own `honeycomb` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A log-search surfaced a recurring `trace.id` and you want the full trace context.
@@ -83,3 +85,4 @@ Hypothesis: upstream-timeout (Stripe API).
 - Showing total time per service. The root span's total is always 100%; self-time is the signal.
 - Hypothesizing without citing evidence. "Looks like a Stripe issue" without naming the timeout span is unfalsifiable.
 - Pulling the full 1000 spans into chat. Collapsed tree + offending-span detail is the right summary.
+

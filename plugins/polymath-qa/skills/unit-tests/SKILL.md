@@ -33,6 +33,15 @@ description: Author unit tests using the repo's existing framework; one test per
 
 ## Output
 
+```text
+tests/test_refunds.py
+  test_refund_rejects_negative_amount        PASS
+  test_refund_above_balance_returns_409      PASS
+
+Covered: 2 behavior(s)   Still uncovered: 0
+Run: pytest tests/test_refunds.py   → green
+```
+
 - Test files in the repo's conventional location.
 - Each new test runs green when invoked through the repo's test command.
 - A summary lists which behaviors are now covered and which (if any) still aren't.

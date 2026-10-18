@@ -170,6 +170,37 @@ def check_binding_consistency(bindings: list[dict]) -> list[str]:
     return problems
 
 
+def check_mcp_identity(bindings: list[dict]) -> list[str]:
+    """MCP-BINDING: every `kind: mcp` binding must declare a provider-identity
+    `mcp` block with at least one match signal (serverAliases / packages /
+    remoteUrls). This is the contract tools/mcp-registry.py uses to recognize
+    an MCP server already registered in a host agent as THIS provider, so the
+    host's server is reused instead of registering a polymath duplicate.
+    """
+    problems: list[str] = []
+    for b in bindings:
+        body, where = b["body"], b["where"]
+        transport = body.get("transport") or {}
+        if transport.get("kind") != "mcp":
+            continue
+        identity = body.get("mcp") or {}
+        signals = [
+            bool(identity.get("serverAliases")),
+            bool(identity.get("packages")),
+            bool(identity.get("remoteUrls")),
+        ]
+        if not any(signals):
+            problems.append(
+                f"{where}: kind=mcp binding has no provider-identity `mcp` block — "
+                f"declare at least one of serverAliases/packages/remoteUrls "
+                f"(consumed by tools/mcp-registry.py host matching)"
+            )
+        for key in identity.get("envKeys") or []:
+            if key != key.upper():
+                problems.append(f"{where}: mcp.envKeys must be UPPER_SNAKE server-native names (got {key!r})")
+    return problems
+
+
 def render_status_block(new_caps: dict) -> str:
     """Render the wired-vs-aspirational provider table surfaced to users in
     docs/CAPABILITIES.md. Sourced from the generated providerPlugins map so it
@@ -224,12 +255,12 @@ def main() -> int:
 
     capabilities = json.loads(CAPABILITIES.read_text())
     new_caps, strict_errors, coverage = generate(capabilities, bindings)
-    strict_errors = strict_errors + check_binding_consistency(bindings)
+    strict_errors = strict_errors + check_binding_consistency(bindings) + check_mcp_identity(bindings)
 
     if strict_errors:
         if args.strict:
             for e in strict_errors:
-                print(f"build-capability-index: BINDING-1: {e}", file=sys.stderr)
+                print(f"build-capability-index: BINDING-1/MCP-BINDING: {e}", file=sys.stderr)
             return 1
         for e in strict_errors:
             print(f"build-capability-index: warning: {e}", file=sys.stderr)

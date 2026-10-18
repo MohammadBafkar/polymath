@@ -7,6 +7,8 @@ description: Triage a Jira issue — fetch via MCP, classify type/priority/compo
 
 > Triage one Jira issue via the jira MCP server.
 
+> **MCP binding (read before any tool call):** resolve which server backs `issue_tracker` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.jira` — when `source` is `host`, the CURRENT host agent's own `jira` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A Jira reference (PROJ-123 or a browse URL) is in the prompt.
@@ -59,3 +61,4 @@ Routing: payments-api team via @payments-eng.
 - Closing as "Duplicate" without linking the original key.
 - Asking for repro that's already in the body — read first.
 - Bulk-updating priority without per-ticket justification.
+

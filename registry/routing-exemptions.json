@@ -30,6 +30,7 @@
     "polymath-communication:write-sunset-notice": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-core:conventions": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-core:doctor": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
+    "polymath-core:mcp-bridge": "connector/environment surface routed by its description; scan/match are explicit procedure steps, not prompt-time routes",
     "polymath-core:glossary": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-core:initialize-project": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",
     "polymath-core:project-context": "knowledge/procedure surface routed by its description; no deterministic prompt signal declared yet — declare routing.yaml or keep this entry",

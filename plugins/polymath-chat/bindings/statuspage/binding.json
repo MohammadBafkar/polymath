@@ -10,5 +10,17 @@
     "statuspagePageId"
   ],
   "title": "statuspage",
-  "description": "statuspage as incident_comms provider, supplied by polymath-chat."
+  "description": "statuspage as incident_comms provider, supplied by polymath-chat.",
+  "mcp": {
+    "serverAliases": [
+      "statuspage"
+    ],
+    "packages": [
+      "@statuspage/mcp-server"
+    ],
+    "envKeys": [
+      "STATUSPAGE_API_KEY",
+      "STATUSPAGE_PAGE_ID"
+    ]
+  }
 }

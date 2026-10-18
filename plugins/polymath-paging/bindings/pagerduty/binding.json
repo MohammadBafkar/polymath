@@ -9,5 +9,16 @@
     "pagerdutyApiKey"
   ],
   "title": "pagerduty",
-  "description": "pagerduty as pager provider, supplied by polymath-paging."
+  "description": "pagerduty as pager provider, supplied by polymath-paging.",
+  "mcp": {
+    "serverAliases": [
+      "pagerduty"
+    ],
+    "packages": [
+      "@pagerduty/mcp-server"
+    ],
+    "envKeys": [
+      "PAGERDUTY_API_KEY"
+    ]
+  }
 }

@@ -9,5 +9,21 @@
     "githubToken"
   ],
   "title": "github issues",
-  "description": "github_issues as issue_tracker provider, supplied by polymath-vcs."
+  "description": "github_issues as issue_tracker provider, supplied by polymath-vcs.",
+  "mcp": {
+    "serverAliases": [
+      "github",
+      "github-issues"
+    ],
+    "packages": [
+      "@modelcontextprotocol/server-github",
+      "@github/mcp-server"
+    ],
+    "remoteUrls": [
+      "https://api.githubcopilot.com/mcp"
+    ],
+    "envKeys": [
+      "GITHUB_PERSONAL_ACCESS_TOKEN"
+    ]
+  }
 }

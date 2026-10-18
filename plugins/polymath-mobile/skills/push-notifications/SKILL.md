@@ -47,7 +47,7 @@ Channels:
   Transactional (default ON):
     - refund_initiated, refund_complete, refund_failed.
   Marketing (default OFF, explicit opt-in):
-    - none for v0.1.
+    - promo, feature-announcement — sent only after opt-in.
 
 Opt-in moment:
   After the user views the refund-status page once. Contextual prompt:

@@ -45,6 +45,37 @@
         }
       }
     },
+    "mcp": {
+      "description": "For kind=mcp: provider IDENTITY — the machine-readable contract tools/mcp-registry.py uses to recognize an MCP server already registered in a host agent (Claude Code, Cursor, Gemini CLI, OpenCode, Codex, VS Code) as THIS provider, so polymath can reuse the host's server instead of registering a duplicate. Declare enough signals to catch the common cases: the server name the vendor's docs use, the npm package (or binary) the official server launches, and the hosted remote URL if one exists.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "serverAliases": {
+          "description": "Server names under which this provider's MCP is commonly registered (e.g. ['datadog', 'dd']).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "packages": {
+          "description": "npm packages / binaries a host-registered stdio server launches for this provider (matched against the npx/uvx/bunx command args).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "remoteUrls": {
+          "description": "Hosted remote MCP endpoints for this provider (matched on scheme+host+path).",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "envKeys": {
+          "description": "Server-native env var names this provider's servers read (e.g. DD_API_KEY). Key names only — never values.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
     "userConfigKeys": {
       "description": "plugin.json userConfig keys this provider needs (credentials / endpoints). Used to validate that a binding's provider is actually configurable, and by future packaging to scope secrets per provider.",
       "type": "array",

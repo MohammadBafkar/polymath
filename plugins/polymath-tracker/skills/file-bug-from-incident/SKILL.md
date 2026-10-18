@@ -70,6 +70,21 @@ If neither set of credentials is present, stop and say which to configure.
 7. **Link back:** update the postmortem's action-items table with each key + URL
    so the trail is bidirectional.
 
+## Output
+
+```text
+Filed from postmortem: docs/postmortems/<incident-id>.md   (provider: <jira|linear>)
+
+  [PROJ-481] Add burn-rate alert at 6h window for refund SLO
+             sev1→Critical · owner: @jdoe · due: 2026-06-02
+             [polymath] refund-slo   ← title_prefix + tag + footer applied
+  [PROJ-482] Pin base image digest in the Dockerfile
+             sev2→High · owner: @arivera · due: 2026-06-09
+
+Postmortem action-items table updated with both keys + URLs.
+Confirmed once before push (HITL).
+```
+
 ## Quality bar
 
 - One ticket per discrete action item; never an umbrella "improve reliability".

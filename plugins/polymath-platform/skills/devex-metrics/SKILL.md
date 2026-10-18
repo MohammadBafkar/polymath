@@ -46,7 +46,6 @@ Five dimensions. Pick at most 2 metrics per dimension; otherwise the sheet becom
 2. **Pick at most 2 SPACE metrics** to complement.
 3. **Document collection** per metric: which system, how queried, what cadence.
 4. **Set targets, not just observations.** "Lead time < 24h" beats "track lead time".
-5. **Antipatterns to avoid:** activity-only views (PRs merged without quality), surveys without action, dashboards no one looks at.
 
 ## Output
 

@@ -1,6 +1,6 @@
 {
   "name": "polymath-chat",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Slack connector: MCP for channels/messages/threads + skill for posting incident comms updates with the right channel + thread routing.",
   "license": "MIT",
   "author": {
@@ -23,14 +23,14 @@
     "slackBotToken": {
       "type": "string",
       "title": "Slack bot token",
-      "description": "Bot token (xoxb-\u2026) with chat:write, channels:read, groups:read, im:read, mpim:read scopes.",
+      "description": "Bot token (xoxb-…) with chat:write, channels:read, groups:read, im:read, mpim:read scopes.",
       "sensitive": true,
       "required": true
     },
     "slackTeamId": {
       "type": "string",
       "title": "Slack workspace (team) ID",
-      "description": "Workspace ID (starts with T\u2026) that @modelcontextprotocol/server-slack requires to scope API calls.",
+      "description": "Workspace ID (starts with T…) that @modelcontextprotocol/server-slack requires to scope API calls.",
       "required": true
     },
     "defaultIncidentChannel": {
@@ -42,7 +42,7 @@
     "statuspageApiKey": {
       "type": "string",
       "title": "Statuspage API key",
-      "description": "API key from Statuspage \u2192 User settings \u2192 API. Page-scoped; do not reuse personal keys across pages.",
+      "description": "API key from Statuspage → User settings → API. Page-scoped; do not reuse personal keys across pages.",
       "sensitive": true,
       "required": true
     },

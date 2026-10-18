@@ -59,6 +59,16 @@ if [[ -x "${script_dir}/load-project-context.py" ]]; then
   fi
 fi
 
+# --- MCP availability map ---
+# Resolve connector providers against MCP servers already registered in the
+# host agent(s) (tools/mcp-registry.py + the project `mcp:` policy) and
+# persist the resolution into project-context.json `mcpResolution`. Skills
+# read the snapshot to bind to the right server; the hook surfaces a line
+# only when a host server is being reused. Fail-open, never blocks.
+if command -v python3 >/dev/null 2>&1 && [[ -f "${script_dir}/build-mcp-resolution.py" ]]; then
+  mcp_note="$(python3 "${script_dir}/build-mcp-resolution.py" 2>/dev/null || true)"
+fi
+
 # --- first-run nudge ---
 # The highest-leverage onboarding moment is a fresh session in an
 # un-initialized repo: without this, the loader exits silently and the user
@@ -103,7 +113,7 @@ if [[ -d "$flows_workflows_dir" ]]; then
 import json, re, sys, pathlib, datetime
 base = pathlib.Path(sys.argv[1])
 def _san(s, n=120):
-    # Untrusted project/run text is surfaced in the agent's opening context:
+    # Untrusted project/run text is surfaced in the opening context:
     # strip control chars + newlines and cap length so it stays one display
     # token and cannot inject instructions or break the list layout.
     s = re.sub(r"[\x00-\x1f\x7f]", " ", str(s))
@@ -202,6 +212,11 @@ PY
 emitted=0
 if [[ -n "$project_summary" ]]; then
   echo "$project_summary"
+  emitted=1
+fi
+if [[ -n "$mcp_note" ]]; then
+  [[ $emitted -eq 1 ]] && echo
+  echo "$mcp_note"
   emitted=1
 fi
 if [[ -n "$py_note" ]]; then

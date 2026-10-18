@@ -7,6 +7,8 @@ description: Run a typed, time-bounded log search against Elasticsearch — refu
 
 > A bounded, defensible Elasticsearch query for incident or PRD investigation. Output is the matching log count, top buckets, and a 10-sample evidence packet — never a raw 10k-row dump.
 
+> **MCP binding (read before any tool call):** resolve which server backs `elastic` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.elastic` — when `source` is `host`, the CURRENT host agent's own `elastic` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - An incident points at "logs say X" and you need the count, the buckets, and a small sample.
@@ -75,3 +77,4 @@ Cross-index hint:
 - "Last 24h" defaults without opt-in. Most incident windows are minutes; 24h defaults bury the signal.
 - Returning raw hits without redaction. Logs frequently carry headers + PII.
 - Treating `total.relation = "gte"` as exact. The number is a lower bound when relation is `gte`.
+

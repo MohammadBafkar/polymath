@@ -32,6 +32,27 @@ This *sequences and communicates*. It does not rank with a method (`polymath-pla
 4. State **non-commitments** explicitly: what each horizon is deliberately *not* promising (dates, scope, that Later will ever ship).
 5. Tie items back to the discovery/evidence that justifies them where available.
 
+## Output
+
+```text
+Roadmap: <product / area>   (horizons, not dates)
+
+Outcome: <the change we're chasing>
+
+Now   (committed, in/entering delivery)
+  - <item>                    confidence: high   deps: <none>
+  Not committing to: dates beyond Q<n>, scope creep into <x>.
+
+Next  (likely next, deps known)
+  - <item>                    confidence: med    deps: <item in Now>
+
+Later (directional, not committed)
+  - <item>                    confidence: low    deps: <hard Now dependency — RISK>
+
+Open sequencing risks:
+  - <Later item> hard-depends on <Now item>; slipping Now slips it too.
+```
+
 ## Quality bar
 
 - Organized by outcome, not by team or by feature list.

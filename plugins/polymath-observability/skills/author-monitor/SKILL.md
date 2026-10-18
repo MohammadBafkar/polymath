@@ -7,6 +7,8 @@ description: Author a Datadog monitor — query, threshold, evaluation window, n
 
 > Write one Datadog monitor and create it via the MCP server. Output is the monitor JSON + the rationale.
 
+> **MCP binding (read before any tool call):** resolve which server backs `datadog` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.datadog` — when `source` is `host`, the CURRENT host agent's own `datadog` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A new service needs alerting before going live.
@@ -76,3 +78,4 @@ Tags: team:payments, service:refund-service, severity:sev2, slo:refund-latency
 - Anomaly monitors as the first alert — usually too noisy without a strong baseline.
 - "Composite" monitors that fan out across teams. Pick a clear owner.
 - Notification messages that contain the threshold as a literal but no link to context.
+

@@ -10,5 +10,20 @@
     "sentryOrg"
   ],
   "title": "sentry",
-  "description": "sentry as observability provider, supplied by polymath-observability."
+  "description": "sentry as observability provider, supplied by polymath-observability.",
+  "mcp": {
+    "serverAliases": [
+      "sentry"
+    ],
+    "packages": [
+      "@sentry/mcp-server"
+    ],
+    "remoteUrls": [
+      "https://mcp.sentry.dev/mcp"
+    ],
+    "envKeys": [
+      "SENTRY_AUTH_TOKEN",
+      "SENTRY_ORG"
+    ]
+  }
 }

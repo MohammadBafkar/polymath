@@ -18,7 +18,7 @@ description: Choose the right Polymath workflow, skill, connector, agent, or ext
 
 - The user's prompt and any attached file paths, URLs, ticket keys, diffs, or logs.
 - Installed Polymath skill/command/agent descriptions already visible in context.
-- If available, read `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`.
+- If available, read `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` — it carries the project snapshot **and** `mcpResolution`.
 - For workflow candidates, read `../../../polymath-flows/data/workflow-index.min.json`; if two workflows tie, read `../../../polymath-flows/data/workflow-detect.json`.
 - For provider-dependent work, read `.polymath/capabilities.yaml` or [`docs/CAPABILITIES.md`](../../../../docs/CAPABILITIES.md).
 
@@ -46,6 +46,7 @@ Do not bulk-load every `SKILL.md`. Load the chosen target's body only after rout
 3. **Use context signals.**
    - Paths like `docs/prds/**`, `docs/plans/**`, `docs/adrs/**`, incident URLs, PR URLs, package manifests, or diffs should influence routing.
    - Capability provider names (`jira`, `linear`, `github`, `datadog`, `sentry`, `pagerduty`) are evidence, not final routing by themselves.
+   - For a connector route, resolve *which server backs the provider* before proposing: read `mcpResolution.<provider>` in the project-context snapshot. When `source` is `host`, name the host's server and its `toolPrefix` in the proposal so the agent binds to tools that exist in this session; when `plugin`, note the plugin-shipped fallback; when `none`, flag that credentials are unconfigured. Never propose a connector whose server is absent — see `polymath-core:mcp-bridge`.
 4. **Break ties explicitly.**
    - If top candidates are within `0.10` confidence, return `route_type="clarify"` with one question.
    - If the user asks for "triage" without a tracker or URL, ask which issue tracker.
@@ -90,7 +91,7 @@ For `route_type="clarify"`, `target` is `null`, `question` is one short question
 
 - "Review this PR for correctness, security, and missing tests" -> `workflow`, `polymath-flows:run-workflow reviewPR`.
 - "Append a changelog entry for this diff" -> `skill`, `polymath-release:changelog`.
-- "Triage this Jira ticket" -> `connector`, `polymath-tracker:jira-triage`.
+- "Triage this Jira ticket" -> `connector`, `polymath-tracker:jira-triage` (resolve `mcpResolution.jira` first: if `source=host`, name the host server).
 - "How do I use this framework API?" -> `external`, official docs or project-declared external skill catalog.
 - "Help me decide between Postgres and DynamoDB" -> `workflow`, `polymath-flows:run-workflow decideUnderAmbiguity`, unless the user only wants a quick comparison.
 
@@ -98,5 +99,6 @@ For `route_type="clarify"`, `target` is `null`, `question` is one short question
 
 - Starting a workflow without confirmation.
 - Loading many skill bodies just to choose one.
+- Routed connector work that ignores `mcpResolution` — proposing a server whose tools are not in this session.
 - Treating connector plugins as factual authorities when official MCPs/docs own the source data.
 - Hiding uncertainty behind a low-confidence guess.

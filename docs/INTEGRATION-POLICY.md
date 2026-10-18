@@ -121,6 +121,16 @@ A capability plugin may bundle several providers' MCP servers (e.g.
 Sentry). Claude Code loads `.mcp.json` statically at session start and cannot
 launch only a subset, so:
 
+- **Reuse the host's server first (`reuse-host` policy, the default).** Before
+  a polymath connector server is registered or used, `tools/mcp-registry.py`
+  scans the host agent's own MCP config (Claude Code, Cursor, Gemini CLI,
+  OpenCode, Codex, VS Code — project + user scopes) and matches registered
+  servers against each binding's provider identity (the `mcp` block:
+  `serverAliases` / `packages` / `remoteUrls`). When the host already has e.g.
+  a `datadog` server, skills use it and the plugin-shipped copy stays idle —
+  no duplicate tools, no duplicate auth. See [`docs/MCP-REUSE.md`](MCP-REUSE.md).
+  Set `mcp.policy: prefer-plugin` in `.polymath/project.yaml` to pin the
+  plugin-shipped server instead.
 - **All declared servers register; configure only the provider(s) you use.**
   Every credential env uses a `${VAR:-}` empty default, so an *unconfigured*
   provider can't break MCP config parsing — its server starts idle and fails its
@@ -130,7 +140,9 @@ launch only a subset, so:
 - **Bindings are the source of truth.** `BINDING-1` checks that every `mcp`
   binding's `server` exists in the plugin's `.mcp.json` and every
   `userConfigKey` exists in `plugin.json` `userConfig`, so the binding model and
-  the runtime config cannot drift.
+  the runtime config cannot drift. `MCP-BINDING` (same gate) checks that every
+  `kind: mcp` binding declares a provider-identity `mcp` block — the contract
+  `tools/mcp-registry.py` uses for host-server matching.
 
 One-plugin-per-provider packaging (so only the installed provider launches) is a
 future option the binding model already supports.

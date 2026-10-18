@@ -10,5 +10,20 @@
     "snykOrg"
   ],
   "title": "snyk",
-  "description": "snyk as vulnerability_scanner provider, supplied by polymath-vuln-scan."
+  "description": "snyk as vulnerability_scanner provider, supplied by polymath-vuln-scan.",
+  "mcp": {
+    "serverAliases": [
+      "snyk"
+    ],
+    "packages": [
+      "@snyk/mcp-server"
+    ],
+    "remoteUrls": [
+      "https://mcp.snyk.io/mcp"
+    ],
+    "envKeys": [
+      "SNYK_TOKEN",
+      "SNYK_ORG"
+    ]
+  }
 }

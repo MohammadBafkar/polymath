@@ -47,7 +47,7 @@ wins; absent → skip and use built-in defaults). Then apply (contract:
 
 - Each commit (or logical chunk) keeps tests green.
 - No dead code, no half-finished alternatives, no comments narrating the change.
-- No new dependencies without an explicit ADR (out of v0.1 scope; surface as an open question).
+- No new dependencies without an explicit ADR (surface as an open question rather than adding one silently).
 - Test names describe the behavior under test, not the implementation.
 
 ## Output

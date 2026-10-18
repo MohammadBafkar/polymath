@@ -1,6 +1,6 @@
 {
   "name": "polymath-vuln-scan",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Snyk connector: MCP server for vulnerability test/monitor + Stop hook that warns if the current branch has open critical vulns.",
   "license": "MIT",
   "author": {
@@ -21,7 +21,7 @@
     "snykToken": {
       "type": "string",
       "title": "Snyk API token",
-      "description": "Snyk auth token (Account settings \u2192 General \u2192 Auth Token).",
+      "description": "Snyk auth token (Account settings → General → Auth Token).",
       "sensitive": true,
       "required": true
     },

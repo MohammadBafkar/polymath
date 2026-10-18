@@ -7,6 +7,8 @@ description: Triage Snyk findings — classify exploitable / reachable / dev-onl
 
 > Read Snyk findings and classify them by what's actually exploitable in this codebase. Output is per-finding action.
 
+> **MCP binding (read before any tool call):** resolve which server backs `vulnerability_scanner` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.snyk` — when `source` is `host`, the CURRENT host agent's own `snyk` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A scheduled Snyk scan produced findings.
@@ -59,3 +61,4 @@ Acceptance via .snyk: NONE (no findings accepted in this triage).
 - "Ignore until next release."
 - Bulk `snyk ignore` to clear the noise.
 - Accepting a critical "because it's transitive" without confirming non-reachability.
+

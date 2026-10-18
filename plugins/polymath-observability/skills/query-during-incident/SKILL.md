@@ -7,6 +7,8 @@ description: Run the right Datadog queries during an incident to narrow cause �
 
 > Inside a live incident, run the focused queries that narrow root cause fastest. Output is a short situation summary, not a dashboard.
 
+> **MCP binding (read before any tool call):** resolve which server backs `datadog` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.datadog` — when `source` is `host`, the CURRENT host agent's own `datadog` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A pager fired; the on-call wants Datadog signals without clicking through 8 dashboards.
@@ -62,3 +64,4 @@ Second-most-likely:
 - "Could be X, could be Y, could be Z."
 - Querying everything in the platform — focus.
 - Skipping the events stream; deploys and flag flips usually explain incidents.
+

@@ -11,5 +11,23 @@
     "datadogSite"
   ],
   "title": "datadog",
-  "description": "datadog as observability provider, supplied by polymath-observability."
+  "description": "datadog as observability provider, supplied by polymath-observability.",
+  "mcp": {
+    "serverAliases": [
+      "datadog",
+      "dd"
+    ],
+    "packages": [
+      "@datadog/mcp-server",
+      "datadog-mcp"
+    ],
+    "remoteUrls": [
+      "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp"
+    ],
+    "envKeys": [
+      "DD_API_KEY",
+      "DD_APP_KEY",
+      "DD_SITE"
+    ]
+  }
 }

@@ -45,6 +45,13 @@ description: Write a user-facing CHANGELOG entry under [Unreleased] in Keep-a-Ch
 
 ## Output
 
+```markdown
+## [Unreleased]
+
+### Fixed
+- Reject negative refund amounts that previously created a credit (#481)
+```
+
 - Updated `CHANGELOG.md` with the new entry under `[Unreleased]`.
 - Summary listing how many bullets were added per section.
 

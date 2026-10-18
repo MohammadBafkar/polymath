@@ -7,6 +7,8 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 
 > Open a real GitHub PR using the github MCP server. Pairs with `polymath-release:pr` (which drafts the description) and `polymath-release:changelog` (which updates CHANGELOG).
 
+> **MCP binding (read before any tool call):** resolve which server backs `vcs` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.github` — when `source` is `host`, the CURRENT host agent's own `github` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - The user says "open a PR" or "ship this".
@@ -42,6 +44,16 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 5. **Reviewers** — add via `request_reviewers` after creation. Tag by team if you can infer it from CODEOWNERS; otherwise ask the user.
 6. **Return** the PR URL.
 
+## Output
+
+```text
+Opened: https://github.com/<org>/<repo>/pull/<n>
+  title:  type(scope): summary
+  base:   main   head: <branch>   draft: <true|false>
+  body:   docs/pr/<slug>.md (from polymath-release:pr)
+  reviewers: @<handle> (CODEOWNERS: <team>)
+```
+
 ## Quality bar
 
 - One commit per logical change — squash before pushing if the branch has fixup commits.
@@ -55,3 +67,4 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 - `git push --force` to "fix" a rejected push.
 - Opening a PR against the wrong base because `origin/HEAD` was stale.
 - Skipping `docs/pr/<slug>.md` when `polymath-release:pr` already drafted it.
+

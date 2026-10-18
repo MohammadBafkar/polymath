@@ -4,7 +4,7 @@ Foundation plugin for the Polymath marketplace. Implicit dependency of everythin
 
 ## What it ships
 
-- Skills: `route`, `conventions`, `glossary`, `initialize-project`, `project-context`, `doctor`.
+- Skills: `route`, `conventions`, `glossary`, `initialize-project`, `project-context`, `doctor`, `mcp-bridge`.
 - Commands: `/route`, `/init-project`, `/plugin-budget`, `/doctor`.
 - Hooks:
   - `SessionStart` — loads `.polymath/project.yaml` (see [`docs/PROJECT-LOCALIZATION.md`](../../docs/PROJECT-LOCALIZATION.md)) into `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`, then surfaces paused workflows. When a repo has no project file it emits a single suppressible nudge toward `/init-project`; otherwise quiet.

@@ -33,6 +33,19 @@ This refines *individual items* against a Definition of Ready. It does not rank 
 6. **Size** each with a rough estimate + confidence; mark guesses.
 7. Output the groomed items, each marked ready / not-ready with the reason.
 
+## Output
+
+```text
+Backlog grooming — N items
+
+READY
+  [ ] <item>   AC: <testable criteria> · size: S · deps: none
+NOT READY
+  [!] <item>   gap: <DoR item missing, e.g. no acceptance criteria>
+               question to unblock: <the one answer needed>
+               split proposal: <child items if oversized>
+```
+
 ## Quality bar
 
 - Every item ends marked ready or not-ready, with the specific gap if not.

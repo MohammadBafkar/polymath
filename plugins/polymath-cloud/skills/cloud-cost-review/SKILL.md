@@ -13,7 +13,7 @@ description: Review cloud spend — rightsizing/waste, cost budgets + anomaly al
 - The user asks about FinOps, rightsizing, savings plans, cost per request/tenant, or a cost budget/anomaly alert.
 - A workflow invokes `polymath-cloud:cloud-cost-review`.
 
-This is *cloud* cost. It is not Polymath's internal listing token budget (`polymath-core:plugin-budget`, `polymath-author:token-budget-report`), capacity/scaling (`polymath-sre:capacity-plan`), or picking an architecture (`polymath-cloud:design-*` — though it consumes their cost dimension).
+This is *cloud* cost. It is not Polymath's internal listing token budget (`polymath-core:plugin-budget`, `polymath-author:token-budget-report`), capacity/scaling (`polymath-sre:capacity-plan`), or picking an architecture (`polymath-cloud:design-aws-pattern` / `design-azure-pattern` / `design-gcp-pattern` — though it consumes their cost dimension).
 
 ## Inputs
 

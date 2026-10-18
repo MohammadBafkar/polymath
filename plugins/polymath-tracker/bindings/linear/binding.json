@@ -9,5 +9,19 @@
     "linearApiKey"
   ],
   "title": "linear",
-  "description": "linear as issue_tracker provider, supplied by polymath-tracker."
+  "description": "linear as issue_tracker provider, supplied by polymath-tracker.",
+  "mcp": {
+    "serverAliases": [
+      "linear"
+    ],
+    "packages": [
+      "@linear/mcp-server"
+    ],
+    "remoteUrls": [
+      "https://mcp.linear.app/sse"
+    ],
+    "envKeys": [
+      "LINEAR_API_KEY"
+    ]
+  }
 }

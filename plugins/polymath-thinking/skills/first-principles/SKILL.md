@@ -25,6 +25,26 @@ This *decomposes to fundamentals*. It is not generating many options (`polymath-
 6. **Compare** the rebuilt approach to the conventional one; name what the convention was costing.
 7. Output: the assumption ledger (fundamental vs convention), the bedrock, and the rebuilt approach with its quantified advantage.
 
+## Output
+
+```text
+First-principles: <problem>
+
+Assumption ledger:
+  A1. <assumption>            → LAW (physics/econ/regulation)   — keep
+  A2. <assumption>            → CONVENTION (changeable)        — drop
+  A3. <assumption>            → CONVENTION                     — drop
+
+Bedrock (what must be true):
+  - <fundamental constraint, quantified where possible>
+
+Rebuilt approach:
+  <solution derived from the bedrock, ignoring the conventional path>
+
+Cost of the convention we dropped:
+  <what the inherited approach was costing: $, latency, complexity>
+```
+
 ## Quality bar
 
 - Every assumption is tagged fundamental (law) or convention (changeable), with reasoning.

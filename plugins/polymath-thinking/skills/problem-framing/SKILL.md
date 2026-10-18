@@ -25,6 +25,26 @@ This *frames* the problem. It is not generating options (`polymath-thinking:brai
 6. **Success signal** — how we'd know the problem is solved, independent of any particular solution.
 7. Output a tight problem statement: who/what/why, evidence, constraints, non-goals, success signal — handoff-ready for `brainstorm` or `polymath-product:prd`.
 
+## Output
+
+```text
+Problem statement: <slug>
+
+Who:          <specific actor, not "users">
+What:         <what they cannot do today>
+Why it matters: <cost of leaving it unsolved>
+
+Evidence:     <data / quotes / frequency>   (fact)
+Assumptions:  - <unverified belief>          (assumption)
+
+Constraints:  - <any solution must respect this>
+Non-goals:    - <explicitly not solving this>
+
+Premature solution set aside: <the solution everyone assumes>
+
+Success signal: <how we'd know it's solved, solution-independent>
+```
+
 ## Quality bar
 
 - The statement describes a problem and need, with zero solution baked in.

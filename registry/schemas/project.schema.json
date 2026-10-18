@@ -362,6 +362,31 @@
         }
       }
     },
+    "mcp": {
+      "description": "MCP server resolution policy: whether Polymath connector skills reuse MCP servers already registered in the CURRENT host agent (detected from in-session env markers — servers registered in other agents are NOT reusable, their tools are not in this session's tool list) or prefer polymath's plugin-shipped servers. Detection is tools/mcp-registry.py; the SessionStart availability map records the resolution per provider. Secrets never live here — servers are matched by name/package/URL identity, and credentials stay in the host that owns them.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "description": "`reuse-host` (default): when the current host's registered server matches a provider's identity, skills use it and the plugin-shipped server stays idle. `prefer-plugin`: the plugin-shipped .mcp.json server wins (e.g. for version pinning); the host's servers are the fallback.",
+          "type": "string",
+          "enum": ["reuse-host", "prefer-plugin"],
+          "default": "reuse-host"
+        },
+        "serverOverrides": {
+          "description": "Per-provider pin: force a specific current-host server name (reuse) or `plugin` to force the plugin-shipped server regardless of policy. Key is the provider token (e.g. `datadog`).",
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        }
+      }
+    },
     "provenance": {
       "description": "Run-provenance persistence. With `runs: true`, polymath-flow whole-copies each COMPLETED workflow run record (state, inputs, trace, step summaries, artifacts) into `.polymath/runs/<run_id>/` so the record is versionable and shareable with the repo. Whole-copy, never sliced; fail-open \u2014 a copy failure never fails the run. Default off.",
       "type": "object",

@@ -13,7 +13,7 @@ description: Design Terraform state — remote backend, locking, state isolation
 - Concurrent applies clobber each other, blast radius is too large, or drift goes unnoticed.
 - A workflow invokes `polymath-iac:terraform-state`.
 
-Not this when: you are authoring a reusable module (`terraform-module`) or reviewing a specific plan (`iac-review`). This is about state topology and operations.
+Not this when: you are authoring a reusable module (`terraform-module`) or reviewing a specific plan (`polymath-cloud:plan-review`). This is about state topology and operations.
 
 ## Inputs
 

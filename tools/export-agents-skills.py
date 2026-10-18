@@ -34,7 +34,10 @@ What cannot auto-activate everywhere:
   - hooks/hooks.json has no cross-agent event standard. The exporter emits
     normalized hook metadata plus scripts for host-specific adapters.
   - MCP is a protocol, but client discovery files differ. The exporter emits
-    one aggregate `_polymath/mcp/mcp.json` and per-plugin MCP files.
+    one aggregate `_polymath/mcp/mcp.json` (canonical Claude-Code shape),
+    per-plugin MCP files, AND per-host renders under `_polymath/mcp/<host>/`
+    (cursor, gemini-cli, opencode, codex, vscode) with each host's wrapper
+    key and env-var syntax — see docs/MCP-REUSE.md.
   - workflows/*.yaml remain driven by the bundled polymath-flow runner.
 
 Usage:
@@ -417,7 +420,13 @@ def export_markdown_surface(
 
 
 def rewrite_hook_command(command: str, plugin_name: str) -> str:
-    return command.replace("${CLAUDE_PLUGIN_ROOT}", f"../support/{plugin_name}")
+    rewritten = command.replace("${CLAUDE_PLUGIN_ROOT}", f"../support/{plugin_name}")
+    # Shell-quoted strict form (the claude CLI's strict validator requires the
+    # quoted placeholder); strip the quotes for the portable contract so the
+    # run-hook dispatcher resolves the path directly.
+    if rewritten.startswith('"') and rewritten.endswith('"'):
+        return rewritten[1:-1]
+    return rewritten
 
 
 def export_hook_metadata(plugin: pathlib.Path, out_root: pathlib.Path) -> dict | None:
@@ -916,6 +925,33 @@ def main() -> int:
         aggregate = out_root / MCP_ROOT / "mcp.json"
         aggregate.parent.mkdir(parents=True, exist_ok=True)
         aggregate.write_text(json.dumps({"mcpServers": all_mcp_servers}, indent=2) + "\n")
+        # Per-host renders: the canonical aggregate is Claude-Code-shaped
+        # (mcpServers + ${VAR:-} expansion). Other hosts need their own
+        # wrapper key, env syntax, and command shape. mcp-registry.py owns
+        # the per-host rendering; the exporter just materializes it.
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "mcp_registry", REPO / "tools" / "mcp-registry.py"
+            )
+            mcp_registry = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mcp_registry)
+            for host in mcp_registry.HOSTS:
+                if host == "claude-code":
+                    continue  # the aggregate itself is the claude-code render
+                frag = mcp_registry.render_fragment(all_mcp_servers, host)
+                if frag is None:
+                    continue
+                dest = out_root / MCP_ROOT / host
+                dest.mkdir(parents=True, exist_ok=True)
+                if host == "codex":
+                    (dest / "mcp.toml").write_text(frag + "\n", encoding="utf-8")
+                else:
+                    (dest / "mcp.json").write_text(
+                        json.dumps(frag, indent=2) + "\n", encoding="utf-8"
+                    )
+        except Exception as e:
+            print(f"export-agents-skills: warning: per-host MCP renders skipped ({e})", file=sys.stderr)
 
     # Ship the runnable hook dispatcher so hooks are executable on any host,
     # not just portable JSON that needs a bespoke per-host adapter.
@@ -952,7 +988,7 @@ def main() -> int:
             "rationale": "These surfaces are exported as files/metadata, but target hosts do not share one discovery or event standard.",
             "surfaces": [
                 "hooks/hooks.json (normalized under _polymath/hooks/); run via the bundled _polymath/hooks/run-hook.py dispatcher — the host only needs to call it on its own lifecycle events",
-                ".mcp.json (aggregate and per-plugin config under _polymath/mcp/)",
+                ".mcp.json (aggregate under _polymath/mcp/mcp.json + per-host renders under _polymath/mcp/<host>/ for cursor, gemini-cli, opencode, codex, vscode; claude-code uses the aggregate)",
                 "workflows/*.yaml (run through _polymath/support/polymath-flows/bin/polymath-flow)",
             ],
             "hookDispatcher": "_polymath/hooks/run-hook.py",

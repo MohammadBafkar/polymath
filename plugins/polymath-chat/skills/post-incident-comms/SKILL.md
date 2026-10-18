@@ -7,6 +7,8 @@ description: Post an incident-comms update to the right Slack channel + thread; 
 
 > Take a comms-update draft (or write one) and post it to the right Slack channel + thread. Output is the posted ts so the next update can thread under it.
 
+> **MCP binding (read before any tool call):** resolve which server backs `incident_comms` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.slack` — when `source` is `host`, the CURRENT host agent's own `slack` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - An incident comms update was drafted by `polymath-incident:comms-update` and needs to go out.
@@ -59,3 +61,4 @@ Saved thread root: docs/incidents/2026-09/slack-thread.ts
 - Re-posting the full update to two channels — duplicate noise. Mirror is one line + a back-pointer.
 - Posting without a thread when one exists. Splits the conversation.
 - Logging the body to plain logs (PII risk). The slack MCP holds it; we don't.
+

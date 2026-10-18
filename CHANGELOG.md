@@ -7,7 +7,34 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.0]
+
+### Added
+
+- **MCP reuse layer (current-host detection + matching + per-host renders).** Polymath connector providers now reuse MCP servers already registered in the CURRENT host agent instead of always registering plugin-shipped duplicates:
+  - `tools/mcp-registry.py` — offline host scanner (`scan`, redacted env/header values, current host detected from in-session env markers; `--all-hosts` is the diagnostics-only cross-host view), provider matching against binding identity (`match`), host-correct config rendering (`render`), and an offline health report (`doctor`).
+  - **Host-only invariant:** polymath takes MCPs from where it has been added — a server registered in a different agent (e.g. an OpenCode datadog server while running in Cursor) is never reused, because its tools are not in this session's tool list. Undetectable host → plugin fallback everywhere.
+  - `bindings/<provider>/binding.json` gains a provider-identity `mcp` block (`serverAliases` / `packages` / `remoteUrls` / `envKeys`) — enforced by the new `MCP-BINDING` check inside `build-capability-index.py --strict`.
+  - `.polymath/project.yaml` gains the `mcp:` block: `policy` (`reuse-host` default / `prefer-plugin`), `serverOverrides`.
+  - polymath-core SessionStart persists `mcpResolution` into `project-context.json`; MCP-dependent connector skills carry a binding preamble that directs the agent to the resolved server per host tool-naming.
+  - `tools/export-agents-skills.py` emits per-host MCP renders under `dist/agents-skills/_polymath/mcp/<host>/` alongside the canonical aggregate.
+  - New skill: `polymath-core:mcp-bridge`; policy + matrix in `docs/MCP-REUSE.md`.
+
+### Changed
+
+- **Adversarial skill-quality pass across the catalog.** Two foundation skills had drifted and were rewritten to be the catalog's actual source of truth:
+  - `polymath-core:glossary` — corrected three plugins wrongly marked "future tier" (they shipped), reframed `flows-lite` as the runner's execution model, and added the vocabulary the catalog now depends on: capabilities/providers/bindings, provider identity, MCP reuse + `mcpResolution`, routing tiers/signals, conformance gates, portability.
+  - `polymath-core:conventions` — replaced stale "v0.1" workflow claims with the current component-choice matrix, declaration discipline (declare-or-exempt), the full conformance-gate list, and the hook-quoting rule; added a Quality bar.
+  - `polymath-core:route` — routing a connector now resolves `mcpResolution.<provider>` first and names the actual server (host `toolPrefix`) instead of proposing tools absent from the session.
+  - `polymath-core:project-context` — added a Quality bar.
+- Fixed broken/loose cross-references: three `polymath-iac:iac-review` references (a skill that never shipped) now point at `polymath-cloud:plan-review`; `polymath-cloud:design-*` and `polymath-release` `write-{…}` brace-refs spelled out to real skill names.
+- Removed stale product-version references: `polymath-release:pr` no longer claims it doesn't open PRs "in v0.1" (it drafts; `polymath-vcs:open-pr` opens), and `polymath-mobile:push-notifications` / `polymath-engineering:feature-dev` dropped leftover "v0.1" placeholders.
+- Added machine-checkable `## Output` shapes to 13 skills (shrinking `registry/output-shape-baseline.txt` 71 → 53).
+
+### Fixed
+
+- **polymath-core `session-start.sh` bash syntax error.** An apostrophe inside a heredoc body within `$( )` unterminated bash's quote scanning, so the hook failed to parse (`unexpected EOF while looking for matching quote`) and every SessionStart surface was silently skipped. Present since 0.8.0.
+- **7 plugins failed `claude plugin validate --strict`** (unquoted `${CLAUDE_PLUGIN_ROOT}` in hooks.json shell commands — warnings-as-errors under the current CLI). All hook commands quoted.
 
 ## [0.8.0]
 

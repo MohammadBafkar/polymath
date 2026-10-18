@@ -7,6 +7,8 @@ description: Triage an inbound GitHub issue — label, severity, area, ask for m
 
 > Triage one GitHub issue via the github MCP server. Output is structured triage actions, not opinions.
 
+> **MCP binding (read before any tool call):** resolve which server backs `vcs` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.github` — when `source` is `host`, the CURRENT host agent's own `github` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - An inbound issue lands and someone needs to decide what to do with it.
@@ -50,3 +52,4 @@ Routing: payments team via team-payments handle.
 - Assigning to a person who is no longer on the team.
 - Closing as "duplicate" without linking the original.
 - Asking for repro when the repro is already in the body — read first.
+

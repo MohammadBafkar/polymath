@@ -10,5 +10,18 @@
     "elasticApiKey"
   ],
   "title": "elastic",
-  "description": "elastic as observability provider, supplied by polymath-observability."
+  "description": "elastic as observability provider, supplied by polymath-observability.",
+  "mcp": {
+    "serverAliases": [
+      "elastic",
+      "elasticsearch"
+    ],
+    "packages": [
+      "@elastic/mcp-server"
+    ],
+    "envKeys": [
+      "ELASTIC_ENDPOINT",
+      "ELASTIC_API_KEY"
+    ]
+  }
 }

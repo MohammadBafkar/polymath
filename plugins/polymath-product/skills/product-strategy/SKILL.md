@@ -32,6 +32,23 @@ This is the *strategy/market layer*. It is not a feature spec (`polymath-product
 4. Define **success metrics** and the leading indicator that tells you early if it's working.
 5. Output the strategy: vision, ICP, positioning, pricing, moat, GTM — each a decision, with assumptions + how to validate.
 
+## Output
+
+```text
+Strategy: <product / segment>
+
+Vision:        <the change in the world if we win (3-yr north star)>
+ICP:           <ideal customer>   NOT for: <who we don't serve>
+Positioning:   displace <alternative> via <unique attribute> → <value>
+Pricing:       <model + value metric + tiers>
+Moat:          <why the advantage compounds>
+
+Key bets (assumption → cheap test):
+  - <bet> → <how to falsify cheaply>
+
+Success metric:  <leading indicator>
+```
+
 ## Quality bar
 
 - Every section is a *choice* with an explicit alternative rejected, not a description.

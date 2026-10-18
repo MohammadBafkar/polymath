@@ -13,7 +13,7 @@ description: Author a reusable Terraform module — input variables with validat
 - A module is hard to consume — unclear inputs, leaks provider config, or can't be versioned.
 - A workflow invokes `polymath-iac:terraform-module`.
 
-Not this when: you are choosing the cloud architecture/primitives — that is `polymath-cloud:design-stack-composition`. For state/backends, `polymath-iac:terraform-state`; for reviewing a plan diff, `polymath-iac:iac-review`.
+Not this when: you are choosing the cloud architecture/primitives — that is `polymath-cloud:design-stack-composition`. For state/backends, `polymath-iac:terraform-state`; for reviewing a generated plan, `polymath-cloud:plan-review`.
 
 ## Inputs
 

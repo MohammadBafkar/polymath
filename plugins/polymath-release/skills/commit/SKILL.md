@@ -65,6 +65,14 @@ description: Draft a Conventional Commits message for the current diff; never co
 
 ## Output
 
+```text
+Staged:  src/refunds.py, tests/test_refunds.py
+Message: fix(refunds): guard against negative refund amounts
+
+Shown to user for approval before commit. On approval:
+  a1b2c3d  fix(refunds): guard against negative refund amounts
+```
+
 - The proposed commit message (shown to user before commit).
 - The list of files about to be staged.
 - After approval and commit: the commit hash + a one-line summary.

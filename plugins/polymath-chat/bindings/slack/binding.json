@@ -10,5 +10,17 @@
     "slackTeamId"
   ],
   "title": "slack",
-  "description": "slack as incident_comms provider, supplied by polymath-chat."
+  "description": "slack as incident_comms provider, supplied by polymath-chat.",
+  "mcp": {
+    "serverAliases": [
+      "slack"
+    ],
+    "packages": [
+      "@modelcontextprotocol/server-slack"
+    ],
+    "envKeys": [
+      "SLACK_BOT_TOKEN",
+      "SLACK_TEAM_ID"
+    ]
+  }
 }

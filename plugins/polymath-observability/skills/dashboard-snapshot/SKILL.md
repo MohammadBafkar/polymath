@@ -7,6 +7,8 @@ description: Capture a Grafana dashboard snapshot for incident timelines + postm
 
 > Take a permalinked snapshot of a Grafana dashboard at a specific time window so an incident timeline or postmortem can reference exactly what the on-call saw. Output is the snapshot URL + the variables/time captured.
 
+> **MCP binding (read before any tool call):** resolve which server backs `grafana` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.grafana` — when `source` is `host`, the CURRENT host agent's own `grafana` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - An incident timeline needs a permalinked dashboard, not a live URL that keeps changing.
@@ -64,3 +66,4 @@ Saved artifact:
 - Permanent snapshots ("`expires=0`"). Postmortem snapshots should age out; if you need it forever, screenshot it into the doc.
 - External snapshots of dashboards with PII labels (user IDs, IPs). The external snapshot service is a separate cache.
 - Skipping the artifact write. The deleteKey + URL pair is the rollback path.
+

@@ -7,6 +7,8 @@ description: Triage a Sentry issue — group context, frequency trend, recent-de
 
 > Take one Sentry issue and classify it for action. Output is a triage record with frequency + reach + recent-change correlation + the next move.
 
+> **MCP binding (read before any tool call):** resolve which server backs `sentry` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.sentry` — when `source` is `host`, the CURRENT host agent's own `sentry` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - A Sentry issue URL or short-ID lands in the prompt.
@@ -70,3 +72,4 @@ Action: FIX NOW.
 - Ignoring without suppression. The same error keeps showing up next pass.
 - Correlating with a deploy by gut, without checking timestamps. The 13:50 deploy didn't necessarily cause the 14:02 trigger — verify.
 - Treating user count as proxy for impact when the issue is in a low-volume path used by paying customers. Cite revenue / journey impact directly.
+

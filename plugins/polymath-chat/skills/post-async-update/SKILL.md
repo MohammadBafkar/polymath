@@ -7,6 +7,8 @@ description: Post an async standup / status update to a Slack channel — short,
 
 > Replace the daily-standup meeting with a structured Slack post. Output is the message ts + a pointer to the daily-anchor thread.
 
+> **MCP binding (read before any tool call):** resolve which server backs `incident_comms` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.slack` — when `source` is `host`, the CURRENT host agent's own `slack` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+
 ## When to use
 
 - The user has a daily / weekly status update to share.
@@ -57,3 +59,4 @@ Update:
 - Pasting a stream-of-consciousness without the 3 sections. Defeats the point.
 - "No blockers" when there are blockers but you don't want to call them out. Surface them; that's the whole value.
 - Posting to the wrong channel because anchors aren't searched. Verify the anchor message exists.
+

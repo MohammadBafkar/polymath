@@ -13,7 +13,7 @@ description: Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/tfsec
 - Misconfigurations (public buckets, open security groups, untagged resources) keep reaching production.
 - A workflow invokes `polymath-iac:policy-as-code`.
 
-Not this when: you are scanning application code/CI broadly — that is `polymath-security:devsecops-pipeline` (this is the infra-policy layer it can call). For reviewing one plan by hand, `polymath-iac:iac-review`.
+Not this when: you are scanning application code/CI broadly — that is `polymath-security:devsecops-pipeline` (this is the infra-policy layer it can call). For reviewing one generated plan by hand, `polymath-cloud:plan-review`.
 
 ## Inputs
 

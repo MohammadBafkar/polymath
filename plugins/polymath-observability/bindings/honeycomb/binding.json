@@ -10,5 +10,17 @@
     "honeycombDataset"
   ],
   "title": "honeycomb",
-  "description": "honeycomb as observability provider, supplied by polymath-observability."
+  "description": "honeycomb as observability provider, supplied by polymath-observability.",
+  "mcp": {
+    "serverAliases": [
+      "honeycomb"
+    ],
+    "packages": [
+      "@honeycomb/mcp-server"
+    ],
+    "envKeys": [
+      "HONEYCOMB_API_KEY",
+      "HONEYCOMB_DATASET"
+    ]
+  }
 }

@@ -258,6 +258,7 @@ KNOWN_TOP_KEYS = {
     "smoke",
     "tracker",
     "routing",
+    "mcp",
     "attribution",
     "provenance",
 }
@@ -265,6 +266,7 @@ COMMIT_STYLES = {"conventional-commits", "free-form", "ticket-prefixed"}
 BRANCH_STRATEGIES = {"trunk-based", "gitflow", "github-flow", "release-branch"}
 INSTALL_KINDS = {"marketplace", "manual", "submodule"}
 ROUTING_MODES = {"hint", "classify", "enforce"}
+MCP_POLICIES = {"reuse-host", "prefer-plugin"}
 
 
 def _split_unknown(data: dict) -> tuple[dict, list[str]]:
@@ -369,7 +371,7 @@ def _validate(data: Any) -> list[str]:
             for i, plugin in enumerate(poly.get("recommended_plugins") or []):
                 if not isinstance(plugin, dict) or not plugin.get("name"):
                     errs.append(f"polymath.recommended_plugins[{i}] missing `name`")
-    for key in ("conventions_docs", "smoke", "tracker", "routing", "attribution"):
+    for key in ("conventions_docs", "smoke", "tracker", "routing", "mcp", "attribution"):
         value = data.get(key)
         if value is not None and not isinstance(value, dict):
             errs.append(f"{key} must be a mapping")
@@ -378,6 +380,14 @@ def _validate(data: Any) -> list[str]:
         mode = routing.get("mode")
         if mode is not None and mode not in ROUTING_MODES:
             errs.append(f"routing.mode {mode!r} not in {sorted(ROUTING_MODES)}")
+    mcp = data.get("mcp")
+    if isinstance(mcp, dict):
+        policy = mcp.get("policy")
+        if policy is not None and policy not in MCP_POLICIES:
+            errs.append(f"mcp.policy {policy!r} not in {sorted(MCP_POLICIES)}")
+        so = mcp.get("serverOverrides")
+        if so is not None and not isinstance(so, dict):
+            errs.append("mcp.serverOverrides must be a mapping")
     smoke = data.get("smoke")
     if isinstance(smoke, dict):
         for lang, recipe in smoke.items():
