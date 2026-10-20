@@ -128,7 +128,11 @@ For language-specific depth (`.NET`, Python, Laravel, …), Polymath defers to e
 - **Capability abstraction.** Workflows declare *what* they need (issue tracker, observability, pager, vulnerability scanner) via `requires.capabilities`. Projects pick the provider once in `.polymath/capabilities.yaml`. See [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md).
 - **Project localization.** `.polymath/project.yaml` describes the project's stack, conventions, external skill catalogs, and per-skill overrides. The SessionStart hook loads it and exposes a resolved snapshot to every skill. See [`docs/PROJECT-LOCALIZATION.md`](docs/PROJECT-LOCALIZATION.md).
 - **Each plugin owns its templates.** Artifact templates live under `plugins/<plugin>/templates/`. Frontmatter on canonical artifacts (PRD, ADR, Plan, RFC, Runbook, ArchitectureDoc, DACIDecision, TradeoffMatrix, Postmortem, ThreatModel, PRDescription) is gated by the matching JSON schema.
-- **Connectors share a shape.** `.mcp.json` for the upstream MCP server, `userConfig` for credentials (`sensitive: true`), hooks for event-driven reactions, a `references/<service>-tools.md` doc.
+- **Connectors share a shape.** `mcp/servers.json` render template for the
+  upstream MCP server (never auto-registered — the host agent's own MCP
+  servers are the default source; see [`docs/MCP-REUSE.md`](docs/MCP-REUSE.md)),
+  `userConfig` for credentials (`sensitive: true`), hooks for event-driven
+  reactions, a `references/<service>-tools.md` doc.
 - **No native scheduler.** Recurring work lives in external schedulers (Cloud Routines, GitHub Actions, OS cron) that write to a queue file the `polymath-core` SessionStart hook surfaces.
 - **No telemetry.** See [docs/PRIVACY.md](docs/PRIVACY.md).
 - **agentskills.io v1.0 compatible.** Most skills export and run unchanged on any harness implementing the open standard (Claude Code, Codex, Cursor, Gemini CLI, Goose, JetBrains Junie); the subset that depends on a Claude Code surface (MCP, SessionStart, the flows runner) carries a portability banner — see [docs/PORTABILITY.md](docs/PORTABILITY.md).
@@ -147,7 +151,7 @@ polymath/
 │       ├── commands/<cmd>.md
 │       ├── agents/<role>.md
 │       ├── hooks/                      # event-driven hook scripts
-│       ├── .mcp.json                   # connector plugins only
+│       ├── mcp/servers.json            # connector plugins only (render template)
 │       ├── workflows/*.yaml            # polymath-flows only
 │       ├── bin/                        # bundled executables (polymath-flow, scaffolders)
 │       ├── README.md, CHANGELOG.md
@@ -183,7 +187,7 @@ The `claude-cli-fixtures` job runs `tests/golden/run-fixtures.sh` against the Cl
 ## Quality
 
 - [`docs/QUALITY-SCORECARD.md`](docs/QUALITY-SCORECARD.md) — the gates, what gets measured, where the artifacts land, and the proof loop.
-- [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping a `.mcp.json` / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
+- [`docs/INTEGRATION-POLICY.md`](docs/INTEGRATION-POLICY.md) — per-plugin audit for every integration plugin (one shipping an `mcp/servers.json` render template / `bindings/`) and infra plugin. Records (a) whether an official MCP / LSP exists, (b) what Polymath adds, (c) the sunset trigger.
 - [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md) — first-run setup, project activation, env vars, plugin sets, workflows, and portability notes.
 
 ## Contributing

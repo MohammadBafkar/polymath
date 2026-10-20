@@ -7,7 +7,7 @@ description: Triage a Linear issue — classify type/priority/state, ask for mis
 
 > Triage one Linear issue via the linear MCP. Linear-specific: respects the team's workflow states (Backlog / Todo / In Progress / In Review / Done / Cancelled) and project-cycle awareness.
 
-> **MCP binding (read before any tool call):** resolve which server backs `issue_tracker` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.linear` — when `source` is `host`, the CURRENT host agent's own `linear` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+> **MCP binding (read before any tool call):** resolve which server backs `issue_tracker` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.linear` — when `source` is `host`, the CURRENT host agent's own `linear` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `none`, no matching server is registered in this host: degrade gracefully (no MCP tool calls) and, if tooling is essential, ask the user before helping install the vendor's server (the plugin template renders a host-correct fragment). Plugins never auto-register MCP servers. See the `polymath-core:mcp-bridge` skill.
 
 ## When to use
 

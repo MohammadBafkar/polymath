@@ -27,17 +27,21 @@ What ports:
   - The skill's plugin templates/ directory, IF the SKILL.md body
     references it via `../../templates/`. The references are
     rewritten to `templates/` (relative to the exported skill).
-  - All plugin templates, bin scripts, hook scripts, and MCP config are copied
-    under `_polymath/` with manifest metadata and portable path contracts.
+  - All plugin templates, bin scripts, hook scripts, and MCP render templates
+    are copied under `_polymath/` with manifest metadata and portable path contracts.
 
 What cannot auto-activate everywhere:
   - hooks/hooks.json has no cross-agent event standard. The exporter emits
     normalized hook metadata plus scripts for host-specific adapters.
-  - MCP is a protocol, but client discovery files differ. The exporter emits
-    one aggregate `_polymath/mcp/mcp.json` (canonical Claude-Code shape),
-    per-plugin MCP files, AND per-host renders under `_polymath/mcp/<host>/`
-    (cursor, gemini-cli, opencode, codex, vscode) with each host's wrapper
-    key and env-var syntax — see docs/MCP-REUSE.md.
+  - MCP is a protocol, but client discovery files differ — and the bundle
+    never auto-registers anything. The exporter emits per-plugin server
+    templates (`_polymath/mcp/<plugin>.servers.json`, canonical Claude-Code
+    shape) and per-host renders under `_polymath/mcp/<host>/` (cursor,
+    gemini-cli, opencode, codex, vscode) with each host's wrapper key and
+    env-var syntax. Use `tools/mcp-registry.py scan` + `match` to reuse
+    servers already registered in your host agent FIRST; render + install a
+    template only when no host server matches and the user opts in — see
+    docs/MCP-REUSE.md.
   - workflows/*.yaml remain driven by the bundled polymath-flow runner.
 
 Usage:
@@ -482,13 +486,19 @@ def export_hook_metadata(plugin: pathlib.Path, out_root: pathlib.Path) -> dict |
 
 
 def export_mcp_config(plugin: pathlib.Path, out_root: pathlib.Path) -> tuple[dict | None, dict]:
-    mcp_path = plugin / ".mcp.json"
+    # Connector MCP server definitions live in mcp/servers.json — a RENDER
+    # TEMPLATE (Claude-Code shape, env keys only), never an auto-registered
+    # config. The exported copy keeps that status: it is documentation of
+    # what the connector's server looks like, to be installed via
+    # mcp-registry render only when the user opts in (their host agent's own
+    # registered MCP servers are the default source).
+    mcp_path = plugin / "mcp" / "servers.json"
     if not mcp_path.is_file():
         return None, {}
     doc = json.loads(mcp_path.read_text())
     servers = doc.get("mcpServers") if isinstance(doc, dict) else None
     servers = servers if isinstance(servers, dict) else {}
-    dest = out_root / MCP_ROOT / f"{plugin.name}.mcp.json"
+    dest = out_root / MCP_ROOT / f"{plugin.name}.servers.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps({"mcpServers": servers}, indent=2) + "\n")
     return (
@@ -593,7 +603,7 @@ discoverable skills. `_polymath/` contains support files for host adapters.
 - Converted commands: {manifest["commandCount"]}
 - Converted subagents: {manifest["agentCount"]}
 - Hook manifests: {manifest["hookCount"]}
-- MCP server configs: {manifest["mcpServerCount"]}
+- MCP server templates: {manifest["mcpServerCount"]}
 - Templates: {manifest["templateCount"]}
 - Scripts: {manifest["scriptCount"]}
 
@@ -612,8 +622,9 @@ Hooks ship with a runnable dispatcher. Wire your host's lifecycle events to:
 
 It runs the matching commands from the normalized `_polymath/hooks/*.hooks.json`
 manifests with the bundle root as the working directory and POLYMATH_* path
-variables exported. MCP servers still require host-specific client registration
-because MCP discovery files are not standardized across agents.
+variables exported. MCP servers are NOT auto-registered anywhere: reuse the
+host agent's own registered servers first (`_polymath/mcp/` holds render
+templates and per-host fragments for the opt-in install path).
 """
     (out_root / "PORTABILITY.md").write_text(text)
 
@@ -922,10 +933,14 @@ def main() -> int:
                 )
 
     if all_mcp_servers:
-        aggregate = out_root / MCP_ROOT / "mcp.json"
+        # Aggregate template: kept Claude-Code-shaped for reference only — a
+        # paste-ready auto-registered aggregate would defeat the reuse-first
+        # model. Per-host renders remain available so an OPT-IN install is a
+        # copy, not a translation exercise.
+        aggregate = out_root / MCP_ROOT / "servers.json"
         aggregate.parent.mkdir(parents=True, exist_ok=True)
         aggregate.write_text(json.dumps({"mcpServers": all_mcp_servers}, indent=2) + "\n")
-        # Per-host renders: the canonical aggregate is Claude-Code-shaped
+        # Per-host renders: the canonical template is Claude-Code-shaped
         # (mcpServers + ${VAR:-} expansion). Other hosts need their own
         # wrapper key, env syntax, and command shape. mcp-registry.py owns
         # the per-host rendering; the exporter just materializes it.
@@ -988,7 +1003,7 @@ def main() -> int:
             "rationale": "These surfaces are exported as files/metadata, but target hosts do not share one discovery or event standard.",
             "surfaces": [
                 "hooks/hooks.json (normalized under _polymath/hooks/); run via the bundled _polymath/hooks/run-hook.py dispatcher — the host only needs to call it on its own lifecycle events",
-                ".mcp.json (aggregate under _polymath/mcp/mcp.json + per-host renders under _polymath/mcp/<host>/ for cursor, gemini-cli, opencode, codex, vscode; claude-code uses the aggregate)",
+                "mcp/servers.json (templates under _polymath/mcp/<plugin>.servers.json + per-host renders under _polymath/mcp/<host>/ for cursor, gemini-cli, opencode, codex, vscode; claude-code uses the template shape) — render inputs, installed only when the user opts in; reuse the host's registered MCP servers first",
                 "workflows/*.yaml (run through _polymath/support/polymath-flows/bin/polymath-flow)",
             ],
             "hookDispatcher": "_polymath/hooks/run-hook.py",
@@ -1007,7 +1022,7 @@ def main() -> int:
     print(
         "support:               "
         f"{len(hook_entries)} hook manifest(s), "
-        f"{sum(len(e.get('servers', [])) for e in mcp_entries)} MCP server(s), "
+        f"{sum(len(e.get('servers', [])) for e in mcp_entries)} MCP template server(s), "
         f"{len(template_entries)} template(s), {len(script_entries)} script(s)"
     )
 

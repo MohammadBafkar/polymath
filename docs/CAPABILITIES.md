@@ -39,10 +39,12 @@ entry in the vocabulary — never a new top-level catalog plugin.
 
 **Which MCP server actually serves the capability** is resolved separately:
 the polymath-core SessionStart hook persists `mcpResolution` into the
-project-context snapshot (`reuse-host` policy default — a host-registered
-server matching the binding's provider identity wins over the plugin-shipped
-`.mcp.json`). Skills and step prompts read `${project.mcpResolution...}` or
-the `polymath-core:mcp-bridge` skill to bind to the right server. See
+project-context snapshot (`reuse-host` policy default — a server registered
+in the current host agent that matches the binding's provider identity wins;
+plugins never auto-register MCP servers, so with no host match the provider
+resolves to `none`). Skills and step prompts read
+`${project.mcpResolution...}` or the `polymath-core:mcp-bridge` skill to
+bind to the right server. See
 [`docs/MCP-REUSE.md`](MCP-REUSE.md).
 
 ## Capability vocabulary

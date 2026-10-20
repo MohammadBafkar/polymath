@@ -27,14 +27,14 @@
       ]
     },
     "transport": {
-      "description": "How the provider is reached. 'mcp' = an MCP server (named by `server`, defined in the plugin's .mcp.json today; how it is packaged so only the configured one launches is the deferred Phase 2 decision). 'cli' = a local vendor CLI. 'skill' = no server/CLI; the plugin contributes design/workflow skills only (e.g. infra design plugins).",
+      "description": "How the provider is reached. 'mcp' = an MCP server (named by `server`, defined in the plugin's mcp/servers.json render template — a template, never an auto-registered .mcp.json; how it is packaged so only the configured one launches is the deferred Phase 2 decision). 'cli' = a local vendor CLI. 'skill' = no server/CLI; the plugin contributes design/workflow skills only (e.g. infra design plugins).",
       "type": "object",
       "additionalProperties": false,
       "required": ["kind"],
       "properties": {
         "kind": { "enum": ["mcp", "cli", "skill"] },
         "server": {
-          "description": "For kind=mcp: the mcpServers key in the plugin's .mcp.json that serves this provider. Multiple providers may share one server (e.g. github_issues/github_actions/dependabot all ride the github server).",
+          "description": "For kind=mcp: the mcpServers key in the plugin's mcp/servers.json render template that serves this provider. Multiple providers may share one server (e.g. github_issues/github_actions/dependabot all ride the github server).",
           "type": "string",
           "minLength": 1
         },
@@ -46,7 +46,7 @@
       }
     },
     "mcp": {
-      "description": "For kind=mcp: provider IDENTITY — the machine-readable contract tools/mcp-registry.py uses to recognize an MCP server already registered in a host agent (Claude Code, Cursor, Gemini CLI, OpenCode, Codex, VS Code) as THIS provider, so polymath can reuse the host's server instead of registering a duplicate. Declare enough signals to catch the common cases: the server name the vendor's docs use, the npm package (or binary) the official server launches, and the hosted remote URL if one exists.",
+      "description": "For kind=mcp: provider IDENTITY — the machine-readable contract tools/mcp-registry.py uses to recognize an MCP server already registered in a host agent (Claude Code, Cursor, Gemini CLI, OpenCode, Codex, VS Code) as THIS provider, so polymath reuses the host's server (the default — plugins never auto-register their own). Declare enough signals to catch the common cases: the server name the vendor's docs use, the npm package (or binary) the official server launches, and the hosted remote URL if one exists.",
       "type": "object",
       "additionalProperties": false,
       "properties": {

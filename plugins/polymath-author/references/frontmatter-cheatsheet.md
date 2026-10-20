@@ -111,7 +111,7 @@ queue.json, etc.). Claude Code hook manifests may still require
 `${CLAUDE_PLUGIN_ROOT}` in `hooks/hooks.json`; the portable exporter rewrites
 hook metadata to `_polymath/support/<plugin>/...`.
 
-## 6. .mcp.json (connector plugins)
+## 6. mcp/servers.json (connector plugins — a render template, never auto-registered)
 
 ```jsonc
 {
@@ -130,3 +130,10 @@ hook metadata to `_polymath/support/<plugin>/...`.
 
 `userConfig` values are exposed to the MCP server's `env` via
 `${POLYMATH_<UPPER-SNAKE>_<USERCONFIGKEY>}` substitution.
+
+Plugins must NOT ship a root `.mcp.json`: Claude Code auto-registers every
+server in it, which duplicates servers the host agent already has (or launches
+servers that fail auth). `mcp/servers.json` is a render input —
+`tools/mcp-registry.py render` turns it into a host-correct fragment that the
+user installs explicitly. The reuse path (host-registered servers, matched via
+the binding's provider identity) is always tried first.

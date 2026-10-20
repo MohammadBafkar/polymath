@@ -4,7 +4,9 @@ GitHub connector for the Polymath marketplace.
 
 ## What it ships
 
-- MCP server: `@modelcontextprotocol/server-github` (via `npx`).
+- MCP server template: `@modelcontextprotocol/server-github` (via `npx`) —
+  rendered to your host's MCP config only when you opt in; if your agent
+  already has a GitHub MCP registered, it is reused.
 - Skills: `open-pr`, `triage-issue`, `diagnose-ci-failure`.
 - Hooks:
   - `UserPromptSubmit` — detects PR URLs in the prompt and hints the model to fetch via the MCP server.
@@ -17,6 +19,11 @@ GitHub connector for the Polymath marketplace.
 claude plugin install polymath-vcs@polymath
 # You'll be prompted for githubToken (sensitive).
 ```
+
+MCP servers are not auto-registered. If your agent already has a GitHub MCP
+registered, the skills use it. Otherwise run
+`python3 tools/mcp-registry.py render --plugin polymath-vcs --target <your-host>`
+and apply the fragment to your host's MCP config.
 
 ## Token
 

@@ -1,6 +1,6 @@
 {
   "name": "polymath-architecture",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Software architecture design craft: DDD context mapping + aggregates, event-driven and integration design, resilience patterns, service decomposition, distributed consistency, and design-pattern application.",
   "license": "MIT",
   "author": {

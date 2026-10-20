@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.10.0]
+
+### Changed
+
+- **/new-connector** scaffolds `mcp/servers.json` (a render template) instead of a root `.mcp.json` — plugins never auto-register MCP servers; the host agent's registered MCPs are reused first. See `docs/MCP-REUSE.md`.
+
 ## [0.9.0]
 
 ### Added
@@ -22,7 +28,7 @@ Author craft: scaffold new plugins/skills/connectors, validate against gates, me
 ### Commands
 
 - **/new-command** — Generate a thin /slash-command alias file inside an existing plugin via new-command.sh; not a capability or workflow.
-- **/new-connector** — Generate an integration (MCP) plugin named by capability (polymath-<concept>) with .mcp.json + userConfig via new-connector.sh; not a generic plugin (new-plugin).
+- **/new-connector** — Generate an integration (MCP) plugin named by capability (polymath-<concept>) with mcp/servers.json template + userConfig via new-connector.sh; not a generic plugin (new-plugin).
 - **/new-pack** — Generate a defaults pack (standalone marketplace + conventions plugin + apply-defaults copy-in) for an org/team/project scope via new-pack.sh; not a generic plugin (new-plugin).
 - **/new-plugin** — Generate a new top-level Polymath plugin (plugin.json, README, CHANGELOG) via new-plugin.sh; not for adding a skill or command to an existing plugin.
 - **/new-skill** — Generate the SKILL.md and directories for a new skill inside an existing plugin via new-skill.sh; not a whole plugin.

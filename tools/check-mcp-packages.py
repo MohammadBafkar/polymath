@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""MCP-PKG gate: every connector .mcp.json package is verified or disclosed.
+"""MCP-PKG gate: every render-template MCP package is verified or disclosed.
 
-Several integration plugins reference an MCP server package in
-their `.mcp.json` `npx` command. Some of those packages are published on
-npm and resolve on `npx -y <pkg>`; others are placeholder names for a
-vendor's MCP server that does not (yet) ship as that npm package — it may be
-a hosted remote URL, a Go binary, a Python `uvx` package, or a CLI
-subcommand. A placeholder that resolves to nothing makes the connector
-dead-on-install: `npx -y @vendor/mcp-server` fails to download and the MCP
-server never starts.
+Polymath connectors ship their MCP server definitions as a render template
+(`mcp/servers.json` — Claude-Code-shaped, env keys only), never as an
+auto-registered `.mcp.json`. The template is what `tools/mcp-registry.py
+render` turns into a host-correct fragment when a user opts in, and it
+references MCP servers via an `npx` command. Some of those package names are
+published on npm and resolve; others are placeholder names for a vendor's
+MCP server that does not (yet) ship as that npm package — it may be a hosted
+remote URL, a Go binary, a Python `uvx` package, or a CLI subcommand. A
+placeholder renders a fragment whose `npx -y <placeholder>` never starts, so
+the user must substitute the real distribution — and the reuse path (the
+host agent's already-registered MCP server) is the primary working route.
 
 This gate makes that state explicit and drift-proof. It does NOT hit the
 network (so CI stays hermetic). Instead it classifies every referenced
@@ -83,12 +86,12 @@ def package_from_args(args: list[str]) -> str | None:
 
 
 def connector_dirs() -> list[pathlib.Path]:
-    # Detect connectors by the artifact that matters here — a .mcp.json — rather
-    # than a name prefix, so the gate survives concept-plugin renames (vcs, chat,
-    # paging, …) and the observability merge.
+    # Detect connectors by the artifact that matters here — an mcp/servers.json
+    # render template — rather than a name prefix, so the gate survives
+    # concept-plugin renames (vcs, chat, paging, …) and the observability merge.
     return sorted(
         p for p in PLUGINS_DIR.iterdir()
-        if p.is_dir() and (p / ".mcp.json").exists()
+        if p.is_dir() and (p / "mcp" / "servers.json").exists()
     )
 
 
@@ -110,12 +113,12 @@ def main() -> int:
     args = parser.parse_args()
 
     problems: list[str] = []
-    # Collect (package, connector_name) references across every connector.
+    # Collect (package, connector_name) references across every render template.
     refs: list[tuple[str, str, pathlib.Path]] = []
     for cdir in connector_dirs():
-        mcp = cdir / ".mcp.json"
+        mcp = cdir / "mcp" / "servers.json"
         if not mcp.exists():
-            continue  # not an MCP plugin (no .mcp.json) — nothing for MCP-PKG to check.
+            continue  # not an MCP plugin (no template) — nothing for MCP-PKG to check.
         data = json.loads(mcp.read_text())
         for server, spec in data.get("mcpServers", {}).items():
             command = spec.get("command", "")

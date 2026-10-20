@@ -12,15 +12,21 @@ one plugin (the `observability` capability).
   `log-search`, `query-during-incident`, `author-monitor`, `triage-error` —
   how to investigate what you've emitted, across providers.
 - **Providers:** Datadog, Grafana, Honeycomb, Elastic, Sentry — each via a
-  `bindings/<provider>/binding.json` + a `.mcp.json` server. Configure only the
-  providers you use (`.polymath/capabilities.yaml`); the rest stay idle.
+  `bindings/<provider>/binding.json` + an `mcp/servers.json` server template
+  (rendered to your host's MCP config only when you opt in; if your agent
+  already has the provider's MCP registered, it is reused — nothing is
+  auto-added). Configure only the providers you use
+  (`.polymath/capabilities.yaml`); the rest stay idle.
 
 <!-- mcp-package-status -->
-> ⚠️ **Some MCP packages not yet published.** `@datadog/mcp-server`,
-> `@grafana/mcp-server`, `@honeycomb/mcp-server`, and `@elastic/mcp-server` do
-> **not** resolve on npm as of 2026-06-08 (Sentry's `@sentry/mcp-server` does).
-> Substitute the real command for the provider(s) you use in `.mcp.json` before
-> relying on them. See [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
+> ⚠️ **Some MCP packages not yet published.** The server templates
+> (`mcp/servers.json`) name `@datadog/mcp-server`, `@grafana/mcp-server`,
+> `@honeycomb/mcp-server`, and `@elastic/mcp-server`, which do **not** resolve
+> on npm as of 2026-06-08 (Sentry's `@sentry/mcp-server` does). If you opt in to
+> installing a rendered fragment, substitute the real command for the
+> provider(s) you use first. If your host agent already has the provider's MCP
+> registered, it is reused and no template is needed. See
+> [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
 <!-- /mcp-package-status -->
 
 ## Installation
@@ -28,6 +34,11 @@ one plugin (the `observability` capability).
 ```bash
 claude plugin install polymath-observability@polymath
 ```
+
+MCP servers are not auto-registered. If your agent already has the provider's
+MCP registered (Datadog, Grafana, Sentry, …), the skills use it. Otherwise run
+`python3 tools/mcp-registry.py render --plugin polymath-observability --target <your-host>`
+and apply the fragments for the providers you use to your host's MCP config.
 
 ## Dependencies
 

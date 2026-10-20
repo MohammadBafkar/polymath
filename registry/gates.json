@@ -96,7 +96,7 @@
       "invocation": "python3 tools/check-mcp-packages.py",
       "tier": "cross-plugin",
       "verification": "grandfathered",
-      "description": "Connector .mcp.json packages resolve on npm or carry a disclosure marker."
+      "description": "Connector mcp/servers.json render-template packages resolve on npm or carry a disclosure marker. Templates are never auto-registered; the host agent's MCP servers are the default source."
     },
     {
       "id": "STABILITY-1",

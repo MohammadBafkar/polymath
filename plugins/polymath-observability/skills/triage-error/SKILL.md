@@ -7,7 +7,7 @@ description: Triage a Sentry issue — group context, frequency trend, recent-de
 
 > Take one Sentry issue and classify it for action. Output is a triage record with frequency + reach + recent-change correlation + the next move.
 
-> **MCP binding (read before any tool call):** resolve which server backs `sentry` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.sentry` — when `source` is `host`, the CURRENT host agent's own `sentry` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `source` is `plugin`, the plugin-shipped `.mcp.json` server backs this skill. When `none`, credentials are unconfigured: ask the user to configure them or degrade gracefully. See the `polymath-core:mcp-bridge` skill.
+> **MCP binding (read before any tool call):** resolve which server backs `sentry` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.sentry` — when `source` is `host`, the CURRENT host agent's own `sentry` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `none`, no matching server is registered in this host: degrade gracefully (no MCP tool calls) and, if tooling is essential, ask the user before helping install the vendor's server (the plugin template renders a host-correct fragment). Plugins never auto-register MCP servers. See the `polymath-core:mcp-bridge` skill.
 
 ## When to use
 

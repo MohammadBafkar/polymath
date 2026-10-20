@@ -51,7 +51,7 @@ class PortableExportTests(unittest.TestCase):
             )
             self.assertIn("paths", manifest)
             self.assertEqual(manifest["paths"]["dataRoot"]["default"], "~/.polymath/data")
-            self.assertTrue((out / "_polymath" / "mcp" / "mcp.json").is_file())
+            self.assertTrue((out / "_polymath" / "mcp" / "servers.json").is_file())
 
     def test_every_exported_skill_has_a_valid_frontmatter_fence(self) -> None:
         # Commands whose source frontmatter carries only a description (no

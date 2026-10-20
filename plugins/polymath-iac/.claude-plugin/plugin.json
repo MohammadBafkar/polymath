@@ -1,6 +1,6 @@
 {
   "name": "polymath-iac",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Infrastructure-as-Code craft: Terraform module authoring, state/backends/drift, policy-as-code guardrails, and IaC plan/diff review.",
   "license": "MIT",
   "author": {

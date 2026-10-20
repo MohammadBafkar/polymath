@@ -47,7 +47,7 @@ Hand-run analysis tools (not CI gates — measurement/diagnostics, run manually)
 ```bash
 tools/triggering.py route-eval         # held-out routing measurement (precision/reach vs tests/route-eval/heldout.jsonl); reports, always exits 0 — NOT the tests/route-triggering gate
 tools/token-report.py usage <file>     # break down a `claude -p --output-format stream-json` transcript by token consumption
-tools/check-mcp-packages.py --online  # re-verify connector .mcp.json packages against npm (the offline MCP-PKG gate runs in conformance)
+tools/check-mcp-packages.py --online  # re-verify connector mcp/servers.json template packages against npm (the offline MCP-PKG gate runs in conformance)
 ```
 
 ## Plugin anatomy
@@ -64,7 +64,8 @@ agents/<role>.md               # Forked-context specialists (use sparingly)
 hooks/hooks.json + scripts/    # Deterministic gates (secret-scan, format-on-save)
 templates/                     # Artifact templates owned by this plugin
 workflows/*.yaml               # polymath-flows only
-.mcp.json                      # Integration plugins only (vcs/chat/observability/…)
+.mcp.json                      # Integration plugins DO NOT ship this (Claude Code would auto-register it)
+mcp/servers.json               # Integration plugins only (vcs/chat/observability/…) — render template, opt-in install
 bindings/<provider>/binding.json  # Capability provider wiring (integration/infra plugins)
 bin/                           # Executables (polymath-flow, scaffolders)
 tests/                         # Unit tests, golden fixtures, skill-triggering cases
@@ -87,21 +88,21 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | WORKFLOW-1 | Workflow YAML validates against `registry/schemas/workflow.schema.json` |
 | WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |
 | SURFACE-INDEX | `plugins/polymath-core/data/route-signals.json` + `surface-index.json` match a fresh `tools/build-surface-index.py` build (diff-guard); `--strict` (SURFACE-2) requires every intent / url / regex pattern to be globally unique across all surfaces |
-| CAPABILITY-INDEX | `registry/schemas/capabilities.json` `providerPlugins{}` matches a fresh `tools/build-capability-index.py` build from per-provider `bindings/<provider>/binding.json` (diff-guard); `--strict` (BINDING-1) requires every binding's provider to be in its capability's `providers[]`, forbids two plugins claiming one `(capability, provider)`, and requires each `mcp` binding's `server` + `userConfigKeys` to exist in the plugin's `.mcp.json` / `plugin.json` |
+| CAPABILITY-INDEX | `registry/schemas/capabilities.json` `providerPlugins{}` matches a fresh `tools/build-capability-index.py` build from per-provider `bindings/<provider>/binding.json` (diff-guard); `--strict` (BINDING-1) requires every binding's provider to be in its capability's `providers[]`, forbids two plugins claiming one `(capability, provider)`, and requires each `mcp` binding's `server` + `userConfigKeys` to exist in the plugin's `mcp/servers.json` / `plugin.json` |
 | TOOL-1 | every `tools/<name>/tool.json` validates against `registry/schemas/tool.schema.json` (enforced by `build-surface-index.py`, i.e. SURFACE-INDEX) |
 | TRUST-1 | a `routing.yaml` `trust` value is `propose` (default) or `auto-headless` — enforced by the `registry/schemas/surface-routing.schema.json` `trust` enum (`build-surface-index.py` validates every sidecar against it). Unconditional `auto` is intentionally not in the enum until per-surface write-scope analysis exists |
 | WORKFLOW-2 | `build-workflow-index.py --strict`: every workflow declares `whenToUse` + `triggers`, and no trigger phrase is shared across workflows |
 | WORKFLOW-TRIGGER | `tests/workflow-triggering/*.md` frontmatter is valid and its `trigger_prompts` are a superset of the workflow's own `triggers` |
 | DESC-1 | `tools/lint-descriptions.py --strict`: no two always-on descriptions (skill/command/agent) token-collide without a distinguishing proper noun (the disambiguation floor; `scope_boundary` is advisory) |
 | DESC-2 | `tools/check-description-confusion.py check`: `tests/forbidden_prompts.yaml` cases are well-formed (referenced skills exist). Behavioural `run` mode is opt-in under `CLAUDE_CODE_OAUTH_TOKEN` |
-| INTEGRATION-1 | Integration plugins (those that ship a `.mcp.json`) need `references/*.md` and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only`. Detected by `.mcp.json` presence, not name |
-| INTEGRATION-2 | Every integration plugin (`.mcp.json` or `bindings/`) and infra plugin must be audited in `docs/INTEGRATION-POLICY.md` and carry the synced policy block. Detected by artifact, not name prefix |
-| MCP-PKG | `tools/check-mcp-packages.py`: every connector `.mcp.json` package is confirmed to resolve on npm or disclosed as a placeholder (`<!-- mcp-package-status -->`) in its README — no dead-on-install connector ships silently. Offline; `--online` re-verifies vs npm |
+| INTEGRATION-1 | Integration plugins (those that ship an `mcp/servers.json` render template) need `references/*.md` and `userConfig` with `title`+`description` per key — unless they delegate to a connector dependency or declare keyword `polymath-cli-only`. Detected by template presence, not name. Plugins never ship an auto-registered `.mcp.json` |
+| INTEGRATION-2 | Every integration plugin (`mcp/servers.json` or `bindings/`) and infra plugin must be audited in `docs/INTEGRATION-POLICY.md` and carry the synced policy block. Detected by artifact, not name prefix |
+| MCP-PKG | `tools/check-mcp-packages.py`: every connector template (`mcp/servers.json`) package is confirmed to resolve on npm or disclosed as a placeholder (`<!-- mcp-package-status -->`) in its README — no dead opt-in install ships silently. Offline; `--online` re-verifies vs npm |
 | AGENT-1 | `tools/check-agents.py`: every `plugins/*/agents/<name>.md` has a baseline-beating golden fixture at `tests/golden/<plugin>/agent-<name>.md` (frontmatter `agent: <name>` + an `expect` trace), and no agent name/description collides with a workflow name or trigger phrase (the role-as-agent guard, PLUGIN-AUTHORING §6/§6.1) |
 | FIXTURE-1 | At least one golden fixture under `tests/golden/<plugin-name>/*.md` |
 | DOCS-1 | Both `README.md` and `CHANGELOG.md` present in plugin root |
 
-When adding a new integration/infra plugin (one with a `.mcp.json` or `bindings/`), populate its `polymath_value` row in [docs/INTEGRATION-POLICY.md](docs/INTEGRATION-POLICY.md) before the PR can merge. Concept plugins are named by capability (`polymath-vcs`, `polymath-chat`, …) and map multiple vendor providers via `bindings/<provider>/binding.json`; the `registry/schemas/capabilities.json` vocabulary lists each capability's providers (a capability may list providers no plugin binds; projects can still declare them with their own MCP servers).
+When adding a new integration/infra plugin (one with an `mcp/servers.json` render template or `bindings/`), populate its `polymath_value` row in [docs/INTEGRATION-POLICY.md](docs/INTEGRATION-POLICY.md) before the PR can merge. Concept plugins are named by capability (`polymath-vcs`, `polymath-chat`, …) and map multiple vendor providers via `bindings/<provider>/binding.json`; the `registry/schemas/capabilities.json` vocabulary lists each capability's providers (a capability may list providers no plugin binds; projects can still declare them with their own MCP servers).
 
 ## Workflow YAML architecture
 

@@ -1,11 +1,11 @@
 # Connector and infra plugin policy
 
-This document governs every **integration** plugin (one that ships a
-`.mcp.json` or capability `bindings/` — e.g. `polymath-vcs`, `polymath-chat`,
-`polymath-observability`) and every **infra** plugin (`polymath-cloud`,
-`polymath-kubernetes`). It exists because the most common criticism of any
-plugin catalog is that such plugins duplicate official MCPs, official docs, or
-vendor tooling without adding distinct value.
+This document governs every **integration** plugin (one that ships an
+`mcp/servers.json` render template or capability `bindings/` — e.g.
+`polymath-vcs`, `polymath-chat`, `polymath-observability`) and every **infra**
+plugin (`polymath-cloud`, `polymath-kubernetes`). It exists because the most
+common criticism of any plugin catalog is that such plugins duplicate official
+MCPs, official docs, or vendor tooling without adding distinct value.
 
 The policy:
 
@@ -78,7 +78,8 @@ release.
 Named by the capability they serve; each maps multiple vendor providers under
 one capability (see `registry/schemas/capabilities.json`). Providers are wired
 incrementally via `bindings/<provider>/binding.json`. Each pairs **MCP-dependent
-skills** (the procedure) with the `.mcp.json` server that backs them — the skill
+skills** (the procedure) with the `mcp/servers.json` server template that
+backs them — the skill
 is the recipe, the MCP is the tooling (see the `polymath-core:glossary`); such
 skills are `claude-coupled` for portability (`docs/PORTABILITY.md`).
 
@@ -116,51 +117,58 @@ Projects then map each capability to the configured provider once in
 
 ### 4.1 Provider configuration & packaging
 
-A capability plugin may bundle several providers' MCP servers (e.g.
+A capability plugin may bundle several providers' server templates (e.g.
 `polymath-observability` ships Datadog + Grafana + Honeycomb + Elastic +
-Sentry). Claude Code loads `.mcp.json` statically at session start and cannot
-launch only a subset, so:
+Sentry). Because plugins never auto-register MCP servers:
 
 - **Reuse the host's server first (`reuse-host` policy, the default).** Before
-  a polymath connector server is registered or used, `tools/mcp-registry.py`
-  scans the host agent's own MCP config (Claude Code, Cursor, Gemini CLI,
-  OpenCode, Codex, VS Code — project + user scopes) and matches registered
-  servers against each binding's provider identity (the `mcp` block:
-  `serverAliases` / `packages` / `remoteUrls`). When the host already has e.g.
-  a `datadog` server, skills use it and the plugin-shipped copy stays idle —
-  no duplicate tools, no duplicate auth. See [`docs/MCP-REUSE.md`](MCP-REUSE.md).
-  Set `mcp.policy: prefer-plugin` in `.polymath/project.yaml` to pin the
-  plugin-shipped server instead.
-- **All declared servers register; configure only the provider(s) you use.**
-  Every credential env uses a `${VAR:-}` empty default, so an *unconfigured*
-  provider can't break MCP config parsing — its server starts idle and fails its
-  own auth rather than blocking the whole session.
-- **To avoid idle servers, disable the unused ones** via the `/mcp` UI (or
-  `disabledMcpjsonServers` in settings).
+  any polymath connector server is used, `tools/mcp-registry.py` scans the
+  host agent's own MCP config (Claude Code, Cursor, Gemini CLI, OpenCode,
+  Codex, VS Code — project + user scopes) and matches registered servers
+  against each binding's provider identity (the `mcp` block: `serverAliases`
+  / `packages` / `remoteUrls`). When the host already has e.g. a `datadog`
+  server, skills use it — no duplicate tools, no duplicate auth. See
+  [`docs/MCP-REUSE.md`](MCP-REUSE.md). Set `mcp.policy: prefer-plugin` in
+  `.polymath/project.yaml` to pin the provider's `mcp/servers.json` template
+  server instead.
+- **No plugin ships an auto-registered `.mcp.json`.** Claude Code
+  auto-registers any `.mcp.json` a plugin root ships, which is exactly the
+  default this design forbids. Connector server definitions live in
+  `mcp/servers.json` — a render template (Claude-Code shape, env keys only)
+  that becomes a real server only when the user runs
+  `tools/mcp-registry.py render` and installs the fragment into their host
+  config.
+- **Unconfigured never blocks a session.** With no host server and no
+  opt-in install, the provider resolves to `none`: the skill degrades
+  gracefully (design guidance without tool calls) instead of launching a
+  server that fails its own auth. This replaces the earlier `${VAR:-}`-empty
+  server trick — there is no server process to fail in the first place.
 - **Bindings are the source of truth.** `BINDING-1` checks that every `mcp`
-  binding's `server` exists in the plugin's `.mcp.json` and every
-  `userConfigKey` exists in `plugin.json` `userConfig`, so the binding model and
-  the runtime config cannot drift. `MCP-BINDING` (same gate) checks that every
-  `kind: mcp` binding declares a provider-identity `mcp` block — the contract
-  `tools/mcp-registry.py` uses for host-server matching.
+  binding's `server` exists in the plugin's `mcp/servers.json` template and
+  every `userConfigKey` exists in `plugin.json` `userConfig`, so the binding
+  model and the template cannot drift. `MCP-BINDING` (same gate) checks that
+  every `kind: mcp` binding declares a provider-identity `mcp` block — the
+  contract `tools/mcp-registry.py` uses for host-server matching.
 
-One-plugin-per-provider packaging (so only the installed provider launches) is a
-future option the binding model already supports.
-Phase 2 (option C). It is intentionally not the default: it would expand the
-marketplace and reverse the recent connector consolidation.
+One-plugin-per-provider packaging (so a rendered install launches only the
+provider the user wants) is a future option the binding model already
+supports. Phase 2 (option C). It is intentionally not the default: it would
+expand the marketplace and reverse the recent connector consolidation.
 
 ### 4.2 MCP package availability
 
-Each connector's `.mcp.json` runs an MCP server via `npx -y <package>`. Some of
-those package names are **placeholders**: the vendor's MCP server exists, but it
-is distributed as a hosted/remote endpoint, a Go binary, a Python `uvx` package,
-or a CLI subcommand — not under that npm name. `npx -y <placeholder>` fails to
-download and the server never starts, so the connector is dead-on-install until
-the user substitutes the real command.
+Each connector's `mcp/servers.json` render template references an MCP server
+via `npx -y <package>`. Some of those package names are **placeholders**: the
+vendor's MCP server exists, but it is distributed as a hosted/remote endpoint,
+a Go binary, a Python `uvx` package, or a CLI subcommand — not under that npm
+name. A rendered fragment with a placeholder `npx -y <placeholder>` fails to
+download and the server never starts, so the opt-in install is dead until the
+user substitutes the real command. (The reuse path — the host agent's own
+registered MCP server — is unaffected and is the primary working route.)
 
 This is disclosed, not hidden: every affected connector README carries an
 `<!-- mcp-package-status -->` callout, and `tools/check-mcp-packages.py`
-(`MCP-PKG`, wired into `tools/conformance.sh`) fails the build if a `.mcp.json`
+(`MCP-PKG`, wired into `tools/conformance.sh`) fails the build if a template
 package is neither known-resolving nor disclosed-as-placeholder. The check is
 offline (hermetic CI); run it with `--online` to re-verify against npm.
 
@@ -183,8 +191,8 @@ re-verify any row with `tools/check-mcp-packages.py --online`):
 | `@linear/mcp-server` | tracker (Linear) | ⚠️ placeholder — does not resolve |
 
 When a vendor publishes a resolvable npm package (or the connector is repointed
-at the real distribution), update the package in `.mcp.json`, move it from
-`UNVERIFIED` to `VERIFIED` in `tools/check-mcp-packages.py`, and drop the
+at the real distribution), update the package in `mcp/servers.json`, move it
+from `UNVERIFIED` to `VERIFIED` in `tools/check-mcp-packages.py`, and drop the
 README callout. The placeholder connectors stay `experimental` until then.
 
 ## 5. Enforcement

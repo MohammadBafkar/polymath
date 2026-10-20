@@ -363,18 +363,18 @@
       }
     },
     "mcp": {
-      "description": "MCP server resolution policy: whether Polymath connector skills reuse MCP servers already registered in the CURRENT host agent (detected from in-session env markers — servers registered in other agents are NOT reusable, their tools are not in this session's tool list) or prefer polymath's plugin-shipped servers. Detection is tools/mcp-registry.py; the SessionStart availability map records the resolution per provider. Secrets never live here — servers are matched by name/package/URL identity, and credentials stay in the host that owns them.",
+      "description": "MCP server resolution policy: Polymath connector skills ALWAYS reuse MCP servers already registered in the CURRENT host agent (detected from in-session env markers — servers registered in other agents are NOT reusable, their tools are not in this session's tool list) and never auto-register a plugin-shipped server: connector MCP definitions are render templates (mcp/servers.json) applied only on user request. Detection is tools/mcp-registry.py; the SessionStart availability map records the resolution per provider. Secrets never live here — servers are matched by name/package/URL identity, and credentials stay in the host that owns them.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "policy": {
-          "description": "`reuse-host` (default): when the current host's registered server matches a provider's identity, skills use it and the plugin-shipped server stays idle. `prefer-plugin`: the plugin-shipped .mcp.json server wins (e.g. for version pinning); the host's servers are the fallback.",
+          "description": "`reuse-host` (default): a server registered in the current host that matches a provider's identity wins; with no match the provider resolves to none and the skill asks before installing anything (plugins never auto-register). `prefer-plugin`: the provider's mcp/servers.json template names the intended server — the host's copy is still only usable once registered under that name.",
           "type": "string",
           "enum": ["reuse-host", "prefer-plugin"],
           "default": "reuse-host"
         },
         "serverOverrides": {
-          "description": "Per-provider pin: force a specific current-host server name (reuse) or `plugin` to force the plugin-shipped server regardless of policy. Key is the provider token (e.g. `datadog`).",
+          "description": "Per-provider pin: look for a specific current-host server name (reuse), or `plugin` to pin the provider's mcp/servers.json template server name. Key is the provider token (e.g. `datadog`).",
           "type": "object",
           "additionalProperties": false,
           "patternProperties": {

@@ -31,9 +31,9 @@ mcp:
   # serverOverrides: { datadog: dd-prod }   # optional pin (or `plugin`)
 ```
 
-- `reuse-host` (default): a server registered in the CURRENT host matching the provider's identity wins; the plugin-shipped `.mcp.json` server stays idle.
-- `prefer-plugin`: the plugin-shipped server wins (e.g. for version pinning); the host's servers are the fallback.
-- A `serverOverrides` value of `plugin` forces the plugin-shipped server for that provider; any other value pins a current-host server by exact name.
+- `reuse-host` (default): a server registered in the CURRENT host matching the provider's identity wins; plugins never auto-register anything — with no match the provider resolves to `none`.
+- `prefer-plugin`: the provider's `mcp/servers.json` template names the intended server (e.g. for version pinning); the host's copy is only usable once registered under that name.
+- A `serverOverrides` value of `plugin` pins the template's server name; any other value pins a current-host server by exact name. A pin that matches nothing resolves to `none` with a note — never a silent fallback.
 
 ## Procedure
 
@@ -42,20 +42,22 @@ mcp:
    python3 "${POLYMATH_PLUGIN_ROOT}/skills/mcp-bridge/scripts/mcp-registry scan"
    ```
    (From inside the marketplace repo: `python3 tools/mcp-registry.py scan`.)
-   The host is detected from in-session env markers; when detection fails nothing is scanned and every provider resolves to the plugin fallback. Add `--all-hosts` to inspect other agents' configs — diagnostics only, those servers are not reusable in this session. Add `--json` for machine-readable output.
+   The host is detected from in-session env markers; when detection fails nothing is scanned and every provider resolves to `none` (nothing is reused, nothing is auto-registered). Add `--all-hosts` to inspect other agents' configs — diagnostics only, those servers are not reusable in this session. Add `--json` for machine-readable output.
 2. **Reconcile providers against the inventory**:
    ```bash
    python3 tools/mcp-registry.py match
    ```
-   Each `kind=mcp` binding (the provider identity lives in `bindings/<provider>/binding.json` `mcp` block) is matched by server-name alias, npm package, or remote URL endpoint — against the current host only. Report per provider: **reuse** (name the host server + scope) or **install** (the plugin-shipped server).
+   Each `kind=mcp` binding (the provider identity lives in `bindings/<provider>/binding.json` `mcp` block) is matched by server-name alias, npm package, or remote URL endpoint — against the current host only. Report per provider: **reuse** (name the host server + scope) or **none** (nothing registered here — do not install without asking).
 3. **Read the session resolution** — the SessionStart hook persists it to
    `${POLYMATH_PLUGIN_DATA}/polymath-core/project-context.json` under
    `mcpResolution`. Skills bind via this snapshot: `source: host` → use the
-   current host's server (`toolPrefix` names the tool naming); `source: plugin` → the
-   plugin's `.mcp.json` server backs the skill; `source: none` → credentials
-   unconfigured, degrade gracefully. `detectedHost` records which host was
-   detected — when `null`, nothing was reused (plugin fallback everywhere).
-4. **If the host has no matching server** and the user wants one, render a
+   current host's server (`toolPrefix` names the tool naming); `source: none`
+   → no matching server in this host — degrade gracefully, and if tooling is
+   essential ask the user before helping install the vendor's server (the
+   plugin template renders a host-correct fragment). Plugins never
+   auto-register MCP servers. `detectedHost` records which host was detected
+   — when `null`, nothing was reused.
+4. **If the host has no matching server and the user asks for one**, render a
    host-correct fragment (correct wrapper key, env syntax, command shape):
    ```bash
    python3 tools/mcp-registry.py render --plugin polymath-observability --target cursor
@@ -83,7 +85,7 @@ mcp:
 - Never print or copy env/header values — key names only, always.
 - Never write into a host config without showing the fragment first.
 - Only the CURRENT host's servers are reusable; never map a provider onto a server registered in a different agent.
-- Prefer reuse; a polymath duplicate server is justified only when the user pins it (`prefer-plugin` / `serverOverrides`).
+- Prefer reuse; never register or launch a polymath copy unprompted — the plugin template exists for the opt-in install path only.
 
 ## Output
 
@@ -91,7 +93,7 @@ mcp:
 provider                   capability               reuse  host server
 datadog                    observability            yes    datadog (opencode/user, matched by name)
 jira                       issue_tracker            yes    atlassian-rovo (cursor/user, matched by name)
-slack                      incident_comms           no     (install: polymath plugin-shipped server 'polymath-chat:slack')
+slack                      incident_comms           no     (nothing registered in this host — do not install without asking)
 
 2/16 mcp-bound provider(s) resolved from host-registered servers.
 ```

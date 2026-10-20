@@ -1,6 +1,6 @@
 # PagerDuty MCP tools (reference)
 
-Default server: `@pagerduty/mcp-server` (or any community server speaking the same tool shape). Swap `command`+`args` in `.mcp.json` if you use a different distribution.
+Default server: `@pagerduty/mcp-server` (or any community server speaking the same tool shape). Swap `command`+`args` in `mcp/servers.json` if you use a different distribution.
 
 Auth: `PAGERDUTY_API_KEY` from `userConfig.pagerdutyApiKey`.
 

@@ -108,11 +108,12 @@ def main() -> int:
 
     # In-scope = every integration/infra plugin on disk, detected by artifact
     # rather than name prefix (so concept-plugin renames + the observability
-    # merge stay covered): an integration plugin ships a .mcp.json or bindings/;
+    # merge stay covered): an integration plugin ships an mcp/servers.json
+    # render template (never an auto-registered .mcp.json) or bindings/;
     # an infra plugin declares the `infra` keyword. Cross-check against the table.
     def _is_in_scope(p: pathlib.Path) -> bool:
-        # MCP connector (.mcp.json) or capability-binding/infra plugin (bindings/).
-        return (p / ".mcp.json").exists() or (p / "bindings").is_dir()
+        # MCP connector (mcp/servers.json template) or capability-binding/infra plugin (bindings/).
+        return (p / "mcp" / "servers.json").exists() or (p / "bindings").is_dir()
 
     in_scope = sorted(
         p.name for p in PLUGINS_DIR.iterdir()

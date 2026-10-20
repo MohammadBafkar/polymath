@@ -1,6 +1,6 @@
 # Jira / Atlassian MCP tools (reference)
 
-This connector ships an `.mcp.json` that runs the Atlassian MCP server (e.g. `@modelcontextprotocol/server-atlassian`) via `npx`. Swap the `command`+`args` if you use a different community server (`mcp-atlassian`, etc.) — the rest of the connector (hooks, skills) doesn't depend on the exact server.
+This connector's `mcp/servers.json` template runs the Atlassian MCP server (e.g. `@modelcontextprotocol/server-atlassian`) via `npx` when you opt in to installing the rendered fragment (your host agent's registered Atlassian MCP is reused first). Swap the `command`+`args` if you use a different community server (`mcp-atlassian`, etc.) — the rest of the connector (hooks, skills) doesn't depend on the exact server.
 
 The token + email + URL are injected from `userConfig.jiraApiToken / jiraEmail / jiraUrl` and exposed as `ATLASSIAN_API_TOKEN` / `ATLASSIAN_EMAIL` / `ATLASSIAN_URL`.
 

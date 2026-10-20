@@ -1,26 +1,35 @@
-# MCP reuse — detect and reuse the host agent's MCP servers
+# MCP reuse — the host agent's MCP servers are the default
 
 **Detection:** [`tools/mcp-registry.py`](../tools/mcp-registry.py) · **Policy config:** `.polymath/project.yaml` `mcp:` (schema: [`registry/schemas/project.schema.json`](../registry/schemas/project.schema.json)) · **Skill entry point:** `polymath-core:mcp-bridge`
 
-## Why this exists
+## The model
 
-Polymath ships `.mcp.json` per connector plugin — the Claude Code plugin
-convention. Other agents (Cursor, Gemini CLI, OpenCode, Codex, VS Code) do not
-read plugin `.mcp.json` files, expand different env-var syntaxes, and store
-their own MCP config at different paths and scopes. Two failure modes follow:
+Polymath does **not** add MCP servers. The host agent — Claude Code, Cursor,
+Gemini CLI, OpenCode, Codex, VS Code — owns MCP registration: if a server for
+a provider is needed, the user adds it in their host, with their credentials
+and their transport. Polymath **detects** what the current host already has
+registered, **matches** those servers against connector providers by
+identity, and **reuses** them. Connector plugins ship their server
+definitions as render **templates** (`mcp/servers.json`), never as an
+auto-registered config.
 
-1. **Duplicate servers.** When a user's host agent already has e.g. a datadog
-   MCP registered, polymath's own `.mcp.json` launches a second one —
+This reverses the earlier design, which shipped a plugin-root `.mcp.json`
+per connector (the Claude Code plugin convention). That file was
+auto-registered at session start and produced two recurring failures:
+
+1. **Duplicate servers.** When the host agent already had e.g. a datadog
+   MCP registered, polymath's own `.mcp.json` launched a second one —
    duplicate tools, duplicate context, name collisions
    (`plugin:polymath-observability:datadog` vs the user's `datadog`).
-2. **Dead exports.** The exported bundle's MCP configs used one syntax
-   (Claude Code's `${VAR:-}`); on other hosts they were inert until hand-repaired.
+2. **Dead or degraded servers.** Most of the shipped `npx` packages were
+   placeholders that never resolved (the server never started), and the
+   rest started without credentials and failed their own auth — neither
+   state ever helped.
 
-The reuse layer closes both: polymath **detects** MCP servers already
-registered in the **current host agent**, **matches** them against connector
-providers by identity, and **reuses** the host's server instead of registering
-a duplicate. The plugin-shipped `.mcp.json` becomes the fallback, not the
-default.
+Consequently there is no plugin `.mcp.json` anywhere in the marketplace: a
+Claude Code plugin that ships one gets its servers auto-registered, which is
+exactly the default this design forbids. The template keeps the canonical
+Claude-Code shape (see below) but is a render input only.
 
 ## The host-only invariant
 
@@ -44,8 +53,8 @@ session's tool list. Resolution therefore:
    | VS Code | `VSCODE_PID`, `VSCODE_CWD`, `VSCODE_GIT_ASKPASS_MAIN` |
 
 2. Scans **only that host's** config locations.
-3. When detection fails (no marker — e.g. a plain shell), providers resolve
-   to the plugin fallback; nothing is ever reused from another host.
+3. When detection fails (no marker — e.g. a plain shell), nothing is reused;
+   providers resolve to `none`. Nothing is ever reused from another host.
 
 `tools/mcp-registry.py scan --all-hosts` inspects every agent's configs for
 diagnostics, and labels the output as not-reusable-here.
@@ -62,12 +71,13 @@ mcp:
 
 | Value | Behavior |
 | --- | --- |
-| `reuse-host` (default) | A server registered in the CURRENT host matching the provider's identity wins; the plugin-shipped server stays idle. |
-| `prefer-plugin` | The plugin-shipped `.mcp.json` server wins (e.g. for version pinning); the host's servers are the fallback. |
+| `reuse-host` (default) | A server registered in the CURRENT host matching the provider's identity wins. With no match the provider resolves to `none` — the skill degrades gracefully and asks before installing anything; nothing launches by default. |
+| `prefer-plugin` | The provider's `mcp/servers.json` template names the intended server (e.g. for version pinning); the host's copy is only usable once registered under that name. |
 
-`serverOverrides` pins per provider: a value of `plugin` forces the
-plugin-shipped server; any other value is a current-host server name to look
-for by exact name (falling back to the plugin when absent).
+`serverOverrides` pins per provider: a value of `plugin` pins the
+template's server name; any other value is a current-host server name to
+look for by exact name. A pin that matches nothing resolves to `none` with
+a note — it never falls back to launching something unasked.
 
 ## How detection works
 
@@ -141,18 +151,29 @@ and persists the resolution into `project-context.json` under `mcpResolution`:
 }
 ```
 
-Per provider: `source: host` (use the current host's server; `toolPrefix`
-names the tool naming), `source: plugin` (the plugin-shipped server backs the
-skill), `source: none` (credentials unconfigured — degrade gracefully).
-`detectedHost: null` means no agent was detected — everything resolves to the
-plugin fallback, never to another host's server. Skills carry a one-line
-**MCP binding** preamble pointing at this snapshot, so the agent binds to the
-right server instead of registering a duplicate.
+Per provider, `source` is one of:
 
-## Rendering host-correct configs
+- `host` — use the current host's server; `toolPrefix` names the tool
+  naming. This is the normal case (and the result of every explicit pin
+  that matched).
+- `none` — no matching server in this host. The skill degrades gracefully
+  (design guidance without tool calls) and, when tooling is essential,
+  asks the user to register the vendor's server — offering to render the
+  host-correct fragment from the plugin's template. Nothing launches or is
+  installed without the user's go-ahead. A `note` names the pinned server
+  when a `serverOverrides` pin did not match (including a `plugin` pin —
+  the template's server name is not registered in this host yet).
 
-When no host server exists and the user wants one, `render` emits
-host-correct fragments — wrapper key, env syntax, and command shape per host:
+`detectedHost: null` means no agent was detected — nothing is reused, every
+provider resolves to `none`. Skills carry a one-line **MCP binding**
+preamble pointing at this snapshot, so the agent binds to a server that
+actually exists in this session instead of registering a duplicate.
+
+## Rendering host-correct configs (opt-in install)
+
+When no host server exists and the user asks for one, `render` emits
+host-correct fragments — wrapper key, env syntax, and command shape per
+host — from the plugin's `mcp/servers.json` template:
 
 ```bash
 python3 tools/mcp-registry.py render --plugin polymath-observability --target cursor
@@ -167,12 +188,14 @@ python3 tools/mcp-registry.py render --plugin polymath-observability --target cu
 | Codex | `[mcp_servers.<n>]` TOML | none — `env_vars` forwards names | `command = "..."` |
 | VS Code | `servers` | `${VAR}` | same as Claude Code |
 
+The exported agentskills bundle materializes all host renders into
+`dist/agents-skills/_polymath/mcp/<host>/` alongside the per-plugin
+templates — so the opt-in install is a copy, not a translation exercise.
+
 Security invariants: a render never copies a literal secret between hosts —
 fragments reference env vars only; `ensure`-style writes always show the
 fragment first and respect each host's trust model (Codex trusted projects,
-Claude Code project approval). The exporter materializes all host renders
-into `dist/agents-skills/_polymath/mcp/<host>/` alongside the canonical
-aggregate.
+Claude Code project approval).
 
 ## Tool naming per host
 
@@ -196,15 +219,18 @@ on the first underscore after `mcp_`.
 python3 tools/mcp-registry.py doctor
 ```
 
-Reports: cross-scope duplicate server names within a host, placeholder
-packages with no host-registered match (the dead-on-install case — reuse is
-also the primary working path for the disclosed-placeholder connectors, see
+Reports: cross-scope duplicate server names within a host, template packages
+with no npm resolution and no host-registered match (the reuse path is the
+primary working route for disclosed-placeholder packages, see
 [INTEGRATION-POLICY § 4.2](INTEGRATION-POLICY.md)), and reused servers whose
 referenced env vars are unset.
 
 ## For connector authors
 
-1. Ship `.mcp.json` as today (Claude Code shape, `${POLYMATH_CONNECTOR_*:-}` env defaults).
+1. Ship the server definition as `mcp/servers.json` (Claude Code shape,
+   `${POLYMATH_CONNECTOR_*:-}` env placeholders) — a render template, never
+   an auto-registered `.mcp.json`. A plugin `.mcp.json` would be
+   auto-registered by Claude Code and defeat the reuse-first model.
 2. Declare the provider identity in each `kind: mcp` binding — `serverAliases` (the names the vendor's docs use), `packages` (what the official server launches), `remoteUrls` (hosted endpoint if any), `envKeys` (server-native env names). `MCP-BINDING` fails a binding without at least one match signal.
 3. Skills bound to the connector carry the MCP-binding preamble (see any shipped connector skill for the shape).
 4. Update the [host matrix](#the-policy) and this doc when a new host or transport lands.

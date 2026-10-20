@@ -13,7 +13,7 @@ catches the pattern where a README's "What it ships" section lags the
 directory after a new skill / command is added.
 
 What we *don't* check (deliberately):
-  - `.mcp.json` — README narrative usually says "MCP server: X" and
+  - `mcp/servers.json` — README narrative usually says "MCP server: X" and
     that's the substance; the filename is implementation detail.
   - `hooks/hooks.json` — README typically lists hooks by event name
     (`PreToolUse(Write|Edit) — secret-scan`) which is what matters.

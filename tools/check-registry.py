@@ -225,11 +225,12 @@ EVIDENCE_FOR_STABLE = {"stable-ready", "stable"}
 
 def is_conn_or_infra(name: str) -> bool:
     # Detect by artifact, not name prefix (concept plugins dropped the
-    # connector-/infra- prefix): an integration plugin ships a .mcp.json; an
-    # infra plugin carries capability bindings/ but no .mcp.json. Matches the
-    # detection used by INTEGRATION-1/2, MCP-PKG, and sync-integration-policy.
+    # connector-/infra- prefix): an integration plugin ships an
+    # mcp/servers.json render template (never an auto-registered .mcp.json);
+    # an infra plugin carries capability bindings/. Matches the detection
+    # used by INTEGRATION-1/2, MCP-PKG, and sync-integration-policy.
     d = PLUGINS_DIR / name
-    return (d / ".mcp.json").exists() or (d / "bindings").is_dir()
+    return (d / "mcp" / "servers.json").exists() or (d / "bindings").is_dir()
 
 
 def stability_check() -> int:

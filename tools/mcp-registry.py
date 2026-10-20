@@ -3,12 +3,19 @@
 agents, match them against Polymath's connector bindings, and render
 host-correct MCP config fragments.
 
-Why this exists: Polymath ships `.mcp.json` per connector plugin (Claude Code
-plugin convention). Other agents (Cursor, Gemini CLI, OpenCode, Codex, VS Code)
-do not read plugin `.mcp.json` files, expand different env-var syntaxes, and
-store MCP config at different paths/scopes. When a user's host agent ALREADY
-has e.g. a datadog MCP registered, Polymath's own `.mcp.json` would launch a
-duplicate server — duplicate tools, duplicate context, name collisions.
+Why this exists: a host agent (Claude Code, Cursor, Gemini CLI, OpenCode,
+Codex, VS Code) that already has e.g. a datadog MCP registered must never get
+a second copy launched under it — duplicate tools, duplicate context, name
+collisions. And plugin-shipped `npx` definitions frequently never start at all
+(placeholder npm names) or fail auth (credentials not configured).
+
+The default, therefore: REUSE the current host's own MCP servers. Polymath
+plugins never ship an auto-registered MCP config — connector servers live as
+render TEMPLATES in each plugin's `mcp/servers.json` (Claude-Code-shaped, env
+keys only) and become a real server only when the user runs `render` and
+installs the fragment into their host config. When no host server matches,
+the provider resolves to `none`: the skill degrades gracefully and asks
+before installing anything.
 
 This tool closes that gap:
 
@@ -21,8 +28,8 @@ This tool closes that gap:
   match   — reconcile the current host's inventory against every connector
             binding's provider identity (bindings/<provider>/binding.json
             `mcp` block) and report reuse-or-install per provider.
-  render  — emit host-correct config fragments from a plugin's `.mcp.json`
-            (per-host wrapper key, env syntax, and command array shape).
+  render  — emit host-correct config fragments from a plugin's `mcp/servers.json`
+            template (per-host wrapper key, env syntax, and command array shape).
   doctor  — offline health report: placeholder packages, unresolved servers,
             cross-scope duplicates.
 
@@ -305,7 +312,7 @@ def scan_host(host: str) -> tuple[list[dict], list[str]]:
 def collect_provider_identity() -> list[dict]:
     """Every kind=mcp binding's identity: provider/capability/plugin + the
     mcp matching block (serverAliases/packages/remoteUrls/envKeys) + the
-    plugin-shipped .mcp.json spec."""
+    plugin's mcp/servers.json render template (if any)."""
     out: list[dict] = []
     for path in sorted(PLUGINS_DIR.glob("*/bindings/*/binding.json")):
         try:
@@ -317,10 +324,10 @@ def collect_provider_identity() -> list[dict]:
             continue
         plugin_dir = PLUGINS_DIR / path.relative_to(PLUGINS_DIR).parts[0]
         shipped: dict | None = None
-        mcp_file = plugin_dir / ".mcp.json"
-        if mcp_file.exists():
+        servers_file = plugin_dir / "mcp" / "servers.json"
+        if servers_file.exists():
             try:
-                shipped = (json.loads(mcp_file.read_text()) or {}).get("mcpServers", {}).get(
+                shipped = (json.loads(servers_file.read_text()) or {}).get("mcpServers", {}).get(
                     transport.get("server") or ""
                 )
             except Exception:
@@ -366,7 +373,7 @@ def _endpoint(url: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Render: plugin .mcp.json → per-host config fragments
+# Render: plugin mcp/servers.json template → per-host config fragments
 # ---------------------------------------------------------------------------
 
 # Per-host env expansion syntax. Credentials are ALWAYS rendered as env-var
@@ -495,7 +502,10 @@ def render_fragment(servers: dict, host: str) -> dict | str | None:
 
 
 def plugin_servers(plugin: str) -> dict:
-    path = PLUGINS_DIR / plugin / ".mcp.json"
+    """The plugin's renderable server template (mcp/servers.json, Claude-Code
+    shape). Empty when the plugin ships no template — templates are render
+    inputs, never auto-registered configs."""
+    path = PLUGINS_DIR / plugin / "mcp" / "servers.json"
     if not path.exists():
         return {}
     return (json.loads(path.read_text()) or {}).get("mcpServers", {})
@@ -608,7 +618,7 @@ def cmd_match(args: argparse.Namespace) -> int:
         else:
             print(
                 f"{r['provider']:26} {r['capability']:24} no     "
-                f"(install: polymath plugin-shipped server '{r['plugin']}:{r['provider']}')"
+                f"(nothing registered in this host — do not install without asking)"
             )
     if warnings:
         print("\nWarnings:")
@@ -623,14 +633,14 @@ def cmd_match(args: argparse.Namespace) -> int:
 def cmd_render(args: argparse.Namespace) -> int:
     out_root = pathlib.Path(args.out) if args.out else pathlib.Path.cwd() / ".polymath" / "mcp"
     plugins = sorted({p.relative_to(PLUGINS_DIR).parts[0]
-                      for p in PLUGINS_DIR.glob("*/.mcp.json")}) if args.all else [args.plugin]
+                      for p in PLUGINS_DIR.glob("*/mcp/servers.json")}) if args.all else [args.plugin]
     targets = list(HOSTS) if not args.target else [args.target]
     written = 0
     for plugin in plugins:
         servers = plugin_servers(plugin)
         if not servers:
             if not args.all:
-                print(f"{plugin}: no .mcp.json", file=sys.stderr)
+                print(f"{plugin}: no mcp/servers.json template", file=sys.stderr)
                 return 1
             continue
         for target in targets:
@@ -681,9 +691,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             scopes = ", ".join(sorted({g["scope"] for g in group}))
             problems.append(f"{host}: server '{name}' registered at multiple scopes ({scopes})")
 
-    # 2. Placeholder/unresolved packages in plugin-shipped configs, and
+    # 2. Placeholder/unresolved packages in the plugin render templates, and
     #    whether a host-registered server already covers the provider (reuse
-    #    makes the dead package irrelevant).
+    #    makes the dead package irrelevant — templates are never launched
+    #    directly).
     for ident in identities:
         shipped = ident.get("shipped") or {}
         pkg = None
@@ -694,9 +705,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             if reused:
                 continue  # host server covers it; the dead package never launches a session tool
             problems.append(
-                f"{ident['provider']}: placeholder package '{pkg}' and no host-registered "
-                f"match — render a config for your host (render subcommand) or register the "
-                f"vendor's real server"
+                f"{ident['provider']}: template package '{pkg}' does not resolve on npm and no host-registered "
+                f"match — register the vendor's real server (render a fragment via the render subcommand)"
             )
         if pkg and pkg not in VERIFIED and pkg not in UNVERIFIED:
             problems.append(f"{ident['provider']}: unclassified package '{pkg}' (MCP-PKG)")

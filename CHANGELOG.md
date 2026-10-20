@@ -7,6 +7,21 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0]
+
+### Changed
+
+- **Plugins never auto-register MCP servers — the host agent's MCPs are the default.** Connector plugins no longer ship a root `.mcp.json` (Claude Code auto-registers every server it declares, which produced duplicates of servers the user's host agent already had, or idle servers that failed their own auth — most of the shipped `npx` package names are placeholders that never resolve). The MCP model is now:
+  - **Reuse first:** `reuse-host` (the default `mcp:` policy) resolves every connector provider against MCP servers already registered in the CURRENT host agent (matched via the binding's provider identity). This was already the skill-binding policy; now it is also the runtime default, with no plugin server to shadow it.
+  - **No plugin server by default:** connector server definitions moved from `.mcp.json` to `mcp/servers.json` — a render template (Claude-Code shape, env keys only) that is never auto-registered. With no host match, the provider resolves to `source: none`: the skill degrades gracefully and asks before helping install anything (the earlier `source: plugin` silent fallback is gone; `detectedHost: null` now resolves to `none`, not to a plugin fallback).
+  - **Opt-in install:** `tools/mcp-registry.py render` emits host-correct fragments from the template (per-host wrapper key / env syntax / command shape); `serverOverrides: {provider: plugin}` and `prefer-plugin` still exist, now meaning "pin the template's server name", and only take effect once that server is registered in the host.
+- `mcp-bridge`, `route`, and `glossary` skills, the SessionStart `mcpResolution` snapshot (`source: host | none`), all connector skill preambles, and every gate/doc (INTEGRATION-1/2, MCP-PKG, BINDING-1, `docs/MCP-REUSE.md`, `docs/INTEGRATION-POLICY.md`, `docs/PORTABILITY.md`, `docs/PRIVACY.md`) updated to the new model. Detection: `mcp/servers.json` presence replaces `.mcp.json` presence everywhere.
+- `tools/export-agents-skills.py` no longer materializes a paste-ready MCP aggregate: the bundle ships per-plugin templates (`_polymath/mcp/<plugin>.servers.json`) plus per-host renders for the opt-in path only.
+
+### Removed
+
+- All plugin-root `.mcp.json` files (moved to `mcp/servers.json` render templates): no more auto-registered duplicate/dead servers on `claude plugin install`.
+
 ## [0.9.0]
 
 ### Added

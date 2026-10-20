@@ -138,9 +138,12 @@ def generate(capabilities: dict, bindings: list[dict]) -> tuple[dict, list[str],
 
 def check_binding_consistency(bindings: list[dict]) -> list[str]:
     """A binding must agree with the plugin it lives in: an `mcp` binding's
-    `server` must exist in that plugin's .mcp.json mcpServers, and every
-    `userConfigKey` must exist in the plugin's userConfig. This locks the binding
-    model to the actual wiring so the two cannot drift (the seam Option-A relies on).
+    `server` must exist in that plugin's mcp/servers.json render template, and
+    every `userConfigKey` must exist in the plugin's userConfig. This locks the
+    binding model to the actual wiring so the two cannot drift (the seam
+    Option-A relies on). Templates are render inputs — no auto-registered
+    `.mcp.json` ships with a plugin; the host agent's own MCP servers are the
+    default source of tooling (docs/MCP-REUSE.md).
     """
     problems: list[str] = []
     mcp_cache: dict[str, set] = {}
@@ -150,14 +153,14 @@ def check_binding_consistency(bindings: list[dict]) -> list[str]:
         transport = body.get("transport") or {}
         if transport.get("kind") == "mcp":
             if plugin not in mcp_cache:
-                p = PLUGINS / plugin / ".mcp.json"
+                p = PLUGINS / plugin / "mcp" / "servers.json"
                 try:
                     mcp_cache[plugin] = set(json.loads(p.read_text()).get("mcpServers", {})) if p.exists() else set()
                 except Exception:
                     mcp_cache[plugin] = set()
             server = transport.get("server")
             if server and server not in mcp_cache[plugin]:
-                problems.append(f"{where}: transport.server {server!r} has no entry in {plugin}/.mcp.json mcpServers")
+                problems.append(f"{where}: transport.server {server!r} has no entry in {plugin}/mcp/servers.json mcpServers")
         for key in body.get("userConfigKeys") or []:
             if plugin not in uc_cache:
                 p = PLUGINS / plugin / ".claude-plugin" / "plugin.json"

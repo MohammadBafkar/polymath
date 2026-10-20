@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.10.0]
+
+### Changed
+
+- **MCP servers are no longer auto-registered by plugins.** The connector server definitions moved from `.mcp.json` to `mcp/servers.json` — a render template for the opt-in install path (`mcp-registry render`), never an auto-registered config. `reuse-host` stays the default resolution: the current host agent's matching MCP server wins; with no match the provider resolves to `source: none` and the skill degrades gracefully (the silent plugin fallback is gone — `detectedHost: null` now resolves to `none`, never to a plugin server). `prefer-plugin` / `serverOverrides: {provider: plugin}` now pin the template's server name and only take effect once that server is registered in the host.
+
 ## [0.9.0]
 
 ### Skills

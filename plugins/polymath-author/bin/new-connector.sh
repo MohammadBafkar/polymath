@@ -7,9 +7,9 @@
 # Usage: /polymath-author:new-connector <concept> [description]  (bin/new-connector.sh)
 #   concept is the capability-ish bare name, e.g. "vcs", "chat", "paging" → polymath-vcs.
 #
-# Generates plugin.json (with userConfig.apiKey), .mcp.json (stub),
-# hooks/ directory, references/<concept>-tools.md template, plus README
-# and CHANGELOG.
+# Generates plugin.json (with userConfig.apiKey), mcp/servers.json (render
+# template — never auto-registered), hooks/ directory,
+# references/<concept>-tools.md template, plus README and CHANGELOG.
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
@@ -60,7 +60,7 @@ fi
 upper_service="$(echo "$service" | tr '[:lower:]' '[:upper:]' | tr '-' '_')"
 config_envvar="POLYMATH_${upper_service}_APIKEY"
 
-mkdir -p "$plugin_dir/.claude-plugin" "$plugin_dir/hooks/scripts" "$plugin_dir/skills" "$plugin_dir/references"
+mkdir -p "$plugin_dir/.claude-plugin" "$plugin_dir/hooks/scripts" "$plugin_dir/mcp" "$plugin_dir/skills" "$plugin_dir/references"
 
 cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
 {
@@ -82,7 +82,7 @@ cat > "$plugin_dir/.claude-plugin/plugin.json" <<JSON
 }
 JSON
 
-cat > "$plugin_dir/.mcp.json" <<JSON
+cat > "$plugin_dir/mcp/servers.json" <<JSON
 {
   "mcpServers": {
     "$service": {
@@ -131,7 +131,7 @@ $description
 
 ## What it ships
 
-- MCP server (TODO: confirm canonical server).
+- MCP server template (\`mcp/servers.json\` — rendered to your host's MCP config only when you opt in; a host-registered server is reused first).
 - Skills: TODO.
 - Hooks: TODO.
 - Reference: [\`references/$service-tools.md\`](references/$service-tools.md).
@@ -141,6 +141,11 @@ $description
 \`\`\`bash
 claude plugin install $name@polymath --config apiKey=<value>
 \`\`\`
+
+MCP servers are not auto-registered. If your agent already has a $service MCP
+registered, the skills use it. Otherwise run
+\`python3 tools/mcp-registry.py render --plugin $name --target <your-host>\`
+and apply the fragment to your host's MCP config.
 
 ## Dependencies
 
@@ -158,12 +163,12 @@ cat > "$plugin_dir/CHANGELOG.md" <<MD
 
 ### Added
 
-- Initial scaffold via \`/polymath-author:new-connector\`. Replace stub \`.mcp.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
+- Initial scaffold via \`/polymath-author:new-connector\`. Replace stub \`mcp/servers.json\`, add skills, and verify with \`polymath-author:validate-plugin\`.
 MD
 
 echo "Scaffolded $plugin_dir"
 echo "Next steps:"
-echo "  1. Replace .mcp.json command+args with the real upstream MCP server"
+echo "  1. Replace mcp/servers.json command+args with the real upstream MCP server (a render template — never an auto-registered .mcp.json)"
 echo "  2. Add userConfig fields if more than apiKey is needed (jiraUrl, datadogSite, ...)"
 echo "  3. Add at least one hook script + one skill"
 echo "  4. Fill references/$service-tools.md with actual tool list"

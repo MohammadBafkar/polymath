@@ -8,11 +8,13 @@ shape of `polymath-observability`.
 
 ## What it ships
 
-- MCP servers: Atlassian (`@modelcontextprotocol/server-atlassian`) and Linear
-  (`@linear/mcp-server`) via `npx`. Each activates from its own credentials,
-  which default to empty (`${VAR:-}`) so an unconfigured server can't break MCP
-  config parsing — it starts idle and fails its own auth. Disable an unused one
-  via the `/mcp` UI.
+- Server templates (rendered to your host's MCP config only when you opt in;
+  if your agent already has an Atlassian or Linear MCP registered, it is
+  reused — nothing is auto-added): Atlassian
+  (`@modelcontextprotocol/server-atlassian`) and Linear (`@linear/mcp-server`)
+  via `npx`, each activating from its own credentials, which default to empty
+  (`${VAR:-}`) so an unconfigured template can't break rendering — it stays
+  inert until you install the fragment and set the env vars.
 - Skills:
   - `jira-triage` — triage an inbound Jira issue.
   - `linear-triage` — triage an inbound Linear issue.
@@ -27,13 +29,15 @@ shape of `polymath-observability`.
   [`references/linear-tools.md`](references/linear-tools.md).
 
 <!-- mcp-package-status -->
-> ⚠️ **MCP packages not yet published.** This connector's `.mcp.json` names
-> `@modelcontextprotocol/server-atlassian` (Jira) and `@linear/mcp-server`,
-> neither of which resolves on npm as of 2026-06-08, so the `npx -y …` commands
-> will fail to start. Atlassian and Linear both offer **hosted/remote** MCP
-> servers (and there are community npm packages) rather than these names —
-> substitute the real command for your tracker in `.mcp.json` before relying on
-> this connector. This is part of why it is `status: experimental`. See
+> ⚠️ **MCP packages not yet published.** This connector's server template
+> (`mcp/servers.json`) names `@modelcontextprotocol/server-atlassian` (Jira)
+> and `@linear/mcp-server`, neither of which resolves on npm as of 2026-06-08,
+> so the rendered `npx -y …` fragments would fail to start. Atlassian and
+> Linear both offer **hosted/remote** MCP servers (and there are community npm
+> packages) rather than these names — substitute the real command before
+> installing a rendered fragment. If your host agent already has these MCPs
+> registered, they are reused and no template is needed. This is part of why
+> it is `status: experimental`. See
 > [`docs/INTEGRATION-POLICY.md` §4.2](../../docs/INTEGRATION-POLICY.md).
 <!-- /mcp-package-status -->
 
@@ -44,6 +48,11 @@ claude plugin install polymath-tracker@polymath
 # Supply the jira* keys if you use Jira, or linearApiKey if you use Linear.
 # All four are optional; configure the set for your tracker.
 ```
+
+MCP servers are not auto-registered. If your agent already has an Atlassian
+(Jira) or Linear MCP registered, the skills use it. Otherwise run
+`python3 tools/mcp-registry.py render --plugin polymath-tracker --target <your-host>`
+and apply the fragment for the tracker you use to your host's MCP config.
 
 ## Dependencies
 

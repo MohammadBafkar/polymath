@@ -25,7 +25,7 @@ Unset or any other value (including `0`) disables it; a unit test in
 
 The plugin code in this repository contains no network calls except those you explicitly trigger through:
 
-- Connector MCP servers (e.g. `polymath-vcs` calling GitHub on your behalf). Those calls go directly from the MCP server to the vendor's API with credentials you supplied via `userConfig`.
+- Connector MCP servers (e.g. a GitHub MCP calling GitHub on your behalf). Those calls go directly from the MCP server to the vendor's API with credentials the user configured in their host agent.
 - The Claude Code runtime itself, governed by Anthropic's terms.
 
 ## The telemetry contract
@@ -104,13 +104,17 @@ unwritable data dir never affects the runner or a hook.
 
 ## What about MCP servers?
 
-Each connector plugin runs an MCP server in a subprocess (e.g. `@modelcontextprotocol/server-github`). Those servers are governed by their own upstream privacy policies. Read the policy for the specific server you install before granting it credentials.
+Polymath never registers or launches an MCP server on its own. Connector
+skills reuse MCP servers already registered in your host agent — with your
+credentials and under your host's control. If you opt in to installing one of
+the shipped server templates (rendered via `tools/mcp-registry.py render`),
+that server runs as a subprocess in your host (e.g. `@modelcontextprotocol/server-github`) and is governed by its own upstream privacy policy. Read the policy for the specific server you install before granting it credentials.
 
 Polymath's responsibility ends at:
 
 - Validating the plugin manifest (no untrusted code is hidden in the manifest itself).
 - Ensuring `userConfig.sensitive: true` credentials are masked in `claude plugin list` output and not echoed to logs.
-- Making the `command` and `args` of every `.mcp.json` legible in the plugin's source tree (i.e. nothing fetched at install time without you seeing it).
+- Making the `command` and `args` of every `mcp/servers.json` template legible in the plugin's source tree (i.e. nothing is installed without you seeing and approving the rendered fragment).
 
 ## Reporting concerns
 

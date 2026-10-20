@@ -15,7 +15,7 @@ resolution into project-context.json under `mcpResolution`:
       "datadog": {
         "capability": "observability",
         "plugin": "polymath-observability",
-        "source": "host",                  # host | plugin | none
+        "source": "host",                  # host | none
         "server": "datadog",               # the server name to reference
         "toolPrefix": "datadog_",          # this host's tool naming
         "host": "opencode", "scope": "user", "matchSignal": "name"
@@ -27,14 +27,22 @@ resolution into project-context.json under `mcpResolution`:
 HOST-ONLY INVARIANT: a server registered in a DIFFERENT agent (e.g. an
 OpenCode datadog server while running in Cursor) is NOT reusable — its tools
 are not in this session's tool list — so only the current host's configs are
-scanned. When the host cannot be detected, providers resolve to `plugin`
-(the plugin-shipped fallback), never to another host's server.
+scanned.
+
+NO AUTO-REGISTERED FALLBACK: Polymath plugins never auto-register MCP
+servers — there is no plugin `.mcp.json` to launch duplicates or fail auth.
+When the current host has no matching server, the provider resolves to
+`none` (with a `note` naming the pinned server when a `serverOverrides` pin
+did not match): the skill degrades gracefully and asks before helping the
+user install anything. The plugin's `mcp/servers.json` template renders a
+host-correct fragment via `mcp-registry render`, applied only on request;
+the `plugin` pin and the `prefer-plugin` policy select the template's server
+NAME, which is only usable once the user registers it in this host.
 
 Skills read this snapshot to bind to the right server: when `source` is
-`host`, the host's server tools are already in the agent's tool list and the
-plugin-shipped server must NOT be registered/used; when `plugin`, the
-plugin's .mcp.json server backs the skill; when `none`, the provider's
-credentials are unconfigured and the skill should degrade gracefully.
+`host`, the host's server tools are already in the agent's tool list; when
+`none`, the skill must degrade gracefully rather than call tools absent
+from the session.
 
 Fail-open: any error here never blocks the session — the map is observability
 context, not a gate. Redaction invariant inherited from mcp-registry.py:
@@ -119,41 +127,58 @@ def build_map(registry) -> dict:
     for ident in registry.collect_provider_identity():
         prov, plugin = ident["provider"], ident["plugin"]
         override = overrides.get(prov)
+        template_name = ident.get("server") or prov
         if override == "plugin":
-            providers[prov] = _entry(ident, "plugin", None, None)
-            continue
-        order = [1, 0] if policy == "prefer-plugin" else [0, 1]
-        resolved = None
-        for idx in order:
-            if idx == 1:
-                resolved = _entry(ident, "plugin", None, None)
-                break
+            # Explicit pin to the plugin's mcp/servers.json template: the
+            # intended server is the one registered under the template's
+            # server name (never an auto-registered copy).
+            override = template_name
+        if override:
             # A name override pins the current host's server to look for (by
-            # exact name); otherwise match the provider's declared identity.
-            if override:
-                candidates = [e for e in host_entries if e["name"] == override]
-                if candidates:
-                    resolved = _entry(ident, "host", candidates[0], "name-override")
-                    break
+            # exact name).
+            candidates = [e for e in host_entries if e["name"] == override]
+            if candidates:
+                providers[prov] = _entry(ident, "host", candidates[0], "name-override")
+            elif override == template_name:
+                providers[prov] = _entry(
+                    ident, "none", None, None,
+                    note=(f"pinned to the plugin template server '{override}' — not registered in this host yet; "
+                          f"opt in via `mcp-registry render --plugin {plugin}`"),
+                )
             else:
-                for e in host_entries:
-                    signal = registry.match_host_server(e, ident["identity"])
-                    if signal:
-                        resolved = _entry(ident, "host", e, signal)
-                        break
-            if resolved:
-                break
+                providers[prov] = _entry(
+                    ident, "none", None, None,
+                    note=f"pinned server '{override}' not found in {detected or 'the current host'}'s config",
+                )
+            continue
+        resolved = None
+        if policy == "prefer-plugin":
+            # The plugin template's server is the intended one; still only
+            # usable once the user has registered it in this host.
+            for e in host_entries:
+                if e["name"] == template_name:
+                    resolved = _entry(ident, "host", e, "name-override")
+                    break
+        if resolved is None:
+            for e in host_entries:
+                signal = registry.match_host_server(e, ident["identity"])
+                if signal:
+                    resolved = _entry(ident, "host", e, signal)
+                    break
         providers[prov] = resolved or _entry(ident, "none", None, None)
     return {"policy": policy, "detectedHost": detected, "providers": providers}
 
 
-def _entry(ident: dict, source: str, host_entry: dict | None, signal: str | None) -> dict:
+def _entry(ident: dict, source: str, host_entry: dict | None, signal: str | None,
+           note: str | None = None) -> dict:
     prov = ident["provider"]
     out: dict = {
         "capability": ident["capability"],
         "plugin": ident["plugin"],
         "source": source,
     }
+    if note:
+        out["note"] = note
     if host_entry is not None:
         name = host_entry["name"]
         out.update({
@@ -164,9 +189,11 @@ def _entry(ident: dict, source: str, host_entry: dict | None, signal: str | None
             "toolPrefix": _tool_prefix(host_entry["host"], name),
         })
     else:
+        # Server name to register UNDER once the user opts in (render +
+        # install). No host tools exist yet — the skill must degrade
+        # gracefully rather than call tools that are absent from the session.
         server = ident.get("server") or prov
         out["server"] = server
-        out["toolPrefix"] = f"mcp__{server}__"
     return out
 
 

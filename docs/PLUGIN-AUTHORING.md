@@ -9,7 +9,7 @@ schema.
 | Need                                                              | Component                            |
 | ----------------------------------------------------------------- | ------------------------------------ |
 | Event-driven gate (block secrets, format on save, push reminder)  | Hook                                 |
-| External service tool calls (GitHub, Jira, Datadog, …)            | MCP server                           |
+| External service tool calls (GitHub, Jira, Datadog, …)            | Reuse the host agent's MCP server; ship an `mcp/servers.json` render template for the opt-in install path |
 | Persistent background watcher (logs, CI, deploy status)           | Monitor                              |
 | Per-language code intelligence                                    | Defer to official LSP / external skill catalog |
 | Specialist isolated context (deep audit, panel critique, research) | Agent                                |
@@ -38,7 +38,7 @@ plugins/polymath-<name>/
 │   ├── hooks.json
 │   └── scripts/
 ├── monitors/monitors.json      # rare
-├── .mcp.json                   # connector plugins only
+├── mcp/servers.json            # connector plugins only — render template, never auto-registered
 ├── workflows/*.yaml            # polymath-flows only
 ├── bin/                        # bundled executables (optional)
 ├── tests/

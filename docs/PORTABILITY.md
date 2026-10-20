@@ -47,7 +47,7 @@ installing each proprietary agent.
 | Plugin `bin/` scripts | Copied to `_polymath/support/<plugin>/bin/` | Runnable by path from exported instructions. |
 | Hook scripts | Copied to `_polymath/support/<plugin>/hooks/scripts/` | Runnable by a target-host hook adapter. |
 | `hooks/hooks.json` | Normalized to `_polymath/hooks/<plugin>.hooks.json`, plus a runnable `_polymath/hooks/run-hook.py` dispatcher | The host calls `run-hook.py <Event> [matcher]` on its lifecycle events; the dispatcher matches and runs the right commands. Only the event-name mapping is host-specific. |
-| `.mcp.json` | Per-plugin files, aggregate `_polymath/mcp/mcp.json` (canonical Claude-Code shape), and per-host renders under `_polymath/mcp/<host>/` (cursor, gemini-cli, opencode, codex, vscode) with each host's wrapper key and env syntax. Prefer reuse first: `tools/mcp-registry.py scan` detects servers already registered in the host agent and `polymath-core:mcp-bridge` maps providers onto them — the plugin-shipped config is the fallback when the host has no matching server. | Client-specific MCP wiring required only when no host server matches. See [`docs/MCP-REUSE.md`](MCP-REUSE.md). |
+| Server templates (`mcp/servers.json`) | Per-plugin templates (`_polymath/mcp/<plugin>.servers.json`, canonical Claude-Code shape) and per-host renders under `_polymath/mcp/<host>/` (cursor, gemini-cli, opencode, codex, vscode) with each host's wrapper key and env syntax. Templates are never auto-registered: reuse first (`tools/mcp-registry.py scan` detects servers already registered in the host agent; `polymath-core:mcp-bridge` maps providers onto them), and render + install only when no host server matches and the user opts in. | Client-specific MCP wiring required only when no host server matches. See [`docs/MCP-REUSE.md`](MCP-REUSE.md). |
 | `workflows/*.yaml` | Copied with the `polymath-flow` runner under `_polymath/support/polymath-flows/` | Runnable explicitly with the bundled runner. No non-Claude host auto-discovers these workflows today. |
 
 ## Portable Paths
@@ -83,8 +83,8 @@ dist/agents-skills/
       bin/
       hooks/
     hooks/<plugin>.hooks.json
-    mcp/<plugin>.mcp.json
-    mcp/mcp.json
+    mcp/<plugin>.servers.json
+    mcp/servers.json
 ```
 
 The top-level directories with `SKILL.md` are the discoverable units. The
@@ -131,10 +131,11 @@ cp -R /path/to/polymath/dist/agents-skills .agents/skills
   step is wiring that host's events (`SessionStart`, `UserPromptSubmit`,
   `PreToolUse`, `PostToolUse`, `Stop`) to invoke the dispatcher — payload shapes
   still differ by host.
-- MCP server definitions are exported (canonical aggregate + per-host renders
-  under `_polymath/mcp/<host>/` with each host's wrapper key and env syntax).
-  Prefer reuse: `tools/mcp-registry.py scan` + `match` detect servers already
-  registered in the host agent and map providers onto them before any install.
+- MCP server templates are exported (per-plugin `mcp/<plugin>.servers.json` +
+  per-host renders under `_polymath/mcp/<host>/` with each host's wrapper key
+  and env syntax). Reuse first: `tools/mcp-registry.py scan` + `match` detect
+  servers already registered in the host agent and map providers onto them;
+  render + install only when no host server matches and the user opts in.
   Credentials and client registration remain target-host concerns.
 - Converted subagents run as ordinary skills unless the target host has an
   equivalent forked-context/subagent feature.

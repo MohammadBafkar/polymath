@@ -1,6 +1,6 @@
 # GitHub MCP tools (reference)
 
-This connector ships an `.mcp.json` that runs `@modelcontextprotocol/server-github` via `npx`. The token is injected from `userConfig.githubToken` and exposed to the server as `GITHUB_PERSONAL_ACCESS_TOKEN`.
+This connector's `mcp/servers.json` template runs `@modelcontextprotocol/server-github` via `npx` when you opt in to installing the rendered fragment (your host agent's registered GitHub MCP is reused first). The token is injected from `userConfig.githubToken` and exposed to the server as `GITHUB_PERSONAL_ACCESS_TOKEN`.
 
 ## Tools exposed (subject to upstream MCP version)
 

@@ -156,5 +156,24 @@ class RenderFragmentTests(unittest.TestCase):
         self.assertIn("mcpServers", frag)
 
 
+class TemplateResolutionTests(unittest.TestCase):
+    """Plugins ship NO auto-registered .mcp.json — server definitions live in
+    mcp/servers.json as render templates, and resolution reuses the host."""
+
+    def test_plugin_servers_reads_template_not_mcp_json(self) -> None:
+        # The reader must point at mcp/servers.json; a plugin-root .mcp.json
+        # would be auto-registered by Claude Code, which the model forbids.
+        import inspect
+        src = inspect.getsource(mcp_registry.plugin_servers)
+        self.assertIn('"mcp" / "servers.json"', src)
+        self.assertNotIn('".mcp.json"', src)
+
+    def test_collect_provider_identity_reads_template_not_mcp_json(self) -> None:
+        import inspect
+        src = inspect.getsource(mcp_registry.collect_provider_identity)
+        self.assertIn('"mcp" / "servers.json"', src)
+        self.assertNotIn('".mcp.json"', src)
+
+
 if __name__ == "__main__":
     unittest.main()

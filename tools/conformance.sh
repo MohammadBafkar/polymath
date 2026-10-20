@@ -140,14 +140,14 @@ if s not in allowed:
   # tools/sync-integration-policy.py.
   # Detect policy-scoped plugins by artifact, not name prefix, so concept-plugin
   # renames (vcs / chat / paging / cloud / kubernetes …) and the observability
-  # merge stay covered. An MCP connector ships a .mcp.json; an infra plugin
-  # carries capability bindings/ but no .mcp.json. INTEGRATION-2 (policy
-  # disclosure) covers both; INTEGRATION-1 (.mcp.json/references/userConfig)
-  # covers MCP connectors only.
+  # merge stay covered. An MCP connector ships an mcp/servers.json render
+  # template (NEVER an auto-registered .mcp.json); an infra plugin carries
+  # capability bindings/ but no template. INTEGRATION-2 (policy disclosure)
+  # covers both; INTEGRATION-1 (template/userConfig) covers MCP connectors only.
   is_connector=0
-  [[ -f "$plugin_dir/.mcp.json" ]] && is_connector=1
+  [[ -f "$plugin_dir/mcp/servers.json" ]] && is_connector=1
   is_policy_scoped=0
-  [[ -f "$plugin_dir/.mcp.json" || -d "$plugin_dir/bindings" ]] && is_policy_scoped=1
+  [[ -f "$plugin_dir/mcp/servers.json" || -d "$plugin_dir/bindings" ]] && is_policy_scoped=1
   if [[ "$is_policy_scoped" -eq 1 ]]; then
     if grep -q "\`$name\`" "$root/docs/INTEGRATION-POLICY.md" 2>/dev/null; then
       echo "  ✓ INTEGRATION-2: audited in docs/INTEGRATION-POLICY.md"
@@ -164,13 +164,14 @@ if s not in allowed:
     fi
   fi
 
-  # INTEGRATION-1 — applies to MCP connectors (ship a .mcp.json), detected by
-  # artifact rather than name prefix.
+  # INTEGRATION-1 — applies to MCP connectors (ship an mcp/servers.json render
+  # template), detected by artifact rather than name prefix. Templates are
+  # render inputs only: no auto-registered `.mcp.json` ships with a plugin.
   if [[ "$is_connector" -eq 1 ]]; then
-    # is_connector ⟺ a .mcp.json is present (detected above). An integration
-    # plugin must also ship references/<service>-tools.md and userConfig with
-    # title + description per key.
-    echo "  ✓ INTEGRATION-1: .mcp.json"
+    # is_connector ⟺ an mcp/servers.json render template is present (detected
+    # above). An integration plugin must also ship references/<service>-tools.md
+    # and userConfig with title + description per key.
+    echo "  ✓ INTEGRATION-1: mcp/servers.json render template (no auto-registered .mcp.json)"
     ls "$plugin_dir/references/"*.md >/dev/null 2>&1 \
       && echo "  ✓ INTEGRATION-1: references/<service>-tools.md" \
       || { echo "  ✗ INTEGRATION-1: references/*.md missing"; fail=1; }

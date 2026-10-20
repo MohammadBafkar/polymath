@@ -46,7 +46,7 @@ Do not bulk-load every `SKILL.md`. Load the chosen target's body only after rout
 3. **Use context signals.**
    - Paths like `docs/prds/**`, `docs/plans/**`, `docs/adrs/**`, incident URLs, PR URLs, package manifests, or diffs should influence routing.
    - Capability provider names (`jira`, `linear`, `github`, `datadog`, `sentry`, `pagerduty`) are evidence, not final routing by themselves.
-   - For a connector route, resolve *which server backs the provider* before proposing: read `mcpResolution.<provider>` in the project-context snapshot. When `source` is `host`, name the host's server and its `toolPrefix` in the proposal so the agent binds to tools that exist in this session; when `plugin`, note the plugin-shipped fallback; when `none`, flag that credentials are unconfigured. Never propose a connector whose server is absent — see `polymath-core:mcp-bridge`.
+   - For a connector route, resolve *which server backs the provider* before proposing: read `mcpResolution.<provider>` in the project-context snapshot. When `source` is `host`, name the host's server and its `toolPrefix` in the proposal so the agent binds to tools that exist in this session; when `none`, flag that no matching server is registered in this host — plugins never auto-register MCP servers, so degrade or ask the user before helping install the vendor's server. Never propose a connector whose server is absent — see `polymath-core:mcp-bridge`.
 4. **Break ties explicitly.**
    - If top candidates are within `0.10` confidence, return `route_type="clarify"` with one question.
    - If the user asks for "triage" without a tracker or URL, ask which issue tracker.
