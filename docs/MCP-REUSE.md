@@ -166,8 +166,11 @@ Per provider, `source` is one of:
 
 `detectedHost: null` means no agent was detected — nothing is reused, every
 provider resolves to `none`. Skills carry a one-line **MCP binding**
-preamble pointing at this snapshot, so the agent binds to a server that
-actually exists in this session instead of registering a duplicate.
+preamble: use the host's server for the provider if it is in the session's tool
+list (under any name — a claude.ai connector appears as `mcp__claude_ai_<Name>__*`),
+otherwise work without MCP and ask before installing. The snapshot is advisory:
+the scan reads config files only, so it cannot see claude.ai connectors or
+extension-supplied servers, and skills never depend on it.
 
 ## Rendering host-correct configs (opt-in install)
 

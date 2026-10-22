@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.10.1]
+
+### Changed
+
+- The skills' MCP-binding paragraph now tells the agent to use the host's MCP server for the provider whenever it is in the session's tool list (under any name, including claude.ai connectors), instead of gating on the SessionStart `mcpResolution` snapshot. `references/datadog-tools.md` documents Datadog's hosted MCP server; `author-monitor` hands over the monitor JSON when the server is read-only.
+
 ## [0.10.0]
 
 ### Changed

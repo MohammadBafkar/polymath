@@ -1,6 +1,6 @@
 {
   "name": "polymath-ai",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "AI craft: prompt engineering, RAG, eval design, agent design, LLM guardrails, and cost/latency tuning; vendor-agnostic across model providers.",
   "license": "MIT",
   "author": {

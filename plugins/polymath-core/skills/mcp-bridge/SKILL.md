@@ -48,15 +48,14 @@ mcp:
    python3 tools/mcp-registry.py match
    ```
    Each `kind=mcp` binding (the provider identity lives in `bindings/<provider>/binding.json` `mcp` block) is matched by server-name alias, npm package, or remote URL endpoint — against the current host only. Report per provider: **reuse** (name the host server + scope) or **none** (nothing registered here — do not install without asking).
-3. **Read the session resolution** — the SessionStart hook persists it to
-   `${POLYMATH_PLUGIN_DATA}/polymath-core/project-context.json` under
-   `mcpResolution`. Skills bind via this snapshot: `source: host` → use the
-   current host's server (`toolPrefix` names the tool naming); `source: none`
-   → no matching server in this host — degrade gracefully, and if tooling is
-   essential ask the user before helping install the vendor's server (the
-   plugin template renders a host-correct fragment). Plugins never
-   auto-register MCP servers. `detectedHost` records which host was detected
-   — when `null`, nothing was reused.
+3. **Read the session resolution (advisory)** — the SessionStart hook may persist it to
+   `${POLYMATH_PLUGIN_DATA}/polymath-core/project-context.json` under `mcpResolution`.
+   The scan reads host config files only, so it can miss servers the host loads
+   from elsewhere (claude.ai connectors, extension-supplied servers). Connector
+   skills therefore treat **the session's own tool list as authoritative**: if the
+   host has a server for the provider, use its tools; if not, work without MCP
+   and ask before helping install the vendor's server (the plugin template renders
+   a host-correct fragment). Plugins never auto-register MCP servers.
 4. **If the host has no matching server and the user asks for one**, render a
    host-correct fragment (correct wrapper key, env syntax, command shape):
    ```bash

@@ -7,6 +7,18 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1]
+
+### Changed
+
+- **Connector skills use the host agent's MCP server whenever it is in the session's tool list.** The "MCP binding" paragraph in the 15 MCP-dependent skills (observability, vcs, tracker, chat, paging, vuln-scan) used to gate every tool call on a `mcpResolution` snapshot that the SessionStart scan was meant to write. That scan reads host config files only, so it could never see claude.ai connectors (e.g. the Datadog connector) or extension-supplied servers — and a skill that found no entry was told to make no MCP calls. The paragraph now says: if your host has a server for the provider, check your own tool list (it may be registered under another name; a Claude Code connector appears as `mcp__claude_ai_<Name>__*`), use its tools, map each step to the closest tool, say when the server is read-only, never start a second copy; if there is none, work without MCP and ask before suggesting an install.
+- `polymath-core:route`, `mcp-bridge`, `glossary` and `docs/MCP-REUSE.md` now describe `mcpResolution` as advisory and the session's tool list as authoritative.
+- `polymath-observability`: `references/datadog-tools.md` documents Datadog's hosted MCP server (tool names, and that OAuth grants are often read-only) next to `@datadog/mcp-server`; `author-monitor` outputs the validated monitor JSON for the user to apply when the server has no create tool.
+
+### Fixed
+
+- `tests/tools/test_mcp_registry.py` host-detection tests no longer fail when run inside an agent session (they now clear the environment instead of only adding to it).
+
 ## [0.10.0]
 
 ### Changed

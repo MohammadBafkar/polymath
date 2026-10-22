@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.10.1]
+
+### Changed
+
+- The skills' MCP-binding paragraph now tells the agent to use the host's MCP server for the provider whenever it is in the session's tool list (under any name, including claude.ai connectors), instead of gating on the SessionStart `mcpResolution` snapshot.
+
 ## [0.10.0]
 
 ### Changed

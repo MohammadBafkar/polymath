@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.10.1]
+
+### Changed
+
+- `route`, `mcp-bridge` and `glossary` describe `mcpResolution` as advisory; the session's tool list is authoritative for connector skills.
+
 ## [0.10.0]
 
 ### Changed

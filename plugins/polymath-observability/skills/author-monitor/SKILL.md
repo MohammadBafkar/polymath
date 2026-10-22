@@ -7,7 +7,7 @@ description: Author a Datadog monitor — query, threshold, evaluation window, n
 
 > Write one Datadog monitor and create it via the MCP server. Output is the monitor JSON + the rationale.
 
-> **MCP binding (read before any tool call):** resolve which server backs `datadog` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.datadog` — when `source` is `host`, the CURRENT host agent's own `datadog` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `none`, no matching server is registered in this host: degrade gracefully (no MCP tool calls) and, if tooling is essential, ask the user before helping install the vendor's server (the plugin template renders a host-correct fragment). Plugins never auto-register MCP servers. See the `polymath-core:mcp-bridge` skill.
+> **MCP binding (read before any tool call):** if your host has a `datadog` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
 
@@ -22,13 +22,15 @@ description: Author a Datadog monitor — query, threshold, evaluation window, n
 
 ## Procedure
 
+If the host's Datadog server is read-only (no create tool — the default for the hosted server), do steps 1-8, validate, then output the monitor JSON for the user to apply instead of creating it. Say so up front.
+
 1. **Decide the monitor type**:
    - **metric alert** — Prometheus/Datadog metric exceeds a threshold.
    - **anomaly** — significant deviation from history. Use only when threshold-based is genuinely impossible.
    - **log alert** — count of matching log lines.
    - **service check** — uptime / synthetic.
    - **composite** — `(monitorA && monitorB) || monitorC`.
-2. **Query** — write the metric or log query. Validate it in Datadog's UI before automating; the MCP creates monitors but it doesn't validate semantics.
+2. **Query** — write the metric or log query. Validate it in Datadog's UI before automating; the MCP creates monitors but it doesn't validate semantics. If the server offers a validation tool (`validate_monitor_definition`), run it on the finished definition.
 3. **Threshold** — derive from the SLO or from a documented baseline. **Never** "pick a round number that looks right".
 4. **Evaluation window** — match the response expectation:
    - Page (sev2): 5-15 min window with a short critical threshold.

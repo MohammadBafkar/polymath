@@ -33,19 +33,19 @@ def _clean_env() -> dict:
 
 class DetectHostTests(unittest.TestCase):
     def test_claude_code_marker(self) -> None:
-        with mock.patch.dict(os.environ, {**_clean_env(), "CLAUDECODE": "1"}):
+        with mock.patch.dict(os.environ, {**_clean_env(), "CLAUDECODE": "1"}, clear=True):
             self.assertEqual(mcp_registry.detect_host(), "claude-code")
 
     def test_cursor_marker(self) -> None:
-        with mock.patch.dict(os.environ, {**_clean_env(), "CURSOR_AGENT": "1"}):
+        with mock.patch.dict(os.environ, {**_clean_env(), "CURSOR_AGENT": "1"}, clear=True):
             self.assertEqual(mcp_registry.detect_host(), "cursor")
 
     def test_opencode_marker(self) -> None:
-        with mock.patch.dict(os.environ, {**_clean_env(), "OPENCODE": "1"}):
+        with mock.patch.dict(os.environ, {**_clean_env(), "OPENCODE": "1"}, clear=True):
             self.assertEqual(mcp_registry.detect_host(), "opencode")
 
     def test_gemini_marker(self) -> None:
-        with mock.patch.dict(os.environ, {**_clean_env(), "GEMINI_CLI": "1"}):
+        with mock.patch.dict(os.environ, {**_clean_env(), "GEMINI_CLI": "1"}, clear=True):
             self.assertEqual(mcp_registry.detect_host(), "gemini-cli")
 
     def test_no_marker_returns_none(self) -> None:

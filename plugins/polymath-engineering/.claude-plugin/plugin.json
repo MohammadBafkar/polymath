@@ -1,6 +1,6 @@
 {
   "name": "polymath-engineering",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation, tech-debt management. Secret-scan + formatter hooks.",
   "license": "MIT",
   "author": {

@@ -7,14 +7,14 @@
     "url": "https://github.com/MohammadBafkar/Polymath"
   },
   "metadata": {
-    "version": "0.10.0"
+    "version": "0.10.1"
   },
   "plugins": [
     {
       "name": "polymath-core",
       "source": "./plugins/polymath-core",
       "description": "Foundation: route prompts, load conventions/project context, report plugin budgets, and run SessionStart hooks.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "foundation",
       "tags": [
         "foundation",
@@ -26,7 +26,7 @@
       "name": "polymath-cloud",
       "source": "./plugins/polymath-cloud",
       "description": "Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "infra",
       "tags": [
         "infra",
@@ -43,7 +43,7 @@
       "name": "polymath-product",
       "source": "./plugins/polymath-product",
       "description": "Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "product",
       "tags": [
         "product",
@@ -55,7 +55,7 @@
       "name": "polymath-engineering",
       "source": "./plugins/polymath-engineering",
       "description": "Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation, tech-debt management.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "engineering",
       "tags": [
         "engineering",
@@ -68,7 +68,7 @@
       "name": "polymath-release",
       "source": "./plugins/polymath-release",
       "description": "Release craft: Conventional Commits, PR descriptions, CHANGELOG, release notes.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "release",
       "tags": [
         "release",
@@ -80,7 +80,7 @@
       "name": "polymath-flows",
       "source": "./plugins/polymath-flows",
       "description": "flows-lite workflow runner: deterministic serial executor with state, resume, and mustPass checks.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "orchestration",
       "tags": [
         "orchestration",
@@ -93,7 +93,7 @@
       "name": "polymath-pipeline",
       "source": "./plugins/polymath-pipeline",
       "description": "Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "foundation",
       "tags": [
         "routing",
@@ -106,7 +106,7 @@
       "name": "polymath-thinking",
       "source": "./plugins/polymath-thinking",
       "description": "Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "thinking",
       "tags": [
         "thinking",
@@ -120,7 +120,7 @@
       "name": "polymath-planning",
       "source": "./plugins/polymath-planning",
       "description": "Planning craft: write-plan, work-breakdown, three-point estimate.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "planning",
       "tags": [
         "planning",
@@ -132,7 +132,7 @@
       "name": "polymath-writing",
       "source": "./plugins/polymath-writing",
       "description": "Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "writing",
       "tags": [
         "writing",
@@ -146,7 +146,7 @@
       "name": "polymath-qa",
       "source": "./plugins/polymath-qa",
       "description": "Quality craft: test strategy, coverage-gap analysis, unit-test authoring.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "quality",
       "tags": [
         "qa",
@@ -158,7 +158,7 @@
       "name": "polymath-security",
       "source": "./plugins/polymath-security",
       "description": "Security craft: STRIDE, OWASP review, supply-chain, auth design, compliance mapping, DevSecOps pipeline, crypto review, LLM-security audit.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "security",
       "tags": [
         "security",
@@ -173,7 +173,7 @@
       "name": "polymath-frontend",
       "source": "./plugins/polymath-frontend",
       "description": "Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "engineering",
       "tags": [
         "frontend",
@@ -185,7 +185,7 @@
       "name": "polymath-backend",
       "source": "./plugins/polymath-backend",
       "description": "Backend craft: REST API design, API versioning strategy, relational schema design, safe online migrations.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "engineering",
       "tags": [
         "backend",
@@ -199,7 +199,7 @@
       "name": "polymath-architecture",
       "source": "./plugins/polymath-architecture",
       "description": "Architecture design craft: DDD context maps + aggregates, event-driven/integration design, resilience, service decomposition, distributed consistency.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "architecture",
       "tags": [
         "architecture",
@@ -214,7 +214,7 @@
       "name": "polymath-data",
       "source": "./plugins/polymath-data",
       "description": "Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "data",
       "tags": [
         "sql",
@@ -226,7 +226,7 @@
       "name": "polymath-streaming",
       "source": "./plugins/polymath-streaming",
       "description": "Data & streaming engineering: streaming topology + delivery semantics, ETL/ELT pipelines, dimensional/lakehouse modeling, stream processing.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "data",
       "tags": [
         "streaming",
@@ -240,7 +240,7 @@
       "name": "polymath-ai",
       "source": "./plugins/polymath-ai",
       "description": "AI craft: prompt engineering, RAG, eval design, agent design, LLM guardrails, cost/latency tuning.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "ai",
       "tags": [
         "ai",
@@ -255,7 +255,7 @@
       "name": "polymath-platform",
       "source": "./plugins/polymath-platform",
       "description": "Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "platform",
       "tags": [
         "platform",
@@ -267,7 +267,7 @@
       "name": "polymath-devops",
       "source": "./plugins/polymath-devops",
       "description": "DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "devops",
       "tags": [
         "devops",
@@ -279,7 +279,7 @@
       "name": "polymath-kubernetes",
       "source": "./plugins/polymath-kubernetes",
       "description": "Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "infra",
       "tags": [
         "kubernetes",
@@ -292,7 +292,7 @@
       "name": "polymath-iac",
       "source": "./plugins/polymath-iac",
       "description": "Infrastructure-as-Code authoring: reusable Terraform modules, state/backends/drift, policy-as-code guardrails (OPA/Sentinel/Checkov).",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "infra",
       "tags": [
         "iac",
@@ -306,7 +306,7 @@
       "name": "polymath-sre",
       "source": "./plugins/polymath-sre",
       "description": "SRE craft: SLO design, error-budget policy, chaos experiments, capacity planning + demand forecasting, on-call program design.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "sre",
       "tags": [
         "sre",
@@ -320,7 +320,7 @@
       "name": "polymath-observability",
       "source": "./plugins/polymath-observability",
       "description": "Observability concept plugin: RED/USE + logging + tracing design AND Datadog/Grafana/Honeycomb/Elastic/Sentry query integration.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "observability",
       "tags": [
         "observability",
@@ -333,7 +333,7 @@
       "name": "polymath-incident",
       "source": "./plugins/polymath-incident",
       "description": "Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "incident",
       "tags": [
         "incident",
@@ -345,7 +345,7 @@
       "name": "polymath-vcs",
       "source": "./plugins/polymath-vcs",
       "description": "Version-control integration: GitHub PR/issue/CI MCP + PR-URL detect + unpushed-commits nudge (GitLab/Azure DevOps/Bitbucket in the capability vocab).",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "connector",
       "tags": [
         "connector",
@@ -357,7 +357,7 @@
       "name": "polymath-paging",
       "source": "./plugins/polymath-paging",
       "description": "On-call/paging integration: PagerDuty incident + on-call MCP + incident-URL detection (Opsgenie/Splunk On-Call in the capability vocab).",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "connector",
       "tags": [
         "connector",
@@ -369,7 +369,7 @@
       "name": "polymath-vuln-scan",
       "source": "./plugins/polymath-vuln-scan",
       "description": "Vulnerability-scanning integration: Snyk test/monitor MCP + Stop-hook warning on cached open criticals (Dependabot/GHAS in the vocab).",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "connector",
       "tags": [
         "connector",
@@ -381,7 +381,7 @@
       "name": "polymath-author",
       "source": "./plugins/polymath-author",
       "description": "Author craft: scaffold new plugins/skills/connectors, validate against gates, measure listing budget, review skill quality.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "author",
       "tags": [
         "author",
@@ -393,7 +393,7 @@
       "name": "polymath-decisions",
       "source": "./plugins/polymath-decisions",
       "description": "Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "decisions",
       "tags": [
         "decisions",
@@ -406,7 +406,7 @@
       "name": "polymath-research",
       "source": "./plugins/polymath-research",
       "description": "Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "research",
       "tags": [
         "research",
@@ -419,7 +419,7 @@
       "name": "polymath-design",
       "source": "./plugins/polymath-design",
       "description": "Design craft: WCAG 2.2 a11y audit, UI critique, design-system conformance review.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "design",
       "tags": [
         "design",
@@ -432,7 +432,7 @@
       "name": "polymath-communication",
       "source": "./plugins/polymath-communication",
       "description": "Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "communication",
       "tags": [
         "communication",
@@ -444,7 +444,7 @@
       "name": "polymath-leadership",
       "source": "./plugins/polymath-leadership",
       "description": "Leadership craft: 1:1 prep, performance reviews, OKR setting, hiring-loop design, conflict mediation, coaching/growth plans.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "leadership",
       "tags": [
         "leadership",
@@ -459,7 +459,7 @@
       "name": "polymath-learning",
       "source": "./plugins/polymath-learning",
       "description": "Learning craft: tiered explanations, code walkthroughs, Feynman-style self-test.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "learning",
       "tags": [
         "learning",
@@ -471,7 +471,7 @@
       "name": "polymath-performance",
       "source": "./plugins/polymath-performance",
       "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "performance",
       "tags": [
         "performance",
@@ -483,7 +483,7 @@
       "name": "polymath-mobile",
       "source": "./plugins/polymath-mobile",
       "description": "Mobile craft: mobile perf budgets, push notification design, deep-link routing.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "mobile",
       "tags": [
         "mobile",
@@ -495,7 +495,7 @@
       "name": "polymath-chat",
       "source": "./plugins/polymath-chat",
       "description": "Incident-comms integration: Slack channels/threads + Statuspage public updates — internal + external incident communication.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "connector",
       "tags": [
         "connector",
@@ -507,7 +507,7 @@
       "name": "polymath-test-automation",
       "source": "./plugins/polymath-test-automation",
       "description": "Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "quality",
       "tags": [
         "e2e",
@@ -519,7 +519,7 @@
       "name": "polymath-tracker",
       "source": "./plugins/polymath-tracker",
       "description": "Issue-tracker connector: Jira + Linear MCP + ticket-key detection (PROJ-123 / TEAM-123 / browse URLs); triage + provider-agnostic file-bug-from-incident.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "connector",
       "tags": [
         "connector",

@@ -7,7 +7,7 @@ description: Fetch the full context for an active PagerDuty incident — log ent
 
 > Front-load context for the on-call before they're fully awake. One incident in, one summary out.
 
-> **MCP binding (read before any tool call):** resolve which server backs `pager` from `${POLYMATH_PLUGIN_DATA:-$HOME/.polymath/data}/polymath-core/project-context.json` `mcpResolution.pagerduty` — when `source` is `host`, the CURRENT host agent's own `pagerduty` MCP server is ALREADY registered: use its tools (`toolPrefix` gives the naming) and do NOT register or start a polymath copy. A server registered in a DIFFERENT agent is never a substitute. When `none`, no matching server is registered in this host: degrade gracefully (no MCP tool calls) and, if tooling is essential, ask the user before helping install the vendor's server (the plugin template renders a host-correct fragment). Plugins never auto-register MCP servers. See the `polymath-core:mcp-bridge` skill.
+> **MCP binding (read before any tool call):** if your host has a `pagerduty` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
 
