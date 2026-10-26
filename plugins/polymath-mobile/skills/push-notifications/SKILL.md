@@ -7,11 +7,20 @@ description: Design push notifications — opt-in moment, payload shape, tap-dee
 
 > Push is one of the easiest privileges to abuse. Output is the design that earns and keeps the permission — payload, timing, and the unsub path.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new app or feature is introducing push notifications.
 - An app's push opt-in rate / unsub rate has regressed.
 - A workflow's user-engagement step needs structured push design.
+
+## Inputs
+
+- The notification use cases (required): what event triggers each, and what the user can do with it.
+- Platforms and the push provider (FCM, APNs direct, OneSignal, …) — optional; absent, design provider-neutral.
+- Regulatory context (optional): marketing pushes need consent rules per region (e.g. ePrivacy/GDPR in the EU).
+- Sending a push is a side effect: the design lists test sends; none go to real users without explicit approval.
 
 ## Procedure
 

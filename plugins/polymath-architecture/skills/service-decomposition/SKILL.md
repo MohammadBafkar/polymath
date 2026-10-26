@@ -7,6 +7,8 @@ description: Map service boundaries in a monolith or split proposal — seam ana
 
 > Most microservice pain is a boundary drawn for the org chart, not the domain. Decompose by subdomain and data ownership, extract one seam at a time, and keep what works.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A monolith is hard to change/scale and a split is being considered.
@@ -32,7 +34,26 @@ Not this when: you are defining the domain language/contexts from scratch — do
 
 ## Output
 
-- A one-page plan: keep-monolith vs split recommendation, ranked extraction candidates (value/risk + data-ownership note), the strangler-fig sequence, the data-split approach, and the characterization-test plan.
+```text
+Decomposition plan: billing monolith
+
+Recommendation: split 1 service now (Invoicing); keep the rest a modular monolith.
+  forcing function: invoicing runs a nightly batch that needs independent scaling; others have none.
+
+Candidates (value ÷ risk)
+  1. Invoicing      high value / low risk   owns invoices + invoice_lines; no foreign JOINs
+  2. Tax            medium / medium         reads customers via JOIN → needs a customer read model first
+  3. Subscriptions  low / high              tangled with pricing core → stays
+
+Strangler sequence
+  1. facade /invoices in the monolith → routes 5% to the new service behind a flag
+  2. 100% reads, then writes; monolith code deleted after 30 days clean
+Data: outbox from the monolith → invoicing DB; reconciliation job daily until cut-over; JOINs → API composition
+Characterization tests: 42 golden invoices captured from prod (anonymized) before extraction
+New costs: network hop, tracing, one more on-call surface — accepted for invoicing only
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-decomposition.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

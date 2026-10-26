@@ -7,6 +7,8 @@ description: Write a multi-stage Dockerfile — distroless or minimal base, buil
 
 > Write a Dockerfile that's small, fast to rebuild, and safe to run.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service needs a container image.

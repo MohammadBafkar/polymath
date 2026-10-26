@@ -10,6 +10,8 @@ description: Run an architecture review as a process — entry criteria, reviewe
 > session, capture decisions, and assign follow-ups so a review board is
 > repeatable instead of a free-for-all.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A team holds (or should hold) architecture / design reviews and wants a consistent rubric.

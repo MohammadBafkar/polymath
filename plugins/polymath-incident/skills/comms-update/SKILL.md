@@ -7,11 +7,20 @@ description: Draft an incident communication update — plain language, status (
 
 > Draft one comms update (status page / customer email / internal stakeholder note). Output is the update, ready for the comms lead to approve — this skill drafts; posting is a separate, approved step (`polymath-chat:post-incident-comms`, `polymath-chat:post-statuspage-update`).
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A sev1/sev2 needs an external update.
 - Stakeholders need an internal update during a long incident.
 - A workflow's comms step generates a draft (e.g. `respondToIncident` paired with `polymath-chat:post-incident-comms`).
+
+## Inputs
+
+- The incident's current facts (required): what users see, start time, scope, mitigation status — from the incident channel or the IC. Anything unconfirmed is left out or stated as unknown, never guessed.
+- Audience (required): external (status page, customers) or internal stakeholders.
+- The previous update (optional) — the new one says what changed since.
+- Drafting is not posting: publishing goes through `polymath-chat` skills, which confirm before sending.
 
 ## Procedure
 

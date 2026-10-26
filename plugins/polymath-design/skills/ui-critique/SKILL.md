@@ -7,11 +7,19 @@ description: Critique a UI surface — hierarchy, density, error/empty/loading s
 
 > Critique one UI surface. Output is findings keyed to specific elements, not "feels off".
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A design has been mocked or implemented and the team wants a second pass before ship.
 - An existing surface has user complaints but the team can't name why.
 - A workflow's design-review step needs a structured critique.
+
+## Inputs
+
+- The surface (required): a screenshot, a running URL, a design file link, or the component code. Critique only what you can see; behavior you can't observe is `[VERIFY]`.
+- The user and task the surface serves (optional but expected) — the critique is judged against that task, not taste.
+- The design system or brand guidelines (optional) — deviations from it are findings; personal preference is not.
 
 ## Procedure
 

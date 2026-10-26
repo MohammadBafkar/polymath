@@ -96,6 +96,10 @@ ROOT = repo_root()
 PLUGINS_DIR = plugins_dir()
 CATALOG_SCHEMA = ROOT / "registry" / "schemas" / "polymath-catalog.schema.json"
 PROFILES = ROOT / "registry" / "polymath-profiles.json"
+# initialize-project reads its own copy: an installed plugin is copied into the
+# host's plugin cache alone, so a marketplace path (registry/...) never resolves
+# there. PROFILE-3 keeps the shipped copy byte-identical to the source of truth.
+PROFILES_MIRROR = PLUGINS_DIR / "polymath-core" / "skills" / "initialize-project" / "references" / "polymath-profiles.json"
 LEDGER = ROOT / "registry" / "stability-evidence.json"
 LEDGER_SCHEMA = ROOT / "registry" / "schemas" / "stability-evidence.schema.json"
 
@@ -202,6 +206,14 @@ def profiles_check() -> int:
                 errors.append(f"profile {name!r}: unknown plugin {p!r}")
             if p in spine:
                 errors.append(f"profile {name!r}: redundantly lists spine plugin {p!r}")
+
+    # PROFILE-3: the copy shipped inside polymath-core must match the registry.
+    if not PROFILES_MIRROR.exists() or PROFILES_MIRROR.read_bytes() != PROFILES.read_bytes():
+        errors.append(
+            f"PROFILE-3: {PROFILES_MIRROR.relative_to(ROOT)} is missing or differs from "
+            f"{PROFILES.relative_to(ROOT)} — run: cp {PROFILES.relative_to(ROOT)} "
+            f"{PROFILES_MIRROR.relative_to(ROOT)}"
+        )
 
     for e in errors:
         print(f"  FAIL  {e}")

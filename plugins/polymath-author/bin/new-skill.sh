@@ -64,10 +64,22 @@ description: $description
 
 > One-line restatement of when this skill should be used (≤ 200 chars).
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked \`[TBD]\` or \`[VERIFY]\`, never filled in.
+
+<!-- Pick the one mode that fits; tools/check-skill-shape.py (SKILL-3) holds the canonical sentence for each:
+     deterministic — mechanical: computed by a bundled script or tool, exact output shape (fenced block or template).
+     analytical    — judgment inside a fixed frame (the default above).
+     generative    — divergence is the point: genuinely different options first, then converge on stated criteria. -->
+
 ## When to use
 
 - Trigger 1
 - Trigger 2
+
+## Inputs
+
+- Required input — and what happens when it is missing (ask / assume-and-state / stop).
+- Optional input (default: …).
 
 ## Procedure
 
@@ -82,6 +94,10 @@ Show the exact shape the skill produces (the model imitates this):
 \`\`\`text
 <output skeleton — replace with the concrete files, frontmatter, or fields>
 \`\`\`
+
+## Quality bar
+
+- 3–6 bullets naming the easy-mode failures specific to this skill.
 
 ## References
 
@@ -115,6 +131,6 @@ fi
 
 echo
 echo "Next steps:"
-echo "  1. Flesh out $skill_dir/SKILL.md (description, procedure, output shape)."
+echo "  1. Flesh out $skill_dir/SKILL.md (description, mode, inputs, procedure, output shape)."
 echo "  2. Add \`$skill\` to the 'Skills:' list in plugins/$plugin/README.md (DOCS-2)."
-echo "  3. Run: tools/conformance.sh $plugin"
+echo "  3. Run: tools/conformance.sh $plugin && tools/check-skill-shape.py"

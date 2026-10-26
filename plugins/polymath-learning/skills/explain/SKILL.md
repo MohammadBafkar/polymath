@@ -7,6 +7,8 @@ description: Explain a concept at a specified audience tier (ELI5 / curious-unde
 
 > Explanations fail when the audience tier is implicit. Pick the tier first, then the analogy, then the where-the-analogy-breaks.
 
+**Mode:** generative — diverge before converging. Produce genuinely different options first (the obvious answer is one candidate, not the answer), then narrow with stated criteria.
+
 ## When to use
 
 - The user asks "explain X" or "how does Y work?".
@@ -26,7 +28,7 @@ description: Explain a concept at a specified audience tier (ELI5 / curious-unde
    - **Curious undergrad**: 1–2 paragraphs. One analogy, one limit of the analogy, one terminology bridge.
    - **Experienced peer**: skip the analogy. Compare to something they already know in this domain. Cite the mechanism, not the metaphor.
    - **Domain expert**: zero analogy. Talk about the specific thing — what's load-bearing, what's a footgun, what's commonly misunderstood.
-2. **For ELI5 and undergrad**: pick the analogy. Then immediately state where it breaks. An analogy that doesn't disclose its limits will mislead the learner.
+2. **For ELI5 and undergrad**: draft three candidate analogies from *different* domains (kitchen, traffic, a library, a sport, …) before choosing — the first analogy that comes to mind is usually the most worn. Pick the one whose breaking point matters least for this audience's next question, then immediately state where it breaks. An analogy that doesn't disclose its limits will mislead the learner.
 3. **For peer and expert**: pick a single reference point in their existing knowledge. "Like X but Y" beats invented metaphor.
 4. **One concept per pass**. If you need to explain a prerequisite first, stop and explain the prerequisite alone first.
 
@@ -44,7 +46,7 @@ explain: <concept> — tier: <ELI5 | undergrad | peer | expert>
 ## Quality bar
 
 - Tier is named at the top.
-- ELI5 / undergrad → analogy + its limit.
+- ELI5 / undergrad → analogy + its limit, chosen from three candidates in different domains (not the stock one by default).
 - Peer / expert → no invented metaphor; reference existing knowledge.
 - One concept per explanation. If a prerequisite is needed, surface it.
 

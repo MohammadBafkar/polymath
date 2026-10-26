@@ -7,6 +7,8 @@ description: Audit docker-compose.yaml — image pinning, named volumes, network
 
 > Spot the patterns in a compose file that bite when you actually run it: floating images, host-mount surprises, secrets in ENV, missing health gates.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A `docker-compose.yaml` / `compose.yaml` is new, changed in a PR, or about to be used beyond a laptop.

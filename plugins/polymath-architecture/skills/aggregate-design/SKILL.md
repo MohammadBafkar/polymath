@@ -7,6 +7,8 @@ description: Design DDD tactical aggregates for a bounded context — aggregate 
 
 > An aggregate is a consistency boundary, not a data model. Get the invariants right and the boundaries fall out; get them wrong and you fight the database forever.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - You have a bounded context (see `bounded-context-map`) and need its internal object model.
@@ -32,8 +34,27 @@ Not this when: you are choosing cross-node consistency (eventual vs strong acros
 
 ## Output
 
-- A one-page aggregate model: aggregates with their roots, the invariant each enforces, entities vs value objects, by-id references, and the domain events that connect them.
-- A flagged list of any invariant spanning two aggregates (a boundary that needs rethinking).
+```text
+Aggregate model: Refunds context
+
+Refund (root)                     invariant: Σ refunds ≤ captured amount of the payment
+  RefundLine        entity        (identity: line id; lifecycle: requested → issued → settled)
+  Money             value object  (amount, currency) — immutable
+  references Payment by id (PaymentId), never by object
+  version: optimistic concurrency column `version`
+
+Payment (root, Payments context)  invariant: captured ≤ authorized
+  emits PaymentCaptured → Refunds caches capturedAmount per PaymentId
+
+Domain events
+  RefundIssued(refundId, paymentId, amount) → Ledger posts the reversal (eventual)
+
+Invariants spanning two aggregates (rethink):
+  - "a refund cannot exceed the *remaining* capture" needs Payment + all Refunds → keep a
+    RefundAllowance on Refund, fed by PaymentCaptured / RefundIssued, not a two-aggregate transaction.
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-aggregates.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

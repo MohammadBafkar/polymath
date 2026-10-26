@@ -13,6 +13,8 @@ description: Find MCP servers already registered in the CURRENT host agent and m
 > in this session's tool list — so only the current host's configs are
 > scanned, detected from in-session env markers.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - Setting up Polymath in a repo where the agent already has e.g. Datadog or Atlassian MCPs registered.
@@ -20,6 +22,12 @@ description: Find MCP servers already registered in the CURRENT host agent and m
 - The SessionStart hook said "reusing … MCP server(s)" and the user wants the full picture.
 - Before registering a polymath connector server into a host config (to avoid a duplicate).
 - To inspect what OTHER agents have registered (diagnostics only — `scan --all-hosts`).
+
+## Inputs
+
+- The provider(s) the user cares about (optional, default: every provider the scan or bindings mention).
+- This session's own tool list — authoritative; the config scan is advisory.
+- `.polymath/project.yaml` `mcp:` policy (optional, default `reuse-host`).
 
 ## Resolution policy
 

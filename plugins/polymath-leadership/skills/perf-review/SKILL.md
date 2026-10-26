@@ -7,6 +7,8 @@ description: Write a perf review — evidence-anchored, calibrated against level
 
 > A perf review with new feedback in it is a manager failure, not a review. This skill writes the review that consolidates what's already been said in 1:1s.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A performance cycle is closing.

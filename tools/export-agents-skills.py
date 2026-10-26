@@ -543,12 +543,18 @@ def export_support_files(plugin: pathlib.Path, out_root: pathlib.Path) -> tuple[
     support = out_root / SUPPORT_ROOT / plugin.name
     templates: list[dict] = []
     scripts: list[dict] = []
-    for sub in ("templates", "bin", "hooks"):
+    # data/ ships too: hooks and skills read it relative to the plugin root
+    # (route-hint.py / event-trigger.py → data/route-signals.json, the flows
+    # SessionStart index, run-workflow's workflow-detect.json). Without it the
+    # bundled hook dispatcher runs against a missing table.
+    for sub in ("templates", "bin", "hooks", "data"):
         src = plugin / sub
         if not src.is_dir():
             continue
         dest = support / sub
         copytree_clean(src, dest)
+        if sub == "data":
+            continue
         for path in iter_clean_files(src):
             entry = {
                 "source_plugin": plugin.name,

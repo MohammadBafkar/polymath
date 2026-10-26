@@ -7,6 +7,8 @@ description: Post an incident-comms update to the right Slack channel + thread; 
 
 > Take a comms-update draft (or write one) and post it to the right Slack channel + thread. Output is the posted ts so the next update can thread under it.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 > **MCP binding (read before any tool call):** if your host has a `slack` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use

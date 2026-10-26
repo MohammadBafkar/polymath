@@ -7,11 +7,19 @@ description: Plan a safe online database migration in expand-migrate-contract ph
 
 > Lay out an online schema/data migration without downtime. Every step has a rollback.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A schema change involves rewriting existing rows, changing types, or renaming columns.
 - A migration could lock a hot table for too long.
 - The user says "is this migration safe?".
+
+## Inputs
+
+- The current and target schema (or the change in words) — required.
+- Table sizes, write rates, and the database engine + version (required for lock and duration judgments; unknown → treat the table as large and hot, and say so).
+- The deploy model (optional): can app versions overlap during the migration? How long between deploys?
 
 ## Related skills
 

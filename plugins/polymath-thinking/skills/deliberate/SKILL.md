@@ -10,6 +10,8 @@ description: Run an iterative observe-frame-options-tradeoffs-risks-revise loop 
 > (`brainstorm`, `red-team`, `pre-mortem`) and owns only the framing, evaluation,
 > synthesis, and revision around them.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The user asks to think through, evaluate, review, improve, or plan a non-trivial idea, implementation, design, roadmap, or document.

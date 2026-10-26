@@ -4,7 +4,7 @@ scenario: activateProject-polymath
 expect:
   output_matches:
     - ".polymath/project.yaml"
-    - "docs/POLYMATH-ONBOARDING.md"
+    - "POLYMATH.md"
     - "(setup|tools|environment)"
 timeout_seconds: 180
 ---

@@ -1,6 +1,6 @@
 {
   "name": "polymath-paging",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "PagerDuty connector: MCP server for incidents/oncall + UserPromptSubmit hook detecting incident URLs/IDs.",
   "license": "MIT",
   "author": {

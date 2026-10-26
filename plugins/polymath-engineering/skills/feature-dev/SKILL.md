@@ -7,6 +7,8 @@ description: Build the smallest safe change satisfying a PRD/acceptance criteria
 
 > Implement the smallest safe change that satisfies a PRD's acceptance criteria using a test-driven loop.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The user says "implement this", "build this feature", "let's write the code".
@@ -16,7 +18,7 @@ description: Build the smallest safe change satisfying a PRD/acceptance criteria
 ## Inputs
 
 - PRD path (preferred) or a concise problem statement.
-- Existing acceptance criteria (preferred). If absent, surface that gap and pause.
+- Existing acceptance criteria (preferred). If absent, surface that gap and pause; in an unattended run (workflow step, subagent), fail the step with that reason — never invent criteria to code against.
 - Repository conventions: `CONTRIBUTING.md` / `AGENTS.md` / `CLAUDE.md` plus the project context's `conventions_docs` (below). (`polymath-core:conventions` is the *Polymath marketplace's* authoring guide — not this repo's conventions.)
 
 ## Project localization
@@ -55,9 +57,20 @@ Before the procedure, resolve the project snapshot —
 
 ## Output
 
-- A code diff that satisfies the listed acceptance criteria.
-- Tests (unit or integration) co-located per repo conventions.
-- A short summary listing files changed and behaviors covered.
+The diff plus tests per repo conventions, then this summary:
+
+```text
+feature-dev: rate-limit /login (docs/prds/rate-limit-login.md)
+
+Baseline:   pytest tests/ → 212 passed, 1 failed (test_legacy_export — pre-existing, untouched)
+AC-1  6th login attempt in 60 s returns 429          test_blocks_sixth_attempt_in_window     red → green
+AC-2  counter resets after 15 min                    test_lock_expires_after_cooldown        red → green
+AC-3  successful login resets the counter            test_success_resets_counter             red → green
+Changed:    src/auth/rate_limit.py (new), src/auth/login.py (+6), tests/auth/test_rate_limit.py (new)
+After:      pytest tests/ → 215 passed, 1 failed (same pre-existing failure)
+Open:       Redis vs in-process store → ADR needed before multi-instance deploy (not added silently)
+Next:       polymath-engineering:verify-change
+```
 
 ## Anti-patterns to avoid
 

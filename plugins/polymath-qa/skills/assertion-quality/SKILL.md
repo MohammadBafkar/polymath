@@ -7,6 +7,8 @@ description: Review test assertions — assert behavior not implementation; kill
 
 > A test is only worth its assertions. Make each one assert the behavior that matters, fail for one clear reason, and resist incidental change.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A test passes but you doubt it would catch the bug it claims to.
@@ -35,6 +37,30 @@ This sharpens *assertions* in existing tests. It is not authoring tests (`polyma
 3. Rewrite each to assert the behavior precisely — narrowest assertion that still fails when the behavior breaks.
 4. Add the missing negative-space assertion (error/boundary) where the behavior implies one.
 5. Ensure one clear reason-to-fail per test; split if not.
+
+## Output
+
+One block per reviewed test, worst first (vacuous > implementation-coupled > over-broad > missing negative space > multi-reason):
+
+```text
+Assertion review: tests/test_refunds.py — 4 tests, 3 findings
+
+test_refund_created                       VACUOUS
+  line 41: assert response is not None
+  protects: a refund for a valid order returns 201 with the refund id
+  rewrite:  assert response.status_code == 201
+            assert response.json()["refund_id"] == expected_id
+
+test_refund_calls_ledger                  IMPLEMENTATION-COUPLED
+  line 58: mock_ledger.post.assert_called_once()
+  protects: the order balance drops by the refund amount
+  rewrite:  assert get_balance(order) == original - 25_00
+
+test_refund_rejects_overdraw              MISSING NEGATIVE SPACE
+  add:      assert refund(order, amount=balance + 1).status_code == 409
+
+Unchanged (already behavior-precise): test_refund_idempotency_key
+```
 
 ## Quality bar
 

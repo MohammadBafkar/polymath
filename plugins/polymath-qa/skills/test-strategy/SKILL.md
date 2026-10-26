@@ -7,6 +7,8 @@ description: Design a layered test strategy (pyramid) for a feature or repo; rec
 
 > Propose the smallest test pyramid that covers a feature's acceptance criteria. Output is a short strategy doc, not test code.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new feature or repo needs a deliberate test plan.
@@ -36,10 +38,10 @@ description: Design a layered test strategy (pyramid) for a feature or repo; rec
 ```text
 Test strategy: <feature>
 
-Layer  Count  Justification
-unit            <n>  …
-integration     <n>  …
-e2e             <n>  …
+Layer         Count  Justification
+unit          <n>    …
+integration   <n>    …
+e2e           <n>    …
 
 Per-criterion plan:
   AC1: <headline> — unit

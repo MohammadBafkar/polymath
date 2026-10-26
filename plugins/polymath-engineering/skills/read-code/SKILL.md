@@ -7,6 +7,8 @@ description: Orient quickly in an unfamiliar codebase area; produce a one-page m
 
 > Orient in an unfamiliar codebase area before changing anything. Output is a concise map, not a tour.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Joining a new repo or area.

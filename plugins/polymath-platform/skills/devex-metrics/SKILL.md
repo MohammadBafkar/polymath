@@ -7,11 +7,19 @@ description: Define DORA + SPACE metrics for the team — what each measures, ho
 
 > Pin DORA (output) and SPACE (developer experience) metrics for a team. Output is a metric sheet with collection sources.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A platform team is starting to measure itself.
 - An exec asks "how do we know we're improving DX?".
 - A workflow needs a baseline before a platform investment.
+
+## Inputs
+
+- The team or service scope (required) and where its delivery data lives: CI/CD system, git host, incident tracker. Each metric's number comes from those systems; one that can't be collected yet is `[TBD: source]`, never estimated.
+- The question the metrics must answer (optional — "did the platform investment help?") — it decides which SPACE dimensions to pick.
+- Survey access (optional) for Satisfaction; absent, drop the dimension rather than guess it.
 
 ## DORA — four output metrics
 
@@ -27,8 +35,9 @@ Since 2024 DORA also reports **Rework Rate** (unplanned deploys made to fix user
 Performance bands (Google DORA report — the cutoffs change between years; check the current report and cite its year):
 
 - **Elite**: multiple deploys per day; <1 day lead time; <5% CFR; <1 hour MTTR.
-- **High**: weekly–monthly deploys; 1 day–1 week lead time; <10% CFR; <1 day MTTR.
-- **Medium / Low**: longer than above.
+- **High**: between daily and weekly deploys; 1 day–1 week lead time; ~10% CFR; <1 day recovery.
+- **Medium**: between weekly and monthly deploys; 1 week–1 month lead time; ~15% CFR; 1 day–1 week recovery.
+- **Low**: slower than Medium on any axis.
 
 ## SPACE — developer experience
 

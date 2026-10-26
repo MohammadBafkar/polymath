@@ -7,6 +7,8 @@ description: Frame the problem before any solution — symptom vs root need, who
 
 > Most bad solutions are answers to badly-framed problems. Pin down what we're actually solving, and for whom, before anyone proposes how.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A request arrives already shaped as a solution ("we need feature X") and you suspect the underlying need is unexamined.
@@ -14,6 +16,12 @@ description: Frame the problem before any solution — symptom vs root need, who
 - A workflow invokes `polymath-thinking:problem-framing`.
 
 This *frames* the problem. It is not generating options (`polymath-thinking:brainstorm`), root-causing an incident (`polymath-thinking:5-whys`), or running the full decide loop (`polymath-thinking:deliberate`).
+
+## Inputs
+
+- The request as stated (required) — often solution-shaped ("build X").
+- Evidence the requester has (optional): data, tickets, quotes, frequency. None: the Evidence line reads `[TBD: evidence]` and every claim goes under Assumptions.
+- Who asked and why now (optional) — the stakeholder's own words are quoted, not paraphrased.
 
 ## Procedure
 

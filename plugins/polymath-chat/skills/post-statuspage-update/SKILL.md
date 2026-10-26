@@ -7,6 +7,8 @@ description: Post a customer-facing Statuspage incident update — maps internal
 
 > Translate an internal incident update into a public Statuspage post. Output is the posted incident ID + update ID so subsequent updates thread under the same incident.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 > **MCP binding (read before any tool call):** if your host has a `statuspage` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the rewritten body and the field values to enter in the Statuspage UI) and ask before suggesting an install.
 
 ## When to use

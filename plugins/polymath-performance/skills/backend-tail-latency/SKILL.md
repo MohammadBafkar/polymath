@@ -7,6 +7,8 @@ description: Investigate backend P99/P999 tail latency — coordinated GC, lock 
 
 > P50 latency is what the median user sees; P99 is what your worst-day user sees. Tail problems hide in coordinated phenomena, not single slow lines.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - P99 / P999 latency is materially worse than P50 and you don't know why.

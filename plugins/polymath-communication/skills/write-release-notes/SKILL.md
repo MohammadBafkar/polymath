@@ -7,6 +7,8 @@ description: Author customer-facing release notes — headline, user-benefit fra
 
 > Customer-facing release notes. Different from CHANGELOG: the audience is users, not engineers. Tone is announcement + benefit, not changelog rollup.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A release is being prepared and you want notes the customer-facing site / email blast can use.
@@ -37,7 +39,7 @@ description: Author customer-facing release notes — headline, user-benefit fra
 4. **Breaking changes**: own section. Migration path required for each. If anyone has to change anything in their code or workflow, this section is mandatory.
 5. **Known issues**: shipping ≠ no-bugs. Be honest about what's pending.
 6. **Security fixes**: credit the reporter when they consented; cite the advisory ID.
-7. **Claims trace to sources.** A speedup, a fixed bug, or a number must come from the CHANGELOG, a PR, or a measurement — every figure traces to the source material; a missing one is written `[NEEDS DATA: <what>]` and listed in the summary.
+7. **Claims trace to sources.** A speedup, a fixed bug, or a number must come from the CHANGELOG, a PR, or a measurement — every figure traces to the source material; a missing one is written `[TBD: <what>]` and listed in the summary.
 
 ## Style
 

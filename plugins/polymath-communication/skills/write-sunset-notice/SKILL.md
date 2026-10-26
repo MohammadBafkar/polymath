@@ -7,6 +7,8 @@ description: Author a deprecation / sunset notice — two dates (warn, remove), 
 
 > A sunset notice is two dates and a migration. Anything else is decoration. The reader needs to know what to do and by when.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A capability (API endpoint, feature, integration) is being deprecated.
@@ -23,7 +25,7 @@ description: Author a deprecation / sunset notice — two dates (warn, remove), 
 ## Procedure
 
 1. Read [`Sunset-notice.md`](../../templates/Sunset-notice.md).
-2. Compute slug from the capability name.
+2. **Slug** from the capability name: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/sunsets/<slug>.md`:
    - **What's being sunset**: one sentence in the user's vocabulary.
    - **When**: today's deprecation warning + sunset date + removal date. All three.

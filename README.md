@@ -95,7 +95,7 @@ claude plugin install \
 For a new target repository, run `/polymath-core:init-project` or
 `/polymath-flows:run-workflow activateProject` first. It creates
 `.polymath/project.yaml`, maps known capability providers, and writes
-`docs/POLYMATH-ONBOARDING.md` so agents know the stack, conventions,
+`POLYMATH.md` at the repository root so agents know the stack, conventions,
 required tools, environment variables, recommended plugins, and first
 steps. See [`docs/POLYMATH-ONBOARDING.md`](docs/POLYMATH-ONBOARDING.md).
 

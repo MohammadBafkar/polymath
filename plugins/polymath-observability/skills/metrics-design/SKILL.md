@@ -7,10 +7,18 @@ description: Design service metrics using RED (services) and USE (resources) —
 
 > Pin RED metrics for services and USE metrics for resources. Output is a labeled metric list with a cardinality budget.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service needs metrics before going live.
 - An existing service has a hundred metrics and no one knows which to alert on.
+
+## Inputs
+
+- The service: its endpoints/jobs and the resources it depends on (DB, queue, cache, third parties) — required; read them from the code or service catalog when not given.
+- The SLOs the metrics must power (optional; from `polymath-sre:slo-design`) — absent: design RED/USE and mark the SLI mapping `[TBD: SLO]`.
+- The metrics backend (optional, default Prometheus conventions) and any series budget already in force.
 
 ## The two methods
 

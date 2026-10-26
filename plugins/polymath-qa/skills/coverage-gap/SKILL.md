@@ -7,6 +7,8 @@ description: Review a diff for missing test coverage; pairs every changed behavi
 
 > Read a code diff plus the existing test files and report which changed behaviors are unprotected. Pair-mode for `code-review` in workflows.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Workflow step before merging a PR (`reviewPR` invokes this as a fanout sibling).

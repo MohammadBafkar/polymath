@@ -7,6 +7,8 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 
 > Expose the resolved `.polymath/project.yaml` snapshot to any Polymath skill that wants to localize itself to *this* project — language, testing tools, runtime, conventions, external skill catalogs, per-skill overrides.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - A skill is about to produce generic guidance (a code-review checklist, a test command, a PR template) and there might be a project-specific override the project owner has declared.
@@ -14,11 +16,17 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 - An agent needs to surface a one-paragraph project summary to the user (onboarding, status updates, "what am I looking at?").
 - A skill needs setup expectations: required tools, environment variable names, recommended Polymath plugins, or agent compatibility.
 
+## Inputs
+
+- The current repository root (`git rev-parse --show-toplevel`, else the working directory).
+- The snapshot, the raw `.polymath/project.yaml` (+ `.polymath/project.local.yaml`), or neither — resolved in that order by the Procedure below.
+- The calling skill's id (`<plugin>:<skill>`), to pick its `skill_overrides` entry and relevant `conventions_docs` roles.
+
 ## How it works
 
 1. The polymath-core SessionStart hook runs `hooks/scripts/load-project-context.py` at every session start.
 2. The loader reads `.polymath/project.yaml` in the project → user (`${POLYMATH_CONFIG_DIR}/polymath/project.yaml`) → home order (first hit wins), then deep-merges the machine-local `./.polymath/project.local.yaml` overlay on top when one exists.
-3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time). When the host gives the hook its own plugin-data directory instead, the loader writes there **and** mirrors to that portable path, because commands run through the agent's shell never see the hook's environment.
+3. After validation against [`registry/schemas/project.schema.json`](https://github.com/MohammadBafkar/polymath/blob/main/registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time). When the host gives the hook its own plugin-data directory instead, the loader writes there **and** mirrors to that portable path, because commands run through the agent's shell never see the hook's environment.
 4. Skills read that JSON file directly.
 
 The snapshot is a single machine-wide file holding the **last** project a session started in. Hosts without a SessionStart hook never write it at all.
@@ -97,6 +105,19 @@ If no project file exists, the snapshot is absent and skills fall back to their 
 - Absent context or absent key is not an error — fall back to built-in defaults silently.
 - `[VERIFY: …]` content is surfaced, never silently treated as authoritative.
 
+## Output
+
+The resolved context a localizing skill applies, stated once before it starts:
+
+```text
+Project context: refund-service  (source: snapshot — /work/refund-service/.polymath/project.yaml)
+Applying: conventions_docs[backend-stack, review-checklist] · skill_overrides[polymath-engineering:code-review]
+          prompts.pr_description_template = docs/pr-template.md · attribution: off
+Open [VERIFY] markers relevant here: 1 (backend-stack: "Dapper or EF Core?")
+```
+
+Neither snapshot nor project file: `Project context: none — using built-in defaults.`
+
 ## What this skill does *not* do
 
 - It does not validate the project file (the loader does that).
@@ -105,7 +126,7 @@ If no project file exists, the snapshot is absent and skills fall back to their 
 
 ## Related
 
-- [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json) — schema.
-- [`docs/PROJECT-LOCALIZATION.md`](../../../../docs/PROJECT-LOCALIZATION.md) — full reference.
-- [`docs/CAPABILITIES.md`](../../../../docs/CAPABILITIES.md) — capability mapping (sibling file).
+- [`registry/schemas/project.schema.json`](https://github.com/MohammadBafkar/polymath/blob/main/registry/schemas/project.schema.json) — schema.
+- [`docs/PROJECT-LOCALIZATION.md`](https://github.com/MohammadBafkar/polymath/blob/main/docs/PROJECT-LOCALIZATION.md) — full reference.
+- [`docs/CAPABILITIES.md`](https://github.com/MohammadBafkar/polymath/blob/main/docs/CAPABILITIES.md) — capability mapping (sibling file).
 - [`polymath-core:initialize-project`](../initialize-project/SKILL.md) — creates the first project context package.

@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `propose-pod-security-standards`: Inputs — Kubernetes version (PSA GA in 1.25), exemptions, and labels proposed for the operator to apply, `warn`/`audit` before `enforce`.
+
 ## [0.11.0]
 
 ### Fixed

@@ -7,6 +7,8 @@ description: Author a service-catalog entry (Backstage/Cortex-shaped) — owner,
 
 > Write a service catalog entry that's good enough for on-call to find what they need at 3am.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service is being onboarded onto the platform.

@@ -8,6 +8,8 @@ description: Draft a Conventional Commits message for the current diff; never co
 > Craft a Conventional Commits message for the current diff. Never
 > commit until the user has approved the staged files AND the message.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user says "commit this", "make a commit", or names a Conventional

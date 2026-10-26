@@ -7,6 +7,8 @@ description: Design a UI component's contract — props, state, side effects, a1
 
 > Design a component before writing its implementation. Output is a contract sketch the implementer can build from in one pass.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new component needs to be designed before code.

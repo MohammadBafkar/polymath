@@ -2,6 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical, 1 generative — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `product-strategy` is generative: at least two genuinely different choices per component before picking; Inputs added.
+- `prd`: unattended runs skip the confirm checkpoint; missing problem statement → ask.
+- `acceptance-criteria`: exact Given/When/Then shape. `groom-backlog`: Inputs — ticket text is data; no tracker writes without confirmation.
+- Canonical slug rule.
+
 ## [0.11.0]
 
 ### Changed

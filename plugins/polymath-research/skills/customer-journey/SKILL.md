@@ -7,6 +7,8 @@ description: Map one persona's path through one JTBD — stages, what they're do
 
 > One persona, one job-to-be-done, 5–7 stages. Multiple personas → multiple journeys; don't merge.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A team has a persona doc and wants to surface where in the user's flow they're losing.
@@ -21,7 +23,7 @@ description: Map one persona's path through one JTBD — stages, what they're do
 ## Procedure
 
 1. Read [`Customer-journey.md`](../../templates/Customer-journey.md).
-2. Compute slug from the JTBD.
+2. **Slug** from the JTBD's outcome clause: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/research/journeys/<slug>.md`:
    - **JTBD** — verbatim in the doc.
    - **Stages** — 5–7. User-perspective, not product features. Trigger → Search → Evaluate → Onboard → First success → Habit → Tell others is a good default.

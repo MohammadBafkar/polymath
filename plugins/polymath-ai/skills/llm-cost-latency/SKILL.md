@@ -7,6 +7,8 @@ description: Cut LLM cost and latency — model routing/cascade, prompt caching,
 
 > LLM spend is dominated by tokens × model tier × call count. Most savings come from sending fewer tokens to a smaller model less often — measure the request first, then cut the biggest line.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - An LLM feature is too slow or too expensive, or you are sizing one before launch.
@@ -32,7 +34,25 @@ Not this when: this is a non-LLM service's latency/cost — that is `polymath-pe
 
 ## Output
 
-- A one-page plan: the per-request cost/latency breakdown, the model-routing/cascade decision, the input/output/call-count cuts with expected savings, caching/streaming plan, and the budget + tripwire.
+```text
+LLM cost/latency plan: support-reply drafting
+
+Per request (measured, 1,000-request sample):
+  input  6,200 tok (system 1,800 · retrieved 3,900 · history 500) × $3.00/M = $0.0186
+  output   450 tok × $15.00/M                                              = $0.0068
+  total  $0.0254/request · p95 latency 7.8 s (TTFT 1.1 s, generation 6.7 s)
+  largest line: retrieved context (61% of input cost)
+
+Cuts (expected)
+  1. retrieve top-4 not top-10 chunks (eval: answer quality 91% → 90%, within noise)   −$0.0070
+  2. prompt caching on the 1,800-token system prefix (hit rate 85% measured in staging)  −$0.0041
+  3. cap output at 300 tokens + "3 short paragraphs" format                             −$0.0023, −2.2 s p95
+  4. route "FAQ-match" requests (38%) to the small tier after eval-plan passes on that slice
+Streaming: on — first paint at TTFT
+Budget + tripwire: ≤ $0.015/request and p95 ≤ 5 s; alert at 120% of either for 1 h
+```
+
+Prices are the provider's current list prices, cited with the date checked; an unknown price is `[TBD: price]`, never remembered.
 
 ## Quality bar
 

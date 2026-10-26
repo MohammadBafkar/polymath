@@ -7,11 +7,20 @@ description: Design Terraform stack composition — module boundaries, state lay
 
 > One big Terraform state is a foot-cannon; one stack per resource is unmanageable. Pick the right granularity. Output: module + state layout, with the blast radius of each apply named.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Greenfield: setting up Terraform from scratch.
 - Brownfield: an oversized state is becoming a deployment risk.
 - Multi-environment / multi-account / multi-region rollout planning.
+
+## Inputs
+
+- The infrastructure in scope (required): existing Terraform/OpenTofu roots and state backends, or the greenfield resource list.
+- Environments, accounts/projects, and regions (required) — they multiply the state layout.
+- Who may apply what (optional): the access model per environment; absent, propose one and mark it `[VERIFY: access model]`.
+- Plan and state files can hold secrets in plaintext: read structure, never quote values.
 
 ## Procedure
 

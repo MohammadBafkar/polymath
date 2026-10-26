@@ -7,6 +7,8 @@ description: Investigate a Honeycomb trace by trace.id — surface the offending
 
 > Given a trace ID, build the chain that explains the failure: which span errored, which span is the *cause* (not just the surface), and which attributes characterize the failure.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 > **MCP binding (read before any tool call):** if your host has a `honeycomb` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
@@ -61,7 +63,7 @@ Offending span:
   duration_ms            = 5012
 
 Self-time by service:
-  stripe-client          5,012 ms (95%)   ← dominant
+  stripe-client          5,012 ms (96%)   ← dominant
   refund-worker          120 ms
   refund-api             60 ms
   refund-db              38 ms

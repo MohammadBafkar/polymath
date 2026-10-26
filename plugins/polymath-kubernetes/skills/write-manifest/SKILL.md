@@ -7,6 +7,8 @@ description: Write a Kubernetes Deployment + Service + PDB manifest with safe de
 
 > Author a Kubernetes manifest set that runs safely from day one.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new workload needs k8s manifests.

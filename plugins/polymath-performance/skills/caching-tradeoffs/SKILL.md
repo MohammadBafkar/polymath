@@ -7,11 +7,19 @@ description: Design a cache — what's cached, where (local / regional / shared)
 
 > "There are only two hard things …" The trade-offs are real. Output is the cache shape + an explicit decision on each of the five hard questions.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Adding caching to a new code path.
 - An existing cache misbehaves (high miss rate, stampedes, stale UI).
 - A perf budget needs cache help and you want to scope it correctly.
+
+## Inputs
+
+- The code path or endpoint to cache (required) and its read/write ratio, request rate, and current latency (measured — absent: `[TBD: measure before caching]`; a cache sized on guesses is a guess).
+- The staleness tolerance (required — a product decision): ask the owner; unattended, propose one marked `[VERIFY: staleness tolerance]` and show what changes if it is tighter.
+- The data's sensitivity (optional): per-user or tenant-scoped data changes what may be shared in a cache.
 
 ## Related skills
 

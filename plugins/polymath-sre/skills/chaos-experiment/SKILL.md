@@ -7,11 +7,19 @@ description: Design a chaos experiment — hypothesis, blast radius, abort crite
 
 > Design one chaos experiment. Output is the hypothesis + plan + abort criteria + observation.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A system is supposed to tolerate a failure that's never been tested.
 - An on-call wants to verify a runbook works before they need it.
 - A workflow needs a resilience signal before a major release.
+
+## Inputs
+
+- The system and the failure it is supposed to tolerate (required).
+- The SLO / steady-state signal that defines "fine" (required) — the abort criteria derive from it. Absent: stop and get it (or run `polymath-sre:slo-design`); an experiment without a steady state can't be judged.
+- The environment and the operator who will run it (required for anything beyond dev). Prod needs the service owner's sign-off.
 
 ## Procedure
 

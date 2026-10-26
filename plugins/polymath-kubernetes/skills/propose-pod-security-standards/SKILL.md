@@ -7,11 +7,20 @@ description: Propose Kubernetes Pod Security Standards (privileged/baseline/rest
 
 > Roll out PSS at the namespace level. Output is the labels to apply + the workloads that need fixes first.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A cluster has no Pod Security configured.
 - A team wants to graduate a namespace from `baseline` to `restricted`.
 - A workflow needs a security gate before workloads land in shared namespaces.
+
+## Inputs
+
+- The namespaces in scope (required) and read access to their workloads (`kubectl get pods -o yaml`, or the manifests in the repo).
+- The Kubernetes version (required — Pod Security Admission is GA from 1.25; older clusters need PodSecurityPolicy migration first).
+- Exemptions policy (optional): system namespaces and break-glass workloads, with owners.
+- Labelling a namespace is a cluster change: the skill proposes the `kubectl label` commands; the operator applies them, `warn`/`audit` mode before `enforce`.
 
 ## The three levels
 

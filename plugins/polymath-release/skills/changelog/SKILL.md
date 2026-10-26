@@ -9,6 +9,8 @@ description: Write a user-facing CHANGELOG entry under [Unreleased] in Keep-a-Ch
 > the current diff. Keep-a-Changelog format, mapped from Conventional
 > Commits.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user says "update the changelog", "add a changelog entry".

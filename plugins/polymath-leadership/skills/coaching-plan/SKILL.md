@@ -7,6 +7,8 @@ description: Build a coaching/growth plan for a report — assess current vs nex
 
 > Growth is not a pep talk; it's a small number of deliberate reps with feedback, plus someone spending their capital to put the person in the room. Coach the skill; sponsor the opportunity.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Building a development plan for a report/mentee, or a report has asked "how do I get to the next level?".
@@ -34,7 +36,26 @@ Not this when: you are writing an evaluation of past performance (`polymath-lead
 
 ## Output
 
-- A one-page growth plan: the current-vs-next-level gap (evidenced), the 1–2 chosen growth areas, coaching mode + concrete practice opportunities per area, the sponsorship actions, the feedback approach, and the check-in cadence.
+Written to the confirmed private path (never committed), in this shape:
+
+```text
+Growth plan: <report> — Senior → Staff (ladder: eng-ladder-v4, "Staff" column)
+
+Gap (evidenced)
+  ✓ leads designs within the team (RFC: payments-retry, 2026-Q2)
+  ✗ cross-team technical direction — no example this cycle (ladder: "sets direction across 2+ teams")
+
+Growth areas (1–2)
+  1. Cross-team direction            mode: coaching (GROW — they know the domain)
+     reps: own the ledger-integration RFC with the Ledger team; run its architecture review
+  2. Writing for executives          mode: directive (clear skill gap)
+     reps: draft the Q3 reliability exec-brief; manager edits with SBI feedback
+
+Sponsorship: put them on the platform-council agenda in August; name them as RFC owner in staff sync
+Feedback:    SBI after each rep, within 48 h
+Cadence:     monthly growth 1:1; revisit the plan at mid-cycle
+Owner:       <report> (manager supports)
+```
 
 ## Quality bar
 

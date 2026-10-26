@@ -7,11 +7,20 @@ description: Design env-promotion (dev → staging → prod) — one artifact pr
 
 > Promote the same artifact through environments rather than rebuilding per env. Pin the gates between stages.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A team is moving from "build per env" to "build once, promote".
 - Releases keep regressing because dev/staging differ from prod in ways that aren't tracked.
 - A workflow needs a deploy path before opening prod traffic.
+
+## Inputs
+
+- The environments in order (e.g. dev → staging → prod) and how each is deployed today (required).
+- The artifact type (container image, package, bundle) and where it is stored (registry/repository).
+- The gates the team already has, and who may approve a prod promotion (optional; absent → propose them, marked `[VERIFY: approver]`).
+- Promotions are side effects: the design shows the exact promote commands; nothing is promoted or deployed without the operator's go-ahead.
 
 ## Procedure
 

@@ -7,12 +7,20 @@ description: Triage an inbound GitHub issue — label, severity, area, ask for m
 
 > Triage one GitHub issue via the github MCP server. Output is structured triage actions, not opinions.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 > **MCP binding (read before any tool call):** if your host has a `github` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
 
 - An inbound issue lands and someone needs to decide what to do with it.
 - A workflow has a "triage backlog" step.
+
+## Inputs
+
+- The issue URL or `(owner, repo, number)` (required); several for a backlog pass.
+- Repo conventions (optional): label taxonomy, CODEOWNERS, issue templates — read them; never invent a label the repo doesn't have (propose it instead).
+- Whether to apply (optional, default: propose only). Labels, comments, assignment, and closing are visible writes — applied only on approval or an explicit "triage and apply".
 
 ## Procedure
 

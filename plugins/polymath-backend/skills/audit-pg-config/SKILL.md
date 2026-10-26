@@ -7,6 +7,8 @@ description: Audit Postgres server config — shared_buffers, work_mem, max_conn
 
 > Sanity-check a Postgres config against the workload. Output: parameter-by-parameter findings + concrete change suggestions.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A Postgres instance is slow, OOMing, bloating, or lagging replicas and the config is a suspect.

@@ -7,6 +7,8 @@ description: Design stream processing — windowing (tumbling/sliding/session), 
 
 > Streaming computation is batch computation where the data never stops and time is ambiguous. Decide event-time vs processing-time and your lateness policy first; everything else is detail.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Computing aggregations, joins, or pattern detection over an unbounded stream (Flink/Kafka Streams/Spark Structured Streaming).
@@ -33,7 +35,19 @@ Not this when: you are designing the topics/partitions/delivery the job consumes
 
 ## Output
 
-- A one-page design: event-time decision, window type+size, watermark + lateness policy, bounded-state + checkpoint plan, delivery semantics, join types with time bounds, and the reprocessing path.
+```text
+Stream processing design: payment fraud velocity (Flink)
+
+Time:        event-time (event.created_at); processing-time rejected — card retries arrive out of order
+Window:      sliding 10 min, slide 1 min, keyed by card_id
+Watermark:   bounded out-of-orderness 30 s; allowed lateness 2 min → late events update the window result;
+             past 2 min → side output `late-payments` (counted and alerted, not dropped silently)
+State:       keyed state TTL 15 min; RocksDB backend; checkpoints every 60 s to S3, exactly-once mode
+Sink:        Kafka transactional sink → fraud.velocity-alerts (exactly-once end to end)
+Joins:       stream–table enrichment with merchants (temporal join on merchant version at event time)
+CEP:         ≥ 5 declines then 1 approval within 10 min, per card_id → alert
+Reprocessing: savepoint, deploy the new job version in parallel from a log offset, compare outputs for 24 h, cut over
+```
 
 ## Quality bar
 

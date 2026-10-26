@@ -2,6 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `run-experiment`: `scripts/sample-size.py` — exact normal-approximation sizing for means and proportions, Bonferroni for A/B/n, duration rounded up to whole weeks with the 28-day cap (UNDERPOWERED verdict plus the detectable MDE), and a chi-square sample-ratio-mismatch check; unit-tested. The worked example now shows the script's 6,280/variant instead of Lehr's 6,400.
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+
 ## [0.11.0]
 
 ### Fixed

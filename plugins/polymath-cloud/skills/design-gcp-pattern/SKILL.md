@@ -7,12 +7,20 @@ description: Pick the right GCP primitive — compute (Cloud Run / GKE / Functio
 
 > Given a workload sketch, pick the GCP primitive with the *why*. Output: chosen primitive, runner-up, conditions to flip.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A PRD says "deploy on GCP" without naming services, or a workload is on the wrong GCP primitive.
 - Comparing GCP options for a new service before writing IaC.
 
 **Verify before you recommend.** Cloud catalogs change faster than this skill: confirm current availability, limits, and prices in the provider's own docs and pricing calculator, and show cost estimates as arithmetic with stated assumptions — never a bare monthly figure.
+
+## Inputs
+
+- A workload sketch (required): request pattern (RPS, peak vs idle), latency budget, longest task, state, data shape and access pattern, query model, consistency and region needs. Missing facts are asked for; in an unattended run, assume a stated value marked `[VERIFY: assumption]` and show how the choice flips if it's wrong.
+- Constraints (optional): region / data residency, compliance, existing GCP footprint and team skills, monthly budget.
+- Prices and limits come from the provider's current docs or pricing calculator, never from memory — a cost figure without its arithmetic and source is `[TBD: price]`.
 
 ## Procedure
 

@@ -2,6 +2,21 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- Style guide: **Mode contract** (deterministic / analytical / generative, with what each mode obliges), the calculator-script convention, one slug rule, two placeholder markers (`[TBD]`, `[VERIFY]`), and an unattended-run rule for confirm checkpoints.
+- `bin/new-skill.sh` scaffolds `**Mode:**`, `## Inputs`, and `## Quality bar`; a unit test proves a fresh scaffold passes the shape gate.
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical, 2 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `skill-author-critic` judges mode *fit* (prose arithmetic in a deterministic skill, a generative skill that converges on its first idea).
+- `validate-plugin` runs `tools/check-skill-shape.py` and the plugin's unit tests; `audit-marketplace` lists every skill's mode and checks unattended runs; its `AGENTS.md` link (dead once installed) is now a repo-root path.
+- `token-budget-report`: Inputs (marketplace checkout required; heuristic-only when the CLI is absent), output sorted heaviest-first.
+- `scaffold-component` keeps the root `POLYMATH.md` in sync when a component adds tools or env vars.
+
 ## [0.11.0]
 
 ### Changed

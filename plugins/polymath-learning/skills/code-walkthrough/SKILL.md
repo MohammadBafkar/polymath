@@ -7,6 +7,8 @@ description: Explain a piece of code in execution order — entry point, branche
 
 > Trace one execution path through real code. Output is a guided narrative the reader can follow with the source open beside them.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new contributor needs to understand how X works.

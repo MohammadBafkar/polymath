@@ -7,6 +7,8 @@ description: Design guardrails for an LLM feature — input validation, prompt-i
 
 > A model will be asked to do things you didn't intend and emit things you can't ship. Guardrails are the validation layer on both sides of the model — design them as code, not as prompt pleading.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Exposing an LLM to untrusted input (user text, retrieved docs, tool output) or letting it drive actions.
@@ -33,7 +35,24 @@ Not this when: you are auditing an existing LLM system end-to-end for security f
 
 ## Output
 
-- A one-page guardrail design: the trust-boundary map, input controls, the propose-vs-authorize split for actions, output validation/filtering, fail-closed behaviors, and what is logged/rate-limited.
+```text
+Guardrail design: support assistant (reads tickets + help center; can tag and refund tickets)
+
+Trust boundaries
+  user message        untrusted   → delimited <user_message>, never in the system prompt
+  retrieved articles  untrusted   → delimited <document>, lower trust than instructions
+  ticket bodies       untrusted   → indirect-injection risk (customers write them)
+
+Input controls: length cap 8k chars; strip zero-width + control chars; injection classifier (defense in depth only)
+Actions (model proposes → code authorizes)
+  tag_ticket          auto, allow-list of 12 tags, user's own permissions
+  refund_ticket       never from model output alone → human approval token required
+Exfiltration triangle: external image/link rendering disabled for answers that saw ticket text
+Output controls: JSON schema validation (retry once, then refuse); PII/secret filter; no URLs outside the help-center domain
+Fail closed: any trip → "I can't help with that here — I've routed this to a human agent." + ticket flagged
+Logging: every trip logged with the guardrail id; rate limit 30 requests/min/user
+Adversarial tests: handed to polymath-security:llm-security-review
+```
 
 ## Quality bar
 

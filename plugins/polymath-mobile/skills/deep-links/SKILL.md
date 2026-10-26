@@ -7,11 +7,20 @@ description: Design deep-link routing — universal/app links over custom scheme
 
 > Deep links bridge web + push + email into the app at the right screen. Output is a routing table + the fallback web URL + the verification story.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new app or major feature ships and the team needs to support inbound deep links.
 - Push payloads need a routing target (see `push-notifications`).
 - Marketing wants email links to open the app.
+
+## Inputs
+
+- The app's screens or routes that need inbound links (required) and the platforms (iOS, Android, both).
+- The web domain(s) you control (required for Universal/App Links — verification files are served from them).
+- Inbound channels (optional): push, email, ads, QR — deferred deep links matter for ads and QR to new users.
+- Link parameters are untrusted input: every route validates its parameters before acting, and no link triggers a state-changing action without user confirmation in the app.
 
 ## Mechanism choice
 

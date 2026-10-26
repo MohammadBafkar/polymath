@@ -9,6 +9,8 @@ description: Score a service's launch readiness across reliability, security, ob
 > *composes* the existing reliability, security, observability, and operability
 > skills into one scored readiness verdict with tracked remediation.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A service or major feature is approaching its first production launch (or a big traffic step-up).
@@ -51,9 +53,29 @@ Then:
 
 ## Output
 
-- File: `docs/readiness/<slug>-prr.md` — the scored dimensions with
-  evidence, the verdict, and the remediation table (item, owner, due-before).
-- One-line summary: the verdict and the count of blocking (Red) items.
+`docs/readiness/<slug>-prr.md`, in this shape:
+
+```text
+Production readiness: refund-service v2 (launch: 100% of EU merchants)
+
+Dimension        Score   Evidence
+Reliability      GREEN   SLO docs/slo/refund-latency.md (99.5%/28d); error-budget policy; rollback = flag off
+Security         AMBER   STRIDE model TM-12 — 2 mitigations owned, 1 unowned (T-07 webhook replay)
+Observability    GREEN   RED metrics + burn-rate monitors routed to payments on-call
+Operability      GREEN   runbook docs/runbooks/refund-5xx.md; on-call: payments rotation; rollback tested 2026-10-20
+Capacity         AMBER   load test reached 1.4× peak, extrapolated beyond (not tested at 2×)
+Data durability  RED     nightly backups exist; restore never tested; RPO/RTO undefined
+
+Verdict: NO-GO (1 Red)
+
+Remediation
+  item                                      owner             due-before
+  test a restore; set RPO 1 h / RTO 4 h     payments team     launch
+  own T-07 webhook replay mitigation        security team     launch
+  load test at 2× peak                      payments team     launch + 14 d
+```
+
+One-line summary: the verdict and the count of blocking (Red) items.
 
 ## Quality bar
 

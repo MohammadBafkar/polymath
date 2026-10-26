@@ -7,6 +7,8 @@ description: Choose a consistency model for a cross-node operation — strong/ev
 
 > "Consistent" is not one thing. Name the model you need per operation — most need less than strong, a few need more than eventual — and pay only for that.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A piece of data lives on / is read from more than one node, region, or service, and correctness depends on what readers see.
@@ -32,7 +34,23 @@ Not this when: the consistency boundary is inside one service's object model —
 
 ## Output
 
-- A one-page decision: per-operation consistency model, the CAP/PACELC choice with its business justification, idempotency/dedup mechanism, conflict-resolution strategy, and a consensus-vs-simpler recommendation.
+```text
+Consistency decision: refunds across eu + us regions
+
+Operation              Model         Why weaker won't do
+issue refund           strong        double refund = lost money; single-writer per payment (home region)
+refund status read     read-your-writes  merchant must see the refund they just issued
+merchant dashboard     eventual (≤ 30 s staleness)  aggregate totals; brief lag is fine
+
+CAP/PACELC: partition → refunds for a payment are unavailable outside its home region (C over A);
+            normal operation → home-region writes pay ~80 ms cross-region latency (PACELC: C over L)
+Idempotency: Idempotency-Key per refund request, dedup table keyed (merchant, key), 24 h retention
+Conflicts:   none for refunds (single writer); dashboard counters converge by recompute, not merge
+Consensus:   not needed — the managed DB's single-region primary is the serialization point
+Client sees: partition → 503 + Retry-After for refund writes in the non-home region; reads stay up
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-consistency.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

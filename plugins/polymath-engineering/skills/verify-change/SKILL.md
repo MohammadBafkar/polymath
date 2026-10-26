@@ -7,6 +7,8 @@ description: Run repository-appropriate verification (build, lint, type-check, t
 
 > Run the verification a human reviewer would run before approving the change, scoped to the changed files where possible.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - After `feature-dev` and `code-review`, before opening a PR.

@@ -7,6 +7,8 @@ description: Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/Trivy
 
 > Guardrails beat gates-by-review: encode the rule once and it enforces itself on every plan. Write policies that block the dangerous and warn the merely untidy — and make exemptions explicit, not silent.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Enforcing org rules (security, tagging, cost, naming) on infrastructure automatically.
@@ -33,7 +35,22 @@ Not this when: you are scanning application code/CI broadly — that is `polymat
 
 ## Output
 
-- A one-page policy design: the rule catalog by intent + severity, enforcement point(s) + tooling, the exemption/waiver mechanism, the policy test plan, and the advisory→blocking rollout.
+```text
+Policy-as-code design: AWS Terraform (Checkov + OPA/Conftest on plan JSON, in CI)
+
+Rule                                   Intent       Tier      Tool
+S3 buckets block public access         security     BLOCK     checkov CKV_AWS_53-56
+no 0.0.0.0/0 ingress on 22/3389        security     BLOCK     checkov CKV_AWS_24/25
+RDS storage encrypted                  security     BLOCK     checkov CKV_AWS_16
+mandatory tags: owner, cost-center     governance   WARN → BLOCK after 30 days     conftest policy/tags.rego
+instance types ≤ 2xlarge outside prod  cost         WARN      conftest policy/cost.rego
+
+Enforcement: on `terraform show -json` in the PR pipeline (pre-apply); prod applies re-check in the apply job
+Waivers:     .checkov.yaml / waivers.yaml entries need owner + reason + expiry (≤ 90 days); expired waiver fails CI
+Tests:       conftest verify with pass/fail fixtures per rule, run in CI on policy changes
+Rollout:     advisory 2 weeks (measure: 41 violations found) → burn down → blocking
+Report:      weekly violation trend + waiver inventory to the platform channel
+```
 
 ## Quality bar
 

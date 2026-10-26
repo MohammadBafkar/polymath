@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical, 2 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `deprecation-plan` (plus anti-patterns), `migration-guide`, `safe-rollout`: exact output shapes, artifact paths aligned with the workflows that call them, and missing dates/baselines marked instead of invented.
+- `commit` and `changelog` are deterministic; canonical slug rule in `pr`.
+
 ## [0.11.0]
 
 ### Changed

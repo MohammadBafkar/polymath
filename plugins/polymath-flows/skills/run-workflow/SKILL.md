@@ -7,6 +7,8 @@ description: Run a flows-lite workflow end-to-end; the skill drives the loop whi
 
 > Drive a flows-lite workflow from start to completion. This skill is the human-facing presenter; the deterministic state machine is the bundled `bin/polymath-flow` runner.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user types `/polymath-flows:run-workflow <name> ...`.
@@ -23,7 +25,7 @@ non-workflow surface skip the propose step in a non-interactive session; it neve
 applies to workflows.) Follow this contract:
 
 1. **Detect.** Compare the request to the injected `whenToUse` lines. To break ties
-   between colliding workflows you MAY read `data/workflow-detect.json` and weigh
+   between colliding workflows you MAY read `"${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/data/workflow-detect.json"` and weigh
    its `paths`/`intents` signals (e.g. a `docs/plans/**` path raises `reviewPlan`).
    Pick at most one primary candidate (plus an optional runner-up).
 2. **Propose (one line, no work yet).** e.g. *"This looks like the `reviewPlan`
@@ -104,11 +106,23 @@ The runner ships in this plugin's `bin/` (also on the shell `PATH` while the plu
    next arc is `incidentRetroToActions` (turn the postmortem into filed actions).
    Run it? (yes / not now)"*.
 
-## Reporting
+## Output
 
-- One line per step: status + key artifact.
-- Final line: `completed` or `paused` with `mustPass` failure summary.
-- If a workflow is paused, surface the resume command.
+One line per step as it completes, then a final status line:
+
+```text
+Run 2026-10-26T14-22-shipFeature-rate-limit-login  (shipFeature, 6 steps)
+  1/6 prd            complete   docs/prds/rate-limit-login.md
+  2/6 plan           complete   docs/plans/rate-limit-login.md
+  3/6 implement      complete   src/middleware/rate_limit.py (+2 files)
+  4/6 verify         complete   pytest: 48 passed
+  5/6 changelog      complete   CHANGELOG.md
+  6/6 pr             complete   docs/pr/rate-limit-login.md
+assert: completed — 4/4 mustPass checks passed
+```
+
+When paused: `assert: paused — mustPass <id> failed: <reason>` followed by
+`Resume: /polymath-flows:resume-workflow <run_id>`.
 
 ## Anti-patterns to avoid
 

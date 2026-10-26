@@ -2,6 +2,15 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `review-migration`: runs `squawk` first when available as the deterministic baseline; requires the Postgres major version; fixed the example — `ACCESS EXCLUSIVE` blocks reads *and* writes.
+- `db-schema`, `migration-plan`, `review-migration`: Inputs sections with missing-data behavior.
+- `api-versioning`: exact output shape.
+
 ## [0.11.0]
 
 ### Fixed

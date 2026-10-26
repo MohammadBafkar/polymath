@@ -7,12 +7,20 @@ description: Triage a Linear issue — classify type/priority/state, ask for mis
 
 > Triage one Linear issue via the linear MCP. Linear-specific: respects the team's workflow states (Backlog / Todo / In Progress / In Review / Done / Cancelled) and project-cycle awareness.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 > **MCP binding (read before any tool call):** if your host has a `linear` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
 
 - A Linear key (TEAM-123 with "Linear" in the prompt) or `linear.app/.../issue/TEAM-123` URL surfaces in the prompt.
 - Periodic backlog triage.
+
+## Inputs
+
+- The Linear key(s) or issue URL(s) (required), or a team + view for a backlog pass.
+- The team's workflow states, labels, and priority scale (read them from Linear; never invent a state or label).
+- Whether to apply (optional, default: propose only). Updates and comments are visible writes, made only on approval.
 
 ## Procedure
 

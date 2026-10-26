@@ -7,6 +7,8 @@ description: Design security gates into CI/CD — SAST, DAST, SCA/dependency, se
 
 > Security scanning that everyone ignores is theater. The skill is gating on what's exploitable, routing the rest to triage, and keeping false positives low enough that red means stop.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Adding or rationalizing security scanning in CI/CD.
@@ -38,7 +40,22 @@ Not this when: you are reviewing one diff by hand (`owasp-review`), triaging a s
 
 ## Output
 
-- A one-page pipeline design: scanner classes mapped to PR vs main stages, gate thresholds by severity/exploitability, the noise-control + suppression policy, the triage flow + SLAs, pipeline-hardening controls, and the metrics.
+```text
+DevSecOps pipeline: refund-service (GitHub Actions, Python + Terraform)
+
+Stage          Scanner (class)             Gate
+PR             gitleaks (secrets)          block on any verified secret
+PR             osv-scanner (SCA)           block: critical/high with a fix available AND reachable; else triage
+PR             semgrep, diff-only (SAST)   block: high-confidence injection/auth rules; else comment
+PR             checkov (IaC)               block: public buckets, open SGs, wildcard IAM
+main/nightly   semgrep full, trivy image   triage queue; block release on critical with known exploit
+nightly        ZAP baseline (DAST)         triage queue
+
+Noise:     baseline at adoption; suppressions need justification + 90-day expiry; dedupe by CVE/rule across tools
+Triage:    owner = CODEOWNERS of the path; SLA critical 7d · high 30d · medium 90d; override by AppSec lead, logged
+Pipeline:  OIDC to cloud (no long-lived keys); actions pinned by SHA; protected main; SLSA provenance on images
+Metrics:   MTTR by severity · escaped vulns per quarter · gate pass rate · false-positive rate
+```
 
 ## Quality bar
 

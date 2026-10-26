@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 1 analytical, 6 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- **`initialize-project` writes `POLYMATH.md` at the project root** (was `docs/POLYMATH-ONBOARDING.md`); a legacy file is moved there, never duplicated. Adds Inputs, an unattended-run rule, a fixed summary shape, and an offer to point `AGENTS.md`/`CLAUDE.md` at `POLYMATH.md`.
+
+### Fixed
+
+- `initialize-project` linked `registry/polymath-profiles.json`, which doesn't exist in an installed plugin. The profiles now ship in `skills/initialize-project/references/` and PROFILE-3 keeps the copy byte-identical to the registry.
+- `glossary`, `project-context`, `route` linked marketplace docs by relative path (dead once installed) — now GitHub URLs. `route` read the flows index via `../../../polymath-flows/…`, which breaks in versioned plugin caches; it now resolves through `polymath-flow` on `PATH`.
+- `conventions` and `glossary` gain the missing When to use / Inputs / Procedure sections; `glossary` defines skill modes and the `[TBD]`/`[VERIFY]` markers; `doctor` shows its exact report; `mcp-bridge` and `project-context` gain Inputs (and `project-context` an Output).
+
 ## [0.11.0]
 
 ### Changed

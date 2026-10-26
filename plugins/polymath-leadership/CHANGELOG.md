@@ -2,6 +2,15 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `coaching-plan`, `conflict-mediation`, `hiring-loop`: exact output shapes.
+- `conflict-mediation`: confidentiality rule; at least three options, one neither party proposed.
+- `hiring-loop`: candidate feedback and debrief notes stay in the ATS, never the repo.
+
 ## [0.11.0]
 
 ### Changed

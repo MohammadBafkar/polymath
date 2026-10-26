@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `assertion-quality`, `integration-contract`, `test-smell`: exact, ranked output shapes.
+- `test-strategy`: aligned output table.
+
 ## [0.11.0]
 
 ### Changed

@@ -7,6 +7,8 @@ description: Map a compliance framework (SOC 2 / GDPR / ISO 27001 / HIPAA) to co
 
 > Auditors don't accept intentions; they accept evidence. Translate each framework requirement into a control someone owns and an artifact that proves it runs — or it isn't real.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Preparing for SOC 2 / ISO 27001 / GDPR / HIPAA, or mapping a requirement to engineering work.
@@ -32,7 +34,24 @@ Not this when: you are finding vulnerabilities (`owasp-review`) or modeling thre
 
 ## Output
 
-- A control-mapping table: requirement → control → enforcement point → evidence artifact → owner → cadence, plus a gap list with remediation owners/dates.
+`docs/compliance/<framework>-controls.md`, in this shape:
+
+```markdown
+# SOC 2 (Security, Availability) — control mapping: payments platform
+
+Scope: prod AWS account 1234…, refund-service, ledger-db; excluded: marketing site (no customer data; separate account).
+
+| Requirement | Control | Enforced at | Evidence | Owner | Cadence |
+|---|---|---|---|---|---|
+| CC6.1 logical access | SSO + MFA for all prod access | Okta, AWS IAM Identity Center | Okta policy export; IAM IC config (IaC) | platform team | continuous; quarterly review |
+| CC6.2 access reviews | Quarterly access review | Okta + Jira ticket | signed review records in Jira PLAT-ACCESS-* | security team | quarterly |
+| CC8.1 change mgmt | PR review + CI gates before deploy | GitHub branch protection | branch-protection settings; CI run logs | eng managers | per change |
+
+## Gaps (remediation)
+- CC7.2 monitoring: no alert on IAM policy changes → CloudTrail + EventBridge alert · owner: platform team · due: [TBD: date agreed with owner]
+```
+
+Engineering input, not legal advice — scope interpretations go to the auditor.
 
 ## Quality bar
 

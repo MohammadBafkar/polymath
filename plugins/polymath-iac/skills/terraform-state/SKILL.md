@@ -7,6 +7,8 @@ description: Design Terraform state — remote backend, locking, state isolation
 
 > State is the most dangerous file in your infra: lose it, share it unlocked, or split it wrong and you reapply or destroy production. Design isolation and locking before scaling usage.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Setting up or restructuring Terraform state, backends, or workspaces.
@@ -18,7 +20,8 @@ Not this when: you are authoring a reusable module (`terraform-module`) or revie
 ## Inputs
 
 - Team size, environments, and the current state layout (monolithic? per-env?).
-- The cloud/backend available (S3+DynamoDB, GCS, Terraform Cloud, etc.).
+- The cloud/backend available (S3 with native lockfile locking, GCS, azurerm, HCP Terraform, …).
+- State files hold secrets in plaintext: read structure and addresses, never quote values.
 
 ## Procedure
 
@@ -32,7 +35,20 @@ Not this when: you are authoring a reusable module (`terraform-module`) or revie
 
 ## Output
 
-- A one-page state design: backend + locking choice, the state segmentation (per env/layer) with blast-radius rationale, drift-detection cadence + policy, the import/move/rm runbook, access controls, and the recovery plan.
+```text
+State design: payments infrastructure (AWS, 3 envs)
+
+Backend:  S3 bucket per env (tfstate-payments-{dev,stage,prod}), SSE-KMS, versioning on, use_lockfile = true
+Layout (one state per env × layer):
+  envs/prod/network/   VPC, subnets, NAT            apply: platform team, 2 approvers
+  envs/prod/data/      RDS, ElastiCache, S3 buckets  apply: platform team, 2 approvers, prevent_destroy on stores
+  envs/prod/app/       ECS services, ALB rules, SQS  apply: payments team
+  (dev and stage mirror the tree with their own buckets and credentials)
+Drift:    nightly `terraform plan -refresh-only` per state → alert on any diff; policy: codify within 2 business days or revert
+Surgery:  import {} / moved {} / removed {} blocks in a reviewed PR; CLI state mv/rm only after `terraform state pull > backup.tfstate`
+Access:   prod state readable by the CI role and 3 named admins (state contains secrets); no human write outside CI
+Recovery: restore from S3 object version; runbook docs/runbooks/terraform-state-restore.md, tested quarterly
+```
 
 ## Quality bar
 

@@ -7,6 +7,8 @@ description: Review a design sketch against SOLID, GoF, and architectural patter
 
 > Patterns are a vocabulary for trade-offs, not a checklist to maximize. The skill is choosing the one that removes the most pain — and refusing the ones that only add indirection.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A design sketch or module structure needs a second pass: which pattern fits, what's over-engineered, where SOLID is being violated.
@@ -38,7 +40,28 @@ Not this when: you are reviewing a concrete diff for bugs and line-level quality
 
 ## Output
 
-- A one-page review: SOLID findings keyed to specific modules, recommended patterns each tied to the pain it removes, an over-engineering/anti-pattern list, and the trade-off per recommendation.
+```text
+Design review: notification module
+
+Pain: every new channel edits NotificationService.send() (a 9-branch switch) — shotgun surgery.
+
+SOLID
+  OCP  NotificationService.send()           — switch on channel → Strategy per channel
+  DIP  notifications/domain imports twilio  — domain depends on infrastructure → port + adapter
+  SRP  ok · LSP ok · ISP ok
+
+Recommend
+  Strategy (ChannelSender per channel)  removes the switch · cost: one interface, 4 small classes
+  Adapter (TwilioSmsSender)             isolates the vendor · cost: one indirection layer
+
+Don't add
+  Abstract factory for senders — one construction path today; a dict of senders is enough
+  Observer bus — no second subscriber exists yet
+
+Anti-patterns: god object NotificationService (templates + routing + sending) → split routing out
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-patterns.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

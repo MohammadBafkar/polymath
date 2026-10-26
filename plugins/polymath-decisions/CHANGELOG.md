@@ -2,6 +2,18 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `tradeoff-matrix`: `scripts/weigh.py` — per-cell `w × s = v` math, totals, ranking, non-differentiating criteria, and the full ±1 sensitivity sweep over every weight and score (guessed scores flagged); unit-tested. The template example reproduces exactly.
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `cynefin-frame`: Inputs; classification without evidence is reported as Confusion.
+- Canonical slug rule (`daci`, `evidence-ledger`, `tradeoff-matrix`).
+
 ## [0.11.0]
 
 ### Fixed

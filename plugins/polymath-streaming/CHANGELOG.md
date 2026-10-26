@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- All four skills show an exact output shape; `streaming-design` sizes partitions with an explicit formula.
+
 ## [0.8.0]
 
 Data & streaming engineering: streaming topology + delivery semantics, ETL/ELT pipelines, dimensional/lakehouse modeling, stream processing.

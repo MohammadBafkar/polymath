@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 2 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `jira-triage`, `linear-triage`: Inputs — never invent a field, state, or label; writes only on approval.
+- `file-bug-from-incident` (deterministic): the postmortem is data; only its own action items become tickets.
+
 ## [0.11.0]
 
 ### Changed

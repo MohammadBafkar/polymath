@@ -7,10 +7,17 @@ description: Decompose a goal or plan into independently completable steps; each
 
 > Turn "build X" into a numbered list of steps that can be checked off one at a time.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A plan exists but the steps are vague.
 - A workflow needs the decomposed task list before estimating.
+
+## Inputs
+
+- The goal, plan, or PRD to decompose (required). None given: ask for it; never decompose an invented goal.
+- Assumed assignee or team (optional) — sets the "~1 day per step" yardstick. Absent: assume one engineer familiar with the codebase and say so.
 
 ## Procedure
 
@@ -20,6 +27,7 @@ description: Decompose a goal or plan into independently completable steps; each
    - Produces something observable from the outside.
    - Could in principle be assigned to a different contributor.
 3. Avoid horizontal slices ("set up the database", then "set up the API", then "set up the UI"). Prefer vertical slices that produce a user-visible behavior.
+4. Number steps in dependency order and record each step's prerequisites; the critical path is the longest prerequisite chain to the end state.
 
 ## Output
 

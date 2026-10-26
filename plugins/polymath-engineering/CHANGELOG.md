@@ -2,6 +2,15 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `verify-change` is deterministic (fixed order, fixed status vocabulary, real counts).
+- `feature-dev`: exact summary shape; in an unattended run, missing acceptance criteria fail the step instead of being invented.
+- `tech-debt-management`: one ranking formula (interest ÷ principal × roadmap factor, fixed tie-break) and an exact register shape.
+
 ## [0.11.0]
 
 ### Changed

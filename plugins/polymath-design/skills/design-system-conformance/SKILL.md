@@ -7,6 +7,8 @@ description: Check a UI surface against the project's design system — tokens, 
 
 > Walk a UI surface against the project's design system. Output is per-deviation findings: what bespoke value should become a token, or which off-system component should be replaced.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new screen is being built and the team wants to keep design drift down.

@@ -7,6 +7,8 @@ description: Review and tighten prose in a Markdown artifact for a target tone (
 
 > Make prose shorter, clearer, and consistent in tone — but never at the cost of dropping a constraint, contradicting the source, or smoothing over an honest "I don't know."
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A draft of a PR description, RFC, runbook, postmortem, ADR, or release-notes block needs to be tightened before publishing.
@@ -65,8 +67,18 @@ description: Review and tighten prose in a Markdown artifact for a target tone (
 ## Output
 
 - File: `<path>.edited.md` (default) or `<path>` (in-place) per user request.
-- One-line summary: "edited <path>.edited.md (source N lines, output M lines, Δ -X%)."
-- Per-paragraph cut report.
+- The summary and per-paragraph cut report, in this shape:
+
+```text
+edited docs/rfcs/rate-limit.edited.md (source 84 lines, output 61 lines, Δ -27%)   tone: terse   budget: 75% → met
+
+¶1 Summary        -35%  dropped filler ("In order to", "it is the case that"); no information lost
+¶2 Motivation      -8%  kept all 3 numbers + the incident link verbatim; cut connective tissue only
+¶3 Quotation        0%  skipped — block quotation
+¶4 Design         -41%  collapsed 3 parallel sentences; REVERSED one cut that dropped "per IP, not per account" (constraint)
+¶5 Risks           -4%  hedge "approximately 80%" kept (carries information)
+Preserved: frontmatter, ## Unresolved questions (preserve_sections), 2 code blocks byte-for-byte
+```
 
 ## Workflow validation
 

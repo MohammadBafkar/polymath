@@ -7,6 +7,8 @@ description: Detect test smells/anti-patterns — over-mocking, fragile assertio
 
 > Read an existing test suite the way a reviewer would — find the tests that will rot, mislead, or flake, and say how to fix each.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A test suite is slow, flaky, or brittle and you want the *causes*, not just a green/red.
@@ -36,6 +38,33 @@ This scans *existing* tests. It does not write tests (`polymath-qa:unit-tests`),
 2. Name the layer the test *should* live at (unit / integration / e2e) if misplaced.
 3. Recommend a concrete refactor per finding (introduce a seam, narrow the assertion, hoist setup, remove the sleep).
 4. Rank findings by blast radius (flake-causing > brittle > slow > cosmetic).
+
+## Output
+
+Findings ranked by blast radius (flake-causing > brittle > slow > cosmetic), then file order:
+
+```text
+Test smells: tests/ (38 tests, 5 findings)
+
+1. FLAKY TIMING      tests/test_worker.py::test_job_retries  (line 22: time.sleep(2))
+   layer: unit (correct)
+   fix:   inject a fake clock; assert on the scheduled retry time, not wall time
+
+2. INTERDEPENDENCE   tests/test_cart.py::test_checkout  (reads the cart created by test_add_item)
+   fix:   create the cart in this test's own fixture
+
+3. OVER-MOCKING      tests/test_refunds.py::test_refund  (mocks RefundRepository, an internal collaborator)
+   layer: should be integration (real repository on a test DB)
+   fix:   replace the mock with the repository on testcontainers postgres
+
+4. FRAGILE           tests/test_report.py::test_render  (asserts the whole 2 KB HTML string)
+   fix:   assert the three totals and the title only
+
+5. SLOW SETUP        tests/conftest.py::db  (migrates a fresh DB per test, ~1.4 s each)
+   fix:   session-scoped migration + per-test transaction rollback
+
+No smell: 33 tests.
+```
 
 ## Quality bar
 

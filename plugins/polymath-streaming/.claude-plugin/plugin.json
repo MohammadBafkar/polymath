@@ -1,6 +1,6 @@
 {
   "name": "polymath-streaming",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Data & streaming engineering craft: streaming topology + delivery semantics, data pipelines (ETL/ELT), data modeling (dimensional/lakehouse), and stream processing.",
   "license": "MIT",
   "author": {

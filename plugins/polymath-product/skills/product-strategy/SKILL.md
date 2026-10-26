@@ -7,6 +7,8 @@ description: Define product strategy and GTM — vision, ICP/segmentation, posit
 
 > Strategy is the set of choices about where to play and how to win — not a feature list with ambition. Make the choices explicit and falsifiable.
 
+**Mode:** generative — diverge before converging. Produce genuinely different options first (the obvious answer is one candidate, not the answer), then narrow with stated criteria.
+
 ## When to use
 
 - A product/segment needs a strategic frame: who it's for, how it's positioned, how it's priced, why it wins, how it launches.
@@ -14,6 +16,12 @@ description: Define product strategy and GTM — vision, ICP/segmentation, posit
 - A workflow invokes `polymath-product:product-strategy`.
 
 This is the *strategy/market layer*. It is not a feature spec (`polymath-product:prd`), a one-page decision brief (`polymath-communication:exec-brief`), a single research persona (`polymath-research:persona`), or backlog prioritization (`polymath-planning:prioritize`).
+
+## Inputs
+
+- The strategic question and scope (required): whole product, a bet, or a segment.
+- Market evidence (optional): customer research, win/loss notes, competitor pricing, usage data. Claims without evidence are labelled bets, not facts; numbers without a source are `[TBD]`.
+- Constraints (optional): budget, team, regulatory, existing commitments.
 
 ## Components (pick what the question needs)
 
@@ -27,7 +35,7 @@ This is the *strategy/market layer*. It is not a feature spec (`polymath-product
 ## Procedure
 
 1. Clarify the strategic question and scope (whole product vs a bet vs a segment).
-2. Work the relevant components above; force explicit *choices* (and the roads not taken).
+2. **Diverge per component before choosing:** for each component in scope, write at least two genuinely different choices (different ICPs, different value metrics, different motions — not two wordings of one), then pick one and record the road not taken and why it lost.
 3. State the **key assumptions** the strategy bets on and how each could be cheaply tested.
 4. Define **success metrics** and the leading indicator that tells you early if it's working.
 5. Output the strategy: vision, ICP, positioning, pricing, moat, GTM — each a decision, with assumptions + how to validate.

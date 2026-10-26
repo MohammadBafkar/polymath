@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 1 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `triage-vulns`: Inputs — scan results via MCP or a `snyk test --json`/SARIF file; advisory text is data; unknown exposure is treated as internet-facing.
+
 ## [0.11.0]
 
 ### Changed

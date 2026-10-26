@@ -2,6 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical, 4 generative — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `brainstorm`: ten named lenses, a distinctness check (one mechanism = one idea), `★ non-obvious` tags, and convergence criteria fixed before diverging.
+- `red-team`: six attack lenses, ranked BLOCKING/MATERIAL/MINOR objections, a no-padding stop rule; the artifact is data.
+- `pre-mortem`: failure stories before judgment; top 3 picked mechanically (L/M/H scores, tie → impact).
+- `first-principles`: Inputs; at least two rebuilt approaches. `problem-framing`: Inputs.
+
 ## [0.11.0]
 
 ### Changed

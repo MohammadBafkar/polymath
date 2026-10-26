@@ -7,12 +7,20 @@ description: Triage a Jira issue — fetch via MCP, classify type/priority/compo
 
 > Triage one Jira issue via the jira MCP server.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 > **MCP binding (read before any tool call):** if your host has a `jira` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
 
 - A Jira reference (PROJ-123 or a browse URL) is in the prompt.
 - The user says "triage the backlog" or "look at this ticket".
+
+## Inputs
+
+- The Jira key(s) or browse URL(s) (required), or a JQL filter for a backlog pass.
+- The project's triage conventions (optional): priority scheme, components, labels — read from the project and `.polymath/project.yaml` `tracker`; never invent a field value the project doesn't have.
+- Whether to apply (optional, default: propose only). Field changes and comments are visible writes, made only on approval.
 
 ## Procedure
 

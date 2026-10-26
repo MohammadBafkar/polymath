@@ -7,6 +7,8 @@ description: Design authentication/authorization — OAuth2/OIDC flow choice, JW
 
 > Authentication proves who; authorization decides what. Conflating them, or hand-rolling either, is where breaches live. Pick standard flows and name where the token can be revoked.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Designing login, API auth, service-to-service auth, or an authorization model.
@@ -33,7 +35,28 @@ Not this when: you are threat-modeling a whole system (`stride-threat-model`) or
 
 ## Output
 
-- A one-page design: authN flow(s) per client, token/session strategy with TTL + revocation, the authZ model (RBAC/ABAC) and enforcement point, SSO mapping, secret rotation, and the threat→control table.
+```text
+Auth design: merchant dashboard + public refunds API
+
+AuthN
+  web dashboard (SPA)   OIDC Authorization Code + PKCE via a backend-for-frontend; HttpOnly, Secure, SameSite=Lax session cookie
+  public API clients    OAuth2 Client Credentials; JWT access token, 10 min TTL
+  service-to-service    mTLS (mesh identities); no shared secrets
+Tokens
+  access JWT: RS256 pinned, iss/aud/exp validated; revocation = 10 min TTL + jti denylist for emergencies
+  refresh: rotated on every use; reuse revokes the whole family
+AuthZ
+  model: RBAC for staff (admin, support, viewer) + ownership check (ABAC) on every merchant resource
+  enforced at: the API resource handlers — never from client-supplied roles
+SSO: Okta via OIDC; groups → roles mapping in config; JIT provisioning; deprovision via SCIM
+Secrets: client secrets in Vault, rotated 90d; admins require WebAuthn passkeys
+
+Threat → control
+  token theft           short TTL + refresh rotation + DPoP for the refunds API
+  replay                jti + exp; nonces on the OIDC flow
+  privilege escalation  server-side role check; role changes audited and alerted
+  IDOR                  ownership check on every merchant_id path parameter
+```
 
 ## Quality bar
 

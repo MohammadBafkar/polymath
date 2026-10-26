@@ -7,6 +7,8 @@ description: Design an on-call program — rotation + escalation, alert quality/
 
 > A healthy on-call is measured by how often it pages and whether each page was worth waking someone. Design for few, actionable, runbook-backed pages — then protect the humans in the rotation.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Standing up or fixing an on-call rotation, or alert fatigue/burnout is showing.
@@ -33,7 +35,23 @@ Not this when: you are running a live incident (`polymath-incident:incident-tria
 
 ## Output
 
-- A one-page on-call design: rotation + coverage model, escalation policy with ack timeouts, the alert-quality bar + audit outcome, runbook-coverage requirement, toil budget, handoff format, and the operational-review cadence.
+`docs/oncall/<team>.md`, in this shape:
+
+```text
+On-call design: payments team (8 engineers, 24×7, EU + US)
+
+Rotation:     follow-the-sun — EU 07–19 CET, US 07–19 ET; weekly shifts; primary + secondary
+Escalation:   primary ack ≤ 5m → secondary ≤ 10m → EM ≤ 15m; sev ladder: docs/oncall/severity.md
+Alert audit:  42 alerts → 11 page (SLO burn, symptom), 19 → ticket, 12 deleted
+Target:       ≤ 2 pages per shift; every page actionable
+Runbooks:     11/11 paging alerts link a runbook (3 written in this pass)
+Toil budget:  ≤ 30% of on-call time; overflow → automation backlog label `toil`
+Handoff:      15m at shift change — open incidents, watch-items, deploys in flight
+Review:       weekly ops review — pages/shift, noisiest 3 alerts, toil items, incident actions
+Sustainability: [TBD: comp policy owner] — time back after any night page
+```
+
+Counts and targets come from the alert inventory you were given; without one, the audit line reads `[TBD: alert inventory]`.
 
 ## Quality bar
 

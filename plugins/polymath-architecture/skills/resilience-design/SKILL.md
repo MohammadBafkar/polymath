@@ -7,6 +7,8 @@ description: Design resilience for a dependency call path — timeout, retry wit
 
 > Every remote call fails eventually. Resilience is deciding what happens then — on purpose, with numbers — instead of discovering it during an incident.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A service calls a dependency (DB, API, queue) and you need the failure behavior specified, not implicit.
@@ -34,8 +36,26 @@ Not this when: you are setting the latency/throughput target itself — that is 
 
 ## Output
 
-- A one-page spec: per-call timeout, retry policy (attempts, backoff, jitter, idempotency basis), circuit-breaker thresholds, bulkhead sizing, fallback behavior, load-shed rule.
-- The failure-mode → response table.
+```text
+Resilience spec: checkout → payments-api (user-blocking, POST /charges)
+
+Timeout:      1.2 s (payments p99 = 900 ms) within the 3 s request deadline; remaining deadline propagated
+Retry:        2 attempts max, exponential backoff 100 ms × 2ⁿ with full jitter; only with Idempotency-Key;
+              retry on 408/429/503 (honor Retry-After) and connect errors; never on other 4xx;
+              retries only in the payments client (not the gateway); retry budget ≤ 10% of requests
+Breaker:      open at ≥ 50% errors over 20 requests in 10 s; half-open after 30 s with 5 probes
+Bulkhead:     payments pool 40 connections (of 200 total); separate from inventory's 20
+Fallback:     breaker open → "payment temporarily unavailable, your cart is saved" (clean 503)
+Load shed:    edge concurrency limit 500; above → 429 + Retry-After: 2
+
+Failure mode          Response                          User sees
+timeout               retry once with same key          slower checkout (≤ 2.5 s)
+5xx                   retry, then breaker counts it     error after retries
+connection refused    no retry after 2nd; breaker       fallback message
+slow (p99 > 2 s)      timeout fires at 1.2 s            fallback message
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-resilience.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

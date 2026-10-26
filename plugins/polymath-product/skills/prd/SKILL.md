@@ -7,6 +7,8 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
 
 > Draft a Product Requirements Document. The output is a single Markdown file at `docs/prds/<slug>.md` that fills in the Polymath PRD template.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The user says "draft a PRD", "write a spec", or "we need requirements for X".
@@ -17,17 +19,19 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
 
 - Title (required) — short headline for the feature.
 - Scope (optional, default `small`) — `small` or `medium`.
-- Problem statement (required) — one-paragraph description from the user.
+- Problem statement (required) — one-paragraph description from the user. Missing: ask; never draft a PRD around an invented problem.
 - Users / context (optional) — known personas, existing PRDs, ADRs.
 
 ## Procedure
 
 1. Read [`PRD.md`](../../templates/PRD.md).
-2. Compute a slug from the title: lowercase, kebab-case, no special characters.
+2. **Slug** from the title: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. **Summary-first checkpoint.** Before writing the document, show a
    one-screen skeleton — problem in one sentence, primary user, the three
    goals, any locked decisions — and confirm direction before the full
    draft.
+   Unattended run (workflow step, subagent): nobody can confirm — skip the
+   wait, write the document, and open the summary with the skeleton.
 4. Create `docs/prds/<slug>.md` if it does not exist; otherwise update in place after surfacing the diff.
 5. Fill each section:
    - **Problem** — restate the user's pain in their words first, then in product terms.

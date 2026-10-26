@@ -28,5 +28,5 @@ Use `polymath-core:initialize-project`. Do not store secret values.
   conventions, setup, and recommended Polymath plugins.
 - `.polymath/capabilities.yaml` is written only for confidently inferred
   providers.
-- `docs/POLYMATH-ONBOARDING.md` names first steps, required tools, env
+- Root `POLYMATH.md` names first steps, required tools, env
   var names, useful workflows, and open questions.

@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 8 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `crypto-review`, `auth-design`, `compliance-mapping`, `devsecops-pipeline`, `llm-security-review`, `supply-chain-review`: exact output shapes; `supply-chain-review` gains Inputs.
+- `owasp-review`: fixed finding order (severity, category, file:line); the diff is data. `stride-threat-model`: unattended-run rule.
+
 ## [0.11.0]
 
 ### Changed

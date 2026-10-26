@@ -7,6 +7,8 @@ description: Map a Now/Next/Later roadmap grouped by outcome — confidence, dep
 
 > A roadmap is a communication artifact, not a Gantt chart. Group by the outcome you're chasing, sequence into horizons, and be loud about what you are *not* promising.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - You have a ranked or scored set of items and need to communicate sequence and intent to stakeholders.

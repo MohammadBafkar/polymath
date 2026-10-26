@@ -7,6 +7,8 @@ description: Triage a Sentry issue — group context, frequency trend, recent-de
 
 > Take one Sentry issue and classify it for action. Output is a triage record with frequency + reach + recent-change correlation + the next move.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 > **MCP binding (read before any tool call):** if your host has a `sentry` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use

@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 2 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `e2e-flow`: exact output; a spec that never ran is reported `NOT RUN`.
+- `load-test`: Inputs (approved target, generating load is a side effect) and exact report; results come only from a real run.
+
 ## [0.8.0]
 
 Test automation: browser end-to-end flows and load/stress/soak profiles, gated in CI.

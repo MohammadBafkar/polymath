@@ -102,9 +102,11 @@ class PortableExportTests(unittest.TestCase):
             dispatcher = out / "_polymath" / "hooks" / "run-hook.py"
             self.assertTrue(dispatcher.is_file(), "missing hook dispatcher")
             # An event with no registered hook is a successful no-op.
+            # Hooks read their payload from stdin: pass an explicit empty one so
+            # the test never blocks on an inherited, never-closed stdin.
             noop = subprocess.run(
                 ["python3", str(dispatcher), "NoSuchEvent"],
-                cwd=td, capture_output=True, text=True,
+                cwd=td, capture_output=True, text=True, input="",
             )
             self.assertEqual(noop.returncode, 0, noop.stderr)
             # A registered SessionStart hook actually executes and does its work
@@ -112,7 +114,7 @@ class PortableExportTests(unittest.TestCase):
             data = pathlib.Path(td) / "data"
             ran = subprocess.run(
                 ["python3", str(dispatcher), "SessionStart"],
-                cwd=td, capture_output=True, text=True,
+                cwd=td, capture_output=True, text=True, input="",
                 env={**os.environ, "POLYMATH_PROJECT_DIR": str(REPO_ROOT),
                      "POLYMATH_DATA_DIR": str(data)},
             )

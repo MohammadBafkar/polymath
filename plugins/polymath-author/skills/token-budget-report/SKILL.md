@@ -7,11 +7,18 @@ description: Check listing-token cost per plugin via claude plugin details; flag
 
 > Produce a budget table that's good enough to merge a PR against. Output is per-plugin token cost plus the top offenders to trim.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - A PR adds or modifies skills/commands and a reviewer wants to confirm the budget impact.
 - A scheduled marketplace health check.
 - A new plugin needs measurement before it lands.
+
+## Inputs
+
+- A Polymath marketplace checkout (required) — the directory with `.claude-plugin/marketplace.json`. None: say so and stop; the budget tools live there.
+- Optional: one plugin to report on (default: all). The `claude` CLI for canonical numbers — absent, report the heuristic only and label the canonical column `N/A (claude CLI not installed)`.
 
 ## Procedure
 
@@ -30,12 +37,12 @@ Heuristic (tools/token-report.py budget): 3,124 tok
 Canonical  (claude plugin details):      5,636 tok
 Total target (250 × plugin_count, ≥1500):  7,250 tok      [ok]
 
-Per-plugin (canonical):
+Per-plugin (canonical), heaviest first:
+  polymath-kubernetes            345  ← heaviest
+  polymath-writing               274
   polymath-core                  194
   polymath-product               187
   …
-  polymath-kubernetes      345  ← heaviest
-  polymath-writing               274  ← second heaviest
 
 Plugins approaching cap (≥ 300 tok):
   polymath-kubernetes  345

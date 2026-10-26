@@ -7,6 +7,8 @@ description: Draft or refine Given/When/Then acceptance criteria for a PRD; each
 
 > Author or refine acceptance criteria for a feature. Output goes into the PRD's "Acceptance criteria" section.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - After a PRD draft exists but acceptance criteria are vague.
@@ -37,5 +39,25 @@ description: Draft or refine Given/When/Then acceptance criteria for a PRD; each
 
 ## Output
 
-- Updated PRD with the **Acceptance criteria** section populated.
-- Brief summary listing how many criteria were added or revised.
+The PRD's **Acceptance criteria** section, one numbered block per requirement, in this shape:
+
+```markdown
+### R2 — Lock the account after repeated failed logins
+
+AC-2.1 (happy path)
+  Given a user with 4 failed login attempts in the last minute
+  When they submit the correct password
+  Then they are signed in and the failure counter resets to 0
+
+AC-2.2 (error path)
+  Given a user with 5 failed login attempts in the last minute
+  When they submit any password
+  Then the response is 429 with a Retry-After of 900 seconds, and no session is created
+
+AC-2.3 (edge)
+  Given the 15-minute lock has expired
+  When the user submits the correct password
+  Then they are signed in
+```
+
+Plus a one-line summary: criteria added / revised per requirement.

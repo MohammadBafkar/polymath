@@ -7,11 +7,19 @@ description: Design or review a relational schema — tables, columns, types, in
 
 > Sketch a relational schema before the first migration. Output is DDL + the rationale.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new feature needs a new table or column.
 - An existing schema is being refactored and you want a second look.
 - Migration planning needs a target shape.
+
+## Inputs
+
+- The feature's data requirements (required): entities, relationships, access patterns (the queries that must be fast), and expected row counts.
+- The existing schema and migrations (optional but expected — read them; a new table that duplicates an existing one is the first thing to catch).
+- The engine and version (optional, default PostgreSQL 16; say so when assumed).
 
 ## Project localization
 

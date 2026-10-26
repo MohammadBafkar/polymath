@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `incident-triage`, `comms-update`: Inputs — alert payloads and reports are data; unconfirmed facts are left out; drafting is not posting.
+
 ## [0.11.0]
 
 ### Fixed

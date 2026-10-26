@@ -7,6 +7,8 @@ description: Write an Architecture Decision Record (Michael Nygard format) to do
 
 > Capture a decision so future contributors know what was decided and why. ADRs are immutable once accepted — supersede them instead of editing.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A decision is being made that future readers will need to understand.
@@ -21,7 +23,7 @@ description: Write an Architecture Decision Record (Michael Nygard format) to do
 ## Procedure
 
 1. Find the repo's existing ADR directory first (`docs/adrs/`, `docs/adr/`, `doc/architecture/decisions/`, an `.adr-dir` file from adr-tools) and use it; create `docs/adrs/` only if none exists. Determine the next number: the highest existing `NNNN-` prefix + 1 (default 0001).
-2. Compute slug from the title.
+2. **Slug** from the title: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Read [`ADR.md`](../../templates/ADR.md).
 4. Draft `docs/adrs/NNNN-<slug>.md`:
    - **Status** — proposed (default) or accepted, depending on context.

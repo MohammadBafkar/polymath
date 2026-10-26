@@ -7,6 +7,8 @@ description: Run a DACI decision (Driver, Approver, Contributors, Informed) for 
 
 > One Approver, one Driver, named Contributors, named Informed. Forces clarity about who's actually deciding.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A decision involves more than one team or function.
@@ -22,7 +24,7 @@ description: Run a DACI decision (Driver, Approver, Contributors, Informed) for 
 ## Procedure
 
 1. Read [`DACI-decision.md`](../../templates/DACI-decision.md).
-2. Compute the slug.
+2. **Slug** from the decision question: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Write `docs/decisions/<slug>.md`:
    - **Driver** — one person. Not the Approver. Drives the process; doesn't get to decide.
    - **Approver** — one person (or one role). If you can't name a single Approver, the situation isn't decision-ready yet — escalate framing.

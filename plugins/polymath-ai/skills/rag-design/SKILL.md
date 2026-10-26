@@ -7,6 +7,8 @@ description: Design a retrieval-augmented generation pipeline — chunking, embe
 
 > Design a RAG pipeline. Output is the architecture plus the cuts you'd make first if quality is low.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new feature needs LLM answers grounded in a corpus.

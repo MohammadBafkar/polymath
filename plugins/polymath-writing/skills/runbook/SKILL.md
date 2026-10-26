@@ -7,6 +7,8 @@ description: Write or refresh an operational runbook for an alert/symptom; struc
 
 > Author or refresh a runbook so an on-call can resolve the situation without paging the author.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new alert exists without a runbook.
@@ -22,7 +24,7 @@ description: Write or refresh an operational runbook for an alert/symptom; struc
 ## Procedure
 
 1. Read [`Runbook.md`](../../templates/Runbook.md).
-2. Compute slug from the alert/symptom name.
+2. **Slug** from the alert/symptom name: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/runbooks/<slug>.md`:
    - **When this runbook applies** — precise alert/symptom; link the alert definition.
    - **TL;DR** — 3 bullets (symptom, fastest mitigation, rollback).

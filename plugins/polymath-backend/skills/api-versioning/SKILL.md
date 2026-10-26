@@ -7,6 +7,8 @@ description: Plan an API versioning strategy — URL vs header vs media-type ver
 
 > The cheapest version is the one you never cut. Most changes can be made backward-compatibly; reserve a new version for the breaks you truly can't avoid — and have a way off the old one.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Evolving a shipped API and deciding whether/how to version a change.
@@ -32,7 +34,20 @@ Not this when: you are designing a brand-new endpoint's shape — that is `polym
 
 ## Output
 
-- A one-page strategy: the change classification, whether a new version is actually required, the versioning mechanism + scope, the compatibility rules, consumer-contract approach, and the parallel-support + deprecation timeline.
+```text
+API versioning: refunds API — make `reason` required on POST /refunds
+
+Change:        tightening validation (optional → required) = BREAKING
+Additive path: keep `reason` optional; default it to "unspecified" server-side; warn via a Deprecation header
+               on requests without it → no new version needed now
+If breaking anyway:
+  Mechanism:   URL path, whole API (/v2) — matches the existing /v1 convention
+  Contract:    additive-only within a major; unknown enum values must be tolerated (documented)
+  Consumers:   3 partners with Pact contracts → CI fails before release if their requests break
+  Parallel:    /v1 + /v2 for 6 months; Deprecation + Sunset headers on /v1 from day one
+  Removal:     when /v1 traffic < 1% for 30 days → hand to polymath-release:deprecation-plan
+Versions in support after this: 2 (cap: 2)
+```
 
 ## Quality bar
 

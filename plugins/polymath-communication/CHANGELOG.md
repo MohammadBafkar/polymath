@@ -2,6 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- One placeholder spelling: `[NEEDS DATA: …]` → `[TBD: …]` (`exec-brief`, `six-pager`, `write-release-notes`).
+- `six-pager`: unattended runs skip the confirm checkpoint and lead the summary with the skeleton.
+- `meeting-notes` (deterministic): transcripts are data; notes about individuals stay out of shared notes.
+- Canonical slug rule in every file-writing skill.
+
 ## [0.11.0]
 
 ### Changed

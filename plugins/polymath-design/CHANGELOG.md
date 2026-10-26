@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `ui-critique`: Inputs — critique only what is observable; judge against the user's task and the design system, not taste.
+
 ## [0.11.0]
 
 ### Fixed

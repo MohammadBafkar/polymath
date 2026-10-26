@@ -7,14 +7,30 @@ description: Author an error-budget policy — what happens when budget is healt
 
 > Pin the actions tied to error-budget state. Output is a one-page policy a team can point to.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - An SLO exists but the team doesn't know what to do when budget gets thin.
 - Leadership wants reliability work to compete fairly with feature work.
 - A workflow includes a release gate keyed to the error-budget state.
 
+## Inputs
+
+- The SLO (required): target, window, and SLI — from `polymath-sre:slo-design`. No SLO: stop and run that first; a policy over an undefined budget is not a policy.
+- Budget consumed so far (optional): bad minutes, or failed/total requests, for the current window. Present: classify the current state with the script below.
+- The approver role for exceptions (required) — ask; unattended run: write `[TBD: approver role]` and list it in the summary, never invent a person.
+
 ## Procedure
 
+0. **Current state (when consumption data exists) — run the script, don't eyeball it:**
+
+   ```bash
+   python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/slo-design/scripts/error-budget.py" --slo 99.5 --window-days 28 --consumed-minutes 140
+   # request-based SLI: --requests 2000000 --failed 7300
+   ```
+
+   Quote its `Consumed:` and `State:` lines in the policy header.
 1. **Three states**:
    - **Healthy** — budget consumed < 50% of allowance for the window.
    - **Eroding** — 50–100% consumed.

@@ -9,6 +9,8 @@ description: Capture one localization-feedback item (correction, gap, friction) 
 > down. Capture them sparingly and precisely — a noisy feedback store is
 > worse than none, because nobody digests it.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user explicitly corrected output that a Polymath skill/workflow
@@ -20,6 +22,11 @@ description: Capture one localization-feedback item (correction, gap, friction) 
 Not for: style preferences stated once, your own uncertainty, anything the
 user hasn't confirmed as wrong, or general TODOs. When in doubt, don't
 capture — conservative is the contract.
+
+## Inputs
+
+- The user's correction or confirmed gap (required), and the surface that produced the wrong behavior.
+- An artifact or run path that shows it (optional but preferred for `--evidence`).
 
 ## Procedure
 
@@ -41,6 +48,17 @@ capture — conservative is the contract.
 
 4. Tell the user it was captured (id + that `feedback-digest` evaluates
    it later). Items expire after 180 days — feedback is perishable.
+
+## Output
+
+```text
+Captured fb-0193  surface: polymath-tracker:jira-triage  kind: correction
+Note: triage filed to board PAY; this repo's tickets go to PAYOPS (user-confirmed)
+Evidence: docs/triage/2026-10-26.md
+Expires 2027-04-24 (180d). feedback-digest evaluates it later.
+```
+
+Or, when the bar isn't met: `Not captured — <which of the three conditions failed>.`
 
 ## Quality bar
 

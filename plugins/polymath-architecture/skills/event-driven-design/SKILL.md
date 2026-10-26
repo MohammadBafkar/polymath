@@ -7,6 +7,8 @@ description: Design an event-driven flow — event catalog, choreography vs orch
 
 > Events decouple services in space and time — and move every hard problem to delivery semantics. Design the failure paths first; the happy path is the easy 10%.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A business process spans services and you are choosing between synchronous calls and events.
@@ -33,7 +35,29 @@ Not this when: the integration is two services and request/response is fine — 
 
 ## Output
 
-- A one-page design: event catalog (name, owner, schema, version rule), the choreography/orchestration decision, a saga table (step → compensation), the outbox + idempotency mechanism, and the ordering/partitioning key.
+```text
+Event-driven design: order fulfillment
+
+Events (past tense · owner · schema · version rule)
+  OrderPlaced        Ordering    orders.v3    additive-only; breaking → OrderPlaced.v4 dual-published 90 d
+  PaymentCaptured    Payments    payments.v2  additive-only
+  ShipmentCreated    Fulfillment fulfil.v1    additive-only
+
+Coordination: orchestration — a fulfillment saga (needs status + multi-step compensation)
+
+Saga
+  step                 compensation
+  reserve stock        release stock
+  capture payment      refund payment
+  create shipment      cancel shipment (cannot fail after carrier pickup → manual review queue)
+
+Dual-write: transactional outbox in each service DB; Debezium relay → Kafka
+Idempotency: consumers dedupe on event_id (processed_events table, 7 d)
+Ordering: partition key = order_id (one order's events in order; no global order assumed)
+Correlation: correlation_id on every event, propagated to traces
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-events.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

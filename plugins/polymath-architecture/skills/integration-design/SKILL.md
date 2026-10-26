@@ -7,6 +7,8 @@ description: Design integration between two services — sync vs async, API gate
 
 > The contract between two services outlives both implementations. Design the seam — sync or async, who owns the schema, how it evolves — before the first call is wired.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Two services (or a client tier and services) need to talk and you are choosing the integration style.
@@ -32,7 +34,22 @@ Not this when: the flow is an asynchronous business process with compensation �
 
 ## Output
 
-- A one-page integration spec: sync/async decision per interaction, gateway/BFF placement, anti-corruption-layer boundaries, the contract (schema + owner + compatibility/versioning rule), error semantics, and the backpressure plan.
+```text
+Integration spec: mobile app ↔ order platform ↔ legacy ERP
+
+Interaction             Sync/async  Why
+app → order status      sync REST   user waits for an answer; p99 120 ms
+order → ERP invoice     async       ERP is slow (p99 4 s) and down nightly; buffer it
+
+Gateway/BFF: mobile BFF aggregates order + shipment + payment (3 calls → 1); auth + rate-limit at the edge gateway
+ACL: erp-adapter translates ERP "DocType 14" ↔ our Invoice; the domain only sees the InvoicePort
+Contract: orders API OpenAPI v2 · owner: checkout team · additive-only, breaking → /v3 + 6-month deprecation
+Errors: BFF timeout 800 ms per downstream; partial response with `shipment: unavailable` (see resilience-design)
+Backpressure: invoice queue bounded at 50k; consumer-lag alert at 10 min; on full → producer gets 503, retries later
+Coupling flags: none — no shared database
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-integration.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

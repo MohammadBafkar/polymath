@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 2 analytical, 1 generative — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `explain` is generative: three candidate analogies from different domains, keep the one whose breaking point matters least for this audience.
+
 ## [0.11.0]
 
 ### Changed

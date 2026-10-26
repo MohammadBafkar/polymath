@@ -7,14 +7,23 @@ description: Audit a Dockerfile for base-image hygiene, layer order, multi-stage
 
 > Find footguns in a Dockerfile before they ship. Output is a categorized review with concrete diffs.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new Dockerfile or a non-trivial change to an existing one.
 - Image size jumped or build is slow.
 - A security scanner flagged the image.
 
+## Inputs
+
+- The Dockerfile (required) and its `.dockerignore` (optional — its absence is a finding).
+- The runtime target (optional): Kubernetes, ECS, Cloud Run, bare Docker — it decides whether `HEALTHCHECK` matters.
+- Scanner output (optional): a Trivy/Grype report that prompted the audit.
+
 ## Procedure
 
+0. **Deterministic baseline.** If `hadolint` is available (`hadolint Dockerfile`, or `docker run --rm -i hadolint/hadolint < Dockerfile`), run it first and fold its rule IDs into the findings below; never mark a line clean that it flags without saying why the rule doesn't apply.
 1. **Base image.**
    - Prefer **digest-pinned** `FROM image@sha256:…` for production builds. Tag-pinned (`alpine:3.19`) floats on each rebuild.
    - Avoid `:latest`. Refuse to approve.

@@ -7,6 +7,8 @@ description: Set a perf budget — per critical user journey, single percentile 
 
 > A perf budget is a contract per critical user journey. One percentile, one threshold, components named. Without that, "make it fast" is the spec.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service or page is shipping and the team wants a target before code.

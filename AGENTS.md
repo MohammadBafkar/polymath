@@ -12,7 +12,7 @@ Run these before opening a PR (CI enforces all of them):
 
 ```bash
 tools/validate-all.sh                  # plugin.json validity + frontmatter discipline
-tools/lint-skills.sh                   # description ≤200 chars, SKILL.md ≤500 lines
+tools/lint-skills.sh                   # description ≤200 chars, SKILL.md ≤500 lines, output shape, + check-skill-shape.py (sections, mode, links)
 tools/token-report.py budget           # per-plugin always-on cost ≤400 tokens
 tools/conformance.sh --all             # MANIFEST/SKILL/TEMPLATE/WORKFLOW/CONNECTOR/FIXTURE checks
 tools/bakeoff.py check                 # parses bakeoff cases without running a judge
@@ -58,7 +58,7 @@ Every plugin lives under `plugins/polymath-<name>/` and follows this layout:
 .claude-plugin/plugin.json     # Required: name, version, description, license
 skills/<name>/SKILL.md         # YAML frontmatter (name, description) + body ≤500 lines
 skills/<name>/references/      # Overflow material that would push SKILL.md past 500 lines
-skills/<name>/scripts/         # Shell/Python helpers bundled with the skill
+skills/<name>/scripts/         # Shell/Python helpers bundled with the skill (calculators: stdlib-only, tested in tests/)
 commands/<cmd>.md              # Thin aliases ≤20 lines — no scripts, no templates
 agents/<role>.md               # Forked-context specialists (use sparingly)
 hooks/hooks.json + scripts/    # Deterministic gates (secret-scan, format-on-save)
@@ -68,7 +68,7 @@ workflows/*.yaml               # polymath-flows only
 mcp/servers.json               # Integration plugins only (vcs/chat/observability/…) — render template, opt-in install
 bindings/<provider>/binding.json  # Capability provider wiring (integration/infra plugins)
 bin/                           # Executables (polymath-flow, scaffolders)
-tests/                         # Unit tests, golden fixtures, skill-triggering cases
+tests/                         # Unit tests (CI discovers every plugins/*/tests), golden fixtures, skill-triggering cases
 README.md, CHANGELOG.md        # Both required (DOCS-1 conformance check)
 ```
 
@@ -84,6 +84,9 @@ Default to **skill-only**: a skill earns a command only when it is a frequent di
 | MANIFEST-2 | plugin.json has `name`, `version`, `description`, `license` |
 | MANIFEST-3 | Plugin has a `status` in `registry/polymath-catalog.json` (`stable` / `beta` / `experimental` / `deprecated`) |
 | SKILL-1 | SKILL.md description ≤200 chars, body ≤500 lines |
+| SKILL-2 | SKILL.md has `## When to use`, `## Inputs`, `## Procedure`, `## Output`, and `## Quality bar` or `## Anti-patterns…` (`tools/check-skill-shape.py`, run by `lint-skills.sh`) |
+| SKILL-3 | Exactly one `**Mode:**` line with the canonical sentence for `deterministic`, `analytical`, or `generative`; a deterministic skill's Output shows an exact shape |
+| SKILL-4 | No relative link or backtick path in a SKILL.md leaves its plugin (installed plugins are copied alone into versioned cache dirs); sibling-skill `SKILL.md` links excepted |
 | TEMPLATE-1 | Templates whose name matches `registry/schemas/artifacts/*.schema.json` must have frontmatter |
 | WORKFLOW-1 | Workflow YAML validates against `registry/schemas/workflow.schema.json` |
 | WORKFLOW-INDEX | `plugins/polymath-flows/data/*.json` routing index matches a fresh `tools/build-workflow-index.py` build (diff-guard + injected-index token ceiling) |

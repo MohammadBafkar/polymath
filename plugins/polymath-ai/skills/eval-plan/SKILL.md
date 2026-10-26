@@ -7,6 +7,8 @@ description: Design an evaluation for an LLM feature — task type, dataset shap
 
 > Pin down what "good" means before you ship. Output is an eval plan that tells you when to release and when to hold.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new LLM feature is being built.
@@ -40,7 +42,8 @@ Not this when: you are designing the agent or prompt itself (`polymath-ai:agent-
    - Run each example k times (e.g. k = 3–5), or at temperature 0 where the provider honors it, and define pass as "passes ≥ m of k". A single stochastic run of a "100% must pass" slice will flake.
 5. **Decision threshold**:
    - "Ship if regression slice passes 100% (≥ 4 of 5 runs per example) AND smoke ≥ 85% AND no critical-severity miss." Pick numbers; document them; defend them.
-   - For pairwise: ship when the 95% confidence interval of the win-rate (ties excluded, reported separately) is above 0.5 — e.g. ≥ 114 wins out of 200 decisive comparisons (57%). A raw 55% at N = 200 is not distinguishable from a coin flip.
+   - For pairwise: ship when the 95% confidence interval of the win-rate (ties excluded, reported separately) is above 0.5 — e.g. ≥ 114 wins out of 200 decisive comparisons (57%). A raw 55% at N = 200 is not distinguishable from a coin flip. Compute the verdict with the bundled script, never by eye:
+     `python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/eval-plan/scripts/winrate.py" --wins 114 --losses 86 --ties 23`
 6. **Failure-mode tracking** — every wrong example is tagged with a root cause category. Patterns inform the next prompt iteration.
 
 ## Output
