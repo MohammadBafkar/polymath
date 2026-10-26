@@ -100,13 +100,21 @@ jobs:
               return attempts >= 10
           PY
 
-          for step in prd acceptance implement review changelog pr; do
+          # Complete steps in the workflow's declared order (the runner refuses
+          # out-of-order completion): prd → acceptance → implement → review →
+          # verify → changelog → pr.
+          for step in prd acceptance implement review; do
             echo "step done" > "${step}.summary.md"
             $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md"
           done
 
           echo "All tests verified, ran lint and typecheck" > verify.summary.md
           $PFLOW complete "$run_id" verify --summary verify.summary.md
+
+          for step in changelog pr; do
+            echo "step done" > "${step}.summary.md"
+            $PFLOW complete "$run_id" "$step" --summary "${step}.summary.md"
+          done
 
           result="$($PFLOW assert "$run_id")"
           echo "$result"
