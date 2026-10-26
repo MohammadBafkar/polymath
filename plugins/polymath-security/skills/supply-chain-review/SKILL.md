@@ -1,6 +1,6 @@
 ---
 name: supply-chain-review
-description: Review supply-chain integrity — SBOM, dependency provenance/lockfiles, license audit, signing/SLSA attestation, build trust. Supply-chain posture, not runtime vuln triage (snyk:triage-vulns).
+description: Review supply-chain integrity — SBOM, dependency provenance/lockfiles, license audit, signing/SLSA attestation, build trust. Supply-chain posture, not runtime vuln triage (triage-vulns).
 ---
 
 # supply-chain-review

@@ -7,7 +7,7 @@ shipped change, from commit through progressive rollout to eventual sunset.
 
 - Skills: `commit`, `pr`, `changelog`, `release-notes`, `safe-rollout`,
   `deprecation-plan`, `migration-guide`.
-- Commands: `/commit`, `/pr`, `/changelog`, `/release-notes`.
+- Slash entry points: every skill is directly invocable (`/polymath-release:commit`, `/polymath-release:pr`, …); no separate command shims.
 - Templates: `CHANGELOG-entry.md`, `PR-description.md`.
 
 `safe-rollout` (from the former `polymath-progressive-delivery`) and
@@ -25,9 +25,9 @@ claude plugin install polymath-release@polymath
 
 - `polymath-core`
 
-## Why commands, not skills
+## Why no command shims
 
-Each component is a thin alias around a procedure that does not bundle scripts or references — the canonical guidance is short and the templates are imported separately. If a future need bundles tooling (e.g. a semver bumper), promote that to a skill.
+A skill is already a slash command (`/polymath-release:<skill>`). A same-named command would only duplicate the always-on listing entry, so this plugin ships skills alone.
 
 ## License
 

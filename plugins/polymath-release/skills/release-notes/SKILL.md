@@ -1,21 +1,22 @@
 ---
 name: release-notes
-description: Draft customer-facing release notes from CHANGELOG [Unreleased] entries; emphasizes user benefit over implementation detail.
+description: Draft version release notes (GitHub release / docs page) from CHANGELOG [Unreleased]; not a customer announcement (write-release-notes).
 ---
 
 # release-notes
 
-> Draft customer-facing release notes for the next version from the
-> `[Unreleased]` section of `CHANGELOG.md`. **User benefit** over
-> implementation detail.
+> Draft the release notes that ship *with a version* — the GitHub release
+> body or docs changelog page — from the `[Unreleased]` section of
+> `CHANGELOG.md`. Readers are users and integrators upgrading; **user
+> benefit** over implementation detail.
 
 ## When to use
 
 - The user says "draft release notes for vX.Y.Z".
 - A workflow's release step needs the customer-facing notes.
-- Pair with `polymath-communication:write-release-notes` for advisories /
-  announcements that need broader content authoring; this skill is the
-  developer-facing version-bump notes.
+- Not the marketing/customer announcement (email, blog, in-app) — that is
+  `polymath-communication:write-release-notes`, which can start from these
+  notes.
 
 ## Inputs
 
@@ -30,12 +31,17 @@ description: Draft customer-facing release notes from CHANGELOG [Unreleased] ent
    which commit range to summarize.
 2. **Read** recent commits to fill in any context missing from the
    CHANGELOG.
-3. **Produce the notes in three layers:**
+3. **Produce the notes in layers:**
    - **Headline**: one sentence on the most important change.
-   - **What's new**: each `Added` entry restated in customer language.
+   - **Breaking changes** (only when present, and first after the
+     headline): each with its migration step or a link to the
+     `polymath-release:migration-guide`.
+   - **What's new**: each `Added` entry restated in user language.
      No internal-only changes.
    - **Notable changes**: `Changed` / `Deprecated` / `Removed` /
-     `Fixed` / `Security` entries that affect customers.
+     `Fixed` / `Security` entries that affect users.
+   Every item traces to a CHANGELOG entry or commit — never add a claim
+   (a speedup figure, a fixed bug) the sources don't contain.
 4. **Tone**: brief, user-benefit oriented, no marketing fluff, no
    emojis.
 5. **Write to** `docs/release-notes/<version>.md` if a version is

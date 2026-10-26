@@ -51,7 +51,7 @@ A cache design that doesn't have an answer to each of these is a bug nursery.
 ## Procedure
 
 1. Answer the 5 questions explicitly. If you can't answer one, you don't have a cache design yet.
-2. Estimate the hit rate. Below 80% hit rate, the cache is often net cost (extra latency on miss + extra system to operate). Re-design or skip.
+2. Estimate the hit rate `h` and do the arithmetic: expected latency ≈ `h·t_hit + (1−h)·(t_lookup + t_origin)`, and origin load drops by `h`. A 50% hit rate on a 2-second computation is a big win; a 90% hit rate in front of a 2 ms query may not pay for the extra system. Re-design or skip when the numbers don't clear the bar.
 3. Decide the layer(s). Most services need only one cache layer; resist stacking until measured.
 4. Decide the warming path (cold cache after deploy / instance start). Pre-warm? Accept the slow first wave? Document.
 5. Decide the observability — hit rate, miss rate, eviction rate, P99 latency for hit vs miss; alert when hit rate drops > 20% from baseline.
@@ -88,7 +88,9 @@ Failure modes (explicit):
     divergence.
 
 Expected hit rate: 85% (modeled from current request distribution).
-Below 80% triggers a re-design review.
+  Latency: 0.85 × 1 ms + 0.15 × (1 ms + 180 ms) ≈ 28 ms vs 180 ms uncached.
+  Latency break-even is h ≈ 1/180 here; the real floor is operational cost —
+  re-design review if the hit rate falls below 50%.
 
 Observability:
   - cache_hit_total, cache_miss_total, cache_eviction_total counters.
@@ -100,7 +102,7 @@ Observability:
 
 - All 5 questions explicitly answered.
 - Failure modes named and mitigated.
-- Hit-rate estimate present (and ≥ 80% target).
+- Hit-rate estimate present, with the latency/load arithmetic that justifies the cache.
 - Observability defined (not "we'll add metrics later").
 
 ## Anti-patterns to avoid

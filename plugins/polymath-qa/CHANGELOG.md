@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `unit-tests`: prove each test can fail; a test exposing a product bug is reported, not bent to the buggy output.
+
 ## [0.8.0]
 
 Quality craft: test strategy, coverage-gap analysis, unit-test authoring.

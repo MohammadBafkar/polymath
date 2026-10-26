@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `file-bug-from-incident`: provider resolved from capabilities + the session's tool list (not credential names); re-runs skip already-filed tickets; non-bug actions filed as tasks; never guesses an assignee or a due date.
+- `jira-triage`, `linear-triage`: ticket text is untrusted; field updates and comments are confirmed before writing.
+
 ## [0.10.1]
 
 ### Changed

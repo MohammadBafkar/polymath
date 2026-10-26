@@ -17,7 +17,7 @@ description: Propose Kubernetes Pod Security Standards (privileged/baseline/rest
 
 - **Privileged** — no restrictions. Reserved for system workloads (kube-system).
 - **Baseline** — minimum prevention of known privilege escalations. Blocks `hostNetwork`, `hostPID`, privileged containers, `hostPath` (mostly), and similar.
-- **Restricted** — security-best-practices. Requires `runAsNonRoot`, drops all capabilities, `readOnlyRootFilesystem`, `seccompProfile: RuntimeDefault`, and more.
+- **Restricted** — security-best-practices. Requires `runAsNonRoot: true`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]` (only `NET_BIND_SERVICE` may be added back), `seccompProfile` `RuntimeDefault`/`Localhost`, and restricted volume types. (`readOnlyRootFilesystem` is a good hardening default but **not** part of the restricted profile — don't report it as a PSS violation.)
 
 ## Procedure
 
@@ -31,20 +31,26 @@ description: Propose Kubernetes Pod Security Standards (privileged/baseline/rest
    metadata:
      labels:
        pod-security.kubernetes.io/enforce: restricted
-       pod-security.kubernetes.io/enforce-version: latest
+       pod-security.kubernetes.io/enforce-version: v1.30   # pin; `latest` changes behavior on cluster upgrade
        pod-security.kubernetes.io/audit: restricted
        pod-security.kubernetes.io/warn: restricted
    ```
 
    Use `audit` + `warn` first to get a report before flipping `enforce`.
-3. **Find violators** — list pods in the namespace and check each container's spec against the target level. The common gaps moving from `baseline → restricted`:
+3. **Find violators** — ask the API server, don't eyeball specs: a server-side dry run of the label lists every existing pod that would violate the level, without changing anything:
+
+   ```bash
+   kubectl label --dry-run=server --overwrite ns payments \
+     pod-security.kubernetes.io/enforce=restricted
+   ```
+
+   The common gaps moving from `baseline → restricted`:
    - `runAsNonRoot: true` not set.
-   - `readOnlyRootFilesystem: true` not set.
    - `capabilities.drop: [ALL]` not set.
    - `seccompProfile.type: RuntimeDefault` not set.
    - `allowPrivilegeEscalation: false` not set.
 4. **Remediate** — patch each workload's `securityContext`. For workloads that genuinely need a capability (e.g. `NET_BIND_SERVICE` to bind <1024), document the exception in an ADR and grant only that capability.
-5. **Verify** — re-list pods; `kubectl get pods -A | grep -i warn` should be empty for the target namespace after the `enforce` flip.
+5. **Verify** — re-run the server-side dry run from step 3: it must report no warnings before you flip `enforce`. After the flip, roll one Deployment (`kubectl rollout restart`) and confirm its pods are admitted.
 
 ## Output
 
@@ -55,8 +61,9 @@ Target: restricted
 
 Audit pass — violators:
   - refund (Deployment)
-      missing: runAsNonRoot, readOnlyRootFilesystem, capabilities.drop:[ALL]
-      Fix: add securityContext block (see write-manifest skill).
+      missing: runAsNonRoot, capabilities.drop:[ALL]
+      Fix: add securityContext block (see write-manifest skill; it also sets
+      readOnlyRootFilesystem as hardening beyond PSS).
   - billing-job (CronJob)
       missing: seccompProfile RuntimeDefault, allowPrivilegeEscalation: false
       Fix: add the two fields to the job template's container.

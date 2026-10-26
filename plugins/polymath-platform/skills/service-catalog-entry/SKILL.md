@@ -45,7 +45,7 @@ metadata:
   tags: [tier-1, payments, golang]
   annotations:
     backstage.io/source-location: url:https://github.com/example/refund-service
-    pagerduty.com/integration-key: <id>
+    pagerduty.com/service-id: <service-id>   # not the integration key — that's a credential
   links:
     - url: https://runbooks.example/refund-service
       title: Runbook

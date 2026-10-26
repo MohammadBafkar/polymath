@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `perf-review`, `one-on-one-prep`, `coaching-plan`: personnel notes go to a private, non-versioned (git-ignored) location, never committed; only user-provided evidence.
+- `hiring-loop`: no protected-characteristic questions.
+
 ## [0.8.0]
 
 Leadership craft: 1:1 prep, performance reviews, OKR setting, hiring-loop design, conflict mediation, coaching/growth plans.

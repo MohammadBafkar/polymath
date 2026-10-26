@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `code-review`: intent fallback when there is no PRD, merge-base diff, callers of changed code, compatibility/perf/resource checks, verify-before-report, severities and a verdict, pre-existing issues separated.
+- `feature-dev`: baseline test run before changes; green never comes from weakening, skipping, or special-casing tests; repo conventions no longer point at the marketplace's `polymath-core:conventions`.
+- `verify-change`: CI config and contributor docs as detection signals, lockfile-aware package manager (`stack.package_manager` now wired), build-only short-circuit, "0 tests collected" ≠ PASS, introduced vs pre-existing failures, flaky reporting.
+- Localization preamble (code-review, feature-dev, verify-change) falls back to `.polymath/project.yaml` and ignores another repo's snapshot.
+
+### Fixed
+
+- `verify-change` no longer tells the model to include "tests"/"verified" so a `stepSummaryMatches` gate passes — summaries report what actually ran.
+
 ## [0.8.0]
 
 Engineering craft: TDD feature-dev loop, code review, change verification, codebase orientation, tech-debt management.

@@ -35,7 +35,7 @@ Walk these in order; each is a common tail-latency root cause. Stop when one is 
 4. **Slow downstream**:
    - Trace samples show the long span isn't your code — it's a downstream call.
    - Look at downstream P99 latency for the affected timeframe; compare to baseline.
-   - Action: timeout aggressively; hedged requests; fall back; add cache.
+   - Action: timeout aggressively; hedged requests (only for idempotent reads, or writes protected by an idempotency key — hedging a non-idempotent call duplicates it); fall back; add cache.
 5. **Retry storms / cascade**:
    - 5xx rate downstream spikes; your tail balloons because retries pile on.
    - Action: token-bucket retry budget; circuit breaker; back off exponentially.
@@ -67,9 +67,14 @@ Dominant cause:
   catches the un-timeout-able subset.
 
 First fix (single change):
-  Switch to hedged requests against Stripe-client with a 200ms hedge delay
-  (Tail at Scale, Dean & Barroso). Expected effect: ~60% reduction in P99
-  latency and ~80% in P99.9 if Stripe's tail is independent across hedges.
+  Move the Stripe refund call off the request path: enqueue it (with an
+  idempotency key) and return 202 + status polling. The user-facing P99
+  then depends on our enqueue time, not Stripe's tail.
+  (Not hedging: a refund POST is not idempotent without the key — a hedge
+  would issue two refunds — and doubling calls to a slow dependency deepens
+  its overload.)
+  Expected effect: measure in staging — P99/P99.9 for the route before and
+  after; don't quote a percentage before you have it.
 
 Validation:
   Confirm the gain in staging before rolling to prod canary. Watch
@@ -86,5 +91,6 @@ Validation:
 
 - "Might be GC, might be locks, might be downstream" — narrow it down.
 - Recommending 3 fixes at once. Pick the highest-leverage one; validate; iterate.
+- Hedging or retrying a non-idempotent call (payments, sends, creates) to cut latency.
 - Tuning GC because GC is famous without checking the GC pause histogram first.
 - Adding cache without first checking the actual hit rate ceiling.

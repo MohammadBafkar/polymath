@@ -15,7 +15,7 @@ description: Design env-promotion (dev → staging → prod) — one artifact pr
 
 ## Procedure
 
-1. **One artifact, many envs.** The same container image / package goes through every stage. Config differs; the binary does not.
+1. **One artifact, many envs.** The same container image / package goes through every stage. Config differs; the binary does not. Promote by **immutable digest** (`image@sha256:…`), not by tag — a tag can be re-pointed between stages.
 2. **Three default stages**:
    - **dev** — fast feedback. Auto-deploy on merge to main.
    - **staging** — production-shaped. Production traffic shape (or shadow), production-grade data (sanitized).
@@ -27,7 +27,7 @@ description: Design env-promotion (dev → staging → prod) — one artifact pr
 4. **Config injection**:
    - Per-env config in a single source of truth (a YAML per env in the repo, or a parameter store).
    - No secrets in repo. Secrets injected from a secret manager via env-specific names.
-5. **Rollback path** named per stage. Usually "redeploy the previous version's image tag". Faster than git revert.
+5. **Rollback path** named per stage. Usually "redeploy the previous version's image digest". Faster than git revert — and only possible if database migrations are backward-compatible across adjacent versions (expand/contract: `polymath-backend:migration-plan`); a migration the previous version can't run against is a rollback blocker, so call it out per release.
 6. **Observability per stage** — same dashboard template, dashboard filterable by env. Alerts route differently per env.
 
 ## Output
@@ -35,7 +35,8 @@ description: Design env-promotion (dev → staging → prod) — one artifact pr
 ```text
 Env promotion: refund-service
 
-Artifact: container image `refund:${git_sha}` pushed once from main.
+Artifact: container image `refund:${git_sha}` pushed once from main;
+  promoted by digest (refund@sha256:…), never re-tagged per env.
 
 Stages:
   dev      → auto-deploy on merge to main

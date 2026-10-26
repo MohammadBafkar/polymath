@@ -28,7 +28,7 @@ description: Audit a Dockerfile for base-image hygiene, layer order, multi-stage
    ```
    Reversing this invalidates the `npm ci` cache on every source edit.
 4. **USER directive.** Final stage must `USER non-root` (numeric UID or named). Running as root is a common scanner finding.
-5. **HEALTHCHECK.** Define one unless the orchestrator (k8s) handles it externally. `CMD curl -fsS http://localhost:PORT/health || exit 1` is the usual shape.
+5. **HEALTHCHECK.** Define one unless the orchestrator handles it (Kubernetes ignores `HEALTHCHECK` and uses probes). Use a binary already in the image — exec form, e.g. `HEALTHCHECK CMD ["/app/healthcheck"]` or the app's own `--health` flag. Don't install `curl` just for this; distroless/slim runtimes don't have it, and it widens the attack surface.
 6. **Secrets.**
    - No `ENV SECRET=…` for build-time secrets. Use `--secret` mount (BuildKit).
    - No `COPY .env .` ever.
@@ -57,8 +57,8 @@ Issues
   - COPY . . (line 18) pulls in .git + node_modules.
     Fix: COPY src/ ./src/ + COPY package.json ./ + .dockerignore.
 
-  - No HEALTHCHECK directive.
-    Fix: HEALTHCHECK CMD curl -fsS http://localhost:3000/health || exit 1
+  - No HEALTHCHECK directive (image runs under Docker Compose, not k8s).
+    Fix: HEALTHCHECK CMD ["node", "healthcheck.js"]   (node is already in the image)
 
   - Three separate RUN apt-get install lines.
     Fix: combine into one RUN with apt-get clean tail.

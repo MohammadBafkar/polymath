@@ -27,9 +27,10 @@ Not this when: you are choosing the cloud architecture/primitives — that is `p
 3. **No hidden global state**: the module declares `required_providers` + version constraints but does **not** configure providers or backends — the root module does. A module that pins a backend isn't reusable.
 4. **Resource hygiene**: consistent naming + tagging (pass via variables/locals), `for_each` over `count` for stable addressing, explicit `depends_on` only where needed.
 5. **Composition boundary**: one module = one cohesive capability. Compose small modules in the root; avoid a god-module. Nested modules only where genuinely shared.
-6. **Versioning + sources**: tag releases (semver) and pin module sources by version; document upgrade/breaking changes.
-7. **Document + example**: a README with inputs/outputs and a working example; lifecycle rules (`prevent_destroy`, `ignore_changes`) where state churn would be dangerous.
-8. **Safety rails**: mark sensitive outputs `sensitive = true`; never bake secrets into the module.
+6. **Versioning + sources**: tag releases (semver) and pin module sources by version; document upgrade/breaking changes. When you rename or restructure resources inside the module, ship `moved {}` blocks so consumers upgrade without destroy+recreate.
+7. **Test it**: `terraform validate` + `tflint` in CI, and `terraform test` (or Terratest) against the example to prove the interface works.
+8. **Document + example**: a README with inputs/outputs and a working example; lifecycle rules (`prevent_destroy`, `ignore_changes`) where state churn would be dangerous.
+9. **Safety rails**: mark sensitive outputs `sensitive = true`; never bake secrets into the module.
 
 ## Output
 

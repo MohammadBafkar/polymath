@@ -28,7 +28,7 @@ Not this when: you are designing auth tokens/sessions (`auth-design`) or doing a
 5. **Randomness**: cryptographically secure RNG for keys/tokens/IVs/salts — never `rand()`/`Math.random`.
 6. **Signatures/certs** where authenticity matters; pin algorithms; reject downgrade.
 7. **Flag the foot-guns**: home-rolled crypto, deprecated algorithms (DES/RC4/MD5/SHA-1), ECB mode, static IVs, hardcoded keys, missing rotation, secrets in logs.
-8. **Crypto-agility**: version the scheme so an algorithm can be retired without a data-loss event.
+8. **Crypto-agility**: version the scheme so an algorithm can be retired without a data-loss event. For data that must stay confidential for years, plan for post-quantum key exchange (hybrid TLS groups such as X25519MLKEM768 where your stack supports them) — recorded traffic can be decrypted later.
 
 ## Output
 

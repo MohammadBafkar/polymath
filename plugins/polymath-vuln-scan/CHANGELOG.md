@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `triage-vulns`: KEV/EPSS before reachability-based deferral; patches go through tests and `polymath-release:commit`, never a silent auto-commit.
+
 ## [0.10.1]
 
 ### Changed

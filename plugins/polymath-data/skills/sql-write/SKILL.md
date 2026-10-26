@@ -25,9 +25,11 @@ description: Write a SQL query that answers a specific question; parameterized, 
 3. **Sketch tables and joins** before writing the query. Document the join keys.
 4. **Use CTEs** for readability over deeply-nested subqueries. Each CTE has one purpose; name it after the purpose.
 5. **Parameterize**. Use placeholders (`$1`, `?`, `:name`) — never string-concatenate user input.
-6. **Indexed predicates first**. If you know the indexed column, put the equality predicate on it in the join / where.
+6. **Sargable predicates.** Keep indexed columns bare on one side of the comparison (`created_at >= now() - interval '7 days'`, not `date(created_at) = …`); predicate order in the SQL text doesn't matter to the planner.
 7. **Aggregations** — explicit `GROUP BY <columns>`; don't rely on MySQL's loose grouping. Use `HAVING` for filtering aggregates, `WHERE` for filtering rows.
 8. **Window functions** when the question is "top-N per group" or "running sum / rank".
+9. **NULL and time traps**: `NOT IN (subquery)` returns nothing if the subquery yields a NULL — use `NOT EXISTS`; state the time zone of every date boundary (`date_trunc('day', ts AT TIME ZONE 'UTC')`).
+10. **Running it**: queries you execute yourself are read-only — explore with a `LIMIT` and against a replica where one exists. Any `INSERT`/`UPDATE`/`DELETE`/DDL is shown to the user first, run only on explicit approval, inside a transaction.
 
 ## Output
 

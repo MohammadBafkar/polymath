@@ -26,7 +26,7 @@ description: Run a typed, time-bounded log search against Elasticsearch — refu
 
 1. **Validate the index pattern.** Refuse `*`, `*-*`, or anything with no leading namespace. Cluster-wide scans cost money and surface PII from unrelated indices.
 2. **Validate the time range.** `gte` is required. Refuse "no time range" unless the caller explicitly opts in with `--allow-default-range`.
-3. **Build the request.** Use `_search` with `track_total_hits=10000` (cap), `size=10` (sample), and `aggs` for the requested buckets. Set `terminate_after` to cap shard-side work.
+3. **Build the request.** Use `_search` with `track_total_hits=10000` (cap), `size=10` (sample), and `aggs` for the requested buckets. Set `terminate_after` to cap shard-side work — and if it triggers (`terminated_early: true`), counts and buckets are partial: report them as lower bounds.
 4. **Run the search.** Capture `took`, `total.value`, `total.relation`. If `relation = "gte"`, the count is approximate — surface honestly.
 5. **Bucket and sample.** Top 10 buckets per agg; first 10 hits sorted by `@timestamp desc`. Redact common PII fields (`user.email`, `client.ip`, `http.request.headers.authorization`) before printing.
 6. **Cross-index hint.** If `trace.id` appears in hits, suggest joining against `traces-*` (Honeycomb / Tempo / OTLP indices) for the upstream trace.

@@ -1,6 +1,6 @@
 ---
 name: validate-plugin
-description: Run every Polymath gate against a plugin — claude plugin validate, lint-skills, token-budget, workflow schema.
+description: Run every Polymath gate against one plugin — conformance, claude plugin validate, lint-skills, token budget, workflow schema.
 ---
 
 # validate-plugin
@@ -16,27 +16,30 @@ description: Run every Polymath gate against a plugin — claude plugin validate
 ## Inputs
 
 - Path to the plugin (default: cwd if it's a `plugins/<name>/` directory).
+- Must run from a Polymath marketplace checkout (the directory with `.claude-plugin/marketplace.json`) — the gates live in its `tools/`. If there is none, say so and stop.
 
 ## Procedure
 
-1. **Manifest validation** — `claude plugin validate --strict <path>` from the plugin directory. Surface every error and warning.
-2. **Skill lint** — `tools/lint-skills.sh`. Description ≤ 200 chars, SKILL.md ≤ 500 lines.
-3. **Token budget** — `tools/token-report.py budget` for the heuristic, then `claude plugin details <name>@polymath` for the canonical measurement. Per-plugin cap is 400 tok; flag if over.
-4. **Template materialization** — if `.claude-plugin/templates.json` exists, `tools/link-templates.sh` must materialize every named template without error.
-5. **Workflow schema** — if the plugin ships any `workflows/*.yaml`, run `plugins/polymath-flows/bin/polymath-flow validate <file>` on each.
-6. **Frontmatter** — every SKILL.md, command.md, and agent.md has the required frontmatter fields (`name`, `description`); descriptions lead with an imperative verb.
+1. **Single-plugin conformance — the source of truth.** `tools/conformance.sh plugins/polymath-<name>`. It runs the MANIFEST/SKILL/TEMPLATE/WORKFLOW/FIXTURE/DOCS checks for that plugin (and `claude plugin validate --strict` when the CLI is on PATH). Every other step below adds detail or catches what this misses; it never replaces it.
+2. **Manifest validation** — `claude plugin validate --strict <path>`. Surface every error and warning; skip with `N/A (claude CLI not installed)` rather than reporting a pass.
+3. **Skill lint** — `tools/lint-skills.sh`: description ≤ 200 chars, SKILL.md ≤ 500 lines, and the output-shape ratchet (`registry/output-shape-baseline.txt`).
+4. **Token budget** — `tools/token-report.py budget` for the heuristic; when the CLI is available, `claude --plugin-dir <path> plugin details <name>` for the canonical per-component cost. Per-plugin cap is 400 tok (heuristic); flag if over.
+5. **Workflow schema** — if the plugin ships any `workflows/*.yaml`, run `plugins/polymath-flows/bin/polymath-flow validate <file>` on each, then `tools/build-workflow-index.py --check`.
+6. **Index drift** — if the plugin has `routing.yaml` sidecars run `tools/build-surface-index.py --check`; if it has `bindings/`, run `tools/build-capability-index.py --check`.
+7. **Frontmatter** — every SKILL.md, command.md, and agent.md has `name` (agents: equal to the file stem) and `description`; descriptions lead with an imperative verb. No command shares its name with a skill in the same plugin (the skill is already `/plugin:skill`).
 
 ## Output
 
 ```text
 Validate: plugins/polymath-foo
 
+  ✓ conformance.sh plugins/polymath-foo  passed (MANIFEST, SKILL, TEMPLATE, FIXTURE, DOCS)
   ✓ claude plugin validate --strict      passed
   ✓ lint-skills.sh                       passed (3 SKILL.md, 2 commands)
-  ✓ token-report.py budget               heuristic 142 tok
-  ✓ claude plugin details                canonical 218 tok (under 400 cap)
-  ✓ link-templates.sh                    materialized 2 templates
+  ✓ token-report.py budget               heuristic 142 tok (under 400 cap)
+  ✓ claude plugin details                canonical 218 tok always-on
   ✓ workflow schema                      n/a (no workflows in plugin)
+  ✓ index drift                          surface + capability indexes in sync
   ✓ frontmatter discipline               all components have name + description
 
 Result: PASS. Ready for submission to polymath marketplace.
@@ -46,6 +49,6 @@ If any gate fails, the report lists the failing file:line and the corrective cha
 
 ## Quality bar
 
-- Every gate produces a binary pass/fail + a one-line evidence excerpt.
-- No "looks good to me" findings.
+- Every gate produces a binary pass/fail (or an explicit N/A with the reason) + a one-line evidence excerpt.
+- A gate that could not run is never reported as passed.
 - Failure produces a concrete fix recommendation.

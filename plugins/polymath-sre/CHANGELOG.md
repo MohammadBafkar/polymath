@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `slo-design` / `error-budget-policy`: 28-day budgets used 30-day figures (99.5% over 28d is 3h 21m 36s, not 3h 36m); burn-rate table gains short windows and both 30d/28d rates.
+- `chaos-experiment`: `kubectl delete pod -l …` deleted every matching pod — the example now kills exactly one; the agent never runs an injection without explicit operator approval.
+- `capacity-plan` / `demand-forecast`: boundaries no longer contradict each other (capacity-plan consumes the forecast).
+
 ## [0.8.0]
 
 SRE craft: SLO design, error-budget policy, chaos experiments, capacity planning + demand forecasting, on-call program design.

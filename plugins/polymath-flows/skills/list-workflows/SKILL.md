@@ -17,15 +17,15 @@ description: List active, paused, and completed flows-lite workflow runs from th
 1. Call the executable:
 
    ```bash
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list
    ```
 
    To filter:
 
    ```bash
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status paused
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status active
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status completed
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list --status paused
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list --status active
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list --status completed
    ```
 
 2. Render the table grouped by status. Active first, paused next, completed last (most recent 5 only).

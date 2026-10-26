@@ -26,6 +26,7 @@ description: Score options against weighted criteria; surfaces where the numeric
 3. Draft `docs/decisions/<slug>-tradeoff.md`:
    - **Criteria** — 3–6 that genuinely differentiate. Anything that scores the same across all options isn't a criterion, it's a fact. Each criterion has a weight (1–5) with a one-line rationale.
    - **Options × criteria** — score each option 1–5 per criterion. Show the math: weight × score per cell. Total per option.
+   - **Sensitivity check** — would moving any single weight by ±1, or any single score by ±1, change the winner? If yes, name that criterion: the decision hinges on it, so its weight/score needs evidence, not opinion. Mark any score that is a guess.
    - **Discussion** — where the numeric ranking disagrees with the gut call, name the tie-breaker explicitly. Often the "missing criterion" is named here.
    - **Recommendation** — the option that wins after discussion (which may not be the highest scorer).
    - **What would change the answer** — name the future condition that would flip the choice.
@@ -36,6 +37,7 @@ description: Score options against weighted criteria; surfaces where the numeric
 - Weights have a one-line rationale.
 - Math is shown per cell; no "Option B: 7/10" hand-waves.
 - If the recommendation contradicts the numeric ranking, the tie-breaker is named explicitly.
+- The sensitivity check is stated: either "no single ±1 change flips the winner" or the criterion the decision hinges on.
 
 ## Output
 

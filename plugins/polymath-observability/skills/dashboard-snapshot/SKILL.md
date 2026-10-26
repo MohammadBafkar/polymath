@@ -1,6 +1,6 @@
 ---
 name: dashboard-snapshot
-description: Capture a Grafana dashboard snapshot for incident timelines + postmortem evidence — public-snapshot URL, time-range pinned, variables resolved.
+description: Capture a Grafana dashboard snapshot for incident timelines + postmortem evidence — snapshot URL, time range pinned, variables resolved.
 ---
 
 # dashboard-snapshot
@@ -26,7 +26,7 @@ description: Capture a Grafana dashboard snapshot for incident timelines + postm
 1. **Resolve the dashboard.** `dashboards.uid` or `search?query=...` to get the UID. Refuse if multiple match — pick the most specific or surface the candidates.
 2. **Validate variables.** Fetch dashboard JSON; identify required template variables. Refuse if any required variable is unspecified (a snapshot with the wrong default variable is worse than no snapshot — it looks authoritative but isn't).
 3. **Resolve relative time.** Convert `now-X` to absolute UTC timestamps at capture time. Embed the absolute range in the snapshot URL.
-4. **Create the snapshot** via `POST /api/snapshots`:
+4. **Create the snapshot** via `POST /api/snapshots` — note the API stores only the data embedded in the payload: a dashboard JSON without panel `snapshotData` produces an empty snapshot. If your tool can't embed query results, fall back to a permalink with absolute `from`/`to` epoch-ms and `var-<name>=` parameters (plus a rendered PNG if the image renderer is available) and say so:
    - `dashboard` — the dashboard JSON with the chosen time + variables pinned.
    - `expires` — pick a long-but-finite TTL (default 90 days for incident, never permanent; permanent snapshots leak).
    - `external` — `false` (host on the same Grafana). `true` only when sharing with non-authenticated viewers AND the dashboard contains no sensitive labels.

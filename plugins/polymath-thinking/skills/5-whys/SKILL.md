@@ -22,7 +22,7 @@ description: Investigate an incident or bug via the 5-whys technique — iterati
 
 1. State the symptom.
 2. Ask "why?" — answer with a verified cause (cite evidence: log line, metric, code path).
-3. Repeat against the previous answer. Stop when:
+3. Repeat against the previous answer. When a "why" has more than one verified cause, branch and follow each — incidents usually have several contributing factors, and a single chain hides the others. Stop a branch when:
    - The cause is a **system property** (process, structure, incentive) — not another proximate event.
    - Continuing would speculate beyond evidence.
 4. Translate the deepest verified cause into one actionable change.
@@ -44,5 +44,6 @@ Proposed change: …
 ## Quality bar
 
 - Each "why" cites concrete evidence; "we think" is not evidence.
+- Branches are followed where more than one cause is verified; the output doesn't force a single chain.
 - The final cause names a process, structure, or incentive — not "Alice forgot".
 - The proposed change addresses the root, not a proximate symptom.

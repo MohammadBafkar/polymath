@@ -5,7 +5,7 @@ description: Investigate a Honeycomb trace by trace.id — surface the offending
 
 # trace-investigate
 
-> Given a trace ID, build the chain that explains the failure: which span errored, which span is the *cause* (not just the surface), and what bb.attributes characterize the failure.
+> Given a trace ID, build the chain that explains the failure: which span errored, which span is the *cause* (not just the surface), and which attributes characterize the failure.
 
 > **MCP binding (read before any tool call):** if your host has a `honeycomb` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
@@ -24,9 +24,9 @@ description: Investigate a Honeycomb trace by trace.id — surface the offending
 
 1. **Fetch the trace.** Use the honeycomb MCP to run a query with `BREAKDOWN trace.span_id` filtered to `trace.id = <id>` over the relevant time window. Cap at 1000 spans (rare traces exceed this; if so, surface the cap and break by parent).
 2. **Build the tree.** Sort spans by start time; resolve each span's parent via `trace.parent_id`. Identify the root span (no parent).
-3. **Find the offending span.** Mark every span with `status_code != OK` or with `error = true`. The *first* error span in causal order is usually the cause; later errors may be propagated. Note: "first" is by ancestor walk, not by timestamp.
+3. **Find the offending span.** Mark every span with an error status or `error = true`. The origin is usually the *deepest* erroring span in the chain — an erroring span none of whose children errored; its ancestors' errors are propagation. Decide by the tree, not by timestamp.
 4. **Walk the dependency chain.** From the offending span, climb to the root: each parent shows the call site that invoked the failing span.
-5. **Surface attributes.** For the offending span: `service.name`, `db.system`, `http.url`, `http.response.status_code`, `messaging.destination`, `error.type`, `error.message`, custom `bb.*` attributes the service set.
+5. **Surface attributes.** For the offending span: `service.name`, `db.system`, `url.full` / `http.url`, `http.response.status_code`, `messaging.destination.name`, `error.type`, `exception.message`, and any custom `app.*` attributes the service set.
 6. **Latency breakdown.** Group span self-time (`duration_ms` minus child time) by `service.name`. The dominant bucket points at where time went.
 7. **Hypothesize root cause.** Use the offending span's attributes + chain + latency to suggest one of:
    - **upstream-timeout** — `error.type` indicates timeout; parent chain shows a long-running peer.
@@ -81,7 +81,7 @@ Hypothesis: upstream-timeout (Stripe API).
 
 ## Anti-patterns to avoid
 
-- Treating the *last* error span as the cause. Usually it's the *first* error in the chain — later errors are propagated.
+- Treating the top-level error span as the cause. Usually it's the deepest erroring span — its ancestors' errors are propagated.
 - Showing total time per service. The root span's total is always 100%; self-time is the signal.
 - Hypothesizing without citing evidence. "Looks like a Stripe issue" without naming the timeout span is unfalsifiable.
 - Pulling the full 1000 spans into chat. Collapsed tree + offending-span detail is the right summary.

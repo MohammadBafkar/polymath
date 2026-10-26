@@ -21,27 +21,36 @@ description: Write a user-facing CHANGELOG entry under [Unreleased] in Keep-a-Ch
 
 ## Procedure
 
-1. **Read** `CHANGELOG.md`. If absent, create one from
-   `plugins/polymath-release/templates/CHANGELOG-entry.md`.
-2. **Inspect** the current diff or recent commits to determine the
+1. **Check how this repo keeps its changelog first.** If it uses a generator
+   — `.changeset/` (Changesets), `release-please-config.json`,
+   `towncrier.toml` / `newsfragments/`, `cliff.toml` (git-cliff), or
+   semantic-release — write the entry in *that* tool's format (e.g. a
+   changeset file) and do not hand-edit `CHANGELOG.md`.
+2. **Read** `CHANGELOG.md`. If absent and no generator is in use, create one
+   from [`CHANGELOG-entry.md`](../../templates/CHANGELOG-entry.md).
+3. **Inspect** the current diff or recent commits to determine the
    change category. Map Conventional Commits → Keep-a-Changelog:
 
    | Commit type | CHANGELOG section |
    | ----------- | ----------------- |
    | `feat:`     | **Added**         |
-   | `refactor:` `perf:` `style:` | **Changed** |
+   | `perf:` or a user-visible behavior change | **Changed** |
    | deprecation | **Deprecated**    |
    | removal     | **Removed**       |
    | `fix:`      | **Fixed**         |
    | security fix | **Security**     |
+   | `refactor:` `style:` `test:` `chore:` `ci:` with no user impact | *(omit)* |
 
-3. **Write one bullet per logical change**:
+   A breaking change (`!` after the type, or a `BREAKING CHANGE:` footer) is
+   prefixed **BREAKING:** in its bullet and names the migration path.
+
+4. **Write one bullet per logical change**:
    - Imperative tense ("Add rate limiting on /login").
    - User-facing language — what the user can now do (or no longer do).
    - Link to PR if known.
-4. **Append under `## [Unreleased]`** in the appropriate subsection.
+5. **Append under `## [Unreleased]`** in the appropriate subsection.
    Create the subsection if it doesn't exist.
-5. **Show the user the diff** before saving.
+6. **Show the user the diff** before saving.
 
 ## Output
 

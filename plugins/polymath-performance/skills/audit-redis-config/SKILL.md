@@ -7,6 +7,18 @@ description: Audit a live Redis instance's config — maxmemory + eviction, pers
 
 > Sanity-check a Redis deployment against the workload. Output: parameter findings + concrete changes.
 
+## When to use
+
+- A Redis instance is evicting unexpectedly, running out of memory, slow, or about to take more load.
+- A security review needs the instance's auth/TLS/exposure posture.
+
+## Inputs
+
+- Effective settings: `CONFIG GET *` and `INFO` (`memory`, `persistence`, `replication`, `clients`), plus the version. Managed services (ElastiCache, Memorystore, Azure Cache) often disable or rename `CONFIG` — read their parameter group / console instead.
+- The workload role: pure cache, session store, queue, or primary store.
+
+**Read-only.** Never run `CONFIG SET`, `CONFIG REWRITE`, `FLUSH*`, `DEBUG`, or `KEYS *` against a live instance — recommend; the owner applies.
+
 ## Procedure
 
 1. **Memory.**
@@ -22,7 +34,7 @@ description: Audit a live Redis instance's config — maxmemory + eviction, pers
    - `replica-read-only yes` — replicas should not accept writes.
    - `repl-diskless-sync yes` for big setups (avoids the disk-write during full sync).
 4. **Slow log.**
-   - `slowlog-log-slower-than 10000` (10ms in µs) — slowest 1% commands surfaced.
+   - `slowlog-log-slower-than 10000` (10 ms, in µs) — logs every command slower than the threshold (a fixed cutoff, not a percentile).
    - `slowlog-max-len 1024` — small ring buffer.
 5. **Client connections.**
    - `maxclients` should match the connecting application's connection pool.
@@ -31,10 +43,13 @@ description: Audit a live Redis instance's config — maxmemory + eviction, pers
    - Default user disabled or non-default password.
    - Per-application ACLs with command + key-prefix scoping.
    - `requirepass` (legacy) is single-user; ACLs are the modern way.
-7. **TLS.**
+7. **Exposure.**
+   - `protected-mode yes` and `bind` limited to private interfaces — never `0.0.0.0` on a reachable network without auth.
+   - Dangerous commands (`FLUSHALL`, `FLUSHDB`, `KEYS`, `CONFIG`, `DEBUG`) denied to application users via ACL categories (`-@dangerous`), or renamed on older versions.
+8. **TLS.**
    - `tls-port` enabled in any non-trusted network.
    - `tls-cert-file` / `tls-key-file` + `tls-auth-clients` for mTLS.
-8. **Cluster vs single.** Cluster mode (`cluster-enabled yes`) shards across nodes; consumers must use cluster-aware clients (no `KEYS *` across slots).
+9. **Cluster vs single.** Cluster mode (`cluster-enabled yes`) shards across nodes; consumers must use cluster-aware clients (no `KEYS *` across slots).
 
 ## Output
 

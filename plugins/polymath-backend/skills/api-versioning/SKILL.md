@@ -22,7 +22,7 @@ Not this when: you are designing a brand-new endpoint's shape — that is `polym
 
 ## Procedure
 
-1. **Classify the change first**: *backward-compatible* (add optional field/endpoint/enum value, loosen a constraint) vs *breaking* (remove/rename, change type/semantics, tighten validation, change defaults). Most changes can be made additively — exhaust that before versioning.
+1. **Classify the change first**: *backward-compatible* (add optional field/endpoint, loosen a constraint) vs *breaking* (remove/rename, change type/semantics, tighten validation, change defaults). Adding an enum value is breaking for clients with exhaustive switches or strict deserializers unless the contract already says unknown values must be tolerated — check before calling it additive. Most changes can be made additively — exhaust that before versioning.
 2. **Apply the compatibility contract**: additive-only by default; never repurpose a field; tolerant reader on the consumer side. Make the breaking change unnecessary where you can.
 3. **Choose the versioning mechanism** (and apply it consistently): URL path (`/v2/…` — visible, cache-friendly, coarse), header/media-type (`Accept: application/vnd.x.v2+json` — clean URLs, finer, less visible), or query param (simplest, weakest). State the choice and scope (whole API vs per-resource).
 4. **Semantic versioning of the contract**: major = breaking, minor = additive, patch = fixes; communicate via the chosen mechanism. Avoid a new major for anything additive.

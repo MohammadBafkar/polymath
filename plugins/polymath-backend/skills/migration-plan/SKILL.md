@@ -37,15 +37,16 @@ on **both** shapes during migrate, and on the **new** shape during contract.
 
 2. **Migrate** (dual-write + backfill):
    - App writes to both old and new shape on every mutation.
-   - Backfill historic rows in **batches** (a few thousand rows per transaction). Run during low-traffic windows. Use `LIMIT` + a primary-key cursor; never a single huge `UPDATE`.
+   - Backfill historic rows in **batches** (a few thousand rows per transaction). Run during low-traffic windows. Walk a primary-key cursor (`WHERE id > :last AND id <= :last + :batch`); never a single huge `UPDATE` (and note Postgres `UPDATE` has no `LIMIT` clause).
    - App reads the new shape if it's populated, falling back to the old.
    - Rollback: stop dual-write; drop the new column or table.
+   - **Gate before contract:** prove the backfill is complete (`SELECT count(*) … WHERE new_col IS NULL` = 0, or a checksum/row-count comparison between shapes) and that reads of the new shape have run in production for at least one release without errors.
 
 3. **Contract** (remove old):
    - App writes only the new shape.
    - Remove old code paths.
    - Drop old columns / tables / indexes.
-   - Rollback: re-add the old column (it had to be NULLable to be droppable safely; ensure expand left it that way).
+   - Rollback: **contract is the one-way door.** Re-adding a dropped column restores the schema, not the data. Before dropping, archive the old column/table (copy or snapshot) and wait at least one release after the last read stopped; the rollback is "restore from that archive", and the plan must say where it lives.
 
 ## Specific hazards to plan around
 

@@ -77,13 +77,30 @@ def _load_mcp_registry():
 
 
 def _data_root() -> pathlib.Path:
-    base = os.environ.get("POLYMATH_PLUGIN_DATA") or os.environ.get("CLAUDE_PLUGIN_DATA")
-    if base:
-        return pathlib.Path(base)
+    # Must resolve exactly like load-project-context.py's _data_root, or the
+    # mcpResolution block lands in a different file than the snapshot it
+    # annotates (CLAUDE_PLUGIN_DATA is a plugin data dir; the snapshot lives
+    # in its polymath-core/ subdirectory).
+    plugin_base = os.environ.get("POLYMATH_PLUGIN_DATA")
+    if plugin_base:
+        return pathlib.Path(plugin_base)
     data_root = os.environ.get("POLYMATH_DATA_DIR")
     if data_root:
         return pathlib.Path(data_root) / "polymath-core"
+    legacy_base = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if legacy_base:
+        return pathlib.Path(legacy_base) / "polymath-core"
     return pathlib.Path.home() / ".polymath" / "data" / "polymath-core"
+
+
+def _mirror_file(ctx_file: pathlib.Path) -> pathlib.Path | None:
+    """The portable snapshot copy load-project-context.py keeps for Bash-tool readers."""
+    if os.environ.get("POLYMATH_PLUGIN_DATA") or os.environ.get("POLYMATH_DATA_DIR"):
+        return None
+    if not os.environ.get("CLAUDE_PLUGIN_DATA"):
+        return None
+    mirror = pathlib.Path.home() / ".polymath" / "data" / "polymath-core" / ctx_file.name
+    return None if mirror == ctx_file else mirror
 
 
 def _tool_prefix(host: str, server: str) -> str:
@@ -215,6 +232,10 @@ def main() -> int:
         ctx["mcpResolution"] = mcp_map
         ctx_file.parent.mkdir(parents=True, exist_ok=True)
         ctx_file.write_text(json.dumps(ctx, indent=2))
+        mirror = _mirror_file(ctx_file)
+        if mirror is not None:
+            mirror.parent.mkdir(parents=True, exist_ok=True)
+            mirror.write_text(json.dumps(ctx, indent=2))
         # Quiet by default: the map is written for skills to read; the
         # SessionStart hook surfaces a one-line summary only when something
         # changed materially (a reuse resolved to the current host's server).

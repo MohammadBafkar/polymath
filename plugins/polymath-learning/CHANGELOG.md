@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `feynman-technique`: when coaching a person, they write the attempts — the agent marks cracks.
+- `explain`: inferred tier when unstated; wording fix.
+
 ## [0.8.0]
 
 Learning craft: tiered explanations, code walkthroughs, Feynman-style self-test.

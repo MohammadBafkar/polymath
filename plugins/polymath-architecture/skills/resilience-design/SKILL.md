@@ -23,8 +23,8 @@ Not this when: you are setting the latency/throughput target itself — that is 
 
 ## Procedure
 
-1. **Set a timeout** on every remote call — derived from the dependency's p99, not a round number. No timeout is the root cause of most cascading outages.
-2. **Decide retry**: only if the operation is idempotent or made so with an idempotency key. Use exponential backoff **with jitter**; cap attempts. Never retry a 4xx-class permanent error.
+1. **Set a timeout** on every remote call — derived from the dependency's p99, not a round number, and within the caller's own deadline: propagate the remaining request deadline downstream so inner hops don't keep working after the caller gave up. No timeout is the root cause of most cascading outages.
+2. **Decide retry**: only if the operation is idempotent or made so with an idempotency key. Use exponential backoff **with jitter**; cap attempts; retry at **one** layer only, under a retry budget (e.g. retries ≤ 10% of requests). Never retry permanent errors (most 4xx); `429`, `503`, and `408` are retryable — honor `Retry-After`.
 3. **Add a circuit breaker** when a dependency can stay down: trip on an error-rate/latency threshold, go half-open to probe recovery. State the trip and reset conditions numerically.
 4. **Isolate with bulkheads**: separate connection pools / thread pools per dependency so one slow dependency can't exhaust everything. Name the pool sizes.
 5. **Define the fallback** for the open-circuit / timeout case: cached value, degraded response, queue-for-later, or a clean error. "Spin forever" is not a fallback.

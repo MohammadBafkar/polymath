@@ -37,7 +37,7 @@ description: Author a deprecation / sunset notice — two dates (warn, remove), 
 
 ## Quality bar
 
-- Two dates: sunset (warning) and removal (stop working). Both must exist.
+- Two dates: sunset (warnings start / new usage blocked) and removal (stops working). Both must exist; the announcement date is stated alongside them.
 - Before/after code or config example present.
 - A replacement is named. If there's no replacement, the doc is a removal-notice, not a sunset-notice — rewrite accordingly.
 - Exception path documented.

@@ -20,10 +20,11 @@ description: Write a multi-stage Dockerfile — distroless or minimal base, buil
 
 ## Project localization
 
-Before the procedure, resolve the project snapshot — glob
-`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (newest
-wins; absent → skip and use built-in defaults). Then apply (contract:
-`polymath-core:project-context`):
+Before the procedure, resolve the project snapshot —
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`
+(ignore it if its `_meta.source` belongs to another repo; absent → read
+`.polymath/project.yaml` directly; neither → built-in defaults). Then apply
+(contract: `polymath-core:project-context`):
 
 - `conventions_docs`: read role `deployment` — approved base images,
   registries, and hosting targets there override the generic choices

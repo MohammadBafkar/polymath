@@ -38,6 +38,7 @@ description: Author an Amazon-style six-page narrative — prose not bullets, te
    - **What we need to decide today** — the concrete ask.
    - **Appendix: FAQ** — 5–8 hardest questions with paragraph answers. This is where the doc earns its keep.
 5. Length target: 1,500–2,000 words.
+6. Never invent numbers, quotes, or dates — every figure traces to the source material; a missing one is written `[NEEDS DATA: <what>]` and listed in the summary.
 
 ## Quality bar
 

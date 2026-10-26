@@ -18,27 +18,34 @@ description: Draft a PR description for the current branch following the canonic
 
 - The current branch's commits (read via `git log`).
 - Optional: PRD path at `docs/prds/<slug>.md` (anchors motivation).
-- Optional: target base branch (default `main`).
+- Optional: target base branch (default: the remote's default branch — `git symbolic-ref --short refs/remotes/origin/HEAD`, else `main`).
 
 ## Project localization
 
-Before the procedure, resolve the project snapshot — glob
-`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (newest
-wins; absent → skip and use built-in defaults). Then apply (contract:
-`polymath-core:project-context`):
+Before the procedure, resolve the project snapshot —
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`
+(ignore it if its `_meta.source` belongs to another repo; absent → read
+`.polymath/project.yaml` directly; neither → built-in defaults). Then apply
+(contract: `polymath-core:project-context`):
 
 - `prompts.pr_description_template`: when set, use that file as the PR
   body template instead of the catalog default.
 
 ## Procedure
 
-1. Run `git log <base>..HEAD --oneline` to see commits on the branch.
-   Default `<base>` is `main`.
-2. Run `git diff <base>..HEAD --stat` for the file list.
+1. Run `git fetch origin <base>` (when a remote exists), then
+   `git log origin/<base>..HEAD --oneline` to see the branch's own commits.
+2. Run `git diff origin/<base>...HEAD --stat` (three dots: against the merge
+   base) for the file list.
 3. Inspect the PRD (if `docs/prds/<slug>.md` exists) to ground the
    motivation section.
-4. Load the canonical template at
-   `plugins/polymath-release/templates/PR-description.md`.
+4. Pick the template, first match wins: the project context's
+   `prompts.pr_description_template`; the repo's own GitHub template
+   (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
+   root `PULL_REQUEST_TEMPLATE.md`, or `docs/PULL_REQUEST_TEMPLATE.md`); else
+   the catalog default [`PR-description.md`](../../templates/PR-description.md).
+   A repo template's headings win over the catalog's — keep the
+   PRDescription frontmatter for the workflow gate.
 5. Fill the template:
    - **Summary**: one paragraph in active voice. What does this PR do?
      Why now?

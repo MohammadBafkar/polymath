@@ -29,7 +29,24 @@ This is *cloud* cost. It is not Polymath's internal listing token budget (`polym
 4. **Unit economics** — compute cost per chosen unit; trend it. Rising cost/unit is the real alarm, not absolute spend growth that tracks usage.
 5. **Commitments** — assess reserved/savings-plan coverage vs steady-state baseline; recommend coverage %, not 100%.
 6. **Guardrails** — propose a cost budget and an anomaly alert (threshold or ML) so the next surprise pages someone.
-7. Output: attributed breakdown, ranked waste/rightsizing actions with $ impact, unit-economics trend, commitment recommendation, budget + alert.
+7. Never delete or resize anything yourself — recommendations only; the owner acts.
+
+## Output
+
+```text
+Cloud cost review: <account/project>, <period>
+
+Attributed spend:   $48.2k/mo — compute 52%, storage 21%, data transfer 14%, other 13%
+Untagged:           $6.1k/mo (12.7%) — owners unknown
+Unit economics:     $0.0031 per refund (↑ 18% QoQ while volume ↑ 4%)  ← the real alarm
+
+Actions (ranked by $ saved):
+  1. Delete 41 unattached volumes + 2.3 TB old snapshots   ~$2.4k/mo   risk: low (verify no restore need)
+  2. Rightsize 12 m5.2xlarge at < 15% CPU → m5.large        ~$3.1k/mo   risk: medium (check memory headroom)
+  3. Savings Plan covering 60% of steady-state compute      ~$4.0k/mo   risk: 1-yr commitment
+
+Guardrails:  monthly budget $50k (alert at 80%/100%); anomaly alert on daily spend > 25% vs 7-day mean
+```
 
 ## Quality bar
 

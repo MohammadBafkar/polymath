@@ -22,7 +22,7 @@ description: Author a Datadog monitor — query, threshold, evaluation window, n
 
 ## Procedure
 
-If the host's Datadog server is read-only (no create tool — the default for the hosted server), do steps 1-8, validate, then output the monitor JSON for the user to apply instead of creating it. Say so up front.
+If the host's Datadog server is read-only (no create tool — the default for the hosted server), do steps 1-8, validate, then output the monitor JSON for the user to apply instead of creating it. Say so up front. When a create tool exists, still show the final JSON and get explicit approval before creating — a new monitor can page people at 3am.
 
 1. **Decide the monitor type**:
    - **metric alert** — Prometheus/Datadog metric exceeds a threshold.
@@ -30,7 +30,8 @@ If the host's Datadog server is read-only (no create tool — the default for th
    - **log alert** — count of matching log lines.
    - **service check** — uptime / synthetic.
    - **composite** — `(monitorA && monitorB) || monitorC`.
-2. **Query** — write the metric or log query. Validate it in Datadog's UI before automating; the MCP creates monitors but it doesn't validate semantics. If the server offers a validation tool (`validate_monitor_definition`), run it on the finished definition.
+   - **SLO burn rate** (`slo alert`) — alerts on how fast an SLO's error budget is burning; the right type for SLO paging (see `polymath-sre:slo-design` for the windows).
+2. **Query** — write the metric or log query using metric names you have confirmed exist (search/list metrics first; never guess a name). Validate it before automating; the MCP creates monitors but it doesn't validate semantics. If the server offers a validation tool (`validate_monitor_definition`), run it on the finished definition.
 3. **Threshold** — derive from the SLO or from a documented baseline. **Never** "pick a round number that looks right".
 4. **Evaluation window** — match the response expectation:
    - Page (sev2): 5-15 min window with a short critical threshold.
@@ -52,15 +53,16 @@ Thresholds:
   critical: 0.5     (500ms, matches SLO threshold)
   warning:  0.4
 
-Evaluation window: 5 minutes (we page on sev2 burn).
+Evaluation window: 5 minutes (fast symptom alert; the SLO burn-rate pages
+live in separate `slo alert` monitors).
 
 No-data: notify_no_data=true, no_data_timeframe=10 (refund is a hot path).
 
 Message:
   @pagerduty-payments
   ## Refund p99 latency above SLO
-  p99 latency on refund-service is {{value}}s (threshold 0.5s).
-  This is a fast-burn signal on the 99.5% / 28d SLO.
+  p99 latency on refund-service is {{value}}s (threshold 0.5s, the
+  latency SLO's target). Check the SLO burn-rate monitor for budget impact.
 
   Runbook: <link>
   Dashboard: <link>
@@ -71,6 +73,7 @@ Tags: team:payments, service:refund-service, severity:sev2, slo:refund-latency
 ## Quality bar
 
 - Threshold derived from an SLO or a baseline number, with the source named.
+- Nothing created without approval of the final JSON.
 - `notify_no_data` explicitly set, not defaulted.
 - Notification routes via `@pagerduty-<service>` (not a person), tagged with team owner.
 - Runbook + dashboard links in the message.

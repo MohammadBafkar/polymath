@@ -5,7 +5,7 @@ description: Draft an incident communication update — plain language, status (
 
 # comms-update
 
-> Draft one comms update (status page / customer email / internal stakeholder note). Output is the update, ready to post.
+> Draft one comms update (status page / customer email / internal stakeholder note). Output is the update, ready for the comms lead to approve — this skill drafts; posting is a separate, approved step (`polymath-chat:post-incident-comms`, `polymath-chat:post-statuspage-update`).
 
 ## When to use
 
@@ -40,8 +40,8 @@ What's happening:
 
 Impact:
   - All customers attempting refunds since 14:02 UTC.
-  - Refunds queued during this window will process after recovery; no
-    refunds will be lost.
+  - Refunds queued during this window are expected to process after
+    recovery; we will confirm once the queue has drained.
 
 What we're doing:
   Rolled back the recent refund-service deploy. Metrics improving; we

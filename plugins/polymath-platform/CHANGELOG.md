@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `production-readiness-review`: capacity (load-tested) and data-durability (restore tested) dimensions.
+- `devex-metrics`: Failed Deployment Recovery Time (formerly MTTR) and Rework Rate.
+- `service-catalog-entry`: PagerDuty service ID instead of the integration key (a credential).
+
 ## [0.8.0]
 
 Platform craft: DORA + SPACE devex metrics, golden-path design, service-catalog entries.

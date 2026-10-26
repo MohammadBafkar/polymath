@@ -24,9 +24,9 @@ Not this when: this is a non-LLM service's latency/cost — that is `polymath-pe
 
 1. **Account the request**: break cost into input tokens, output tokens, and model tier; break latency into time-to-first-token, generation time, and tool/round-trips. Optimize the largest contributor, not the easiest.
 2. **Right-size the model**: route easy cases to a smaller/cheaper model and escalate only hard ones (a cascade). Reserve the top tier for tasks that measurably need it — verify with `polymath-ai:eval-plan` that the cheaper model still passes.
-3. **Cut input tokens**: trim/compress context, retrieve less but better (tune `rag-design`), drop stale transcript, and reuse a stable system prompt to exploit **prompt caching** (order prefix-stable content first).
-4. **Cut output tokens**: ask for the minimal format (structured/short), cap max output, and stop sequences — output tokens are usually the costlier side.
-5. **Cut call count**: batch independent requests, collapse multi-call chains where one call suffices, and cache deterministic results.
+3. **Cut input tokens**: trim/compress context, retrieve less but better (tune `rag-design`), drop stale transcript, and reuse a stable system prompt to exploit **prompt caching** (order prefix-stable content first; check the provider's minimum cacheable length, cache TTL, and the write premium vs read discount, then measure the cache-hit rate). In agent loops, input cost grows with every turn because the history is re-sent — caching and summarization matter most there.
+4. **Cut output tokens**: ask for the minimal format (structured/short), cap max output, and stop sequences — output tokens are priced several times higher than input and dominate generation latency.
+5. **Cut call count**: batch independent requests (asynchronous batch APIs trade latency for a large discount on non-interactive work), collapse multi-call chains where one call suffices, and cache deterministic results.
 6. **Hide latency**: stream tokens to first paint; parallelize independent tool calls; precompute where the input is known ahead of time.
 7. **Set the budget + tripwire**: a per-request cost and p95 latency target, with an alert when exceeded — the same discipline as a perf budget.
 

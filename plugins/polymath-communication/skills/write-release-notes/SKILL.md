@@ -37,6 +37,7 @@ description: Author customer-facing release notes — headline, user-benefit fra
 4. **Breaking changes**: own section. Migration path required for each. If anyone has to change anything in their code or workflow, this section is mandatory.
 5. **Known issues**: shipping ≠ no-bugs. Be honest about what's pending.
 6. **Security fixes**: credit the reporter when they consented; cite the advisory ID.
+7. **Claims trace to sources.** A speedup, a fixed bug, or a number must come from the CHANGELOG, a PR, or a measurement — every figure traces to the source material; a missing one is written `[NEEDS DATA: <what>]` and listed in the summary.
 
 ## Style
 
@@ -58,12 +59,12 @@ What's new
   - You can now view refund status in the timeline view of an order.
 
 Notable changes
-  - Idempotency-Key is now required on refund retries (previously optional).
+  - Idempotency-Key is now required on refund creation (previously optional).
     See the migration note below.
 
 Breaking changes
-  - `POST /v1/refunds` now requires `Idempotency-Key` header on retries. Calls
-    without it on a retry return 400.
+  - `POST /v1/refunds` now requires an `Idempotency-Key` header on every
+    request. Calls without it return 400.
     Migration: include a UUID `Idempotency-Key` per refund attempt.
 
 Security fixes
@@ -71,7 +72,7 @@ Security fixes
     Reported by <name>. See advisory link.
 
 Known issues
-  - The new timeline view doesn't yet render correctly on IE11. Tracked in #1234.
+  - The new timeline view doesn't yet render correctly on Safari 15. Tracked in #1234.
 ```
 
 ## Quality bar

@@ -15,10 +15,11 @@ description: Design or review a relational schema — tables, columns, types, in
 
 ## Project localization
 
-Before the procedure, resolve the project snapshot — glob
-`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (newest
-wins; absent → skip and use built-in defaults). Then apply (contract:
-`polymath-core:project-context`):
+Before the procedure, resolve the project snapshot —
+`${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`
+(ignore it if its `_meta.source` belongs to another repo; absent → read
+`.polymath/project.yaml` directly; neither → built-in defaults). Then apply
+(contract: `polymath-core:project-context`):
 
 - `conventions_docs`: read role `database` — naming conventions,
   migration tooling/process, and tenant-isolation rules there are
@@ -36,12 +37,12 @@ wins; absent → skip and use built-in defaults). Then apply (contract:
    - Money: integer in the smallest unit (`amount_cents`). Never floats.
    - Time: `timestamptz` always. Store UTC. Never `timestamp without timezone`.
    - Booleans: `boolean not null default false` — never nullable booleans.
-   - Enums: native enum if the DB supports it; otherwise a check constraint + a lookup table.
+   - Enums: a check constraint or a lookup table by default. Native enums (e.g. Postgres) are compact but hard to evolve — values can be added, not removed or reordered — so use them only for truly fixed sets.
 4. **Required vs nullable** — `not null` until proven otherwise. Nullable means "we know we don't know". Each nullable column needs a justification comment.
 5. **Indexes**:
    - Every foreign key gets an index.
    - Every `WHERE` predicate from the top-3 queries gets an index.
-   - Composite index column order matches predicate order: most-selective first, range last.
+   - Composite index column order: equality-filtered columns first, then the range or sort column (the order predicates appear in the SQL text doesn't matter to the planner).
    - Unique constraints exposed as indexes.
 6. **Audit columns** — `created_at timestamptz not null default now()`, `updated_at timestamptz not null default now()` with a trigger.
 7. **Soft delete** — only if you genuinely need recovery. Add `deleted_at timestamptz` and *every* query needs to filter on it; if you can't enforce that, prefer hard delete + a separate archive table.
@@ -69,7 +70,7 @@ CREATE INDEX refunds_status_created_at_idx ON refunds (status, created_at);
 
 Rationale:
 
-- `id` uuid v7 via `gen_random_uuid()` substitute on the app side.
+- `id` uuid: `gen_random_uuid()` gives v4 (random). For sortable v7 ids use `uuidv7()` on Postgres 18+, or generate v7 in the app and drop the column default.
 - `amount_cents` integer to avoid float drift.
 - Index `(status, created_at)` for the "list pending refunds in order" query.
 - `idempotency_key` unique so retries collapse to one row.

@@ -32,7 +32,7 @@ description: Design deep-link routing — universal/app links over custom scheme
    /orders/:id/refunds/new   → NewRefundScreen(order_id)
    /share/:token             → ShareLandingScreen(token) — public unauth path
    ```
-4. **Auth-gated screens**: deep link → if signed-in, go to screen; if not, signed-out landing → after login, complete the deep link. **Never** drop the user on the home screen after auth.
+4. **Auth-gated screens**: deep link → if signed-in, go to screen; if not, signed-out landing → after login, complete the deep link. **Never** drop the user on the home screen after auth. Validate the saved target against the routing table before following it — an unchecked "return to" URL is an open redirect.
 5. **Deferred deep-link support**: pre-install link click captured by the attribution SDK or by a first-party landing URL (server-side log + cookie). On first launch after install, app fetches the pending deep link and routes.
 6. **Parameter verification**: signed/JWT params for sensitive operations (e.g. magic-link login, password reset). Treat deep-link inputs as **untrusted**; verify on the server.
 7. **Fallback web URL**: every deep link MUST have a working https URL that handles the case when the app isn't installed. Quality of the fallback is a feature.

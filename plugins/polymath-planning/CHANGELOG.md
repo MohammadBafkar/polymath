@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `estimate`: summing every optimistic and pessimistic value is not a 90% interval — uses σ ≈ (P−O)/2.56 per step, root-sum-square aggregation, an 80% interval, and a correlation caveat.
+
 ## [0.8.0]
 
 Planning craft: write-plan, work-breakdown, three-point estimate.

@@ -1,6 +1,6 @@
 ---
 name: capacity-plan
-description: Plan forward capacity for a service or resource — current utilization, a growth model, headroom, scaling triggers, and cost; not short-term demand forecasting (demand-forecast).
+description: Turn a demand projection into a capacity plan — constrained resource, headroom date, scaling triggers, and cost; not forecasting the demand itself (demand-forecast).
 ---
 
 # capacity-plan
@@ -25,9 +25,10 @@ description: Plan forward capacity for a service or resource — current utiliza
 1. **Baseline.** State current utilization of the constrained dimension and the
    measurement window. Cite the metric (lean on `polymath-observability:metrics-design`
    for the RED/USE signal if it doesn't exist yet).
-2. **Growth model.** Project demand forward (linear / compounding / step). State
-   the assumption explicitly and the evidence behind it — a guessed growth rate
-   is an assumption, label it.
+2. **Demand input.** Take the demand projection from `polymath-sre:demand-forecast`
+   when one exists. Without one, use a simple stated model (linear / compounding /
+   step) and label the growth rate as an assumption with its evidence — run
+   `demand-forecast` when seasonality or known events matter.
 3. **Headroom.** Compute when projected demand crosses the safe-utilization
    threshold (leave margin below 100% for spikes and failover). Report the date
    or event, not just a percentage.

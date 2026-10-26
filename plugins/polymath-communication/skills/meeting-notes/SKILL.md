@@ -25,7 +25,8 @@ description: Capture meeting notes in three sections — decisions, action-items
    - **Action items** — each with owner (a person, not "the team"), due date, and the observable outcome ("@alice — by 2026-05-31 — opens PR for rate-limit middleware").
    - **Open questions** — what we agreed we don't know, with who is going to resolve it.
 3. Conflicts of memory: write what was concretely said. If two people remember differently, log the disagreement explicitly rather than picking one.
-4. Distribute within 24 hours. Notes that arrive 3 days later get ignored.
+4. Never invent an owner or a date the source doesn't contain. Write `owner: UNASSIGNED` / `due: UNSET` and list those items at the top of Actions so they get resolved — a made-up owner is worse than a visible gap.
+5. Distribute within 24 hours. Notes that arrive 3 days later get ignored.
 
 ## Output
 
@@ -49,7 +50,7 @@ Open questions
 ## Quality bar
 
 - Three sections, no more.
-- Every action item has owner + date + observable outcome.
+- Every action item has owner + date + observable outcome — or is explicitly marked UNASSIGNED / UNSET, never filled in by guess.
 - Decision section starts with a verb.
 - No "we discussed …" entries.
 

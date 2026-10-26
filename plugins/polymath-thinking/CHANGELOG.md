@@ -2,6 +2,17 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `architecture-critic` agent: read-only (`disallowedTools`), checks design claims against the repo (`checked` vs `reasoned`), confidence per objection, no padding to hit a quota, "Checked and sound" section, handles a missing artifact.
+- `5-whys`: branches on multiple verified causes.
+
+### Removed
+
+- The `/deliberate` command (the skill is already `/polymath-thinking:deliberate`).
+
 ## [0.8.0]
 
 Thinking craft: brainstorm, 5-whys, pre-mortem, red-team.

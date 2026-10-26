@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `bundle-analyze`: Vite has no `--report` flag (stats come from `rollup-plugin-visualizer`).
+- `web-vitals-budget`: no invented LCP gain — measure in lab then RUM.
+
 ## [0.8.0]
 
 Frontend craft: component contracts, Web Vitals budgets, bundle bloat hunts.

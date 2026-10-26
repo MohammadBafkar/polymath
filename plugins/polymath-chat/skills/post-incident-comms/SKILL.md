@@ -26,14 +26,16 @@ description: Post an incident-comms update to the right Slack channel + thread; 
 
 1. **Resolve the channel.** Prefer explicit channel input; fall back to `inc-<incident-id-slug>`; fall back to `userConfig.defaultIncidentChannel`. If none resolves, surface and stop.
 2. **Look up the channel ID** via the slack MCP's `conversations_list` (or `channels.list`). Slack APIs take channel IDs, not names.
-3. **Format the body** — `polymath-incident:comms-update` already produces a status / impact / next-update structure. Don't re-wrap; post as-is into a Slack code block or as Markdown if the channel renders it.
-4. **Post** via the slack MCP's `chat_postMessage` with:
+3. **Format the body** — `polymath-incident:comms-update` already produces a status / impact / next-update structure. Don't re-wrap; convert it to Slack mrkdwn (not a code block — code blocks don't wrap on mobile and aren't read well by screen readers).
+4. **Confirm with the comms lead / user.** Show the channel, thread, and exact text and wait for approval — unless the user already approved this exact update (e.g. a workflow step that presented it).
+5. **Post** via the slack MCP's `chat_postMessage` with:
    - `channel`: resolved ID.
    - `thread_ts`: if a parent was supplied.
    - `text`: a short fallback summary (Slack uses it for push notifications and screen-readers).
    - `blocks`: rich layout with the structured fields.
-5. **Return the posted message's `ts`** so the next update can thread under it. Save it as a step artifact (e.g. `docs/incidents/<id>-slack-thread.ts`).
-6. **Status-page channel mirror** — for sev1/sev2, also post a one-line summary to the status-page channel (separate channel from the incident channel). The summary points back to the incident channel for thread continuation.
+   If the call errors or times out, read the channel/thread history for the message before retrying — a duplicate incident update is worse than a slow one.
+6. **Return the posted message's `ts`** so the next update can thread under it. Save it as a step artifact (e.g. `docs/incidents/<id>-slack-thread.ts`).
+7. **Status-page channel mirror** — for sev1/sev2, also post a one-line summary to the status-page channel (separate channel from the incident channel). The summary points back to the incident channel for thread continuation.
 
 ## Output
 

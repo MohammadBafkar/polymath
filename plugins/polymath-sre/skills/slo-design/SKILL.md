@@ -23,19 +23,22 @@ description: Design an SLO — pick the right SLI per critical user journey, set
    - Availability: 99.0%, 99.5%, 99.9%, 99.95% — based on what the journey actually needs. Don't reach for 99.99% reflexively; the budget gets too tight to ship anything.
    - Latency: pick a single percentile (P95 or P99) and a single threshold. Avoid "P50 < 100ms AND P99 < 500ms" pyramids.
 4. **Measurement window** — 28 days rolling is the default. Long enough to absorb a bad day; short enough to be actionable.
-5. **Error budget arithmetic**:
-   - 99.9% = 0.1% allowed failure = 43m 12s of failure per 28d.
-   - 99.95% = 21m 36s per 28d.
-   - 99.99% = 4m 19s per 28d — almost certainly too tight.
-6. **Burn-rate alerts** — Google SRE workbook's multi-window multi-burn-rate is the proven shape:
+5. **Error budget arithmetic** (28 days = 40,320 minutes; budget = (1 − SLO) × window):
+   - 99.0% = 6h 43m 12s per 28d.
+   - 99.5% = 3h 21m 36s per 28d.
+   - 99.9% = 40m 19s per 28d.
+   - 99.95% = 20m 10s per 28d.
+   - 99.99% = 4m 2s per 28d — almost certainly too tight.
+   (The familiar 43m 12s / 21m 36s / 4m 19s figures are for a 30-day window — don't mix them with 28d.)
+6. **Burn-rate alerts** — Google SRE workbook's multi-window, multi-burn-rate shape. Each alert fires only when **both** its long and short window exceed the rate (the short window makes it reset quickly once the burn stops):
 
-   | Window | Burn rate | Severity |
-   | ------ | --------- | -------- |
-   | 1h     | 14.4×     | page (sev2) |
-   | 6h     | 6×        | page (sev3) |
-   | 3d     | 1×        | ticket |
+   | Long window | Short window | Budget consumed | Burn rate (30d / 28d) | Severity |
+   | ----------- | ------------ | --------------- | --------------------- | -------- |
+   | 1h          | 5m           | 2%              | 14.4× / 13.44×        | page |
+   | 6h          | 30m          | 5%              | 6× / 5.6×             | page |
+   | 3d          | 6h           | 10%             | 1× / 0.93×            | ticket |
 
-   Tune from the 28-day budget; don't invent thresholds.
+   burn rate = budget fraction × window hours ÷ long-window hours. Using the workbook's 30-day numbers on a 28-day SLO is fine if you say so; don't invent thresholds.
 
 ## Output
 
@@ -54,12 +57,12 @@ SLO:
   rolling window.
 
 Error budget:
-  3h 36m per 28d.
+  0.5% × 40,320 min = 201.6 min = 3h 21m 36s per 28d.
 
-Burn-rate alerts:
-  - 1h window @ 14.4× burn  → page sev2 to payments oncall
-  - 6h window @ 6× burn     → page sev3 to payments oncall
-  - 3d window @ 1× burn     → ticket to payments team
+Burn-rate alerts (28d rates):
+  - 1h & 5m windows  @ 13.44× burn → page payments oncall
+  - 6h & 30m windows @ 5.6× burn   → page payments oncall
+  - 3d & 6h windows  @ 0.93× burn  → ticket to payments team
 
 Where measured:
   Prometheus rule `slo_refund_latency_success_rate` (defined in

@@ -2,6 +2,15 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `run-experiment`: duration formula divided wrongly by the traffic fraction; the worked example's sample size was ~28× too large; percentile metrics need the delta method/bootstrap; success no longer means "crossed the MDE"; added no-peeking/sequential and sample-ratio-mismatch checks.
+- `sql-optimize`: `EXPLAIN ANALYZE` executes the query (DML in a rolled-back transaction, prod caution); plan reading is leaf-first in every dialect with per-loop, child-inclusive timings; `Rows Removed by Filter` belongs to scans.
+- `sql-write`: sargable predicates instead of "indexed predicates first"; `NOT IN`/NULL and time-zone traps; agent-run queries are read-only, DML only on approval.
+- `metrics-tree`: funnel stages multiply, disjoint segments add (the anti-pattern contradicted the example); session leaf counted users; baselines are never invented.
+
 ## [0.8.0]
 
 Data craft: SQL authoring, plan-based optimization, metrics-tree decomposition.

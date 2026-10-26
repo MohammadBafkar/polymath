@@ -27,7 +27,7 @@ Do not bulk-load every `SKILL.md`. Load the chosen target's body only after rout
 ## Procedure
 
 0. **Read the deterministic shortlist first.** Run
-   `python3 "${POLYMATH_PLUGIN_ROOT}/hooks/scripts/route-hint.py" --shortlist "<the user's request text>"`
+   `python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/scripts/route-hint.py" --shortlist "<the user's request text>"`
    and treat its `candidates` as the constrained choice set: the scorer
    has already done the narrowing the model is bad at, so
    reason *inside* the top-3 before reasoning outside it. Candidates with

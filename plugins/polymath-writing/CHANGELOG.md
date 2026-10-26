@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `adr`: finds the repo's existing ADR directory; superseding updates only the old ADR's status line.
+- `runbook`: every command/link verified or marked `[VERIFY]`; destructive steps flagged; no secrets.
+
 ## [0.8.0]
 
 Writing craft: ADR (Nygard), RFC, runbook, C4 architecture doc.

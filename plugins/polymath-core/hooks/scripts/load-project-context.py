@@ -92,6 +92,28 @@ def _data_root() -> pathlib.Path:
     return pathlib.Path.home() / ".polymath" / "data" / "polymath-core"
 
 
+def _mirror_file(out_file: pathlib.Path) -> pathlib.Path | None:
+    """Portable copy of the snapshot when the hook wrote under CLAUDE_PLUGIN_DATA.
+
+    Claude Code exports CLAUDE_PLUGIN_DATA to hook processes but not to the
+    Bash tool, so skills and the flows runner (which run through the Bash
+    tool) resolve the data root to ~/.polymath/data. Without the mirror they
+    never see the snapshot the hook wrote and silently skip localization.
+    """
+    if os.environ.get("POLYMATH_PLUGIN_DATA") or os.environ.get("POLYMATH_DATA_DIR"):
+        return None
+    if not os.environ.get("CLAUDE_PLUGIN_DATA"):
+        return None
+    mirror = pathlib.Path.home() / ".polymath" / "data" / "polymath-core" / out_file.name
+    return None if mirror == out_file else mirror
+
+
+def _clear_snapshot(out_file: pathlib.Path) -> None:
+    for path in (out_file, _mirror_file(out_file)):
+        if path is not None and path.exists():
+            path.unlink()
+
+
 # ---------------------------------------------------------------------------
 # YAML loader — same shim as polymath-flow's, but trimmed for the project
 # subset (no block scalars; no inline-mapping-in-list-item beyond two levels).
@@ -506,8 +528,7 @@ def main() -> int:
 
     if source is None and overlay is None:
         # Clear any stale snapshot so downstream skills don't act on it.
-        if out_file.exists():
-            out_file.unlink()
+        _clear_snapshot(out_file)
         _debug("no .polymath/project.yaml found; cleared snapshot")
         return 0
 
@@ -560,8 +581,7 @@ def main() -> int:
 
     if source is None and applied_overlay is None:
         # Overlay was the only candidate and it was skipped.
-        if out_file.exists():
-            out_file.unlink()
+        _clear_snapshot(out_file)
         _debug("only an invalid overlay found; cleared snapshot")
         return 0
 
@@ -589,6 +609,13 @@ def main() -> int:
         meta["ignored_keys"] = ignored_keys
     snapshot["_meta"] = meta
     out_file.write_text(json.dumps(snapshot, indent=2))
+    mirror = _mirror_file(out_file)
+    if mirror is not None:
+        try:
+            mirror.parent.mkdir(parents=True, exist_ok=True)
+            mirror.write_text(json.dumps(snapshot, indent=2))
+        except OSError as e:
+            _debug(f"could not write portable snapshot mirror {mirror}: {e}")
 
     summary = _summary_line(snapshot)
     if summary:

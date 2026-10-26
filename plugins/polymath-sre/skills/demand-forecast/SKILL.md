@@ -13,7 +13,7 @@ description: Model capacity demand — growth (linear/compound/seasonal), transl
 - Turning a usage trend into a provisioning decision with a deadline.
 - A workflow invokes `polymath-sre:demand-forecast`.
 
-Not this when: you are setting reliability targets (`polymath-sre:slo-design`) or the current point-in-time capacity recommendation (`polymath-sre:capacity-plan`). This skill projects demand forward in time.
+Not this when: you are setting reliability targets (`polymath-sre:slo-design`) or turning the forecast into scaling triggers and a cost plan (`polymath-sre:capacity-plan`, which consumes this output). This skill projects demand forward in time.
 
 ## Inputs
 

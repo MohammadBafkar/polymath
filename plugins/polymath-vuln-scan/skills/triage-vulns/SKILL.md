@@ -17,13 +17,13 @@ description: Triage Snyk findings — classify exploitable / reachable / dev-onl
 ## Procedure
 
 1. **Fetch findings** via the snyk MCP (`list_issues`, filtered to the project or target).
-2. **For each finding**, classify:
+2. **For each finding**, check known exploitation first — listed in CISA KEV, or a high EPSS score — which overrides reachability-based deferral for anything internet-facing. Then classify:
    - **Exploitable + reachable** — patch immediately. The vulnerable function is called from this codebase.
    - **Reachable, not exploitable in our config** — patch in the next routine bump; document.
    - **Unreachable (Snyk reachability says no)** — defer until the next major bump; still upgrade if cheap.
    - **Dev-only / test-only dependency** — patch in routine bumps; CVSS-critical in build tooling still matters for supply-chain risk.
 3. **Action per class**:
-   - Patch: bump version, run `snyk test` locally, commit.
+   - Patch: bump to the lowest fixed version, run the project's tests (`polymath-engineering:verify-change`) and `snyk test`, then commit through `polymath-release:commit` (shown to the user first) — never a silent auto-commit. Major-version bumps get a changelog read for breaking changes.
    - Defer: open a tracking ticket with the finding ID, classification reason, and re-evaluation date (default: 30 days).
    - Accept: only with a documented justification in `.snyk` (the policy file) and an explicit expiration date.
 4. **Never auto-`snyk ignore`**. Ignoring without a justification + expiration is how vulns become permanent.

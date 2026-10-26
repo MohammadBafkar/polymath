@@ -10,7 +10,7 @@ description: Define shared Polymath vocabulary — artifacts, capabilities/provi
 ## Lifecycle artifacts
 
 - **PRD** — Product Requirements Document: problem, users, goals, non-goals, requirements, acceptance criteria, metrics. Owner: `polymath-product`.
-- **ADR** — Architecture Decision Record (Michael Nygard): context, decision, consequences. Immutable once accepted; superseded, never edited. Owner: `polymath-decisions`.
+- **ADR** — Architecture Decision Record (Michael Nygard): context, decision, consequences. Immutable once accepted; superseded, never edited. Owner: `polymath-writing`.
 - **RFC** — Request for Comments: lightweight design document for changes that need group input before commitment. Owner: `polymath-writing`.
 - **Acceptance criteria** — Concrete, testable Given/When/Then statements that gate the smallest shippable slice. Owner: `polymath-product`.
 - **Postmortem** — Blameless incident retrospective: timeline, impact, contributing causes, action items. Owner: `polymath-incident`.
@@ -56,15 +56,15 @@ description: Define shared Polymath vocabulary — artifacts, capabilities/provi
 - **Routing tier** — How strongly a surface is signal-backed: `soft` (advisory ranking) or `hard` (a declared deterministic signal that may fire the route hint). Hard-tier surfaces are ratcheted and fixture-backed.
 - **`routing.mode`** — The project's routing posture: `hint` (ambient, zero-ceremony), `classify`, or `enforce` (mutating tool calls gated until classified — needs the `polymath-pipeline` plugin).
 - **detect → propose → confirm → run** — The contract for workflows and routed surfaces: detect a match, propose it in one line, wait for approval, then run. Never auto-start.
-- **Project context** — The resolved `.polymath/project.yaml` snapshot at `${POLYMATH_DATA_DIR}/polymath-core/project-context.json`, consumed by localizing skills. Owner: `polymath-core:project-context`.
+- **Project context** — The resolved `.polymath/project.yaml` snapshot at `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (falls back to the raw project file when absent or from another repo), consumed by localizing skills. Owner: `polymath-core:project-context`.
 
 ## Marketplace
 
 - **Plugin** — Single-responsibility unit of trust, versioning, and distribution (`plugins/polymath-<name>/`).
 - **Component** — A skill, command, agent, hook, MCP server, or monitor inside a plugin.
-- **Skill vs command** — A skill bundles a procedure with templates/scripts/references; a command is a thin alias (≤ 20 lines) that points at a skill.
+- **Skill vs command** — A skill bundles a procedure with templates/scripts/references and is itself invocable as `/plugin:skill`; a command is a thin alias (≤ 20 lines) under a *different* name that points at a skill.
 - **Always-on listing cost** — Tokens consumed by the `name`+`description` of every skill/command/agent, surfaced to the model every turn.
-- **Token budget** — ≤ 400 tokens per plugin always-on; ≤ 1,000 catalog-wide measured. Measured by `tools/token-report.py budget`.
+- **Token budget** — ≤ 400 tokens per plugin always-on; catalog-wide ≤ 250 × plugin count. Measured by `tools/token-report.py budget`.
 - **Conformance** — The deterministic gates in `tools/conformance.sh` (MANIFEST, SKILL, TEMPLATE, WORKFLOW, SURFACE-INDEX, CAPABILITY-INDEX, BINDING-1, MCP-BINDING, MCP-PKG, INTEGRATION-1/2, DESC-1/2, AGENT-1, FIXTURE-1, DOCS-1/2). `tools/validate-all.sh` runs the authoring subset.
 - **Portability** — The agentskills.io export (`tools/export-agents-skills.py`): skills port natively; commands/agents export as converted skills; hooks/workflows/MCP export as support metadata a target host must wire. See [`docs/PORTABILITY.md`](../../../../docs/PORTABILITY.md).
 

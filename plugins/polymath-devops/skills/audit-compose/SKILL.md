@@ -7,6 +7,14 @@ description: Audit docker-compose.yaml — image pinning, named volumes, network
 
 > Spot the patterns in a compose file that bite when you actually run it: floating images, host-mount surprises, secrets in ENV, missing health gates.
 
+## When to use
+
+- A `docker-compose.yaml` / `compose.yaml` is new, changed in a PR, or about to be used beyond a laptop.
+
+## Inputs
+
+- The compose file(s), including override files (`compose.override.yaml`, `-f` stacks) — findings depend on the merged result (`docker compose config` prints it).
+
 ## Procedure
 
 1. **`image:` pinning.** Each service should be digest-pinned for production-shaped compose; tag-pinned for dev is fine if the tag is specific (`postgres:16.3`, not `postgres:latest`).
@@ -20,6 +28,7 @@ description: Audit docker-compose.yaml — image pinning, named volumes, network
 7. **Resource limits.** `deploy.resources.limits` (Swarm) or runtime `cpus:` / `mem_limit:` (compose-direct). Without limits, one container can starve others on the host.
 8. **`ports:` exposure.** `127.0.0.1:5432:5432` over `5432:5432` for local-only services. Without the bind address, the port is open to the host's external interfaces.
 9. **`profiles:`** for optional services (`profiles: [dev]`); keeps a single compose file from running everything in prod.
+10. **Host-escape settings** — each is a high-severity finding unless justified: `privileged: true`; mounting `/var/run/docker.sock` (root on the host); `network_mode: host` or `pid: host`; broad `cap_add` (`SYS_ADMIN`, `NET_ADMIN`); `security_opt: [seccomp:unconfined]`.
 
 ## Output
 
@@ -49,3 +58,4 @@ Recommendation: 5 fixes; prod readiness requires all addressed.
 - Plain-text credentials in `environment:`. Show up in `docker inspect`.
 - `depends_on` without `condition: service_healthy` for stateful deps. Race conditions on startup.
 - Single compose file used in dev *and* prod with no `profiles` / overrides.
+- Mounting the Docker socket "so the container can manage containers" — that container now owns the host.

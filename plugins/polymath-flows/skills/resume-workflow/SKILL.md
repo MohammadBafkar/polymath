@@ -23,8 +23,8 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 1. If no `run_id` was supplied, list both resumable buckets:
 
    ```bash
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status paused
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow list --status active
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list --status paused
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" list --status active
    ```
 
    Surface the combined table (`run_id` + status + `last_active`) and ask the user to
@@ -34,7 +34,7 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 2. Resume the chosen run:
 
    ```bash
-   ${POLYMATH_PLUGIN_ROOT}/bin/polymath-flow resume <run_id>
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-flow" resume <run_id>
    ```
 
    The executable flips status from `paused` to `active` and prints the next step JSON.
@@ -48,5 +48,6 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 
 ## Anti-patterns to avoid
 
-- Resuming without checking *why* it paused. If a `mustPass` check failed, the user must fix the underlying artifact (e.g. create the missing PRD file) before resuming.
+- Resuming without checking *why* it paused. If a `mustPass` check failed, the underlying artifact must actually be fixed (e.g. the missing PRD written) before resuming — never by editing a step summary to match the gate.
+- Resuming a run flagged stale (≥ 2 days idle) without first checking that the branch, artifacts, and inputs it depends on still exist.
 - Re-doing already-complete steps. The executable's `next` always points to the right place; trust it.

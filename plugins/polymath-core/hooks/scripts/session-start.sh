@@ -87,7 +87,9 @@ fi
 init_nudge=""
 if [[ -z "$project_summary" && -z "$py_note" ]] && command -v git >/dev/null 2>&1; then
   repo_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
-  if [[ -n "$repo_root" ]]; then
+  # A project file that resolved but yields no one-line summary (e.g. a minimal
+  # file with no stack yet) is still an initialized repo — don't nudge.
+  if [[ -n "$repo_root" && ! -f "$repo_root/.polymath/project.yaml" ]]; then
     nudge_marker="${data_root}/polymath-core/init-nudged"
     if [[ ! -f "$nudge_marker" ]] || ! grep -Fxq "$repo_root" "$nudge_marker" 2>/dev/null; then
       init_nudge="Polymath: this repo isn't initialized. Run /polymath-core:init-project to set up project context (or /polymath-core:doctor to check your tools)."
@@ -101,6 +103,13 @@ flows_workflows_dir="${data_root}/polymath-flows/workflows"
 # Older layouts wrote to ${data_root}/workflows; fall back if needed.
 if [[ ! -d "$flows_workflows_dir" && -d "${data_root}/workflows" ]]; then
   flows_workflows_dir="${data_root}/workflows"
+fi
+# Under Claude Code the hook sees CLAUDE_PLUGIN_DATA but the runner — invoked
+# through the Bash tool, which never receives plugin env vars — writes run
+# state under ~/.polymath/data. Look there too, or paused runs never surface.
+if [[ ! -d "$flows_workflows_dir" && -z "${POLYMATH_DATA_DIR:-}" && -z "${POLYMATH_PLUGIN_DATA:-}" \
+      && -d "$HOME/.polymath/data/polymath-flows/workflows" ]]; then
+  flows_workflows_dir="$HOME/.polymath/data/polymath-flows/workflows"
 fi
 
 # Surface resumable runs: paused (need attention) AND active (in-progress across

@@ -3,7 +3,6 @@
 # docs/<area> path). lint-skills.sh fails on any NEW shapeless skill and on any
 # baselined skill that has since gained a shape — the baseline only shrinks.
 # Fix a skill's Output section, then delete its line here.
-polymath-ai:agent-design
 polymath-ai:llm-cost-latency
 polymath-ai:llm-guardrails
 polymath-architecture:aggregate-design
@@ -14,9 +13,7 @@ polymath-architecture:event-driven-design
 polymath-architecture:integration-design
 polymath-architecture:resilience-design
 polymath-architecture:service-decomposition
-polymath-author:scaffold-component
 polymath-backend:api-versioning
-polymath-cloud:cloud-cost-review
 polymath-core:doctor
 polymath-core:initialize-project
 polymath-core:project-context

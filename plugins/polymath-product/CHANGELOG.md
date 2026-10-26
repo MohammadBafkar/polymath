@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `prd`: metric baselines/targets are `[TBD]` unless supplied — never invented.
+
 ## [0.8.0]
 
 Product craft: PRDs, acceptance criteria, epic decomposition with materialized templates.

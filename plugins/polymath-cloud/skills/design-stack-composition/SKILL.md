@@ -20,13 +20,13 @@ description: Design Terraform stack composition — module boundaries, state lay
    - **Platform** (monthly; impact: multiple services) — EKS clusters, shared databases, service mesh.
    - **Service** (per-feature; impact: one service) — Lambdas, ECS services, SQS, app DBs.
 2. **One state per blast-radius zone × environment.** A bad change to the foundational stack should never block a service deploy.
-3. **State backend.** Remote state (S3 + DynamoDB lock for AWS; GCS + lock for GCP; AzureRM blob + lease for Azure). Local state on `main` is a refusal-to-merge.
+3. **State backend.** Remote state with locking: S3 with native lockfile locking (`use_lockfile = true`, Terraform ≥ 1.10 — DynamoDB locking is deprecated), GCS (built-in locking), AzureRM blob (lease). Separate buckets/containers — and credentials — per environment. Local state on `main` is a refusal-to-merge.
 4. **Workspaces vs directories.**
-   - **Workspaces** for genuinely identical environments (dev/staging/prod with the same module). Variables tweak per workspace.
-   - **Directories** when environments diverge structurally (different modules, different providers). Workspaces hide divergence; directories make it explicit.
+   - **Directories (one root per env)** for dev/staging/prod — the default. CLI workspaces share one backend and one set of credentials, so they can't give prod stricter access than dev (HashiCorp's own guidance: workspaces don't fit deployments that need separate credentials and access controls).
+   - **Workspaces** only for short-lived, genuinely identical copies (per-PR preview stacks, load-test clones) where shared credentials are acceptable.
 5. **Module boundaries.** A module owns a *capability*, not a *primitive*. `network-vpc` (capability) over `aws-vpc` (primitive); the module composes VPC + subnets + routes + NAT.
-6. **`required_providers` + version pinning.** Pin minor in modules (`~> 5.0`); pin patch in root stacks. Floating across rebuilds = surprise plan output.
-7. **Remote-state references** (`terraform_remote_state`) only between adjacent zones. Service stacks read platform outputs (cluster ID, DB endpoints); platform stacks read foundational outputs (VPC ID, KMS key ARN). Service stacks should not reach into another service's state.
+6. **`required_providers` + version pinning.** Modules declare a lower bound plus major ceiling (`>= 5.20, < 6.0`, or `~> 5.20` — note `~> 5.0` allows any 5.x); root stacks commit `.terraform.lock.hcl`, which pins exact provider versions and hashes. Floating across rebuilds = surprise plan output.
+7. **Remote-state references** (`terraform_remote_state`) only between adjacent zones — and prefer publishing the few needed outputs to a parameter store (SSM, Secret Manager, Key Vault) or `tfe_outputs`: `terraform_remote_state` grants the reader the *entire* upstream state, secrets included. Service stacks read platform outputs (cluster ID, DB endpoints); platform stacks read foundational outputs (VPC ID, KMS key ARN). Service stacks should not reach into another service's state.
 8. **Per-apply blast radius.** Document for each stack:
    - What it owns.
    - What breaks if you destroy it.
@@ -57,8 +57,9 @@ States (foundational → service)
        Apply:   refund team, per-PR via CI.
        Reads:   terraform_remote_state.platform_shared.outputs.{cluster_id, mesh_ca}
 
-Workspaces
-  dev / staging / prod per state — same module, vars per workspace.
+Environments
+  envs/{dev,staging,prod}/<stack>/ — one root and one backend per env;
+  prod backend and apply role reachable only from the prod pipeline.
 
 Module boundaries
   /modules/network/vpc           VPC + subnets + NAT + route tables (capability).
@@ -66,14 +67,14 @@ Module boundaries
   /modules/service/lambda-sqs    Lambda + SQS + DLQ + alarms (capability).
 
 Provider pinning
-  Modules: ~> 5.0 (minor)
-  Root:    = 5.43.2 (exact, root re-bumps deliberately)
+  Modules: >= 5.20, < 6.0
+  Root:    .terraform.lock.hcl committed (exact versions + hashes; bumped deliberately)
 
 Anti-foot-cannon checks
   ✓ No service stack references another service's state.
   ✓ Foundational state is RO from platform; platform state RO from service.
-  ✓ All states locked via DynamoDB.
-  ✗ Currently dev workspace shares the same backend bucket as prod — separate buckets per env recommended.
+  ✓ All states locked (S3 native lockfile).
+  ✗ Currently dev shares the prod backend bucket — separate buckets and credentials per env.
 ```
 
 ## Quality bar
@@ -87,5 +88,5 @@ Anti-foot-cannon checks
 
 - One big monolithic state for the whole org. Apply takes minutes, blast radius is everything.
 - One state per resource. State plumbing eats all the time you saved.
-- Workspaces in lieu of separate directories when environments diverge structurally. Surprises a year later.
+- CLI workspaces for dev/staging/prod — one backend and one credential set for every environment.
 - Reading sibling services' remote state. Tight coupling masquerading as composition.

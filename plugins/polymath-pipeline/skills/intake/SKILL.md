@@ -29,7 +29,7 @@ that); intake decides *where the request goes*, in one screen.
    `python3 "<polymath-core>/hooks/scripts/route-hint.py" --shortlist "<the request text>"`
    — the sibling plugin's hook script, resolvable from the directive's
    plugin path. Its `candidates` are the constrained choice set for
-   step 5: the scorer already narrowed 153 surfaces to ≤3, so reason
+   step 5: the scorer already narrowed the whole catalog to ≤3, so reason
    inside that set first and route outside a non-empty shortlist only
    with a stated reason. An empty list means no declared signal matched —
    proceed unconstrained.
@@ -60,12 +60,13 @@ that); intake decides *where the request goes*, in one screen.
      name (propose-first contract; `polymath-core:route` can confirm)
    - single skill → name it
    - trivial after clarification → `direct`
-   - Surfaces declared `trust: auto-headless` that are read-only may be run
-     without propose-confirm when `routing.mode != hint`.
+   - A surface declared `trust: auto-headless` may skip propose-confirm only
+     in a non-interactive (headless) session, only if it is read-only, and
+     never when it is a workflow — workflows are always proposed first.
 6. **Record the classification** so the gate opens (1h validity): run the
    exact mark command the directive/deny message carries (absolute path
    plus `--session <id>`), filling in the surface:
-   `"${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" mark --session <id> --surface <choice>`.
+   `"${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-pipeline" mark --session <id> --surface <choice>`.
    The surface is validated against the catalog — a typo'd or invented
    name is rejected and does not open the gate.
 7. **Output one screen**: the 4 scores with one-line justifications, open

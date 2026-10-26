@@ -31,7 +31,8 @@ description: Write or refresh an operational runbook for an alert/symptom; struc
    - **Verification** — how to confirm the system is healthy.
    - **Rollback** — how to reverse if the action makes things worse.
    - **Escalation** — when to page whom.
-4. Update `last_reviewed` in the frontmatter to today.
+4. Every command, dashboard link, and alert name must be one you verified exists (in the repo, the alert definition, or with the owning team). An unverified step is marked `[VERIFY: …]` — an on-call following an invented command at 3 AM is worse than a gap. Destructive commands carry a warning line and a pre-check; no secrets in the runbook — reference where to fetch them.
+5. Update `last_reviewed` in the frontmatter to today.
 
 ## Quality bar
 

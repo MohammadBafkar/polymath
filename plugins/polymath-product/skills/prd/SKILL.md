@@ -40,7 +40,7 @@ description: Draft a PRD from a problem statement plus user/context inputs; popu
      the condition that reopens it.
    - **Requirements** — enumerated, testable behaviors.
    - **Acceptance criteria** — Given / When / Then statements that map to test cases.
-   - **Metrics** — adoption, quality, performance. Reference North Star if known.
+   - **Metrics** — adoption, quality, performance. Reference North Star if known. Baselines and targets come from data the user supplied; otherwise write `[TBD: baseline from <source>]` — never an invented number.
    - **Risks and open questions** — at least one open question if uncertainty exists.
    - **Out of scope** — explicit future work list.
    - **Rollout plan** — single paragraph; reference feature flags if applicable.

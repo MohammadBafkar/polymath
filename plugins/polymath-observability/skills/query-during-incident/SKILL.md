@@ -17,7 +17,7 @@ description: Run the right Datadog queries during an incident to narrow cause â€
 ## Procedure
 
 1. **Anchor on the alert that fired**. Note the metric, threshold, and exact time.
-2. **Run these queries in order** via the MCP, comparing each result against pre-incident baseline (typically 24h ago, same time):
+2. **Run these queries in order** via the MCP, comparing each result against a pre-incident baseline (24h ago, same time; also 7 days ago when traffic is weekly-seasonal). The metric names below are placeholders â€” find the service's real metric/APM names first (search metrics or the service's dashboard) instead of guessing:
    - **Error rate** for the service: `5xx_rate{service:X}` over the last 30 min vs 24h ago same window.
    - **Latency** percentiles: `p50/p95/p99 latency{service:X}` over the last 30 min vs 24h ago.
    - **Saturation**: CPU / memory / queue depth on the service's pods or hosts.
