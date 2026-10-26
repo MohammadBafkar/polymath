@@ -7,6 +7,8 @@ description: Write a Mom-Test-shaped interview guide for one research question; 
 
 > Author one interview guide for one research question. Output is `docs/research/<slug>-guide.md` ready to run.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A product or research question needs primary evidence.
@@ -21,7 +23,7 @@ description: Write a Mom-Test-shaped interview guide for one research question; 
 ## Procedure
 
 1. Read [`Interview-guide.md`](../../templates/Interview-guide.md).
-2. Compute the slug from the question.
+2. **Slug** from the research question: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/research/<slug>-guide.md`:
    - **Research question** — exactly one. Reject bundled questions; pick the most important and spin the others off.
    - **Recruit** — audience + 2-3 screener questions + target N (5–8).

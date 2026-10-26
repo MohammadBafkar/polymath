@@ -7,6 +7,8 @@ description: Decompose a problem to first principles — strip to fundamentals, 
 
 > Stop reasoning by analogy ("everyone does it this way"). Strip the problem to what must be true, then rebuild — that's where the non-obvious answer lives.
 
+**Mode:** generative — diverge before converging. Produce genuinely different options first (the obvious answer is one candidate, not the answer), then narrow with stated criteria.
+
 ## When to use
 
 - A constraint or cost is treated as fixed "because that's how it's done" and you suspect it's inherited, not fundamental.
@@ -15,12 +17,17 @@ description: Decompose a problem to first principles — strip to fundamentals, 
 
 This *decomposes to fundamentals*. It is not generating many options (`polymath-thinking:brainstorm`), framing the problem (`polymath-thinking:problem-framing`), or incident root-cause (`polymath-thinking:5-whys`).
 
+## Inputs
+
+- The problem, and the conventional approach or constraint being questioned (required). Only a problem given: state the conventional approach yourself in step 1.
+- Domain numbers if available (unit costs, latency floors, volumes) — used to quantify the bedrock; absent ones are `[TBD: <number>]`, never invented.
+
 ## Procedure
 
 1. **State the conventional approach** and the assumptions it rests on — list them explicitly.
 2. **Test each assumption**: is it a law (physics, math, economics, regulation) or a convention/analogy someone could change? Tag every assumption.
 3. **Keep only the bedrock** — the constraints that are genuinely fundamental. Discard the conventions.
-4. **Rebuild** a solution from the bedrock up, ignoring how it's "normally" done.
+4. **Rebuild** from the bedrock up, ignoring how it's "normally" done — sketch at least two rebuilt approaches that differ in mechanism before choosing one.
 5. **Quantify** where you can — fundamentals are often numeric (material cost, latency floor, unit economics); a first-principles argument with numbers beats one with adjectives.
 6. **Compare** the rebuilt approach to the conventional one; name what the convention was costing.
 7. Output: the assumption ledger (fundamental vs convention), the bedrock, and the rebuilt approach with its quantified advantage.

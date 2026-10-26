@@ -7,6 +7,8 @@ description: Capture a Grafana dashboard snapshot for incident timelines + postm
 
 > Take a permalinked snapshot of a Grafana dashboard at a specific time window so an incident timeline or postmortem can reference exactly what the on-call saw. Output is the snapshot URL + the variables/time captured.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 > **MCP binding (read before any tool call):** if your host has a `grafana` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use

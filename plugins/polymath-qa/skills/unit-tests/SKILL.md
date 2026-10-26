@@ -7,6 +7,8 @@ description: Author unit tests using the repo's existing framework; one test per
 
 > Author unit tests for behaviors a `coverage-gap` pass identified as MISSING (unit).
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A workflow invokes `polymath-qa:unit-tests`.

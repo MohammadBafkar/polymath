@@ -7,6 +7,8 @@ description: Set Core Web Vitals budgets (LCP, INP, CLS) per route and propose t
 
 > Pin budgets for LCP, INP, and CLS per route; if a route is over budget, propose the highest-leverage fix.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new route ships; we need a target.

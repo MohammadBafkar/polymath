@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `rfc`, `architecture-doc`: Inputs and unattended-run rules; `editorial-pass`: exact cut-report shape.
+- Canonical slug rule.
+
 ## [0.11.0]
 
 ### Changed

@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `activateProject` (v0.2.0) writes and gates on the root `POLYMATH.md`.
+- `run-workflow` and `resume-workflow` show exact per-step output; `list-workflows` gains Inputs; `run-workflow` reads `workflow-detect.json` from its plugin root.
+
 ## [0.11.0]
 
 ### Fixed

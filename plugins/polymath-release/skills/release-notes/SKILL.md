@@ -10,6 +10,8 @@ description: Draft version release notes (GitHub release / docs page) from CHANG
 > `CHANGELOG.md`. Readers are users and integrators upgrading; **user
 > benefit** over implementation detail.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The user says "draft release notes for vX.Y.Z".

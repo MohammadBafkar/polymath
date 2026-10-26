@@ -7,6 +7,32 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0]
+
+Hardening pass for determinism, creativity, and completeness. Every skill now declares how much latitude it has, computes its arithmetic with tested scripts instead of prose, and shows the exact output it produces.
+
+### Added
+
+- **Skill modes (SKILL-3).** Every SKILL.md declares one `**Mode:**` — `deterministic` (26 skills: same inputs, same output, computed by a script or tool), `analytical` (153: judgment inside a fixed frame, evidence per verdict), or `generative` (6: diverge into genuinely different options before converging on stated criteria). The canonical sentence for each lives in `tools/check-skill-shape.py`; drift fails the build.
+- **`tools/check-skill-shape.py`**, run by `lint-skills.sh`: SKILL-2 required sections (When to use, Inputs, Procedure, Output, Quality bar / Anti-patterns), SKILL-3 mode, SKILL-4 no relative link or backtick path that leaves the plugin (dead once installed).
+- **Nine deterministic calculators**, stdlib-only, each with unit tests: `planning` (`pert.py`, seeded `monte-carlo.py`, RICE/WSJF `score.py`), `decisions` (`weigh.py`, full ±1 sensitivity sweep), `sre` (`error-budget.py`, `headroom.py`), `data` (`sample-size.py` with SRM check), `ai` (`winrate.py`, Wilson interval), `cloud` (`plan-summary.py`, Terraform plan classification that never prints values). Skill examples are the scripts' real output.
+- **PROFILE-3**: the install profiles ship inside `polymath-core` and must stay byte-identical to `registry/polymath-profiles.json`.
+
+### Changed
+
+- **Project init writes `POLYMATH.md` at the project root** instead of `docs/POLYMATH-ONBOARDING.md` (`polymath-core:initialize-project`, `activateProject` v0.2.0). Re-running init moves a legacy file; there is never more than one.
+- **Output-shape baseline emptied**: all 50 grandfathered skills now show an exact output shape; 53 skills gained an Inputs section with defined missing-input behavior.
+- **Generative skills diverge for real**: `brainstorm` (ten lenses, distinctness check, `★ non-obvious`, criteria fixed first), `red-team` (six lenses, ranked objections, no padding), `pre-mortem`, `first-principles`, `product-strategy`, `explain` (three candidate analogies).
+- **One slug rule** (18 skills, matching the flows runner) and **two placeholder markers** (`[TBD]`, `[VERIFY]`); confirm checkpoints name their unattended fallback; untrusted-text rules added where skills read logs, alerts, tickets, transcripts, diffs, or scan results.
+- CI discovers every `plugins/*/tests` suite instead of a hand-maintained list; the style guide, `skill-author-critic`, `validate-plugin`, and the `new-skill` scaffold all carry the new contract.
+
+### Fixed
+
+- Paths that only resolved inside the marketplace checkout: `initialize-project`'s profiles link, `glossary` / `project-context` / `route` doc links, and `route`'s cross-plugin path into `polymath-flows` (broken by versioned plugin caches).
+- The portable export never copied plugins' `data/` directories, so bundled hooks (`route-hint`, `event-trigger`, the flows SessionStart index) ran against missing tables.
+- `lint-skills.sh` exited silently with failure once the output-shape baseline was empty (`grep` + `pipefail`).
+- Content errors: `estimate`'s example missed a P/O > 3 flag; `devex-metrics` mislabelled DORA's High band; `open-pr` built its body from the wrong step and contradicted its own base-branch default; `tracing-strategy-otel` contradicted its own example; `review-migration` said `ACCESS EXCLUSIVE` blocks only writes; `terraform-state` still suggested DynamoDB locking.
+
 ## [0.11.0]
 
 Adversarial reliability pass over every skill and both subagents: ~150 defects fixed across 37 plugins — wrong commands and arithmetic in worked examples, unsafe or ungated side effects, gate-gaming instructions, contradictions between sibling skills, and paths that only resolved inside the marketplace checkout.

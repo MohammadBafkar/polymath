@@ -7,6 +7,8 @@ description: Design an LLM agent — architecture (ReAct, plan-execute, reflexio
 
 > An agent is a loop around a model with tools and a stopping rule. Most agent failures are a missing stop condition, a vague tool contract, or unbounded context — design those first.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Building a feature where the model must call tools, take multiple steps, or coordinate sub-agents.

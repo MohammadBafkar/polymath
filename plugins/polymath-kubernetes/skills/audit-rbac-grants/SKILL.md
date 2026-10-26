@@ -7,6 +7,8 @@ description: Audit RBAC roles and bindings — find overbroad verbs (*), cluster
 
 > Read a set of RBAC manifests and flag the grants that are wider than they need to be.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A periodic RBAC review.

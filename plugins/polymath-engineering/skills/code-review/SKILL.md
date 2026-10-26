@@ -7,6 +7,8 @@ description: Review a code change for correctness, simplification, and missing t
 
 > Review a code change with two lenses: correctness (does it do what the PRD says?) and simplification (could it do the same with less?).
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A workflow invokes `polymath-engineering:code-review` after `feature-dev`.

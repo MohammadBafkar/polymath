@@ -7,6 +7,8 @@ description: Write a blameless postmortem to docs/postmortems/<incident-id>.md; 
 
 > Author a blameless postmortem. Output is `docs/postmortems/<incident-id>.md` whose frontmatter passes the `Postmortem` artifact schema.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - An incident has been resolved and the team wants to learn from it.

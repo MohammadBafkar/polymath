@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `i18n-audit`: Inputs (target locales default to the next locale plus one RTL locale) and an exact, severity-ranked findings shape.
+
 ## [0.11.0]
 
 ### Fixed

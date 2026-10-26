@@ -7,6 +7,8 @@ description: Write a consumer migration guide for a breaking change — before/a
 
 > A migration guide earns its keep when a consumer can follow it start to finish without asking a question. Show the diff, not the philosophy.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - You're deprecating or breaking something and consumers need concrete steps to move off it.
@@ -18,7 +20,8 @@ This writes the *consumer upgrade steps*. It is not the deprecation timeline/pol
 ## Inputs
 
 - The old and new way (API shape, config keys, behavior).
-- Who is migrating (audience skill level) and the most common usage patterns.
+- Who is migrating (audience skill level) and the most common usage patterns. Unknown patterns: derive them from the old API's call sites or docs, and mark any guessed pattern `[VERIFY]`.
+- Every before/after example must be checked against the real old and new APIs (read the code or docs); an example you could not verify is marked `[VERIFY: untested]`.
 
 ## Procedure
 
@@ -29,6 +32,39 @@ This writes the *consumer upgrade steps*. It is not the deprecation timeline/pol
 5. **Verify** — how the consumer confirms the migration worked (a test, an output, a log line).
 6. **Rollback** — how to revert if something breaks mid-migration.
 7. **Codemod** — if the change is mechanical at scale, provide or point to an automated codemod.
+8. **Slug** from the change (e.g. `v1-search-to-v2`): a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
+9. Write `docs/migrations/<slug>-guide.md`.
+
+## Output
+
+`docs/migrations/<slug>-guide.md`, in this shape:
+
+````markdown
+# Migrating from /v1/search to /v2/search
+
+**Change:** results are paginated with a cursor instead of `page=` — mechanical for most callers.
+
+## Before / after (most common first)
+
+```diff
+- GET /v1/search?q=refund&page=2
++ GET /v2/search?q=refund&cursor=<next_cursor from the previous response>
+```
+
+## Steps
+1. Upgrade the SDK to ≥ 4.8 (reversible: pin back to 4.7).
+2. Replace `page` loops with `next_cursor` loops — checkpoint: tests pass on 4.8.
+3. Remove the v1 client config (irreversible once deployed; do it last).
+
+## Gotchas
+- `total_count` is no longer returned; it is expensive at scale — use `has_more`.
+
+## Verify
+Run `sdk-doctor search` — it prints `v2 OK`.
+
+## Rollback
+Steps 1–2 revert by pinning the SDK to 4.7; step 3 needs the v1 config restored before 2027-02-01.
+````
 
 ## Quality bar
 

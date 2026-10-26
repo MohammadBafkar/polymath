@@ -7,6 +7,8 @@ description: Investigate an incident or bug via the 5-whys technique — iterati
 
 > Iteratively ask "why?" to walk back from a symptom to a root cause. Five is a heuristic, not a quota.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - An incident or recurring bug needs root-cause analysis.

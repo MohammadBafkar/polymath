@@ -7,6 +7,8 @@ description: Model analytical data — dimensional (star/snowflake) vs normalize
 
 > Declare the grain of every fact table in one sentence before you add a column. Most warehouse pain is a fact table whose grain nobody can state.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Designing warehouse/lake tables for analytics or as a pipeline's destination.
@@ -35,7 +37,21 @@ Not this when: you are designing an OLTP transactional schema for a service — 
 
 ## Output
 
-- A one-page model: chosen style + (for lakehouse) layer per table, the stated grain of each fact, conformed dimensions with SCD type, partition/cluster keys, and the schema-evolution rule.
+```text
+Data model: order analytics (lakehouse)
+
+Style: medallion — bronze raw CDC → silver conformed → gold marts
+Facts
+  gold.fct_order_line     grain: one row per order line per order version (latest per day in the view)
+  gold.fct_refund         grain: one row per refund event
+Dimensions (conformed)
+  dim_customer   SCD2 (tier and region history matter for cohorts)   surrogate key customer_sk
+  dim_product    SCD1 (only current names are reported)
+  dim_date       static
+Partitioning: facts by order_date (dominant filter); clustered by customer_sk, product_sk
+Evolution: additive-only in silver/gold; breaking change → new versioned table + 30-day dual-write; bronze immutable
+Late data: late order lines join dim_customer as of the order date (SCD2 effective dates); unknown customer → -1 member, repaired nightly
+```
 
 ## Quality bar
 

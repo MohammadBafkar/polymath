@@ -7,6 +7,8 @@ description: Read EXPLAIN ANALYZE output and propose targeted optimizations — 
 
 > A SQL query is slow. Read the plan, identify the dominant cost, propose one concrete change.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A query is slow in production or in development.

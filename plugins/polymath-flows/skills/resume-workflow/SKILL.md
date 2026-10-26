@@ -7,6 +7,8 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 
 > Resume a paused workflow. Pause causes include user interrupt, step failure, or a failed `mustPass` check.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user types `/polymath-flows:resume-workflow [<run_id>]`.
@@ -41,10 +43,17 @@ description: Resume a paused flows-lite workflow run from the last completed ste
 
 3. Continue the loop exactly as `run-workflow` does: announce step → perform work → write artifacts → `complete` → `assert` at the end.
 
-## Reporting
+## Output
 
-- One-line summary of why the run was paused (from `state.json`'s `pause_reason`).
-- Then the same per-step reporting as `run-workflow`.
+```text
+Resuming 2026-10-21T09-10-shipFeature-resilient-retries  (paused: mustPass pr-draft-exists failed)
+Fixed first: wrote docs/pr/resilient-retries.md
+  6/6 pr             complete   docs/pr/resilient-retries.md
+assert: completed — 4/4 mustPass checks passed
+```
+
+Then the same per-step lines as `run-workflow`. With no `run_id` and nothing
+resumable: `No paused or active runs.`
 
 ## Anti-patterns to avoid
 

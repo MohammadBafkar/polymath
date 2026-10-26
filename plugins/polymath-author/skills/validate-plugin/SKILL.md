@@ -7,6 +7,8 @@ description: Run every Polymath gate against one plugin — conformance, claude 
 
 > Run every gate the marketplace requires. Output is a pass/fail per gate with the failing line cited.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - A new plugin is being added; need to know if it's submission-ready.
@@ -22,7 +24,8 @@ description: Run every Polymath gate against one plugin — conformance, claude 
 
 1. **Single-plugin conformance — the source of truth.** `tools/conformance.sh plugins/polymath-<name>`. It runs the MANIFEST/SKILL/TEMPLATE/WORKFLOW/FIXTURE/DOCS checks for that plugin (and `claude plugin validate --strict` when the CLI is on PATH). Every other step below adds detail or catches what this misses; it never replaces it.
 2. **Manifest validation** — `claude plugin validate --strict <path>`. Surface every error and warning; skip with `N/A (claude CLI not installed)` rather than reporting a pass.
-3. **Skill lint** — `tools/lint-skills.sh`: description ≤ 200 chars, SKILL.md ≤ 500 lines, and the output-shape ratchet (`registry/output-shape-baseline.txt`).
+3. **Skill lint** — `tools/lint-skills.sh`: description ≤ 200 chars, SKILL.md ≤ 500 lines, the output-shape ratchet (`registry/output-shape-baseline.txt`), and the shape gate `tools/check-skill-shape.py` (SKILL-2 required sections, SKILL-3 one canonical `**Mode:**` line, SKILL-4 no relative link or path leaving the plugin).
+   Skills with a `scripts/` folder: run `python3 -m unittest discover -s plugins/polymath-<name>/tests` too — a calculator without a passing test is not done.
 4. **Token budget** — `tools/token-report.py budget` for the heuristic; when the CLI is available, `claude --plugin-dir <path> plugin details <name>` for the canonical per-component cost. Per-plugin cap is 400 tok (heuristic); flag if over.
 5. **Workflow schema** — if the plugin ships any `workflows/*.yaml`, run `plugins/polymath-flows/bin/polymath-flow validate <file>` on each, then `tools/build-workflow-index.py --check`.
 6. **Index drift** — if the plugin has `routing.yaml` sidecars run `tools/build-surface-index.py --check`; if it has `bindings/`, run `tools/build-capability-index.py --check`.
@@ -35,7 +38,8 @@ Validate: plugins/polymath-foo
 
   ✓ conformance.sh plugins/polymath-foo  passed (MANIFEST, SKILL, TEMPLATE, FIXTURE, DOCS)
   ✓ claude plugin validate --strict      passed
-  ✓ lint-skills.sh                       passed (3 SKILL.md, 2 commands)
+  ✓ lint-skills.sh                       passed (3 SKILL.md, 2 commands; shape gate: 2 analytical, 1 deterministic)
+  ✓ plugin unit tests                    12 passed
   ✓ token-report.py budget               heuristic 142 tok (under 400 cap)
   ✓ claude plugin details                canonical 218 tok always-on
   ✓ workflow schema                      n/a (no workflows in plugin)

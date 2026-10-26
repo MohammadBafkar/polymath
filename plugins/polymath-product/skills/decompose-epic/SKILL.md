@@ -7,6 +7,8 @@ description: Decompose a PRD or epic into vertically-sliced user stories using a
 
 > Break a PRD or epic into a Jeff Patton-style user story map. Slices are vertical (shippable), not horizontal (layer-by-layer).
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A PRD describes more than one user activity or release.

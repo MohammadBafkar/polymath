@@ -7,6 +7,8 @@ description: Model a system with STRIDE; writes docs/threat-models/<slug>.md wit
 
 > Frame a threat model around the six STRIDE categories, decompose the scope by data flow, list threats with mitigations.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A workflow invokes `polymath-security:stride-threat-model`.
@@ -22,10 +24,12 @@ description: Model a system with STRIDE; writes docs/threat-models/<slug>.md wit
 ## Procedure
 
 1. Read [`Threat-model.md`](../../templates/Threat-model.md).
-2. Compute slug from system name (kebab-case).
+2. **Slug** from the system name: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. **Summary-first checkpoint.** Show a one-screen skeleton — the
    scope boundary, the trust boundaries found, the 2–3 highest-risk
    STRIDE candidates — and confirm scope before the full model.
+   Unattended run (workflow step, subagent): nobody can confirm — skip the
+   wait, write the model, and open the summary with the skeleton.
 4. Draft `docs/threat-models/<slug>.md`:
    - **Scope** — explicit boundary; what is and isn't covered.
    - **Data flow** — mermaid or ASCII diagram showing every trust boundary the system spans (user → API → DB, internal → external, etc).

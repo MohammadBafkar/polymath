@@ -7,6 +7,8 @@ description: Decompose a North Star metric into a tree of input metrics so each 
 
 > Decompose a North Star into the input metrics that move it. Each leaf is a lever a team owns.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A team is asked "how does your work move the North Star?".

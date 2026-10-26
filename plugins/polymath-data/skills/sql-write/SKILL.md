@@ -7,6 +7,8 @@ description: Write a SQL query that answers a specific question; parameterized, 
 
 > Translate a question into a SQL query. Output the query, the schema assumptions, and how to verify the result.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A specific analytical or operational question needs SQL.

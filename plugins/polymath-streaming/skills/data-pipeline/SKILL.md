@@ -7,6 +7,8 @@ description: Design a data pipeline — ETL vs ELT, batch vs streaming, orchestr
 
 > A pipeline that can't be safely re-run is a pipeline that will eventually corrupt your warehouse. Design idempotency and backfill before you design transforms.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Building or reworking ingestion/transformation from sources into a warehouse/lake.
@@ -33,7 +35,21 @@ Not this when: you are choosing the target table shape — that is `polymath-str
 
 ## Output
 
-- A one-page design: ETL/ELT + batch/streaming decisions, the DAG with retry/idempotency per step, the backfill procedure, schema-drift handling, the data-quality assertions + on-failure behavior, and lineage/freshness monitoring.
+```text
+Data pipeline: orders → warehouse (Dagster, BigQuery)
+
+Decisions: ELT (raw lands first; PII columns hashed at load) · daily batch — freshness SLA is 6 h, streaming not needed
+DAG
+  extract_orders      CDC snapshot per day partition         retry 3× · idempotent: overwrite partition
+  load_raw            → raw.orders (partition = order_date)  idempotent: delete-insert per partition
+  transform_orders    raw → staging → marts.fct_orders       idempotent: MERGE on order_id
+  quality_gate        row count ±20% vs 7-day mean · order_id unique · amount ≥ 0 · FK to dim_customer
+                      on failure: quarantine the partition, stop downstream, page data on-call
+Backfill: `dagster job backfill --partitions 2026-01-01...2026-03-31` — same code path, partition by partition
+Schema drift: new source columns land in raw automatically; marts only change via a reviewed model PR; removed columns alert
+Late data: corrections up to 3 days old → reprocess those 3 partitions nightly
+Lineage + freshness: dbt/Dagster lineage graph; alert when fct_orders is older than 6 h
+```
 
 ## Quality bar
 

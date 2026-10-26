@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `caching-tradeoffs`, `design-cache-layer`: Inputs — measured traffic or `[TBD]`; staleness tolerance is the owner's decision.
+
 ## [0.11.0]
 
 ### Fixed

@@ -7,6 +7,8 @@ description: Author a reusable Terraform module — input variables with validat
 
 > A good module is a small, versioned contract: clear inputs, useful outputs, no hidden global state. Design the interface before the resources, the way you would an API.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Writing a new Terraform module or refactoring copy-pasted HCL into a reusable one.
@@ -34,7 +36,20 @@ Not this when: you are choosing the cloud architecture/primitives — that is `p
 
 ## Output
 
-- A module design/skeleton: the variable contract (typed + validated), outputs, `required_providers` constraints, naming/tagging approach, composition boundary, versioning plan, and the example usage.
+The module skeleton and a one-paragraph design note, in this shape:
+
+````text
+modules/sqs-queue/            (capability: a queue with its DLQ, alarms, and access policy)
+  versions.tf    required_providers { aws = { source = "hashicorp/aws", version = ">= 5.40, < 6.0" } }  — no provider/backend blocks
+  variables.tf   name (string, validation: ^[a-z0-9-]{3,60}$) · visibility_timeout_seconds (number, default 30)
+                 max_receive_count (number, default 5, validation 1–20) · tags (map(string), default {})
+  main.tf        aws_sqs_queue.this + aws_sqs_queue.dlq (redrive) · aws_cloudwatch_metric_alarm.dlq_depth
+  outputs.tf     queue_url, queue_arn, dlq_arn
+  examples/basic/main.tf   module "refunds_queue" { source = "../.." name = "refunds" }
+  tests/basic.tftest.hcl   asserts the redrive policy and the alarm threshold
+Versioning: v1.0.0 tag; renames ship moved {} blocks; breaking input changes → v2.0.0 + UPGRADE.md
+CI: terraform fmt -check · terraform validate · tflint · terraform test
+````
 
 ## Quality bar
 

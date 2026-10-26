@@ -7,11 +7,19 @@ description: Design a golden path / paved road for a team — the supported way 
 
 > A golden path is the *one* supported way to build a class of service. Output is the path doc that a new team can follow without help.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A platform team is paving a road for "all new microservices look like this".
 - Existing services are diverging in arbitrary ways and supportability is suffering.
 - A workflow needs to ground a new service in conventions.
+
+## Inputs
+
+- The class of service the path covers (required): e.g. "stateless Go HTTP API on Kubernetes".
+- The existing services of that class (optional but expected) — the path is distilled from what works there, with the divergences named.
+- Platform constraints (optional): runtime, CI system, observability stack, security baseline. Unknown pieces are `[VERIFY]`, not assumed.
 
 ## Procedure
 

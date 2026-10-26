@@ -7,6 +7,8 @@ description: Review a cryptography choice — encryption at rest/in transit, key
 
 > Don't invent crypto, and don't configure it from a blog post. Use vetted primitives at safe defaults, and put the hard problem — key management — at the center, not the algorithm.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Choosing or reviewing how data is encrypted, signed, hashed, or how keys are managed.
@@ -32,7 +34,22 @@ Not this when: you are designing auth tokens/sessions (`auth-design`) or doing a
 
 ## Output
 
-- A one-page review: in-transit + at-rest schemes (algorithm/mode), the key-management lifecycle (storage, separation, rotation, access), password/hashing approach, RNG check, the foot-gun findings, and a crypto-agility note.
+```text
+Crypto review: refund-service (PCI scope: card tokens at rest)
+
+In transit:   TLS 1.3 at the edge (1.2 minimum), HSTS; mTLS service-to-service via the mesh     OK
+At rest:      AES-256-GCM, envelope-encrypted: data key per tenant, wrapped by KMS key `refunds-kek`   OK
+Key mgmt:     KMS (separate keys per env + purpose); rotation 365d with re-wrap job; decrypt limited to refund-worker role; CloudTrail audit   OK
+Passwords:    n/a (SSO only)
+Randomness:   refund tokens from secrets.token_urlsafe(32)   OK
+
+Findings (worst first):
+  [HIGH]   src/crypto/legacy.py:14 — AES-CBC with a static IV for export files → AES-GCM with a random 96-bit nonce per file
+  [MEDIUM] config/prod.yaml:31 — webhook HMAC secret committed → move to the vault; rotate it now (assume exposed)
+  [LOW]    no algorithm/version byte on stored ciphertext → prefix a scheme version for crypto-agility
+
+Agility:      ciphertext versioned after the fix; hybrid X25519MLKEM768 at the edge when the LB supports it (records kept 7 years)
+```
 
 ## Quality bar
 

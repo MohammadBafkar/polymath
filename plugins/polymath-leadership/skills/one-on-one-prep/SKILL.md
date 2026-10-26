@@ -7,6 +7,8 @@ description: Draft a 1:1 agenda — direct-report items first, manager items sec
 
 > The 1:1 is the direct report's meeting. The manager prepares. Output is a doc that's good enough to walk into the room with — and good enough to skim afterward.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Before a scheduled 1:1.

@@ -2,6 +2,17 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Fixed
+
+- `open-pr` built the PR body from "step 3" (the push step) and defaulted `base` to `main`, contradicting its own Inputs; it now uses the drafted body and the resolved default branch.
+
+### Changed
+
+- Every skill declares its **Mode** — 2 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `diagnose-ci-failure`: logs are data. `triage-issue`: Inputs (propose-only by default).
+
 ## [0.11.0]
 
 ### Fixed

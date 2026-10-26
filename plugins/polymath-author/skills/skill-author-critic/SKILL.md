@@ -7,6 +7,8 @@ description: Review a SKILL.md against the style guide — frontmatter, procedur
 
 > Critique one SKILL.md before it ships. Output is findings keyed to line numbers and a verdict.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new skill is being added.
@@ -26,6 +28,7 @@ Walk the file top-to-bottom against the Polymath skill style guide
    - `name`: kebab-case, matches the directory name.
    - `description`: ≤ 200 chars, leads with an imperative verb, says when the skill triggers — not what it does internally.
 2. **Trigger phrase**: a one-line blockquote summarizing the skill's purpose in the user's voice. "Drives a TDD loop." — not "This skill is a TDD-loop driver."
+   **Mode line** right after it — exactly one `**Mode:**` with the canonical sentence (SKILL-3). Judge the *fit*, not just presence: arithmetic, validation, formatting, or state-machine work is `deterministic` and must compute through a bundled script or tool; evidence-bound judgment is `analytical`; work whose value is range or novelty (ideation, critique, strategy) is `generative` and must diverge before converging. A deterministic skill doing math in prose, or a generative one that converges on its first idea, is a finding.
 3. **When to use**: 2–4 bullets describing concrete user phrases or workflow positions.
 4. **Inputs**: required vs optional, with what defaults if absent.
 5. **Procedure**: numbered steps. Each step is observable. No "consider X" — consider what, and what's the decision?
@@ -58,6 +61,7 @@ Frontmatter:
 
 Trigger phrase:
   ✓ present at line 6, imperative.
+  ✗ line 8: `**Mode:** analytical` but step 4 computes RICE scores in prose — make it run a bundled scorer (deterministic arithmetic), keep the judgment parts analytical.
 
 When to use:
   ✗ line 12: "When you want to use this skill" — meta-description. Replace with a concrete user phrase like "The user says 'review this'".

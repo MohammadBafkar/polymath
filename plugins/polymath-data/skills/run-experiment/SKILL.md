@@ -7,6 +7,8 @@ description: Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardra
 
 > Pin an experiment's design before launching. Output: a doc the on-call analyst can read in 90 seconds and the launch reviewer can approve without re-asking.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new feature is going behind an experiment (flag at 0/50/0 split).
@@ -18,8 +20,8 @@ description: Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardra
 - Hypothesis (required) — testable, one variable, one direction.
 - Primary metric (required) — what success looks like.
 - Guardrail metrics (required) — what *can't* regress.
-- Baseline values + traffic (required) — current metric mean + variance, daily eligible users.
-- Acceptable MDE (optional) — minimum detectable effect; derive sample size if missing.
+- Baseline values + traffic (required) — current metric mean + standard deviation (or the baseline rate for a proportion), daily eligible units. Missing: the sizing line reads `[TBD: …]` and the plan is not launch-ready — never invent a baseline.
+- Acceptable MDE (optional) — the smallest effect worth detecting; absent, ask the owner (unattended: propose one, marked `[VERIFY: MDE]`).
 
 ## Procedure
 
@@ -29,14 +31,17 @@ description: Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardra
    - Tied to the North Star (see `metrics-tree`).
    - Not the same as the variable under test (you'd be measuring tautology).
 3. **Guardrails** — 2-3 max. Latency, error rate, key downstream conversions. State the regression tolerance per guardrail.
-4. **MDE + sample size.**
-   - Statistical power 0.8, significance α = 0.05 are the usual defaults.
-   - Sample size per variant (two variants, α = 0.05 two-sided, power 0.8 — Lehr's rule): `n ≈ 16 × σ²/MDE²` for a difference in means; `n ≈ 16 × p(1−p)/MDE²` for a proportion with an absolute MDE.
-   - At known daily traffic, the duration falls out: `days = (variants × n) / (daily_eligible × fraction_of_traffic_in_experiment)`.
+4. **MDE + sample size + duration — run the bundled script, never compute by hand.** Defaults: power 0.8, α = 0.05 two-sided; with more than two variants it applies Bonferroni (α / (k − 1) per comparison vs control):
+
+   ```bash
+   python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/run-experiment/scripts/sample-size.py" \
+     --metric mean --sigma 2000 --mde 100 --daily-eligible 80000 --allocation 1.0
+   # proportion: --metric proportion --baseline 0.12 --mde 0.01   (or --mde-relative 5)
+   ```
+
+   It uses the exact normal-approximation formulas (Lehr's `16σ²/MDE²` is the α = 0.05 / power 0.8 shortcut of the mean case), converts to days of traffic, rounds the run **up to whole weeks with a 7-day floor** (weekday vs weekend behavior), and marks the plan **UNDERPOWERED** past the 4-week cap — printing the MDE that is detectable in 28 days so the owner can pick a bigger MDE or a larger allocation. Paste its block verbatim.
    - These formulas assume the metric is a mean or proportion **per randomization unit**. Percentiles (p99 latency) and ratios with a different denominator (per-request metrics under user randomization) need the delta method or a bootstrap — and usually far more samples.
-5. **Duration floor + cap.**
-   - Floor: at least one full weekly cycle (weekday vs weekend behavior).
-   - Cap: 4 weeks max; if MDE requires longer, the experiment is under-powered for your traffic — pick a bigger MDE or larger allocation.
+5. **Do not launch an UNDERPOWERED plan** without the owner explicitly accepting the longer run or the larger MDE in writing (in the plan file).
 6. **Randomization unit.** User-level for product changes; session-level for content / UX experiments where multi-device matters; cluster-level (org / org-pair) for B2B to avoid contamination.
 7. **Allocation.** 50/50 once tooling supports it; 90/10 (ramp) only when risk is high and you accept lower power. Document.
 8. **Stop conditions.**
@@ -45,7 +50,7 @@ description: Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardra
    - **Inconclusive** — at duration cap, primary effect is within noise.
    - **Emergency** — incident, ethics issue, regulatory; immediate halt independent of stats.
    - **No peeking:** don't stop early because a daily look shows significance — repeated looks inflate false positives. Analyze at the planned sample size, or pre-register a sequential method (group-sequential bounds, always-valid p-values) that allows early stopping.
-   - **Sample-ratio mismatch:** check the observed split against the planned allocation (chi-square) before reading any metric; an SRM means the assignment is broken and the results are void.
+   - **Sample-ratio mismatch:** before reading any metric, check the observed split against the plan — `python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/run-experiment/scripts/sample-size.py" --srm 50421,49579 --split 50,50`. p < 0.001 means the assignment is broken and the results are void.
 9. **Pre-registration.** Write the plan before launch and freeze. Post-hoc metric switching ("oh, let's check this other one") inflates false-positive rate.
 
 ## Output
@@ -73,11 +78,15 @@ Guardrails
   refund_completion_rate              tolerance: > -0.3 percentage points
   refund_5xx_rate                     tolerance: < +0.2 percentage points
 
-Sample size + duration
-  daily eligible users: 80,000; 100% of traffic in the experiment
-  n per variant ≈ 16 × 2,000² / 100² = 6,400
-  → days ≈ (2 × 6,400) / (80,000 × 1.0) = 0.16 → floor: 1 weekly cycle = 7 days.
-  SRM check: chi-square on assignment counts before analysis.
+Sample size + duration (sample-size.py, verbatim)
+  Experiment sizing (two-sided, α = 0.05, power = 0.8, 2 variants)
+  Metric:   mean, σ = 2,000, MDE = 100 (absolute)
+  z:        z(1−α/2) = 1.960, z(power) = 0.842
+  n per variant: 6,280   (total 12,560)
+  Traffic:  80,000 eligible/day × 100% in experiment
+  Duration: 0.16 days of traffic → run 7 days (whole weeks, 7-day floor)
+  Verdict:  OK — within the 28-day cap
+  SRM check: sample-size.py --srm <A>,<B> before reading any metric.
 
 Stop conditions (evaluated once, at day 7 — no early stop on significance)
   Success:     treatment mean lower than control, p < 0.05, guardrails clean.
@@ -92,7 +101,7 @@ Pre-registration
 ## Quality bar
 
 - One primary, ≤ 3 guardrails — never "we'll look at everything".
-- MDE + sample size + duration all named.
+- MDE + sample size + duration all named, and every number came from the script.
 - Stop conditions cover success / failure / inconclusive / emergency.
 - Pre-registration with a frozen plan file before launch.
 

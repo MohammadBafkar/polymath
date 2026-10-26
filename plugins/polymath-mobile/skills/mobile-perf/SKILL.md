@@ -7,10 +7,18 @@ description: Set mobile perf budgets — cold start (TTI), warm start, scroll FP
 
 > Mobile perf is about the low-end Android in someone's hand, not the iPhone on your desk. Output is a budget per critical screen + the dominant cost.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A mobile app or screen is being designed/built.
 - Users complain "the app is slow" but the team doesn't know which axis.
+
+## Inputs
+
+- The critical screens/journeys (required) and the platforms.
+- Field data (optional but decisive): Play Console vitals, Xcode Organizer, Firebase Performance, Sentry — absent, the budget is a target to measure against, and the "dominant cost" line is `[TBD: profile on the audience device]`, never guessed.
+- The audience device tier (required — see below); unknown → low-end Android baseline.
 
 ## The budget axes
 

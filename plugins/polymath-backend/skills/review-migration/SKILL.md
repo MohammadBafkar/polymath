@@ -7,11 +7,19 @@ description: Review a Postgres migration for lock surface, online/offline safety
 
 > Review a `.sql` migration the way an on-call reviewer would: which lock does each statement need, how long it holds, and whether it's safe to apply against a live, replicating, big-table prod.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A schema migration is in a PR.
 - A long-lived table needs a structural change and someone has drafted SQL.
 - A previous migration timed out and you're trying to figure out why.
+
+## Inputs
+
+- The migration `.sql` file(s) (required). For ORM migrations, review the generated SQL (`rails db:migrate:status` + `--dry-run`, `alembic upgrade --sql`, `prisma migrate diff --script`), not the DSL.
+- The Postgres major version (required — PG 11 fast defaults and PG 12 `NOT NULL`-via-`CHECK` change the verdict). Unknown: ask; unattended, assume the oldest version the repo supports and say so.
+- Table sizes and write rates (optional) — unknown tables are treated as large and hot.
 
 ## Related skills
 
@@ -25,6 +33,7 @@ description: Review a Postgres migration for lock surface, online/offline safety
 
 ## Procedure
 
+0. **Deterministic baseline.** If `squawk` (the Postgres migration linter) is available — `squawk <file>.sql`, or `npx squawk-cli` — run it first and fold its rule hits into the statement list; never report a statement as safe that it flags without saying why it doesn't apply.
 1. **Parse statements.** For each statement, identify the locks acquired and held:
    - `CREATE INDEX` — `SHARE` lock (writes blocked).
    - `CREATE INDEX CONCURRENTLY` — `SHARE UPDATE EXCLUSIVE` lock (writes ok); cannot run inside a transaction.
@@ -78,7 +87,7 @@ Statements
      Lock: ACCESS EXCLUSIVE; full scan on 50M rows.               ✗ unsafe
 
 Issues
-  - Statement 3 will block writes for the duration of the scan on a 50M-row table.
+  - Statement 3 holds ACCESS EXCLUSIVE — blocking reads and writes — for the full scan of a 50M-row table.
     Fix: split into the 4-step NOT VALID → backfill → VALIDATE → SET NOT NULL pattern.
 
   - No lock_timeout set. Risk: migration holds the queue if contention spikes.

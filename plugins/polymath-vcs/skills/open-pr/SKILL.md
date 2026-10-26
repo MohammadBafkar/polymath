@@ -7,6 +7,8 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 
 > Open a real GitHub PR using the github MCP server. Pairs with `polymath-release:pr` (which drafts the description) and `polymath-release:changelog` (which updates CHANGELOG).
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 > **MCP binding (read before any tool call):** if your host has a `github` MCP server, use its tools for this skill's data access. Check your own tool list — it may be registered under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`). Tool names differ between servers: use the closest match, and say so when the server is read-only. Never install or start a second copy. If there is none, work without MCP tool calls (give the user the queries or steps to run) and ask before suggesting an install.
 
 ## When to use
@@ -39,8 +41,8 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 4. **Draft body** — if `docs/pr/<slug>.md` exists (from `polymath-release:pr`), use it (strip its frontmatter). Otherwise compose a body from the repo's own PR template if it has one, else the canonical PR template.
 5. **Create PR** via the github MCP tool `create_pull_request`:
    - `title`: the headline commit's subject, in the repo's convention (Conventional Commits when the repo uses it).
-   - `body`: from step 3.
-   - `base`: target base (default `main`).
+   - `body`: from step 4.
+   - `base`: the target base resolved in Inputs (the remote's default branch unless the user named one).
    - `head`: current branch.
    - `draft`: `true` if the change isn't ready for review (build still red, etc.).
 6. **Reviewers** — add via `request_reviewers` after creation. Tag by team if you can infer it from CODEOWNERS; otherwise ask the user.

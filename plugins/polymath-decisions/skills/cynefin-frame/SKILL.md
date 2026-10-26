@@ -7,11 +7,18 @@ description: Classify a decision context — Clear / Complicated / Complex / Cha
 
 > Before reaching for a framework, classify what kind of problem this is. The wrong response shape (e.g. "best practice" for a complex domain) is how teams burn through trust.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The team is reaching for a heavy framework on what's actually a Clear problem (or vice versa).
 - A decision keeps stalling because no one has named what kind of decision it is.
 - A retrospective wants to understand why a past decision approach didn't work.
+
+## Inputs
+
+- The situation (required) — what is happening and what decision it forces. Vague input: restate it in one sentence and mark the restatement `[VERIFY]`.
+- Evidence about cause and effect (optional): past attempts and their outcomes, incident data, expert opinions. Classification without evidence is reported as Confusion, not guessed.
 
 ## The four domains (Dave Snowden)
 

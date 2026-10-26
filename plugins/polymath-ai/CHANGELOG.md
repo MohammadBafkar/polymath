@@ -2,6 +2,18 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `eval-plan`: `scripts/winrate.py` — pairwise ship verdict from a Wilson score interval (ties excluded), plus the win count needed to ship; unit-tested. The skill's 114-of-200 rule now comes from the script, not mental arithmetic.
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `llm-cost-latency`, `llm-guardrails`: exact output shapes (per-request cost arithmetic with sourced prices; trust-boundary and propose-vs-authorize design).
+- `prompt-engineer`: compare two structurally different drafts on the eval set before keeping one.
+
 ## [0.11.0]
 
 ### Changed

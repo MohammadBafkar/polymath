@@ -8,6 +8,8 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
 > Bottom Line Up Front. One page. The exec stops reading after the TL;DR
 > and walks away with the right answer.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - An exec or stakeholder needs a decision and you want them ready in <5 min reading.
@@ -24,7 +26,7 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
 ## Procedure
 
 1. Read [`Exec-brief.md`](../../templates/Exec-brief.md) (materialized).
-2. Compute slug from the title.
+2. **Slug** from the title: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/briefs/<slug>.md`:
    - **TL;DR**: state the decision / ask / recommendation in one paragraph. Not "we want to talk about X" — what's the answer?
    - **What's happening**: ≤ 2 paragraphs of evidence. Cite metrics, customer quotes, deadlines. No background unless load-bearing.
@@ -33,7 +35,7 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
    - **What we need from you**: the unambiguous ask + deadline.
    - **If yes / if no**: short consequences. Honest, not hyperbolic.
 4. Length target: ≤ 1 page.
-5. Never invent numbers, quotes, or dates — every figure traces to the source material; a missing one is written `[NEEDS DATA: <what>]` and listed in the summary.
+5. Never invent numbers, quotes, or dates — every figure traces to the source material; a missing one is written `[TBD: <what>]` and listed in the summary.
 
 ## Quality bar
 
@@ -42,7 +44,7 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
 - Ask is concrete ("approve $50k for Q3 work" not "align on direction").
 - "What if no" cost stated honestly.
 - No background section. Background goes in references.
-- Every number and quote traces to the source material; gaps are marked `[NEEDS DATA]`, not filled.
+- Every number and quote traces to the source material; gaps are marked `[TBD]`, not filled.
 
 ## Output
 

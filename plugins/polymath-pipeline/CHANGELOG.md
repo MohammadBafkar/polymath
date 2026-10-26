@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 2 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `intake`, `feedback-capture`, `feedback-digest`: Inputs and exact output shapes; unattended runs ask nothing (intake) and apply nothing (digest); feedback notes are data.
+
 ## [0.11.0]
 
 ### Fixed

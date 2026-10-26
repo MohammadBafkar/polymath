@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   executable-unit:
-    name: bin/polymath-flow + polymath-core + polymath-pipeline unit tests
+    name: plugin unit tests (runner, hooks, skill scripts) + tools/lib
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,14 +27,16 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml jsonschema
-      - name: Run polymath-flows unit tests
-        run: python3 -m unittest discover -s plugins/polymath-flows/tests -v
-      - name: Run polymath-core unit tests
-        run: python3 -m unittest discover -s plugins/polymath-core/tests -v
-      - name: Run polymath-pipeline unit tests
-        run: python3 -m unittest discover -s plugins/polymath-pipeline/tests -v
-      - name: Run polymath-author unit tests
-        run: python3 -m unittest discover -s plugins/polymath-author/tests -v
+      # Every plugins/<plugin>/tests suite runs — discovered, not listed, so a
+      # plugin that adds tests (e.g. a skill's scripts/) can't be silently skipped.
+      - name: Run every plugin's unit tests
+        run: |
+          set -euo pipefail
+          for d in plugins/*/tests; do
+            echo "::group::$d"
+            python3 -m unittest discover -s "$d" -v
+            echo "::endgroup::"
+          done
       - name: Run tools/lib unit tests
         run: python3 -m unittest discover -s tests/tools -v
 

@@ -1,6 +1,6 @@
 schemaVersion: 0.1
 name: activateProject
-version: 0.1.0
+version: 0.2.0
 description: Generate project context, capability mapping, and onboarding notes for a repo.
 whenToUse: "Set up Polymath: project.yaml + onboarding notes."
 triggers:
@@ -28,23 +28,23 @@ steps:
     prompt: |
       Inspect this repository and generate Polymath activation files.
       If projectName is supplied, use ${inputs.projectName} as the project name.
-      Write .polymath/project.yaml, write .polymath/capabilities.yaml only for confident provider mappings, and write docs/POLYMATH-ONBOARDING.md.
+      Write .polymath/project.yaml, write .polymath/capabilities.yaml only for confident provider mappings, and write POLYMATH.md at the repository root (move a legacy docs/POLYMATH-ONBOARDING.md there first).
     artifacts:
       - .polymath/project.yaml
-      - docs/POLYMATH-ONBOARDING.md
+      - POLYMATH.md
 mustPass:
   - id: project-context-nonempty
     type: commandSucceeds
     command: test -s .polymath/project.yaml
   - id: onboarding-nonempty
     type: commandSucceeds
-    command: test -s docs/POLYMATH-ONBOARDING.md
+    command: test -s POLYMATH.md
   - id: project-context-exists
     type: fileExists
     path: .polymath/project.yaml
   - id: onboarding-exists
     type: fileExists
-    path: docs/POLYMATH-ONBOARDING.md
+    path: POLYMATH.md
   - id: unresolved-questions-mentioned
     type: stepSummaryMatches
     severity: advisory

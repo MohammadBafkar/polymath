@@ -9,6 +9,8 @@ description: Draft a PR description for the current branch following the canonic
 > `docs/pr/<slug>.md`. **Drafts only** — it never opens a real GitHub PR;
 > that's `polymath-vcs:open-pr`, which consumes this draft.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - The user says "draft a PR", "PR description for this branch".
@@ -58,7 +60,7 @@ Before the procedure, resolve the project snapshot —
    - **Reviewers**: tag by area if you can infer from CODEOWNERS or
      diff paths.
    - **Checklist**: leave unchecked for the author to confirm.
-6. Compute the slug from the branch name or the PRD slug.
+6. **Slug** from the branch name (reuse the PRD's slug when the PR implements one): a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 7. Write `docs/pr/<slug>.md` with the validated frontmatter
    (artifact: PRDescription).
 

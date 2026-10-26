@@ -7,11 +7,24 @@ description: Read Polymath marketplace conventions — naming, token budget, com
 
 > Marketplace-wide conventions that apply across plugins. Load this when a task touches plugin authoring, marketplace structure, or the contribution flow.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - A task creates or edits a plugin, skill, command, agent, hook, workflow, or connector.
 - A workflow step needs to ground itself in marketplace standards.
 - A contributor is being onboarded to the marketplace.
+
+## Inputs
+
+- The authoring or review task at hand (required) — which component it creates or changes.
+- The marketplace checkout (required for anything beyond reading): the gates named below run from its root.
+
+## Procedure
+
+1. Classify the task by component (table below) and read only the sections it touches.
+2. For each rule you apply, name the section and the gate ID that enforces it; a rule no gate enforces is labelled a convention, not a requirement.
+3. Return the Output shape; do not restate whole sections or sibling docs.
 
 ## Component choice (decide this first)
 
@@ -48,7 +61,7 @@ Routing is **declare-or-exempt**: every surface either ships a `routing.yaml` (v
 
 ## Conformance gates
 
-`tools/conformance.sh --all` is the source of truth. `tools/validate-all.sh` runs the authoring subset. Key rules: MANIFEST-1/2/3, SKILL-1 (`description` ≤ 200, body ≤ 500), TEMPLATE-1, WORKFLOW-1/2/INDEX, SURFACE-INDEX (SURFACE-1/2, TOOL-1, TRUST-1), CAPABILITY-INDEX (BINDING-1, MCP-BINDING), MCP-PKG, INTEGRATION-1/2, DESC-1/2, AGENT-1, FIXTURE-1, DOCS-1/2. Re-run the relevant builder after editing a workflow (`build-workflow-index.py`), `routing.yaml` (`build-surface-index.py`), or a binding (`build-capability-index.py`); the gate fails on drift.
+`tools/conformance.sh --all` is the source of truth. `tools/validate-all.sh` runs the authoring subset. Key rules: MANIFEST-1/2/3, SKILL-1 (`description` ≤ 200, body ≤ 500), SKILL-2/3/4 (`tools/check-skill-shape.py`: required sections, one canonical `**Mode:**` line — deterministic / analytical / generative — and no relative link leaving the plugin), TEMPLATE-1, WORKFLOW-1/2/INDEX, SURFACE-INDEX (SURFACE-1/2, TOOL-1, TRUST-1), CAPABILITY-INDEX (BINDING-1, MCP-BINDING), MCP-PKG, INTEGRATION-1/2, DESC-1/2, AGENT-1, FIXTURE-1, DOCS-1/2. Re-run the relevant builder after editing a workflow (`build-workflow-index.py`), `routing.yaml` (`build-surface-index.py`), or a binding (`build-capability-index.py`); the gate fails on drift.
 
 ## Hooks
 

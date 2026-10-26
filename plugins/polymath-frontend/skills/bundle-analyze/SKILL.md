@@ -7,6 +7,8 @@ description: Audit a JavaScript bundle for the biggest bytes and propose the che
 
 > Read the bundler's stats output, identify the top contributors to bundle size, and propose one specific cut.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A bundle has grown materially and we don't know why.

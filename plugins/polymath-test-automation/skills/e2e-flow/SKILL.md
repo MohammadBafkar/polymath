@@ -7,6 +7,8 @@ description: Author a browser end-to-end (e2e) test for a critical user journey 
 
 > Test the journey a user actually takes through the running app — the few flows whose breakage is a Sev. Not the whole UI, not every edge; the money paths.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A critical user journey (sign-up, checkout, the core loop) needs protection against full-stack regressions.
@@ -18,7 +20,8 @@ This authors *browser, full-stack* flows. It is not unit testing (`polymath-qa:u
 ## Inputs
 
 - The journey (the user goal and its happy path), and the 1–2 failure paths worth guarding.
-- The app URL / how to launch it, and how to seed deterministic test data.
+- The app URL / how to launch it, and how to seed deterministic test data. Unknown: read the repo's e2e config (`playwright.config.*`, `cypress.config.*`) and README before asking.
+- The framework already in use (detect it; default to Playwright only when the repo has none).
 
 ## Procedure
 
@@ -28,7 +31,26 @@ This authors *browser, full-stack* flows. It is not unit testing (`polymath-qa:u
 4. **Deterministic data** — seed/reset per test (API or fixture); never depend on prod-like shared state or test order.
 5. **One journey per spec**, with a clear arrange → act → assert; isolate auth/setup into reusable fixtures.
 6. **Trace on failure** — capture screenshot/trace/video so a CI failure is debuggable.
-7. Output the spec(s) and the run command; note the data seeding and any required services.
+7. **Run the spec** with the repo's e2e command and report the real result; a spec that was never run is reported as `NOT RUN` with the reason, never as passing.
+
+## Output
+
+The spec file(s) in the repo's e2e directory, then:
+
+```text
+e2e: checkout happy path + declined card
+
+e2e/checkout.spec.ts
+  ✓ guest completes checkout with a valid card           (seeds: product SKU-42 via POST /test/seed)
+  ✓ declined card shows the retry banner, order not created
+
+Selectors:  getByRole / data-testid only
+Waits:      web-first assertions; 0 sleeps
+Data:       per-test seed + teardown via /test/seed (test env only)
+Trace:      retained on failure (playwright trace: 'retain-on-failure')
+Run:        npx playwright test e2e/checkout.spec.ts   → 2 passed (14.2s)
+Needs:      app on :3000, payments stub (docker compose up payments-stub)
+```
 
 ## Quality bar
 

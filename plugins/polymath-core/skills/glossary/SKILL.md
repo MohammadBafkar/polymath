@@ -7,6 +7,24 @@ description: Define shared Polymath vocabulary — artifacts, capabilities/provi
 
 > Single source of truth for Polymath terminology. Reach for this when a term is ambiguous, when two plugins risk using one word for two things, or when onboarding a contributor to the marketplace.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
+## When to use
+
+- A term is ambiguous, or two plugins risk using one word for two things.
+- A user or contributor asks what a Polymath term means ("what's a binding?", "what does `mustPass` do?").
+- Writing or reviewing a skill, workflow, or doc that should use the canonical term.
+
+## Inputs
+
+- The term or terms to define (required). A term not in this glossary is reported as missing — never improvised.
+
+## Procedure
+
+1. Find the term below (match case-insensitively, and on the section headings for families of terms).
+2. Return it in the Output shape, with its owner and the closest related terms.
+3. Not found: say so, name the closest entries, and flag the gap (a term with no owner signals a catalog gap).
+
 ## Lifecycle artifacts
 
 - **PRD** — Product Requirements Document: problem, users, goals, non-goals, requirements, acceptance criteria, metrics. Owner: `polymath-product`.
@@ -41,13 +59,13 @@ description: Define shared Polymath vocabulary — artifacts, capabilities/provi
 
 ## Capabilities & integrations
 
-- **Capability** — A vendor-neutral need (`issue_tracker`, `observability`, `incident_comms`, `pager`, `ci`, `cloud`, `runtime`, `vcs`, `vulnerability_scanner`) declared in [`registry/schemas/capabilities.json`](../../../../registry/schemas/capabilities.json). Workflows target the capability, not a vendor.
+- **Capability** — A vendor-neutral need (`issue_tracker`, `observability`, `incident_comms`, `pager`, `ci`, `cloud`, `runtime`, `vcs`, `vulnerability_scanner`) declared in [`registry/schemas/capabilities.json`](https://github.com/MohammadBafkar/polymath/blob/main/registry/schemas/capabilities.json). Workflows target the capability, not a vendor.
 - **Provider** — A concrete vendor supplying a capability (e.g. `jira`/`linear` for `issue_tracker`, `datadog`/`honeycomb` for `observability`); listed in that capability's `providers[]`.
 - **Binding** — `bindings/<provider>/binding.json` inside a connector plugin: wires one provider to a capability, its transport (`mcp`/`cli`/`skill`), `userConfigKeys`, and provider identity. `providerPlugins{}` is generated from binding paths (`CAPABILITY-INDEX` / `BINDING-1`).
 - **Provider identity** — The `mcp` block on a binding (`serverAliases`/`packages`/`remoteUrls`/`envKeys`): the contract used to recognize this provider's MCP server when it is already registered in the host agent. Enforced by `MCP-BINDING`.
-- **Integration plugin** — A concept plugin (e.g. `polymath-vcs`, `polymath-observability`) that pairs MCP-dependent skills with the provider's server template (`mcp/servers.json`) that backs them. Detected by `mcp/servers.json` / `bindings/` presence; governed by [`docs/INTEGRATION-POLICY.md`](../../../../docs/INTEGRATION-POLICY.md).
+- **Integration plugin** — A concept plugin (e.g. `polymath-vcs`, `polymath-observability`) that pairs MCP-dependent skills with the provider's server template (`mcp/servers.json`) that backs them. Detected by `mcp/servers.json` / `bindings/` presence; governed by [`docs/INTEGRATION-POLICY.md`](https://github.com/MohammadBafkar/polymath/blob/main/docs/INTEGRATION-POLICY.md).
 - **MCP-dependent skill** — A skill whose procedure calls an MCP server's tools. The standard split: the **skill is the recipe** (what to do), the **MCP is the tooling** (data/actions). These are the skills `docs/PORTABILITY.md` tags `claude-coupled` — they run fully only where an MCP supplies the tools.
-- **MCP reuse (host-only)** — Polymath resolves each provider against MCP servers already registered in the **current** host agent (detected from in-session env markers); a server registered in a different agent is not reusable — its tools are not in this session's tool list. Plugins never auto-register MCP servers; when no host server matches, the provider resolves to `none` and the skill degrades. See [`docs/MCP-REUSE.md`](../../../../docs/MCP-REUSE.md).
+- **MCP reuse (host-only)** — Polymath resolves each provider against MCP servers already registered in the **current** host agent (detected from in-session env markers); a server registered in a different agent is not reusable — its tools are not in this session's tool list. Plugins never auto-register MCP servers; when no host server matches, the provider resolves to `none` and the skill degrades. See [`docs/MCP-REUSE.md`](https://github.com/MohammadBafkar/polymath/blob/main/docs/MCP-REUSE.md).
 - **`mcpResolution`** — The per-provider resolution the SessionStart hook writes into `project-context.json`: `source` (`host`/`none`), the resolved server name, and the host's `toolPrefix`. It is advisory: the scan reads host config files only, so connector skills treat the session's own tool list as authoritative.
 
 ## Routing & localization
@@ -63,10 +81,12 @@ description: Define shared Polymath vocabulary — artifacts, capabilities/provi
 - **Plugin** — Single-responsibility unit of trust, versioning, and distribution (`plugins/polymath-<name>/`).
 - **Component** — A skill, command, agent, hook, MCP server, or monitor inside a plugin.
 - **Skill vs command** — A skill bundles a procedure with templates/scripts/references and is itself invocable as `/plugin:skill`; a command is a thin alias (≤ 20 lines) under a *different* name that points at a skill.
+- **Skill mode** — The one-line contract every SKILL.md declares (`**Mode:**`, gate SKILL-3): `deterministic` (same inputs → same output; computed by a script or tool, fixed shape), `analytical` (judgment inside a fixed frame; verdicts cite evidence; unknowns marked `[TBD]` / `[VERIFY]`), or `generative` (diverge into genuinely different options before converging on stated criteria).
+- **`[TBD: …]` / `[VERIFY: …]`** — The two placeholder markers: `[TBD]` for a fact or number the inputs don't contain, `[VERIFY]` for an inferred claim awaiting confirmation. Never filled in by guess.
 - **Always-on listing cost** — Tokens consumed by the `name`+`description` of every skill/command/agent, surfaced to the model every turn.
 - **Token budget** — ≤ 400 tokens per plugin always-on; catalog-wide ≤ 250 × plugin count. Measured by `tools/token-report.py budget`.
-- **Conformance** — The deterministic gates in `tools/conformance.sh` (MANIFEST, SKILL, TEMPLATE, WORKFLOW, SURFACE-INDEX, CAPABILITY-INDEX, BINDING-1, MCP-BINDING, MCP-PKG, INTEGRATION-1/2, DESC-1/2, AGENT-1, FIXTURE-1, DOCS-1/2). `tools/validate-all.sh` runs the authoring subset.
-- **Portability** — The agentskills.io export (`tools/export-agents-skills.py`): skills port natively; commands/agents export as converted skills; hooks/workflows/MCP export as support metadata a target host must wire. See [`docs/PORTABILITY.md`](../../../../docs/PORTABILITY.md).
+- **Conformance** — The deterministic gates in `tools/conformance.sh` (MANIFEST, SKILL-1..4, TEMPLATE, WORKFLOW, SURFACE-INDEX, CAPABILITY-INDEX, BINDING-1, MCP-BINDING, MCP-PKG, INTEGRATION-1/2, DESC-1/2, AGENT-1, FIXTURE-1, DOCS-1/2). `tools/validate-all.sh` runs the authoring subset.
+- **Portability** — The agentskills.io export (`tools/export-agents-skills.py`): skills port natively; commands/agents export as converted skills; hooks/workflows/MCP export as support metadata a target host must wire. See [`docs/PORTABILITY.md`](https://github.com/MohammadBafkar/polymath/blob/main/docs/PORTABILITY.md).
 
 ## Quality bar
 

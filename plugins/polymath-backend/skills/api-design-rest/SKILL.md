@@ -7,6 +7,8 @@ description: Design a REST endpoint or resource — URL, method, status codes, r
 
 > Specify a REST endpoint before implementing it. Output is a one-page design that surfaces the trade-offs.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - Adding a new endpoint.

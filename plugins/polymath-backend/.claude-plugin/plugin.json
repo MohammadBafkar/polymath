@@ -1,6 +1,6 @@
 {
   "name": "polymath-backend",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Backend craft: REST API design, API versioning strategy, relational schema design, safe online migration planning.",
   "license": "MIT",
   "author": {

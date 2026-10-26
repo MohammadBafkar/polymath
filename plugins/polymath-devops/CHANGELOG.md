@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `audit-dockerfile`: Inputs, and `hadolint` as the deterministic baseline when available.
+- `env-promotion`: Inputs; promotions are shown as commands and run only on the operator's go-ahead.
+
 ## [0.11.0]
 
 ### Fixed

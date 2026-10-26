@@ -36,8 +36,7 @@ jobs:
           bash tools/validate-all.sh
           bash tools/lint-skills.sh
           python3 tools/token-report.py budget
-          python3 -m unittest discover -s plugins/polymath-flows/tests -v
-          python3 -m unittest discover -s plugins/polymath-core/tests -v
+          for d in plugins/*/tests; do python3 -m unittest discover -s "$d" -v; done
       - name: Verify conformance
         run: bash tools/conformance.sh --all
       - name: Plan plugin tags

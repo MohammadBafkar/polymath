@@ -7,6 +7,8 @@ description: Adversarially audit the Polymath marketplace for production readine
 
 > Walk every plugin and tool as a hostile reviewer. Emit one ranked ADD/FIX/CONSOLIDATE/REMOVE list — simplicity is the tiebreaker.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A release or maturity review of the whole marketplace ("audit the marketplace", "red-team every plugin").
@@ -32,6 +34,7 @@ tools/check-command-overlap.py        # commands that only shadow a skill
 tools/check-workflow-invokes.py       # workflow steps -> real skills
 tools/lint-descriptions.py --strict   # description collisions = redundancy signal
 tools/build-surface-index.py --check  # every routed surface, in sync
+tools/check-skill-shape.py --modes    # every skill's declared mode (deterministic / analytical / generative)
 ```
 
 Build the work-list — each entry is one audit unit:
@@ -45,7 +48,7 @@ Build the work-list — each entry is one audit unit:
 For each unit, answer all five. Quote a `file:line` for every claim:
 
 1. **Would a real practitioner reach for this mid-SDLC, or is it theater?** Name the concrete scenario. No scenario → REMOVE candidate.
-2. **What breaks the first real use?** Walk the unhappy path, not the demo.
+2. **What breaks the first real use?** Walk the unhappy path, not the demo — including an unattended run (workflow step, subagent) where nobody answers questions.
 3. **What does it duplicate?** Overlapping description, twin procedure, or a workflow that already chains it.
 4. **Cost vs. payoff.** Always-on tokens (step 1 numbers) against the manual work it actually saves.
 5. **Deletion test.** If removed, who complains and why? Nobody → REMOVE.
@@ -59,7 +62,7 @@ Delegate the deep per-item critique instead of redoing it inline:
 ### 3. Hunt the two failure directions
 
 - **Gaps (ADD).** Per SDLC stage, name a real scenario a team hits that nothing covers. A gap is real only if (a) a concrete scenario needs it and (b) no existing surface — even an adjacent one — covers it. Otherwise it is not a gap.
-- **Bloat (REMOVE / CONSOLIDATE).** Surfaces with no invoker, twin skills, commands that only shim a skill ([AGENTS.md authoring policy §5.1](../../../../AGENTS.md)), machinery with no user, references nothing links to.
+- **Bloat (REMOVE / CONSOLIDATE).** Surfaces with no invoker, twin skills, commands that only shim a skill (the promotion policy in `docs/PLUGIN-AUTHORING.md` §5.1 at the marketplace root), machinery with no user, references nothing links to.
 
 ### 4. Classify and rank
 

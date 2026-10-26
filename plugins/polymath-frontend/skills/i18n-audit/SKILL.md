@@ -7,6 +7,8 @@ description: Audit software for i18n readiness — hardcoded strings, locale dat
 
 > Internationalization is an architecture property, not a translation task. Find the places the code assumes one language, one region, one text direction — before a locale launch does.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A product is going (or might go) multi-locale and you need an i18n-readiness assessment.
@@ -14,6 +16,12 @@ description: Audit software for i18n readiness — hardcoded strings, locale dat
 - A workflow invokes `polymath-frontend:i18n-audit`.
 
 This audits *internationalization readiness*. It is not UX writing/microcopy (design), accessibility (`polymath-design:a11y-audit`), or general localization-of-content marketing.
+
+## Inputs
+
+- The codebase or paths to audit (required) and the i18n library in use, if any (react-intl, i18next, ICU4J, gettext, …) — detect it from dependencies before assuming none.
+- Target locales (optional, default: the next planned locale plus one RTL locale, so RTL readiness is always assessed).
+- Translation workflow facts (optional): TMS, who translates, release cadence.
 
 ## What to check
 
@@ -33,7 +41,24 @@ This audits *internationalization readiness*. It is not UX writing/microcopy (de
 4. Assess UI for text-expansion and RTL/bidi readiness.
 5. Verify a fallback chain and missing-translation behavior.
 6. Recommend the extraction → TMS → import loop and pseudolocalization in CI.
-7. Output findings ranked by launch-blocking severity, each with a concrete fix.
+7. Rank findings by launch-blocking severity (BLOCKER → MAJOR → MINOR), then by file path, and write them in the Output shape.
+
+## Output
+
+```text
+i18n audit: web-checkout (react, react-intl present but partly unused)   targets: de-DE, ar-SA
+
+BLOCKER  src/cart/Summary.tsx:41      `${count} items` concatenation → <FormattedMessage id="cart.items"
+                                     defaultMessage="{count, plural, one {# item} other {# items}}" />
+BLOCKER  src/checkout/Total.tsx:18    price.toFixed(2) + " €" → new Intl.NumberFormat(locale, {style: "currency", currency})
+MAJOR    src/layout/*.css (14 rules)  margin-left/right → margin-inline-start/end (RTL mirroring)
+MAJOR    src/cart/Promo.tsx:9         fixed 120px button width → min-width; de-DE runs ~35% longer
+MINOR    src/i18n/index.ts:5          missing-key fallback shows the key → fall back to en-US, log the miss
+
+Fallback chain: ar-SA → ar → en-US (en-US is the source locale)
+Pipeline: extract with formatjs CLI in CI → TMS → import on merge; pseudolocalization (en-XA, ar-XB) run in CI e2e
+Counts: 23 hardcoded strings · 4 non-locale-aware formats · 2 plural bugs · 14 physical CSS properties
+```
 
 ## Quality bar
 

@@ -7,10 +7,18 @@ description: Define a service's logging strategy — structured JSON, level disc
 
 > Pin a logging strategy that's useful at 3am and not the company's biggest cloud bill.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service is being built and the logging is "println for now".
 - An existing service is generating gigabytes a day with no one knowing what's in there.
+
+## Inputs
+
+- The service and its log pipeline (required): language/logger, where logs ship (Loki, Elastic, Datadog, CloudWatch).
+- Current volume and cost (optional) — absent: the cost line is `[TBD: current GB/day and $/GB]`, never a guessed figure.
+- Compliance retention rules (optional): audit, PCI, GDPR obligations override the defaults below.
 
 ## Procedure
 

@@ -7,6 +7,8 @@ description: Author or improve an LLM prompt — clarify task, constrain output 
 
 > Write a prompt that gets the right answer with the lowest variance. Output is the prompt plus the reasoning behind each section.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new prompt is being authored.
@@ -34,8 +36,9 @@ description: Author or improve an LLM prompt — clarify task, constrain output 
 5. **Worked examples** if the task allows variance. 2–4 examples that span the space, wrapped in tags (`<example>`) so they read as examples, not instructions. Long reference documents go at the top of the prompt and the question at the end.
 6. **Reasoning room** for multi-step tasks: let the model think before the final answer (or enable the provider's extended thinking), and ask for the answer in a separate tagged block so it's easy to parse. Skip it for simple classification where latency matters.
 7. **Calibration line**: tell the model when to say "I don't know" or to abstain. Otherwise it confabulates.
-8. **Test it**: run the prompt against a small labeled set (`polymath-ai:eval-plan`) before and after each change; keep the failures as regression cases. A prompt tuned on vibes regresses silently.
-9. **Cost trim**. Cut tokens that don't change the answer. Remove:
+8. **Compare two drafts** when the task has real variance: write a second draft that differs in approach (few-shot vs rules-first, or reasoning block vs none), not just wording, and keep whichever scores better on the eval set.
+9. **Test it**: run the prompt against a small labeled set (`polymath-ai:eval-plan`) before and after each change; keep the failures as regression cases. A prompt tuned on vibes regresses silently.
+10. **Cost trim**. Cut tokens that don't change the answer. Remove:
    - "You are a helpful assistant" filler.
    - Multiple ways of saying the same constraint.
    - Examples that test the same axis twice.

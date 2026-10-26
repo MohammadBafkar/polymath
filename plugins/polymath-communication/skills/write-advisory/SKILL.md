@@ -7,6 +7,8 @@ description: Author a security or breaking-change advisory — severity, affecte
 
 > Advisories are read once, scanned for the action. The structure must let the reader answer "am I affected? what do I do?" in 30 seconds.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A vulnerability has been fixed and customers need to know.
@@ -25,7 +27,7 @@ description: Author a security or breaking-change advisory — severity, affecte
 
 0. **Embargo check (security advisories).** Until the fix ships and the disclosure date passes, the advisory is confidential. Never draft it in a public repository's tracked files — a pushed draft *is* the disclosure. Draft in the private channel (a GitHub draft security advisory, a private repo, or a local file outside the repo) and move it to `docs/advisories/` only at publication.
 1. Read [`Advisory.md`](../../templates/Advisory.md).
-2. Compute slug from the advisory ID.
+2. **Slug** from the advisory ID: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 3. Draft `docs/advisories/<slug>.md`:
    - **Severity + classification** at the top.
    - **Affected / fixed versions** in exact ranges, not "all old versions".

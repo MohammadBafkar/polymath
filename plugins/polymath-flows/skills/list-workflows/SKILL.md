@@ -7,10 +7,16 @@ description: List active, paused, and completed flows-lite workflow runs from th
 
 > Show every flows-lite workflow run on this machine, grouped by status.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - The user asks "what workflows are running?" or "show me paused workflows".
 - After a session restart when the SessionStart hook hinted at paused runs.
+
+## Inputs
+
+- Optional status filter (`active`, `paused`, `completed`). None: list all three groups.
 
 ## Procedure
 

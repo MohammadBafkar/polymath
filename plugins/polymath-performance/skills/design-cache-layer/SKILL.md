@@ -7,11 +7,19 @@ description: Design a Redis cache layer — key schema, TTLs, eviction policy, s
 
 > Cache design that survives Black Friday, not just the demo. Output: key schema, TTL strategy, write/read path, failure modes considered.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A read-heavy endpoint needs caching.
 - An existing cache is causing incidents (stampedes, hot keys, memory pressure).
 - A PRD says "use Redis" with no further detail.
+
+## Inputs
+
+- The cache shape decided by `polymath-performance:caching-tradeoffs` (what, where, invalidation, staleness) — required; without it, run that first.
+- Traffic: request rate, key cardinality, value sizes, hot-key candidates (measured or `[TBD]`).
+- The Redis deployment (optional): managed vs self-hosted, cluster vs single primary, memory limit.
 
 ## Related skills
 

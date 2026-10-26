@@ -7,6 +7,8 @@ description: Audit a UI against WCAG 2.2 AA — perceivable, operable, understan
 
 > One audit pass on a UI surface against WCAG 2.2 AA. Findings cite the SC number, element selector, and a concrete remediation.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new UI surface is being added.

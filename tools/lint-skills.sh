@@ -2,6 +2,7 @@
 # Enforce skill/command frontmatter discipline:
 #   - description field present and ≤ 200 chars
 #   - SKILL.md ≤ 500 lines
+#   - SKILL.md shape (tools/check-skill-shape.py: sections, mode, links)
 #   - description starts with an imperative verb-ish lowercase letter (advisory)
 set -euo pipefail
 
@@ -69,7 +70,9 @@ if [[ -f "$baseline_file" ]]; then
       END { exit (found ? 0 : 1) }
     ' "$f" || echo "$f" | sed -E 's#.*/plugins/([^/]+)/skills/([^/]+)/SKILL.md#\1:\2#'
   done < <(find "$plugins_dir" -type f -name SKILL.md -print0) | sort > "$current"
-  grep -vE '^[[:space:]]*(#|$)' "$baseline_file" | sort > "$baseline_sorted"
+  # `|| true`: an empty baseline (the goal state) makes grep exit 1, which
+  # pipefail would turn into a silent script failure.
+  { grep -vE '^[[:space:]]*(#|$)' "$baseline_file" || true; } | sort > "$baseline_sorted"
   new_viol="$(comm -23 "$current" "$baseline_sorted")"
   fixed="$(comm -13 "$current" "$baseline_sorted")"
   if [[ -n "$new_viol" ]]; then
@@ -83,6 +86,13 @@ if [[ -f "$baseline_file" ]]; then
     fail=1
   fi
   rm -f "$current" "$baseline_sorted"
+fi
+
+# SKILL-2/3/4: the SKILL.md structure contract — required sections, one
+# canonical **Mode:** line (deterministic / analytical / generative), and no
+# relative link or path that leaves the plugin (dead once installed).
+if ! python3 "$root/tools/check-skill-shape.py"; then
+  fail=1
 fi
 
 if [[ "$fail" -ne 0 ]]; then

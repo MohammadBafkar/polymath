@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `slo-design/scripts/error-budget.py` — budget for any SLO and window, burn-rate alert table, and HEALTHY/ERODING/EXHAUSTED state from consumed minutes or requests (used by `slo-design` and `error-budget-policy`).
+- `capacity-plan/scripts/headroom.py` — linear vs compound fit by R², ceiling-crossing date, event overlays, must-act-by date with an explicit `--as-of` (used by `capacity-plan` and `demand-forecast`).
+- Unit tests for both.
+
+### Changed
+
+- Every skill declares its **Mode** — 6 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- Inputs for `slo-design`, `error-budget-policy`, `chaos-experiment`; exact shapes for `capacity-plan`, `demand-forecast`, `oncall-design`.
+
 ## [0.11.0]
 
 ### Fixed

@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `deep-links` (link parameters are untrusted input), `mobile-perf` (no guessed dominant cost), `push-notifications` (test sends only with approval): Inputs sections.
+
 ## [0.11.0]
 
 ### Fixed

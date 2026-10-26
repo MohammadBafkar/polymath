@@ -7,6 +7,8 @@ description: Audit a live Redis instance's config — maxmemory + eviction, pers
 
 > Sanity-check a Redis deployment against the workload. Output: parameter findings + concrete changes.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A Redis instance is evicting unexpectedly, running out of memory, slow, or about to take more load.

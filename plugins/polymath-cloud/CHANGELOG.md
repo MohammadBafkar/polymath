@@ -2,6 +2,17 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `plan-review`: `scripts/plan-summary.py` classifies a `terraform show -json` plan (create/update/replace/delete/forget, replacement causes, stateful/IAM/exposure callouts, out-of-scope changes, drift, unpinned providers) and states the minimum gate — never printing a value; unit-tested. The skill is now deterministic: the reviewer may raise the gate for a named reason, never lower it.
+
+### Changed
+
+- Every skill declares its **Mode** — 5 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `design-aws-pattern`, `design-gcp-pattern`, `design-azure-pattern`, `design-stack-composition`: Inputs sections — missing workload facts become stated `[VERIFY]` assumptions; prices come from current provider docs, never memory.
+
 ## [0.11.0]
 
 ### Fixed

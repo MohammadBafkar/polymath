@@ -2,6 +2,24 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Added
+
+- `estimate`: `scripts/pert.py` (per-step mean/σ, critical-path root-sum-square, 80% interval, P/O > 3 flags, draft markers).
+- `forecast`: `scripts/monte-carlo.py` — seeded throughput Monte Carlo for "when" and "how many"; the method is chosen by a data rule, not preference.
+- `prioritize`: `scripts/score.py` — RICE/WSJF with every input visible, a fixed tie-break, low-confidence flags, and ×0.5/×2 sensitivity on guessed inputs.
+- Unit tests for all three.
+
+### Fixed
+
+- `estimate`'s worked example omitted the decompose flag on a step with P/O = 4; the example is now the script's real output.
+
+### Changed
+
+- Every skill declares its **Mode** — 4 analytical, 1 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `work-breakdown`: Inputs; `write-plan`: unattended-run rule and the canonical slug rule.
+
 ## [0.11.0]
 
 ### Fixed

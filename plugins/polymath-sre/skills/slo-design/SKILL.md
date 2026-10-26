@@ -7,10 +7,19 @@ description: Design an SLO — pick the right SLI per critical user journey, set
 
 > Design one SLO per critical user journey. Output is the SLI, threshold, measurement window, and the burn-rate alert structure.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service is going live and needs an SLO before opening real traffic.
 - An existing service has alerts but no SLO; on-call is firefighting symptoms not promises.
+
+## Inputs
+
+- The service and its users (required).
+- The critical user journey(s) to protect (optional) — absent: propose them from the service's user-facing endpoints, marked `[VERIFY]`.
+- Current performance data (optional): availability and latency percentiles over the last 28 days. Absent: thresholds are proposals marked `[VERIFY: baseline]`, never presented as measured.
+- Dependency SLOs (optional) — an SLO can't exceed what its hard dependencies deliver.
 
 ## Procedure
 
@@ -23,7 +32,13 @@ description: Design an SLO — pick the right SLI per critical user journey, set
    - Availability: 99.0%, 99.5%, 99.9%, 99.95% — based on what the journey actually needs. Don't reach for 99.99% reflexively; the budget gets too tight to ship anything.
    - Latency: pick a single percentile (P95 or P99) and a single threshold. Avoid "P50 < 100ms AND P99 < 500ms" pyramids.
 4. **Measurement window** — 28 days rolling is the default. Long enough to absorb a bad day; short enough to be actionable.
-5. **Error budget arithmetic** (28 days = 40,320 minutes; budget = (1 − SLO) × window):
+5. **Error budget arithmetic — run the bundled script, never compute by hand.** It prints the budget and the burn-rate table for any SLO and window:
+
+   ```bash
+   python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/slo-design/scripts/error-budget.py" --slo 99.5 --window-days 28
+   ```
+
+   Reference values it reproduces (28 days = 40,320 minutes; budget = (1 − SLO) × window):
    - 99.0% = 6h 43m 12s per 28d.
    - 99.5% = 3h 21m 36s per 28d.
    - 99.9% = 40m 19s per 28d.
@@ -38,7 +53,7 @@ description: Design an SLO — pick the right SLI per critical user journey, set
    | 6h          | 30m          | 5%              | 6× / 5.6×             | page |
    | 3d          | 6h           | 10%             | 1× / 0.93×            | ticket |
 
-   burn rate = budget fraction × window hours ÷ long-window hours. Using the workbook's 30-day numbers on a 28-day SLO is fine if you say so; don't invent thresholds.
+   burn rate = budget fraction × window hours ÷ long-window hours (the script computes it for your window). Using the workbook's 30-day numbers on a 28-day SLO is fine if you say so; don't invent thresholds.
 
 ## Output
 

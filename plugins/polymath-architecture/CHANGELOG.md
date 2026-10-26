@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 8 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- All eight skills show an exact output shape — a worked, internally consistent example — instead of a prose description (`aggregate-design`, `bounded-context-map`, `design-patterns-apply`, `distributed-consistency`, `event-driven-design`, `integration-design`, `resilience-design`, `service-decomposition`). Results stay inline unless kept under `docs/architecture/`.
+
 ## [0.11.0]
 
 ### Fixed

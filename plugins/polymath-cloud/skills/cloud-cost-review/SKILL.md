@@ -7,6 +7,8 @@ description: Review cloud spend — rightsizing/waste, cost budgets + anomaly al
 
 > Cloud cost is an engineering signal, not a finance afterthought. Tie spend to units served, kill waste, and make the bill attributable.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A cloud bill is rising, surprising, or unattributed, and you need where-the-money-goes plus actions.

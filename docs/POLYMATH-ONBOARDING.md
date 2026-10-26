@@ -4,7 +4,7 @@ Two audiences read this file:
 
 - **Installing Polymath into your own repo?** Read [Install](#install) →
   [Activate your repo](#activate-your-repo). Activation generates a
-  `docs/POLYMATH-ONBOARDING.md` tailored to *your* project — the
+  `POLYMATH.md` at your repository root, tailored to *your* project — the
   [Maintaining this marketplace](#maintaining-this-marketplace) section at the
   bottom is for contributors to Polymath itself, not for you.
 - **Contributing to this marketplace?** Read the whole file.
@@ -90,7 +90,7 @@ manifests, and deployment files, then writes:
 
 - `.polymath/project.yaml` — stack, conventions, setup, recommended plugins, skill overrides.
 - `.polymath/capabilities.yaml` — provider mappings (GitHub, Jira, Datadog, …) when confidently inferred.
-- `docs/POLYMATH-ONBOARDING.md` — *your* project's first steps, tools, env vars, workflows, and open questions.
+- `POLYMATH.md` (repository root) — *your* project's first steps, tools, env vars, workflows, and open questions. A repo initialized before v0.12.0 has it at `docs/POLYMATH-ONBOARDING.md`; re-running init moves it.
 
 If you skip activation, a fresh session in an un-initialized repo prints one
 suppressible line pointing you here.
@@ -182,7 +182,7 @@ See [PORTABILITY.md](PORTABILITY.md) for current drop locations and limitations.
 ## Maintaining this marketplace
 
 *This section is for contributors to Polymath itself. A downstream project's
-generated `docs/POLYMATH-ONBOARDING.md` does not include it.*
+generated `POLYMATH.md` does not include it.*
 
 Run these before opening a PR (CI enforces all of them):
 

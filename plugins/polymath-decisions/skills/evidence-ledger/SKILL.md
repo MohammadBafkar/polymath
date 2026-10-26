@@ -9,6 +9,8 @@ description: Frame a decision's evidence — separate facts, assumptions, unknow
 > a ledger that names what you know, what you are assuming, and what you do not
 > know — and for each unknown, what evidence would change the answer.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A decision must be made with incomplete information and the gaps need to be named, not hidden.
@@ -22,7 +24,7 @@ description: Frame a decision's evidence — separate facts, assumptions, unknow
 
 ## Procedure
 
-1. Compute the slug from the decision.
+1. **Slug** from the decision: a workflow's `${workflow.slug}` wins; otherwise lowercase it, replace each run of characters outside `a-z0-9` with `-`, trim `-` at the ends, and cut to ≤ 60 characters at a `-`. An existing file at the target path is updated in place (show the diff), never duplicated.
 2. Draft `docs/decisions/<slug>-evidence.md`:
    - **Facts** — things established by evidence. Cite the source (doc, metric, code path) per fact; a claim you cannot source goes under Assumptions, never Facts.
    - **Assumptions** — things being treated as true without proof. Each is a one-liner the reader could challenge.

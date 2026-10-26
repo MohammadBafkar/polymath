@@ -7,6 +7,8 @@ description: Set OKRs — one ambitious Objective, 3–5 measurable Key Results 
 
 > Andy Grove's OKR. **O** is qualitative + ambitious. **KRs** are measurable + time-boxed. Confidence at 0.5–0.7 average — anything higher is sandbagging.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A team or org is setting OKRs for the next cycle.

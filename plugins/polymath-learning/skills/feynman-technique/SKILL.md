@@ -7,6 +7,8 @@ description: Verify your understanding of a concept by attempting an undergrad-l
 
 > Richard Feynman: if you can't explain it simply, you don't understand it. The point isn't the explanation — it's the cracks that surface during the attempt.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - You think you understand a concept and want to verify.

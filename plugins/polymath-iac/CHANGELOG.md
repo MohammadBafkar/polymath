@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 analytical — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- `policy-as-code`, `terraform-module`, `terraform-state`: exact output shapes.
+- `terraform-state`: Inputs no longer suggest DynamoDB locking (deprecated); state is read for structure, never for values.
+
 ## [0.11.0]
 
 ### Fixed

@@ -7,6 +7,8 @@ description: Map a domain into DDD bounded contexts + a context map (customer-su
 
 > Carve a domain into bounded contexts before anyone draws service boundaries. A context map shows how contexts relate and where models must NOT leak.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new system or a large feature spans several subdomains and the team keeps arguing over what a word means ("order", "account", "user").
@@ -37,8 +39,31 @@ Not this when: you already have one context and need its internals — that is `
 
 ## Output
 
-- A one-page context map: contexts (with core/supporting/generic), relationship edges with patterns and direction, and the per-context ubiquitous-language table.
-- A short "boundaries that will hurt" list — overloaded terms and ownerless contexts.
+```text
+Context map: commerce platform
+
+Contexts
+  Ordering      core        owner: checkout team
+  Payments      supporting  owner: payments team
+  Catalog       supporting  owner: merchandising team
+  Identity      generic     owner: platform team (Okta behind an ACL)
+
+Relationships (upstream → downstream: pattern)
+  Catalog  → Ordering : open-host / published language (product snapshot v2)
+  Ordering → Payments : customer–supplier (Ordering's needs are on the Payments backlog)
+  Okta     → Identity : anti-corruption layer
+  Payments → Ledger   : conformist (no leverage over the vendor ledger API)
+
+Ubiquitous language (term that changes meaning at a boundary)
+  "order"   Ordering: the customer's intent to buy · Payments: a charge reference only
+  "account" Identity: a login · Payments: a merchant settlement account
+
+Boundaries that will hurt
+  - Ordering is downstream of 3 contexts → coupling risk on every release
+  - No owner for "Promotions" (lives half in Catalog, half in Ordering)
+```
+
+Inline by default; when a workflow step or the user wants it kept, write it to `docs/architecture/<slug>-context-map.md` (slug from the system or context name, lowercased, non-`a-z0-9` runs → `-`).
 
 ## Quality bar
 

@@ -9,11 +9,17 @@ description: Check the Polymath environment — required and optional tools, and
 > step 0 of project initialization, so missing tools surface as actionable
 > guidance instead of a cryptic shell error.
 
+**Mode:** deterministic — same inputs, same output. Follow the steps and the output shape exactly; compute with the named script or tool, never by estimate; add nothing the shape does not ask for.
+
 ## When to use
 
 - A new contributor just installed Polymath and wants to confirm their machine is ready.
 - The SessionStart hook printed nothing, or a workflow failed with a tool error.
 - `initialize-project` calls this as step 0 before it does any inference.
+
+## Inputs
+
+- None required. Run from the repository root so the project-file and routing checks see this repo.
 
 ## Procedure
 
@@ -40,8 +46,33 @@ description: Check the Polymath environment — required and optional tools, and
 
 ## Output
 
-- The PASS/WARN/FAIL report, plus a one-line verdict.
-- For each failure, the concrete next action (install command or skill to run).
+The script's report verbatim, then one fix line per `✗` / `!`:
+
+```text
+polymath-core:doctor — environment preflight
+
+Required:
+  ✓ bash       GNU bash, version 5.2.21(1)-release
+  ✓ python3    Python 3.12.3
+
+Recommended:
+  ✓ git        git version 2.43.0
+  ! claude     not found — install Claude Code to run plugin validation and fixtures
+
+Optional:
+  ✓ PyYAML     present (richer project.yaml parsing)
+  ! jq         not found (optional)
+
+Project context:
+  ! no .polymath/project.yaml — run /polymath-core:init-project
+
+Routing pipeline:
+  ✓ routing    mode=hint — ambient route hints only
+
+doctor: OK — required tools present.
+
+Fixes: install the claude CLI (recommended) · run /polymath-core:init-project
+```
 
 ## Quality bar
 

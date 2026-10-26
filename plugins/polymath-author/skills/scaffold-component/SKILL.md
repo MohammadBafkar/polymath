@@ -10,6 +10,8 @@ description: Generate a component/service/module in the CURRENT repo per its con
 > boilerplate, and infra files come from the skills that own those
 > formats. The model's job is composition, not invention.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - "Add a new service/module/package/handler like the existing ones."
@@ -57,8 +59,9 @@ Not for authoring Polymath plugins/skills (`new-plugin`, `new-skill`,
    component table) edits existing files: make those edits additive only
    and show each one as a diff.
 6. **Close the loop.** If the component adds tools or env vars, update
-   `setup` in `.polymath/project.yaml` and regenerate the onboarding
-   checklist: `python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/gen-prerequisites.py"
+   `setup` in `.polymath/project.yaml`, update the matching tools / env-var
+   lines in the root `POLYMATH.md` (show the diff), and regenerate the
+   onboarding checklist: `python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/gen-prerequisites.py"
    --out docs/onboarding/prerequisites.md`. Run the repo's build/test once
    to prove the component compiles and its starter test passes.
 

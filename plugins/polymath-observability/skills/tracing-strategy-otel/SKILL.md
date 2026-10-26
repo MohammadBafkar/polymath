@@ -7,10 +7,18 @@ description: Design an OpenTelemetry tracing strategy — sampling, attribute di
 
 > Trace what matters at a sampling rate you can afford. Output is a service's tracing plan.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new service needs tracing and you want the right setup, not a copy-paste.
 - An existing OTel deployment is expensive and the team can't tell why.
+
+## Inputs
+
+- The service: language/runtime, inbound and outbound protocols, request rate (required for the cost math — absent: `[TBD: request rate]`, and the cost target stays a formula).
+- Existing telemetry stack (optional): collector, backend (Tempo, Honeycomb, Datadog, …), monthly tracing budget.
+- Trust boundaries: which outbound calls leave your control (they get baggage stripped).
 
 ## Procedure
 
@@ -72,7 +80,7 @@ Cost target: $400/mo at 10% sampling + tail-based error capture.
 
 ## Anti-patterns to avoid
 
-- 100% sampling "to see everything" — bills explode, signal doesn't improve.
+- Storing 100% of traces in the backend "to see everything" — bills explode, signal doesn't improve. (Exporting 100% to your *own* collector so its tail sampler can keep every error is different: the collector drops most of it.)
 - Spans per function (huge trees, noise).
 - user_id as resource attribute (cardinality explosion in the backend).
 - Direct vendor exporter from each app pod (no collector buffer to tune).

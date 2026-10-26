@@ -137,6 +137,11 @@ any version drift between a marketplace entry and its plugin.json.
 - `name`: bare kebab-case slug.
 - `description`: ≤ 200 chars, trigger phrase first, present tense.
 - `SKILL.md` body ≤ 500 lines. Spill to `references/`.
+- Body shape (SKILL-2/3/4, `tools/check-skill-shape.py`): the required sections, one
+  `**Mode:**` line (`deterministic` / `analytical` / `generative` — see the
+  [style guide's Mode contract](../plugins/polymath-author/references/skill-style-guide.md)),
+  and no relative link that leaves the plugin.
+- Arithmetic a skill relies on lives in a tested `scripts/` calculator, not in prose.
 - Reference the plugin's templates via relative path from the skill —
   a link target of `../../templates/PRD.md` resolves from
   `skills/<skill>/SKILL.md` to the plugin's own `templates/` directory.

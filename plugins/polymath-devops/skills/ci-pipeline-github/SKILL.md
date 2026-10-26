@@ -7,6 +7,8 @@ description: Author a GitHub Actions workflow — lint/test/build/deploy with ca
 
 > Write a `.github/workflows/*.yml` that's correct, fast, and secure.
 
+**Mode:** analytical — judgment inside a fixed frame. Keep the output shape; every verdict cites its evidence; unknowns are marked `[TBD]` or `[VERIFY]`, never filled in.
+
 ## When to use
 
 - A new repo needs CI.

@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.12.0]
+
+### Changed
+
+- Every skill declares its **Mode** — 3 deterministic — the one-line contract `tools/check-skill-shape.py` (SKILL-3) enforces.
+- Posting skills are classified deterministic (fixed format, confirm-before-send).
+
 ## [0.11.0]
 
 ### Changed
