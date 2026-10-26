@@ -16,6 +16,8 @@ description: Read EXPLAIN ANALYZE output and propose targeted optimizations — 
 
 - The query.
 - The plan: `EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)` on Postgres (or the dialect equivalent). Run with a warmed cache when comparing.
+
+**`EXPLAIN ANALYZE` executes the query.** For `INSERT`/`UPDATE`/`DELETE`, wrap it in `BEGIN; … ROLLBACK;`. Don't run a heavy query's `ANALYZE` on a production primary without the owner's OK — use a replica or a copy, or start with plain `EXPLAIN`.
 - Schema and indexes for the involved tables.
 
 ## Reading the plan, by dialect
@@ -34,11 +36,13 @@ it. Cheat sheet:
 | Redshift | `EXPLAIN <query>` + `SVL_QUERY_REPORT` | step type, `rows_pre_filter` vs `rows`, `is_diskbased`, distribution / sort key alignment |
 | DuckDB | `EXPLAIN ANALYZE <query>` | `actual time`, `cardinality`, `function` (operator) names |
 
-Read Postgres bottom-up; read MySQL / BigQuery / Snowflake top-down
-(the root node is the final operator and children are inputs). The
-*dominant cost* rule is dialect-independent: pick the single node
-accounting for > 50 % of runtime; if no node dominates, pick the
-deepest one.
+In every dialect the root node is the final operator and its children
+are inputs: start at the leaves (most indented) and follow rows upward.
+In Postgres, a node's `actual time` includes its children and is *per
+loop* — multiply by `loops`, then subtract the children to get the
+node's own cost. The *dominant cost* rule is dialect-independent: pick
+the single node whose own time is > 50 % of runtime; if no node
+dominates, pick the deepest expensive one.
 
 ## Procedure
 
@@ -48,7 +52,7 @@ deepest one.
    - **Index Scan** on the wrong index (high "buffers read" relative to rows returned) → composite index column order is wrong.
    - **Nested Loop** with high outer rows → join order / hash join would be cheaper.
    - **Sort** spilling to disk (high "external merge" or "Sort Method: external") → memory or pre-sorted index.
-   - **Hash Aggregate** with very high `Rows Removed by Filter` → predicate could move earlier.
+   - **Scan** with very high `Rows Removed by Filter` relative to rows returned → the predicate isn't using an index (or the index isn't selective enough).
    - **Function call in WHERE** (`WHERE lower(email) = ...`) blocking index use → use a functional index or normalize on write.
    - **CTE materialization** on Postgres < 12 (CTEs are an optimization fence in old versions) → inline or use a subquery.
 3. **Compute the dominant cost**. Pick the single node accounting for > 50% of total runtime; if no single node dominates, pick the deepest one.

@@ -242,6 +242,29 @@ def rewrite_name(fm: str, namespaced: str) -> str:
     return new_fm
 
 
+# agentskills.io / Skills-API frontmatter allowlist. Strict hosts reject any
+# other key, so Claude-only agent/command fields (disallowedTools, model,
+# argument-hint, ...) must not leak into converted SKILL.md files.
+PORTABLE_FM_KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+FM_TOP_KEY = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*):")
+
+
+def portable_frontmatter(fm: str) -> str:
+    """Drop top-level frontmatter keys (and their indented continuation lines)
+    that are not in PORTABLE_FM_KEYS."""
+    out: list[str] = []
+    skipping = False
+    for line in fm.split("\n"):
+        m = FM_TOP_KEY.match(line)
+        if m:
+            skipping = m.group(1) not in PORTABLE_FM_KEYS
+        elif line[:1] not in (" ", "\t", "-"):
+            skipping = False
+        if not skipping:
+            out.append(line)
+    return "\n".join(out)
+
+
 def support_rel(plugin_name: str) -> str:
     return f"../{SUPPORT_ROOT.as_posix()}/{plugin_name}"
 
@@ -255,6 +278,10 @@ def rewrite_portable_paths(body: str, plugin_name: str) -> str:
     """
     plugin_root = support_rel(plugin_name)
     replacements = {
+        # Canonical source form: Claude Code substitutes the inner
+        # ${CLAUDE_PLUGIN_ROOT} at skill-load time (the Bash tool never sees
+        # plugin env vars), other hosts fall back to POLYMATH_PLUGIN_ROOT.
+        "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}": plugin_root,
         "${POLYMATH_PLUGIN_ROOT:-$CLAUDE_PLUGIN_ROOT}": plugin_root,
         "${POLYMATH_PLUGIN_ROOT}": plugin_root,
         "$POLYMATH_PLUGIN_ROOT": plugin_root,
@@ -402,7 +429,7 @@ def export_markdown_surface(
 
     text = md_path.read_text()
     fm, body, trailing = parse_frontmatter(text)
-    new_fm = rewrite_name(fm, namespaced)
+    new_fm = rewrite_name(portable_frontmatter(fm), namespaced)
     if not frontmatter_value(new_fm, FM_DESCRIPTION):
         new_fm += f"description: Portable {kind} exported from {plugin.name}:{slug}\n"
     new_body, _ = rewrite_body_links(body, plugin)

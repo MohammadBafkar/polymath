@@ -26,7 +26,7 @@ description: Decompose a North Star metric into a tree of input metrics so each 
 4. **Each leaf has**:
    - A name.
    - A definition (SQL-able).
-   - A current baseline value.
+   - A current baseline value — measured, or marked `[TBD: query not yet run]`; never an invented number.
    - An owning team.
    - A direction (↑ or ↓ is good).
 5. **Sanity check**: if any leaf can't be moved without crossing into another team's surface, the tree is wrong — re-decompose.
@@ -58,13 +58,13 @@ Decomposition (multiplicative):
 
 Each leaf:
   Sessions / week (organic):
-    SQL: count distinct user_id where source='organic' and ts >= now() - 7d
+    SQL: count distinct session_id where source='organic' and ts >= now() - 7d
     Baseline: 320k
     Direction: ↑
 ```
 
 ## Anti-patterns to avoid
 
-- Decomposing additively when the relationship is multiplicative ("WAB = ad clicks + organic + referral" double-counts).
+- Mixing up the two decompositions: funnel stages multiply (volume × rate × rate); disjoint segments add (organic + paid + referral sessions). Adding *overlapping* segments — users counted in two sources — double-counts.
 - Leaves that two teams would have to coordinate to move.
 - Vanity metrics ("page views") that don't connect upward.

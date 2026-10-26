@@ -22,11 +22,11 @@ Not this when: you are authoring a reusable module (`terraform-module`) or revie
 
 ## Procedure
 
-1. **Remote backend + locking**: store state remotely (S3+DynamoDB lock, GCS, azurerm, or TF Cloud) with encryption and versioning; **never** local state for shared infra. Locking is non-negotiable for teams.
+1. **Remote backend + locking**: store state remotely (S3 with native `use_lockfile` locking — DynamoDB locking is deprecated since Terraform 1.10 — GCS, azurerm, or HCP Terraform) with encryption and versioning; **never** local state for shared infra. Locking is non-negotiable for teams.
 2. **Isolate state by blast radius**: separate state per environment (dev/stage/prod) and per independently-changing layer (network vs data vs app). A single giant state means every apply risks everything and serializes the team.
 3. **Workspaces vs directories**: prefer separate root configs/dirs (or a tool like Terragrunt) for strong env isolation; CLI workspaces only for lightweight, low-risk variation — they share a backend and are easy to misfire.
-4. **Drift detection**: scheduled `terraform plan` to detect out-of-band changes; alert and reconcile. Decide the policy: codify the change or revert it — don't let drift accumulate.
-5. **Safe state surgery**: `import` to bring existing resources under management; `state mv` for refactors (renames/module moves) so Terraform doesn't destroy+recreate; `state rm` to stop managing without destroying. Always plan and back up state first.
+4. **Drift detection**: scheduled `terraform plan -refresh-only` (or plain `plan`) to detect out-of-band changes; alert and reconcile. Decide the policy: codify the change or revert it — don't let drift accumulate.
+5. **Safe state surgery** — prefer the config-driven blocks, which show up in `plan` and get code-reviewed: `import {}` to adopt existing resources, `moved {}` for renames/module moves (so Terraform doesn't destroy+recreate), `removed {}` to stop managing without destroying. Fall back to CLI `state mv` / `state rm` only when a block can't express it — and back up state (`terraform state pull > backup.tfstate`) first.
 6. **Secrets in state**: assume state contains secrets — restrict backend access (least privilege), encrypt, and avoid outputs that leak them.
 7. **Recovery**: state versioning/backups + a documented restore; protect against concurrent corruption.
 
@@ -39,4 +39,4 @@ Not this when: you are authoring a reusable module (`terraform-module`) or revie
 - Remote, encrypted, versioned backend with locking — no shared local state.
 - State is segmented by environment and blast radius, not one monolith.
 - Drift is detected on a cadence with a written reconcile policy.
-- Refactors use `state mv`/`import` (plan + backup first), never destroy+recreate of live infra.
+- Refactors use `moved`/`import`/`removed` blocks (CLI state surgery only with a backup), never destroy+recreate of live infra.

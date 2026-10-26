@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `backend-tail-latency`: the example hedged a non-idempotent payment refund (double refunds) — replaced; hedging restricted to idempotent calls.
+- `design-cache-layer`: lock release is token-owned compare-and-delete with bounded waiting (plain `DEL` could free another worker's lock); update-then-invalidate race named.
+- `caching-tradeoffs`: hit-rate value is computed from miss penalty, not a blanket 80% rule.
+- `audit-redis-config`: When-to-use, inputs (managed-service `CONFIG` limits), read-only rule, exposure checks; slowlog threshold is not a percentile.
+
+### Removed
+
+- The `/audit-redis-config` command (the same-named skill provides it).
+
 ## [0.8.0]
 
 Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.

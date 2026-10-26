@@ -28,7 +28,7 @@ Not this when: you are evaluating an existing report (`polymath-leadership:perf-
 4. **Calibrate interviewers**: shared rubric, example answers at each level, shadow/reverse-shadow before going solo. Recalibrate when a hire surprises.
 5. **Evidence before opinion**: interviewers submit written, evidence-based feedback and a recommendation *before* the debrief — to prevent groupthink and anchoring on the loudest voice.
 6. **Structured debrief**: review against the scorecard competency by competency; a "no" with evidence outweighs a vague "yes". Decide hire/no-hire (+ level) with a named decision-owner.
-7. **Guard against bias**: consistent process, diverse panel where possible, focus on job-relevant signal, watch for affinity/halo. Track funnel + outcome metrics to catch systematic bias.
+7. **Guard against bias**: consistent process, diverse panel where possible, focus on job-relevant signal, watch for affinity/halo. Track funnel + outcome metrics to catch systematic bias. Never ask about protected characteristics (age, family plans, religion, health, nationality…) — check questions with HR/legal for each hiring jurisdiction.
 8. **Candidate experience**: timely, respectful, clear — a rejected candidate is a future customer/applicant.
 
 ## Output

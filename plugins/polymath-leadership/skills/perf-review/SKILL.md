@@ -21,8 +21,10 @@ description: Write a perf review — evidence-anchored, calibrated against level
 
 ## Procedure
 
+**Confidential.** Performance reviews are personnel data. Default to a private, non-versioned location — outside the repo, or a repo path that `git check-ignore` confirms is ignored (add the ignore entry first if needed) — or the company's HR system; never commit or push them. Confirm the path with the user before writing. Use only evidence the user provided; never invent incidents, quotes, or feedback.
+
 1. Read [`Perf-review.md`](../../templates/Perf-review.md).
-2. Write `docs/people/<employee>/perf-<cycle>.md`:
+2. Write `<private-dir>/people/<employee>/perf-<cycle>.md` (default `<private-dir>`: `~/.polymath/private`):
    - **Impact** — 3–5 outcomes with evidence (metric, shipped artifact, customer quote). Their role in each.
    - **How they worked** — quote specific incidents. "In <project>, X did <thing>, leading to <outcome>." Not "is a great collaborator".
    - **Strengths** — 2–3 strongest patterns, each with an example.
@@ -40,7 +42,7 @@ description: Write a perf review — evidence-anchored, calibrated against level
 
 ## Output
 
-- File: `docs/people/<employee>/perf-<cycle>.md`.
+- File: `<private-dir>/people/<employee>/perf-<cycle>.md` — never committed. Shape: the [`Perf-review.md`](../../templates/Perf-review.md) template.
 - Summary listing the recommendation + the 1–2 growth areas.
 
 ## Anti-patterns to avoid

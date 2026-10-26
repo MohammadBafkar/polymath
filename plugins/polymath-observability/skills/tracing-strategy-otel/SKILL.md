@@ -19,7 +19,7 @@ description: Design an OpenTelemetry tracing strategy — sampling, attribute di
    - **Head-based, parent-aware** — `ParentBased(TraceIdRatioBased(0.1))` keeps 10% of root spans, follows the parent decision for children. Cheap, deterministic, predictable cost.
    - **Tail-based** — sample at the collector based on error / latency outcome. Catches all errors; needs collector capacity.
    - **Adaptive** — let the collector tune sampling rate per route. Use when traffic is bursty.
-   Start head-based at 10%; layer tail-based at the collector when you can afford a collector.
+   Start head-based at 10%; layer tail-based at the collector when you can afford a collector. **They don't stack the way people assume:** the collector can only keep what the app sent, so a 10% head sample hides 90% of errors from tail sampling. To keep all errors, export 100% (or a high rate) from the app and let the collector's tail sampler decide. Tail sampling also needs every span of a trace on the same collector instance — put a trace-ID-aware load-balancing exporter in front of a collector fleet.
 3. **Span hygiene**:
    - One span per logical step (DB call, external call, business operation). Not per function.
    - Span name = stable identifier (`HTTP GET /v1/orders/{id}`, not `getOrder(42)`).
@@ -29,7 +29,7 @@ description: Design an OpenTelemetry tracing strategy — sampling, attribute di
    - **Don't** put high-cardinality values as resource attributes (user_id is OK as a span attribute; never as a resource attribute).
    - **Don't** add ad-hoc attributes the cardinality of which you can't predict.
 5. **Context propagation** — W3C `traceparent` / `tracestate` headers on every outbound call. If you control both sides and have legacy clients, keep `b3` headers as a fallback during migration.
-6. **Baggage** — sparingly. Each item rides every request downstream. `user_tier` is fine; `entire user object JSON` is not.
+6. **Baggage** — sparingly. Each item rides every request downstream. `user_tier` is fine; `entire user object JSON` is not. Strip baggage (and usually `tracestate`) at calls that leave your trust boundary — third parties receive whatever you propagate.
 7. **Exporter config**:
    - OTLP/gRPC to a collector. Don't push directly from app to vendor backend; the collector is the choke point you tune.
    - Collector samples / batches / re-routes. App stays simple.
@@ -44,8 +44,10 @@ SDK: OpenTelemetry Go SDK 1.x, auto-instrumented (HTTP server,
 HTTP client, database/sql).
 
 Sampling:
-  App: ParentBased(TraceIdRatioBased(0.1))   → keep 10% of roots.
-  Collector: tail-based on error or latency > 1s → keep 100% of those.
+  App: export 100% to the in-cluster collector (load-balanced by trace ID).
+  Collector tail sampler: keep 100% of traces with an error or latency > 1s,
+    10% probabilistic of the rest.
+  (A 10% head sample in the app would hide 90% of errors from the tail sampler.)
 
 Span hygiene:
   Manual spans for: refund_create, downstream.stripe, db.refund_insert.

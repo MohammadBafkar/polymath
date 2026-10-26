@@ -7,16 +7,23 @@ description: Pick the right GCP primitive — compute (Cloud Run / GKE / Functio
 
 > Given a workload sketch, pick the GCP primitive with the *why*. Output: chosen primitive, runner-up, conditions to flip.
 
+## When to use
+
+- A PRD says "deploy on GCP" without naming services, or a workload is on the wrong GCP primitive.
+- Comparing GCP options for a new service before writing IaC.
+
+**Verify before you recommend.** Cloud catalogs change faster than this skill: confirm current availability, limits, and prices in the provider's own docs and pricing calculator, and show cost estimates as arithmetic with stated assumptions — never a bare monthly figure.
+
 ## Procedure
 
 1. **Characterize the workload** (compute pattern, storage shape, DB query model, networking surface).
 2. **Compute.**
    - HTTP, stateless, bursty, autoscale-to-zero → **Cloud Run** (managed K-native; supports concurrency per instance, custom domains, IAM).
-   - Cron / event-driven, short-lived → **Cloud Functions (2nd gen)** (now Cloud Run under the hood, but with simpler triggers).
+   - Cron / event-driven, short-lived → **Cloud Run functions** (formerly Cloud Functions 2nd gen; runs on Cloud Run with simpler triggers).
    - Long-running, stateful, GPU, complex networking → **GKE** (Autopilot for low-ops, Standard for control).
    - Legacy / windows / appliance → **GCE** (VMs with managed instance groups).
 3. **Database.**
-   - Relational, regional, < 30TB, traditional → **Cloud SQL** (Postgres / MySQL / SQL Server).
+   - Relational, regional, traditional, within Cloud SQL's storage/connection limits (check current limits) → **Cloud SQL** (Postgres / MySQL / SQL Server).
    - Relational, global, horizontal scale, strong consistency → **Spanner** (cost premium; scale you can't get elsewhere).
    - Document, mobile / web sync → **Firestore** (Native mode for new projects).
    - Wide-column, time-series, very-high-throughput → **Bigtable**.
@@ -26,7 +33,7 @@ description: Pick the right GCP primitive — compute (Cloud Run / GKE / Functio
    - Filesystem → **Filestore** (managed NFS).
    - Block → **Persistent Disks**.
 5. **Messaging.** Pub/Sub for fan-out + retention; Cloud Tasks for HTTP-triggered queues with per-task retry policies.
-6. **Networking.** Cloud Load Balancing (global) > regional NLB > internal LB. Cloud Armor for WAF; serverless services attach via VPC Connector.
+6. **Networking.** Cloud Load Balancing (global) > regional NLB > internal LB. Cloud Armor for WAF; Cloud Run reaches private resources via Direct VPC egress (or a Serverless VPC Access connector).
 7. **Cost shape.** Cloud Run = vCPU-seconds + requests; GKE Autopilot = pod-resource; Spanner = node-hour; Firestore = ops + storage; BigQuery = on-demand TB-scanned (or flat-rate slots).
 8. **Flip conditions.** Quantitative thresholds where you'd revisit.
 
@@ -52,7 +59,10 @@ Messaging:
 Networking:
   HTTPS via Cloud Run's built-in HTTPS endpoint; no LB needed at this scale.
 
-Cost driver: Cloud Run vCPU-seconds + Firestore reads/writes. ~$220/mo at 500 RPS.
+Cost driver: Cloud Run vCPU-seconds + memory GiB-seconds + requests,
+  + Firestore document reads/writes. Estimate each from the expected
+  instance-seconds and per-refund document ops (show the arithmetic);
+  verify in the Google Cloud Pricing Calculator.
 
 Ops shape:
   Logs: Cloud Logging out of the box.
@@ -65,4 +75,11 @@ Ops shape:
 - "Spanner because it sounds cool." Spanner's cost floor is high; use Cloud SQL until you outgrow it.
 - "GKE for everything." Autopilot or Cloud Run handles 90% of workloads with less ops.
 - BigQuery for OLTP. Per-query latency is seconds, not ms.
-- Forgetting the VPC Connector for serverless → private DB access. Default serverless is internet-only.
+- Forgetting VPC egress for serverless → private DB access. Default serverless egress is internet-only.
+
+## Quality bar
+
+- Workload characterized in measurable terms (RPS, latency budget, task duration, data shape).
+- Chosen primitive justified, with a runner-up and quantitative flip conditions.
+- Product names, limits, and availability match current GCP docs.
+- Cost estimates show assumptions and arithmetic.

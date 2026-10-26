@@ -13,7 +13,7 @@ description: Design an event-driven flow — event catalog, choreography vs orch
 - A write must update the database *and* publish a message and you are about to do both in one block (the dual-write trap).
 - A workflow invokes `polymath-architecture:event-driven-design`.
 
-Not this when: the integration is two services and request/response is fine — that is `integration-design`. For the broker's partitioning/throughput tuning, that is `polymath-streaming:streaming-design` (when present).
+Not this when: the integration is two services and request/response is fine — that is `integration-design`. For the broker's partitioning/throughput tuning, that is `polymath-streaming:streaming-design`.
 
 ## Inputs
 

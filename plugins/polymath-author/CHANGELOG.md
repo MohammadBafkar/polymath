@@ -2,6 +2,20 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `skill-author-critic`: a reliability lens — resolvable installed paths, missing-input behavior, side-effect gates, verification, fabrication guard, untrusted content, factual accuracy, sibling consistency.
+- `references/skill-style-guide.md`: new "Reliability contract" section; frontmatter guidance reflects the agentskills.io key allowlist.
+- `scaffold-component`: generators run only after confirmation (dry-run first), registration edits are additive diffs, build/test is run after scaffolding; Output shape added; shorter description (plugin back under the 400-token cap).
+
+### Fixed
+
+- `validate-plugin`: runs `tools/conformance.sh <plugin>` as the source of truth; removed the nonexistent `tools/link-templates.sh` / `templates.json` step; a gate that can't run is N/A, never PASS.
+- `references/frontmatter-cheatsheet.md`: hook commands use the quoted `${CLAUDE_PLUGIN_ROOT}`; a blocking hook's reason comes from stderr, not stdout.
+- Commands: `new-workflow` validates with `polymath-flow` on PATH instead of a `../polymath-flows` path that breaks once installed; bundled-script paths resolve under Claude Code.
+
 ## [0.10.0]
 
 ### Changed

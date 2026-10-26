@@ -16,7 +16,8 @@ description: Design a chaos experiment — hypothesis, blast radius, abort crite
 ## Procedure
 
 1. **Hypothesis** — a single falsifiable statement: "When pod X dies, request error rate stays under 0.5% for 5 minutes." Not "we want to know what happens".
-2. **Blast radius** — smallest first. Run in dev → staging → one prod canary → broader prod. Never start in prod.
+2. **Blast radius** — smallest first. Run in dev → staging → one prod canary → broader prod. Never start in prod. Prod runs need the service owner's sign-off and an announced window.
+   You design the experiment; a human runs it. Never execute the injection yourself unless the operator explicitly tells you to, for that environment, at that moment.
 3. **Failure to inject** — pick one:
    - Pod kill / node drain.
    - Network latency / partition between two services.
@@ -45,8 +46,10 @@ Pre-conditions:
   - 3 replicas running.
   - On-call team aware (scheduled in #payments-eng).
 
-Injection:
-  kubectl delete pod -l app=refund -n payments  (single pod, random)
+Injection (exactly one pod — `kubectl delete pod -l …` alone would delete
+every matching pod):
+  pod="$(kubectl get pods -n payments -l app.kubernetes.io/name=refund -o name | shuf -n 1)" \
+    && kubectl delete -n payments "$pod"
 
 Observation (5 minutes):
   Grafana dashboard `refund-canary-chaos` showing:
@@ -78,3 +81,4 @@ Promotion plan:
 - Starting in prod.
 - No abort criteria.
 - No rollback plan because "it'll recover on its own".
+- An injection command whose selector matches more than the intended target (a label selector without picking one pod).

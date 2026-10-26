@@ -5,7 +5,7 @@ expect:
   invoked:
     - polymath-leadership:perf-review
   artifacts:
-    - "docs/people/alice/perf-h1-2026.md"
+    - "private/people/alice/perf-h1-2026.md"
   output_matches:
     - "(Impact|Strengths|growth)"
     - "(promote|exceeds|meets|below)"
@@ -21,6 +21,8 @@ timeout_seconds: 120
 Use polymath-leadership:perf-review. Employee: Alice. Manager: me.
 Cycle: H1 2026. Level: Senior Engineer. Use the linked career ladder.
 Evidence comes from 6 months of 1:1 notes plus 360 feedback.
+Save it to `private/people/alice/perf-h1-2026.md` and make sure `private/`
+is gitignored — this must never be committed.
 
 # Acceptance
 
@@ -29,3 +31,4 @@ Evidence comes from 6 months of 1:1 notes plus 360 feedback.
 - Areas-for-growth section: each item is something Alice already heard in 1:1s. No surprise feedback.
 - Recommendation (promote / exceeds / meets / below) anchored in the level expectations.
 - Calibration notes flag at least one bias risk (recency, halo, etc.).
+- The review lands in the gitignored private path, never under `docs/`.

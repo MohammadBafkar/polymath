@@ -7,6 +7,31 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0]
+
+Adversarial reliability pass over every skill and both subagents: ~150 defects fixed across 37 plugins — wrong commands and arithmetic in worked examples, unsafe or ungated side effects, gate-gaming instructions, contradictions between sibling skills, and paths that only resolved inside the marketplace checkout.
+
+### Fixed
+
+- **Bundled scripts never ran under Claude Code.** Skills invoked bundled scripts as `${POLYMATH_PLUGIN_ROOT}/…`, but Claude Code only substitutes `${CLAUDE_PLUGIN_ROOT}` in skill text and never exports plugin variables to the Bash tool, so every call resolved to `/skills/…`. Skills and commands now use `${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}`; the exporter rewrites that form for portable bundles.
+- **Project localization silently never applied under Claude Code.** The SessionStart hook wrote `project-context.json` under `CLAUDE_PLUGIN_DATA`, while skills and the flows runner (Bash tool) read `~/.polymath/data`. The loader now mirrors the snapshot there; `build-mcp-resolution.py` resolves the same directory as the loader (it used to write `mcpResolution` into a different file); paused runs and the index-mute marker under `~/.polymath/data` are honored; a minimal project file no longer triggers the "not initialized" nudge. Skills fall back to the raw `.polymath/project.yaml` (hosts without SessionStart) and ignore a snapshot whose `_meta.source` is another repo.
+- **Gate gaming removed.** `run-workflow` and `verify-change` told the model to include "tests"/"verified" in step summaries so `stepSummaryMatches` would pass; summaries now report what actually ran, and a step that didn't verify fails.
+- Baseline gate failures: `evidence-ledger` description over 200 chars (SKILL-1), `polymath-core` (414) and `polymath-author` (401) over the 400-token cap.
+- Factual errors in worked examples, among them: Postgres `UPDATE … LIMIT`; 30-day error budgets labelled 28-day; an A/B sample size ~28× too large and a wrong duration formula; a "90% confidence" estimate that summed extremes; `kubectl delete pod -l` presented as killing one pod; hedging a non-idempotent payment refund; a cache lock any worker could release; the restricted Pod Security profile requiring `readOnlyRootFilesystem`; Cosmos DB strong consistency with multi-region writes; DynamoDB state locking; an OWASP 2021 table labelled current; a CI example whose pnpm cache step fails.
+
+### Changed
+
+- **Subagents** (`research-scout`, `architecture-critic`): read-only via `disallowedTools`, an explicit brief/input contract (subagents can't ask the user), fetched or reviewed text treated as data, defined status vocabulary or checked-vs-reasoned basis, no quota padding, stop rules. The exporter strips Claude-only frontmatter keys (agentskills.io allowlist) when converting agents and commands.
+- **Side effects are gated** across chat posts, Statuspage, monitor creation, tracker/issue writes, PR push/open, generators, and chaos injection; **untrusted content** (issues, tickets, error payloads, fetched pages, retrieved docs) is treated as data in every skill that reads it; **no fabrication** rules for owners, dates, metrics, quotes, and timeline entries.
+- **Privacy**: personnel notes (`perf-review`, `one-on-one-prep`, `coaching-plan`) default to a private, git-ignored location; embargoed security advisories are never drafted in a public repo.
+- `polymath-author`: `skill-author-critic` gains a reliability lens and the style guide a "Reliability contract"; `validate-plugin` runs `tools/conformance.sh` (the nonexistent `link-templates.sh` step is gone).
+- `docs/PLUGIN-AUTHORING.md`: subagent constraints updated to current Claude Code behavior (subagents can nest; `AskUserQuestion` is unavailable; omitted `tools` inherits everything); same-named command shims are disallowed.
+- DEADCONF-1: `conventions.commit_style` (now read by `polymath-release:commit`) and `stack.package_manager` (now read by `polymath-engineering:verify-change`) leave the dead-config exemption list.
+
+### Removed
+
+- Eleven command shims that shared a name with a skill in the same plugin (`polymath-core` `/doctor` `/route`; `polymath-backend` `/review-migration`; `polymath-devops` `/audit-dockerfile` `/audit-compose`; `polymath-performance` `/audit-redis-config`; `polymath-release` `/commit` `/pr` `/changelog` `/release-notes`; `polymath-thinking` `/deliberate`). Each skill is already invocable as `/plugin:skill`, so the shims only duplicated always-on listing entries. Every slash invocation keeps working.
+
 ## [0.10.1]
 
 ### Changed

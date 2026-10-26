@@ -25,13 +25,13 @@ description: Post an async standup / status update to a Slack channel — short,
 ## Procedure
 
 1. **Resolve channel ID** via the slack MCP.
-2. **Find or create the daily anchor** (anchor-per-day mode): search the channel for today's "Standup — YYYY-MM-DD" message in the last 24h. Create one if absent.
+2. **Find or create the daily anchor** (anchor-per-day mode): search the channel for today's "Standup — YYYY-MM-DD" message in the last 24h. Create one only if absent; if several exist, thread under the earliest.
 3. **Format the update** in the standard structure:
    - **Yesterday** — what shipped or moved.
    - **Today** — what's planned.
    - **Blockers** — what's stuck and who can unblock.
    Each section ≤ 3 bullets. No prose paragraphs.
-4. **Post threaded** under the daily anchor. Return the posted `ts`.
+4. **Confirm, then post.** Show the exact message and channel and wait for approval (it is posted under the user's identity), then post threaded under the daily anchor. If the post call errors or times out, search the thread for the message before retrying — never double-post. Return the posted `ts`.
 
 ## Output
 

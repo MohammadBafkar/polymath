@@ -20,7 +20,7 @@ description: Read Polymath marketplace conventions — naming, token budget, com
 | Event-driven gate (block secrets, format on save, push reminder) | Hook |
 | External service tool calls (GitHub, Jira, Datadog, …) | MCP server (connector plugin) |
 | Repeating procedure with templates/scripts/references | Skill |
-| Frequent direct entry point | Command (thin alias → skill) |
+| Frequent direct entry point whose name differs from the skill | Command (thin alias → skill). A skill is already `/plugin:skill`; never ship a same-named command |
 | ≥ 2 skills chained with data dependencies or gates | Workflow |
 | Forked-context deep audit, panel, or research | Agent |
 
@@ -30,7 +30,7 @@ Default to **skill-only**: a command earns its place only when it is a frequent 
 
 - Plugins: `polymath-<bare-name>` (kebab-case).
 - Skills/commands: bare file names; invocation is namespaced (`/polymath-product:prd`).
-- Agents: nouns-of-people (`security-reviewer`, `pm-critic`).
+- Agents: a role-flavored critic or lens noun (`architecture-critic`, `research-scout`) — never an org-role doer (`tech-lead`, `sre`); see PLUGIN-AUTHORING §6.1.
 - Templates: PascalCase artifact names (`PRD.md`, `ADR.md`).
 - Workflows: camelCase (`shipFeature.yaml`).
 - Routing sidecars: `routing.yaml` beside `SKILL.md`; workflows declare theirs in `plugins/polymath-flows/routing/<name>.yaml`.
@@ -38,7 +38,7 @@ Default to **skill-only**: a command earns its place only when it is a frequent 
 ## Token budget
 
 - Per-plugin always-on listing ≤ 400 tokens (only `name` + `description` of skills/commands/agents are measured).
-- Catalog-wide measured total ≤ 1,000 tokens.
+- Catalog-wide measured total ≤ 250 × plugin count (`tools/token-report.py budget` prints the live target).
 - Descriptions ≤ 200 chars; front-load the trigger phrase and end with a scope boundary where a sibling could be confused.
 - SKILL.md body ≤ 500 lines; overflow goes to `references/`.
 

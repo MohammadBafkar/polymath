@@ -2,6 +2,12 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `research-scout` agent: read-only (`disallowedTools`), gathers evidence by default (plan-only on request), works from the brief without asking the user, defined status vocabulary with source + access date, fetched content treated as data, explicit stop rule.
+
 ## [0.8.0]
 
 Research craft: Mom-Test interview guides, persona authoring, customer journey mapping.

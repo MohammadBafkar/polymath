@@ -21,20 +21,21 @@ description: Read a terraform plan (binary or JSON) and surface destructive acti
 
 ## Procedure
 
-1. **Convert if needed.** If a binary plan is supplied, run `${terraformBinary} show -json <plan>` to produce JSON. Do not parse the binary format directly.
+1. **Convert if needed.** If a binary plan is supplied, run `terraform show -json <plan>` (or `tofu show -json`, or the binary named in the plugin's `terraformBinary` setting) to produce JSON. Do not parse the binary format directly. **The JSON contains sensitive values in plaintext** (`before_sensitive`/`after_sensitive` only *mark* them): never echo those values in your review, and flag a `tfplan.json` uploaded as a public CI artifact or committed to the repo.
 2. **Classify every resource change** by `change.actions`:
-   - `["no-op"]` — drift baseline; ignore.
+   - `["no-op"]` — unchanged; ignore. `["read"]` — data source read; note only if it's deferred to apply time.
+   - `["forget"]` — removed from state without destroying (a `removed` block); confirm that's intended.
    - `["create"]` — new resources; flag if outside approved scope.
    - `["update"]` — in-place change; show before → after for sensitive fields.
-   - `["delete", "create"]` or `["create", "delete"]` — replacement; almost always destructive (state loss).
+   - `["delete", "create"]` or `["create", "delete"]` — replacement; almost always destructive (state loss). Read `action_reason` and `replace_paths` to see *which attribute* forced it — often a one-line config fix avoids the replace.
    - `["delete"]` — destruction; only safe with explicit approval.
 3. **Flag destructive patterns** by resource type:
    - `aws_db_instance`, `aws_rds_cluster`, `google_sql_database_instance`, `azurerm_mssql_database` — replacement triggers backup-required gate.
    - `aws_s3_bucket`, `google_storage_bucket`, `azurerm_storage_account` — delete triggers data-loss gate (require `force_destroy = false` audit).
-   - `aws_iam_*`, `google_project_iam_*`, `azurerm_role_assignment` — privilege changes deserve their own reviewer.
+   - `aws_iam_*`, `google_project_iam_*`, `azurerm_role_assignment` — privilege changes deserve their own reviewer; wildcard actions/resources (`"*"`) and new cross-account trust get a dedicated callout.
    - `*_security_group`, `*_firewall*` — surface opening (0.0.0.0/0 ingress) gets a dedicated callout.
-4. **Detect drift.** Resources with `change.actions = ["update"]` but no corresponding configuration change (compare `before` vs `after` against the prior-known config) are drift, not intent — note them separately.
-5. **Sensitive-field check.** Plan JSON marks sensitive fields. Confirm they are not being logged or echoed in CI; flag if `sensitive_values` shows real values rather than `(sensitive value)`.
+4. **Detect drift.** Read the plan JSON's top-level `resource_drift` array — changes Terraform detected during refresh that happened outside Terraform. Report them separately from intended changes; an update in `resource_changes` that merely reverts drift is not part of the PR's intent either.
+5. **Sensitive-field check.** Confirm sensitive attributes are marked (`after_sensitive`) and that the CI log shows `(sensitive value)` rather than the value; flag any secret that appears unmasked in plan *output* or in a non-sensitive attribute (e.g. a password in a tag or user_data).
 6. **Provider version pinning.** Note any providers without a version constraint — they will float and re-plan unpredictably.
 7. **Recommend** one of: `apply-ok`, `apply-with-approval`, `needs-rework`, `block`.
 
@@ -81,3 +82,4 @@ Recommendation: needs-rework
 - Treating a replacement as an update. Replacement = delete + create, with state loss.
 - Skipping the drift section because it "doesn't change anything in this PR". Drift is the leading indicator of out-of-band changes that bypass review.
 - Reviewing a binary plan by reading it directly. Always go through `terraform show -json` first.
+- Quoting a sensitive value from the plan JSON in the review.

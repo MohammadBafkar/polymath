@@ -2,6 +2,17 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `design-aws-pattern`: cost example was ~20× low — now shown as arithmetic with assumptions; Lambda tree no longer equates "< 100 ms" with Lambda (cold starts); Timestream for LiveAnalytics is closed to new customers.
+- `design-azure-pattern`: Cosmos DB strong consistency is not available with multi-region writes, and Azure SQL has no "multi-write groups"; added When-to-use and Quality bar.
+- `design-gcp-pattern`: Cloud Run functions naming, Direct VPC egress, no hard-coded Cloud SQL limit; added When-to-use and Quality bar.
+- `design-stack-composition`: S3 native lockfile locking (DynamoDB locking is deprecated), one root/backend per environment instead of CLI workspaces, `~> 5.0` semantics corrected, `.terraform.lock.hcl`, `terraform_remote_state` exposes the whole state.
+- `plan-review`: the JSON plan holds sensitive values in plaintext — never echo them; drift comes from `resource_drift`; `read`/`forget` actions, `action_reason`/`replace_paths`; `${terraformBinary}` (never substituted) replaced.
+- `cloud-cost-review`: Output shape and a no-mutation rule.
+
 ## [0.8.0]
 
 Cloud infrastructure design craft: pattern selection across AWS, GCP, Azure + Terraform stack composition.

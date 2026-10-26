@@ -32,7 +32,7 @@ description: Author an error-budget policy — what happens when budget is healt
 ```text
 Error-budget policy: refund-service (SLO: 99.5% / 28d)
 
-State: HEALTHY (< 50% of 3h 36m budget used)
+State: HEALTHY (< 50% of the 3h 21m 36s budget used)
   - Feature work proceeds as planned.
   - Standard release cadence.
 

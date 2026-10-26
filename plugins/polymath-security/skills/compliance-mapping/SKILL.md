@@ -23,7 +23,7 @@ Not this when: you are finding vulnerabilities (`owasp-review`) or modeling thre
 ## Procedure
 
 1. **Define scope** precisely: which systems, data classes, and environments the audit covers. Out-of-scope must be justified and isolated.
-2. **Pull the relevant control families**: e.g. SOC 2 Trust Services Criteria (Security/Availability/Confidentiality/…), ISO 27001 Annex A, GDPR articles (lawful basis, DSAR, breach notice, DPIA), HIPAA safeguards. Work from the actual criteria, not memory.
+2. **Pull the relevant control families** (this mapping is engineering input, not legal advice — scope interpretations go to your auditor or counsel): e.g. SOC 2 Trust Services Criteria (Security/Availability/Confidentiality/…), ISO 27001 Annex A, GDPR articles (lawful basis, DSAR, breach notice, DPIA), HIPAA safeguards. Work from the actual criteria, not memory.
 3. **Map each requirement → technical control**: access control (least privilege, MFA, review cadence), encryption (at rest/in transit — see `crypto-review`), logging/monitoring, change management, vulnerability management, backup/DR, vendor management, data retention/deletion.
 4. **Name the evidence per control**: the artifact an auditor accepts — access-review records, CI logs showing the gate ran, config screenshots/IaC, ticket trails, signed policies, pen-test reports. A control with no evidence source is a finding waiting to happen.
 5. **Assign an owner and cadence** to each control (who runs it, how often, where it's recorded). Automate evidence collection where possible.

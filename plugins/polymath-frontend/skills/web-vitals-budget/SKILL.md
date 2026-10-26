@@ -57,7 +57,8 @@ Dominant cost (LCP):
 
 First-try fix:
   Add fetchpriority="high" to the hero <img>; preload via <link rel="preload">.
-  Estimated LCP gain: 600–900 ms (based on current critical path).
+  Expected effect: the image request starts with the HTML instead of after
+  CSS — confirm the LCP delta in a lab run, then in RUM/CrUX over 28 days.
 ```
 
 ## Anti-patterns to avoid

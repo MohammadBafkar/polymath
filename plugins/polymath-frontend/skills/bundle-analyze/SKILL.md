@@ -16,7 +16,7 @@ description: Audit a JavaScript bundle for the biggest bytes and propose the che
 ## Inputs
 
 - A bundler stats file. Detect from these signals:
-  - **Vite / Rollup**: `dist/stats.html` or `--mode=production --report` output.
+  - **Vite / Rollup**: `stats.html` / `stats.json` from `rollup-plugin-visualizer` (Vite has no built-in report flag).
   - **Webpack**: `stats.json` from `webpack --json`.
   - **Next.js**: `.next/analyze/*.html` from `@next/bundle-analyzer`.
   - **esbuild**: `--metafile=meta.json`.

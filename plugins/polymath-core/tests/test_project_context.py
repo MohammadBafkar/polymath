@@ -369,6 +369,38 @@ class LoaderEndToEndTests(unittest.TestCase):
         self.assertEqual(cp.returncode, 0)
         self.assertEqual(cp.stdout.strip(), "")
 
+    def test_claude_plugin_data_snapshot_is_mirrored_for_bash_readers(self) -> None:
+        # Claude Code exports CLAUDE_PLUGIN_DATA to hooks but not to the Bash
+        # tool; skills read ~/.polymath/data, so the loader keeps a mirror there.
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nproject:\n  name: mirrored\n"
+        )
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        mirror = (
+            self.work / "fake-home" / ".polymath" / "data" / "polymath-core"
+            / "project-context.json"
+        )
+        self.assertTrue(mirror.is_file())
+        self.assertEqual(json.loads(mirror.read_text())["project"]["name"], "mirrored")
+        # Removing the project file clears both the primary and the mirror.
+        (self.work / ".polymath" / "project.yaml").unlink()
+        cp = self._run()
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        self.assertFalse(mirror.exists())
+        self.assertFalse((self.data / "polymath-core" / "project-context.json").exists())
+
+    def test_no_mirror_when_polymath_data_dir_is_set(self) -> None:
+        (self.work / ".polymath").mkdir()
+        (self.work / ".polymath" / "project.yaml").write_text(
+            "schemaVersion: 1\nproject:\n  name: native\n"
+        )
+        cp = self._run(env_extra={"POLYMATH_DATA_DIR": str(self.work / "polydata")})
+        self.assertEqual(cp.returncode, 0, msg=cp.stderr)
+        self.assertTrue((self.work / "polydata" / "polymath-core" / "project-context.json").is_file())
+        self.assertFalse((self.work / "fake-home" / ".polymath").exists())
+
     def test_happy_path_emits_summary_and_writes_snapshot(self) -> None:
         (self.work / ".polymath").mkdir()
         (self.work / ".polymath" / "project.yaml").write_text(

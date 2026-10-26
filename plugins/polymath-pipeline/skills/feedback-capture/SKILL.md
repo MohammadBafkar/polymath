@@ -33,7 +33,7 @@ capture — conservative is the contract.
 3. **Record one item per distinct issue:**
 
    ```bash
-   "${POLYMATH_PLUGIN_ROOT}/bin/polymath-pipeline" feedback capture \
+   "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/bin/polymath-pipeline" feedback capture \
      --surface <plugin>:<skill> --kind correction|gap|friction|praise \
      --note "<what happened, one screen max>" \
      --evidence "<artifact/run path that shows it>"

@@ -34,13 +34,13 @@ Most services need RED for themselves and USE for the resources they depend on (
 2. **Per resource the service uses**: define USE.
    - DB pool: `db_pool_in_use`, `db_pool_wait_seconds`, `db_errors_total`.
    - Queue: `queue_depth`, `queue_enqueue_wait_seconds`, `queue_errors_total`.
-   - Cache: `cache_hit_ratio`, `cache_errors_total`.
+   - Cache: `cache_hits_total`, `cache_requests_total`, `cache_errors_total` (compute the hit ratio in the query — a pre-computed ratio gauge can't be aggregated across instances).
 3. **Cardinality budget** — count the labels' Cartesian product.
    - `route` (~20) × `method` (~5) × `status` (~10) = 1,000 series per metric. Fine.
    - `user_id` on a request counter — millions of series. Don't.
    - Set a budget per service (e.g. 50,000 active series) and enforce it via PromQL `count by (__name__)` checks.
 4. **Histograms not summaries** for latency. Histograms aggregate across instances; summaries don't.
-   - Bucket choice: a geometric series matching the SLO threshold. For "P99 < 500ms" pick `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]` ms.
+   - Bucket choice: a geometric series with a boundary exactly at the SLO threshold, in the metric's base unit. For "P99 < 500ms" on a `_seconds` histogram: `[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]`.
 5. **Naming** — match Prometheus conventions: `<thing>_<unit>_total` for counters with units, `<thing>_seconds` for time, no upper-case, no spaces.
 6. **Pull vs push** — Prometheus default is pull (scrape). For short-lived jobs use Pushgateway or OTel push.
 7. **SLI mapping** — name which metrics power each SLO directly. Anything not powering an SLO or operational dashboard is a candidate for deletion.
@@ -53,13 +53,13 @@ Metrics design: refund-service
 RED (service):
   http_requests_total{route, method, status}                    counter
   http_request_duration_seconds{route, method}                  histogram
-    buckets: 5,10,25,50,100,250,500,1000,2500,5000 ms
+    buckets (s): 0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5
   errors_total{route, kind}                                     counter
     kind ∈ { validation, upstream, internal }
 
 USE (resources):
   db_pool_in_use                                                gauge
-  db_pool_wait_seconds                                          histogram (buckets 1,5,10,50,100 ms)
+  db_pool_wait_seconds                                          histogram (buckets s: 0.001,0.005,0.01,0.05,0.1)
   db_errors_total                                               counter
   stripe_client_errors_total{kind}                              counter
   stripe_client_request_duration_seconds                        histogram
@@ -70,8 +70,8 @@ Cardinality budget:
 
 SLI mapping:
   refund-latency SLO → http_request_duration_seconds{route="/refunds"}
-  refund-availability SLO → http_requests_total{route="/refunds",status="5xx"}
-                            / http_requests_total{route="/refunds"}
+  refund-availability SLO → 1 - (sum(rate(http_requests_total{route="/refunds",status=~"5.."}[5m]))
+                                 / sum(rate(http_requests_total{route="/refunds"}[5m])))
 
 Anti-cardinality guard:
   CI rule: any new metric introducing a forbidden label fails the PR.

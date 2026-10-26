@@ -17,7 +17,7 @@ description: Open a GitHub PR via the github MCP server — push current branch,
 ## Inputs
 
 - Current branch (must be ahead of `origin/<base>`).
-- Optional: target base branch (default `main`).
+- Optional: target base branch (default: the remote's default branch — `git symbolic-ref --short refs/remotes/origin/HEAD` after `git fetch`, else `main`).
 - Optional: reviewer handles.
 - Optional: `docs/pr/<slug>.md` from `polymath-release:pr`.
 
@@ -27,22 +27,24 @@ description: Open a GitHub PR via the github MCP server — push current branch,
    - `git status` clean (no uncommitted changes that aren't intended to ship).
    - No secrets in the diff (the `polymath-engineering` secret-scan hook is a backstop, not a replacement for the check).
    - Branch tracks an upstream; if not, set it on push.
-2. **Push** the branch:
+   - Not on the base branch itself — never open a PR from `main` to `main`; create a branch first.
+2. **Confirm.** Show the branch, base, title, draft flag, and body source, and get explicit approval — pushing and opening a PR are visible to the whole team.
+3. **Push** the branch:
 
    ```bash
    git push -u origin <branch>
    ```
 
    Never `--force` or `--force-with-lease` unless the user explicitly asked. If the push is rejected for non-fast-forward, stop and surface the conflict rather than overwriting upstream.
-3. **Draft body** — if `docs/pr/<slug>.md` exists (from `polymath-release:pr`), use it. Otherwise compose a body following the canonical PR template.
-4. **Create PR** via the github MCP tool `create_pull_request`:
-   - `title`: Conventional Commits headline (`type(scope): summary`).
+4. **Draft body** — if `docs/pr/<slug>.md` exists (from `polymath-release:pr`), use it (strip its frontmatter). Otherwise compose a body from the repo's own PR template if it has one, else the canonical PR template.
+5. **Create PR** via the github MCP tool `create_pull_request`:
+   - `title`: the headline commit's subject, in the repo's convention (Conventional Commits when the repo uses it).
    - `body`: from step 3.
    - `base`: target base (default `main`).
    - `head`: current branch.
    - `draft`: `true` if the change isn't ready for review (build still red, etc.).
-5. **Reviewers** — add via `request_reviewers` after creation. Tag by team if you can infer it from CODEOWNERS; otherwise ask the user.
-6. **Return** the PR URL.
+6. **Reviewers** — add via `request_reviewers` after creation. Tag by team if you can infer it from CODEOWNERS; otherwise ask the user.
+7. **Return** the PR URL.
 
 ## Output
 
@@ -56,8 +58,8 @@ Opened: https://github.com/<org>/<repo>/pull/<n>
 
 ## Quality bar
 
-- One commit per logical change — squash before pushing if the branch has fixup commits.
-- PR title matches Conventional Commits.
+- One commit per logical change. Squash fixup commits only while they are still local; once pushed, leave history alone and let the merge strategy squash (squashing pushed commits would need the force-push this skill forbids).
+- PR title follows the repo's convention.
 - PR body is the structured template, not a free-form paragraph.
 - Reviewers are tagged by team where possible.
 - No force-push.

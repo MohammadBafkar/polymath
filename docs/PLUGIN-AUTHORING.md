@@ -170,8 +170,11 @@ Both produce `/name` invocations. Choose by directory shape:
 - **Skill** (`skills/foo/SKILL.md`): directory, bundles templates,
   scripts, references.
 
-If both exist for the same name, the command must be a thin alias
-pointing to the skill; the skill holds canonical content.
+Never ship a command with the same name as a skill in the same plugin:
+a skill is already invocable as `/plugin:skill`, so the command only adds a
+duplicate always-on listing entry (and an ambiguous `/plugin:name`). A
+command earns its place only under a *different*, shorter name
+(`/init-project` → `initialize-project`).
 
 ## 5.1 Promotion policy — when a skill earns a command or a workflow
 
@@ -233,13 +236,25 @@ Agents are reserved for:
 - Heavy research / audit that would flood the main context.
 - Distinct named roles the user explicitly addresses.
 
-Three structural constraints (verify against current Claude Code
-docs before relying):
+Structural constraints (from the Claude Code sub-agents docs — re-check
+when relying on them):
 
-1. Plugin-shipped subagents **cannot** ship their own hooks, MCPs,
-   or `permissionMode`.
-2. Subagents **cannot** spawn subagents.
-3. Subagent execution is synchronous from the caller's view.
+1. Plugin-shipped subagents ignore the `hooks`, `mcpServers`, and
+   `permissionMode` frontmatter fields (and `initialPrompt`).
+2. Subagents can spawn their own subagents, up to a depth limit
+   (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`); omit `Agent` from `tools` (or
+   list it in `disallowedTools`) to stop a specific agent from fanning out.
+3. Subagents cannot ask the user questions (`AskUserQuestion` is removed),
+   so the agent body must say what to do with an ambiguous brief —
+   state an assumption and proceed, or return what's missing.
+4. An omitted `tools` field inherits every tool, including Write/Edit and
+   all MCP tools. A critic or research agent declares
+   `disallowedTools: Write, Edit, NotebookEdit` (an explicit `tools`
+   allowlist would also drop MCP tools unless each is listed). The
+   exporter strips Claude-only frontmatter keys when converting agents
+   to portable skills.
+5. Text an agent reads (web pages, issues, docs) is data, not
+   instructions — say so in the agent body.
 
 A new agent ships with a golden fixture showing the forked-context
 agent surfaces something a same-input no-agent baseline misses. The
@@ -265,8 +280,8 @@ fork catches nothing. Concretely:
 - **Role hand-offs already exist as workflows.** `plugins/polymath-flows/`
   sequences PM → eng → reviewer → release (`featureFromIdea`) and the incident
   arc (`respondToIncident`) with `mustPass` gates and artifact schemas a chain
-  of role-agents would lack — and subagents can't spawn subagents, so a roster
-  can't orchestrate itself anyway.
+  of role-agents would lack — nested subagents could technically fan out, but
+  they would still have no state machine, resume, or gates.
 - **An org-role doer collides with workflow intent.** An "Incident Commander"
   agent competes with `respondToIncident` on the same prompt with no
   trigger-uniqueness gate to catch it.

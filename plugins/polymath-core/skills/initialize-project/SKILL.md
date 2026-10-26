@@ -16,7 +16,7 @@ description: Map a repository to .polymath/project.yaml — capability mapping a
 ## Preflight
 
 Before inferring anything, run `polymath-core:doctor` (or
-`bash ${POLYMATH_PLUGIN_ROOT}/skills/doctor/scripts/doctor.sh`). If a **required**
+`bash "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/skills/doctor/scripts/doctor.sh"`). If a **required**
 tool is missing, stop and relay the fix — the inference and validation steps
 below need `python3`. The doctor also reports whether a `.polymath/project.yaml`
 already exists, so you know up front whether this is a create or an update.
@@ -70,7 +70,7 @@ pack intent the same way it preserves user intent.
      `review-checklist` role.
 5. **Offer to scaffold `.polymath/conventions/`** (skip silently if the
    user declines or docs already exist). Start from the skeletons in
-   `${POLYMATH_PLUGIN_ROOT}/templates/conventions/` — minimum viable is one
+   `${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/templates/conventions/` — minimum viable is one
    `stack-doc` per detected primary area plus `review-checklist`;
    `knowledge-base` and `artifact-matrix` are offered, not pushed. Fill
    placeholders only from what inference actually established; every
@@ -106,8 +106,10 @@ pack intent the same way it preserves user intent.
      metadata that require target-host wiring. Note that on another agent the
      hook-driven setup above does not run automatically.
 8. **Validate.**
-   - Run `python3 plugins/polymath-core/hooks/scripts/load-project-context.py` from the repo root with a temp `POLYMATH_DATA_DIR` when available.
-   - Run project validation commands discovered from the repo only if they are cheap and safe.
+   - Run the SessionStart loader against the file you wrote, from the repo root, with a throwaway data dir so the real snapshot is untouched:
+     `POLYMATH_DATA_DIR="$(mktemp -d)" python3 "${POLYMATH_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/hooks/scripts/load-project-context.py"`.
+     Exit 0 = valid; exit 2 prints the validation errors — fix them and re-run before reporting success.
+   - Run project validation commands discovered from the repo only if they are cheap, read-only, and need no credentials.
    - Report assumptions, unknowns, and follow-up questions — including the
      count of open `[VERIFY: …]` markers in any scaffolded conventions.
 

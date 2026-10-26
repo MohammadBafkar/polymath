@@ -25,7 +25,9 @@ description: Author unit tests using the repo's existing framework; one test per
    - Name describes the behavior, not the implementation.
    - Arrange / Act / Assert blocks are visible.
    - One assertion per behavior; multiple `assert`s only when they describe the same observation.
-3. Avoid:
+3. **Prove each test can fail.** For a test written against existing code, temporarily break the behavior it protects (flip the condition, return the wrong value) and watch it fail, then restore. A test that stays green is vacuous — fix the assertion.
+4. **If a new test fails because the code is wrong, report the bug** — don't change the assertion to match the buggy output. Mark the test as a known failure only if the user agrees (with a link to the bug).
+5. Avoid:
    - Mocking internal collaborators (mock only the boundaries you don't own — clock, network, filesystem).
    - Asserting on private attributes.
    - Time-of-day or random seeds without explicit injection.

@@ -26,11 +26,13 @@ description: Audit RBAC roles and bindings — find overbroad verbs (*), cluster
 2. **Verbs**:
    - `verbs: ["*"]` → flag every time. Always.
    - `verbs: ["create","update","patch","delete"]` on Secrets / ServiceAccounts / RoleBindings → flag.
-   - `verbs: ["impersonate"]` or `["escalate"]` → flag with high severity.
+   - `get`/`list`/`watch` on Secrets → flag: `list` and `watch` return every secret's data in the namespace, so they are full read access, not "metadata".
+   - `verbs: ["impersonate"]`, `["escalate"]`, or `["bind"]` → flag with high severity (each lets the holder gain permissions it doesn't have).
 3. **Resources**:
    - `resources: ["*"]` → flag.
    - `nonResourceURLs: ["*"]` → flag.
    - Secrets / ServiceAccounts / RoleBindings / ClusterRoleBindings as resources for create/update verbs → privilege escalation risk; flag.
+   - Escalation sub-resources: `pods/exec`, `pods/attach`, `nodes/proxy`, `serviceaccounts/token` (create), and `create` on pods/workloads in a namespace with powerful ServiceAccounts → flag.
 4. **Subjects**:
    - `system:anonymous` or `system:unauthenticated` → flag immediately.
    - `kind: Group` referencing OIDC groups → confirm group membership is documented.

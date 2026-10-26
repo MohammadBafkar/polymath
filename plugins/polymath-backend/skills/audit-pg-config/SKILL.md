@@ -7,6 +7,20 @@ description: Audit Postgres server config — shared_buffers, work_mem, max_conn
 
 > Sanity-check a Postgres config against the workload. Output: parameter-by-parameter findings + concrete change suggestions.
 
+## When to use
+
+- A Postgres instance is slow, OOMing, bloating, or lagging replicas and the config is a suspect.
+- Before a traffic step-up, or after migrating to a new host / managed tier.
+
+## Inputs
+
+- The effective settings — not the config file you *think* is deployed:
+  `SELECT name, setting, unit, source FROM pg_settings WHERE source <> 'default';` plus `SELECT version();`.
+- Host RAM and CPU, whether a pooler (pgbouncer) sits in front, the workload shape (OLTP / analytics / mixed), and whether it is managed (RDS/Aurora/Cloud SQL/Azure — some parameters are fixed or set through parameter groups).
+- Missing an input? Say which finding it blocks and continue with the rest; don't guess RAM or workload.
+
+**Read-only.** Gather with `SELECT`/`SHOW` only. Never run `ALTER SYSTEM`, change a parameter group, or reload/restart — recommend; the owner applies.
+
 ## Procedure
 
 1. **Memory.**
@@ -28,8 +42,9 @@ description: Audit Postgres server config — shared_buffers, work_mem, max_conn
    - `default_statistics_target` — 100 is the default; 500-1000 for skew-y joins where the planner makes bad row-estimates.
    - `track_io_timing = on` — needed for `pg_stat_statements` to show meaningful IO numbers.
 6. **Replication.**
-   - `hot_standby_feedback = on` if long-running replica reads exist (prevents replication conflicts).
+   - `hot_standby_feedback = on` if long-running replica reads exist (prevents query cancellations on the replica — at the cost of bloat on the primary while those queries run).
    - `wal_keep_size` (PG 13+) replaces `wal_keep_segments`; ensure replicas can catch up without falling off.
+   - Replication slots retain WAL until consumed — an abandoned slot fills the disk. Set `max_slot_wal_keep_size` (PG 13+) and check `pg_replication_slots` for inactive slots.
 7. **Logging.**
    - `log_min_duration_statement = '500ms'` (or workload-specific). Cheaper than waiting for a customer ticket.
    - `log_lock_waits = on` — diagnose lock-storm incidents.

@@ -22,17 +22,20 @@ description: Author or improve an LLM prompt — clarify task, constrain output 
 
 1. **Task statement first**. The first sentence after any role framing is the task. Specific verb + specific deliverable: "Classify the message into one of [list]" beats "Help me categorize this".
 2. **Output shape**. Pin it explicitly:
-   - JSON schema (and refuse non-JSON in the prompt).
+   - JSON: prefer the API's native structured output / tool schema when the provider has one; otherwise give the schema in the prompt, then parse and validate the reply and retry on failure — never assume it parsed.
    - Markdown sections (named).
    - One-of-N (give the list).
 3. **Inputs section**. Label every input with a heading so the model can reference them. `<message>...</message>` style tags work across vendors.
 4. **Constraints in priority order**:
    - What it MUST do.
-   - What it MUST NOT do.
+   - What it MUST NOT do — but phrase rules positively where you can ("reply in plain prose" beats "don't use Markdown").
    - Soft preferences last.
-5. **Worked examples** if the task allows variance. 2–4 examples that span the space. Place them near the bottom; the model attends to recent context more.
-6. **Calibration line**: tell the model when to say "I don't know" or to abstain. Otherwise it confabulates.
-7. **Cost trim**. Cut tokens that don't change the answer. Remove:
+   Give the *reason* behind non-obvious constraints ("answers are read aloud by a TTS engine, so no lists") — models generalize from the why.
+5. **Worked examples** if the task allows variance. 2–4 examples that span the space, wrapped in tags (`<example>`) so they read as examples, not instructions. Long reference documents go at the top of the prompt and the question at the end.
+6. **Reasoning room** for multi-step tasks: let the model think before the final answer (or enable the provider's extended thinking), and ask for the answer in a separate tagged block so it's easy to parse. Skip it for simple classification where latency matters.
+7. **Calibration line**: tell the model when to say "I don't know" or to abstain. Otherwise it confabulates.
+8. **Test it**: run the prompt against a small labeled set (`polymath-ai:eval-plan`) before and after each change; keep the failures as regression cases. A prompt tuned on vibes regresses silently.
+9. **Cost trim**. Cut tokens that don't change the answer. Remove:
    - "You are a helpful assistant" filler.
    - Multiple ways of saying the same constraint.
    - Examples that test the same axis twice.
@@ -77,7 +80,7 @@ Reasoning per section:
 
 ## Anti-patterns to avoid
 
-- "You are an expert" framing — adds tokens, doesn't change behavior.
-- Polite filler ("please", "thank you").
+- Generic "You are a world-class expert" framing in place of real context — a specific role (audience, domain, constraints) helps; flattery doesn't.
+- Shouting (ALL-CAPS "MUST", "CRITICAL") to fix a rule the model ignores — explain the reason instead; capable models over-apply shouted rules.
 - Examples that all test the same axis.
 - "Be creative" plus a strict schema — pick one.

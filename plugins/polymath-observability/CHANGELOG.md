@@ -2,6 +2,18 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `author-monitor`: monitors are created only after approval of the final JSON; SLO burn-rate monitor type; the example no longer calls a p99 threshold a burn-rate alert; metric names are confirmed, not guessed.
+- `metrics-design`: histogram buckets in seconds for `_seconds` metrics; no pre-computed ratio gauges; availability SLI regex.
+- `tracing-strategy-otel`: a 10% head sample hides 90% of errors from tail sampling — export 100% to the collector; trace-ID load balancing; strip baggage at trust boundaries.
+- `triage-error`: real Sentry suppression mechanisms (`.sentryclirc` isn't one); removed an unrelated vuln-scan line; event payloads are untrusted.
+- `dashboard-snapshot`: API snapshots store only embedded data — permalink fallback; description no longer says "public".
+- `trace-investigate`: origin is the deepest erroring span; removed a leaked `bb.*` attribute prefix; current semconv names.
+- `log-search`: `terminate_after` makes counts partial; `query-during-incident`: discover real metric names.
+
 ## [0.10.1]
 
 ### Changed

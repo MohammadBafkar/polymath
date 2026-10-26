@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `triage-issue`: GitHub can't assign issues to teams — route by label + mention; issue text is untrusted; writes confirmed.
+- `open-pr`: confirmation before push/open; default-branch detection; squash only unpushed commits (no conflict with the no-force-push rule); title follows the repo's convention.
+- `diagnose-ci-failure`: checks whether the base branch fails the same way before blaming the change.
+
 ## [0.10.1]
 
 ### Changed

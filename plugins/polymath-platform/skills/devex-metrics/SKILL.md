@@ -20,9 +20,11 @@ description: Define DORA + SPACE metrics for the team — what each measures, ho
 | Deployment Frequency | How often do we deploy to prod? | CI/CD logs, deployment system. |
 | Lead Time for Changes | Time from commit → prod. | Git + deploy logs. |
 | Change Failure Rate | % of deploys causing incident or rollback. | Incident tracker + deploy logs. |
-| Mean Time to Restore | Time from incident open → resolved. | Incident tracker. |
+| Failed Deployment Recovery Time (formerly MTTR) | Time to recover from a deploy that caused a failure. | Incident tracker + deploy logs. |
 
-Performance bands (Google DORA report; check the current year's report for latest cutoffs):
+Since 2024 DORA also reports **Rework Rate** (unplanned deploys made to fix user-facing problems) alongside the four above.
+
+Performance bands (Google DORA report — the cutoffs change between years; check the current report and cite its year):
 
 - **Elite**: multiple deploys per day; <1 day lead time; <5% CFR; <1 hour MTTR.
 - **High**: weekly–monthly deploys; 1 day–1 week lead time; <10% CFR; <1 day MTTR.

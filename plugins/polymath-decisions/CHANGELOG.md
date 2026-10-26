@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `evidence-ledger`: description was 202 chars (SKILL-1 failure); unsourced claims can't be Facts.
+- `daci`: no nonexistent "script"; never invents Driver/Approver names.
+- `tradeoff-matrix`: sensitivity check (does a ±1 change flip the winner).
+
 ## [0.8.0]
 
 Decision craft: DACI roles, weighted tradeoff matrix, Cynefin domain framing.

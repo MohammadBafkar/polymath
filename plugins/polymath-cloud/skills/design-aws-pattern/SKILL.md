@@ -13,6 +13,8 @@ description: Pick the right AWS primitive for a workload — compute (Lambda/ECS
 - A workload is on the wrong primitive (Lambda timing out, ECS overprovisioned) and you want to know what to migrate to.
 - A spike needs a "scratch this on AWS" plan.
 
+**Verify before you recommend.** Cloud catalogs change faster than this skill: confirm current availability, limits, and prices in the provider's own docs and pricing calculator, and show cost estimates as arithmetic with stated assumptions — never a bare monthly figure.
+
 ## Procedure
 
 1. **Characterize the workload.** Ask explicitly:
@@ -20,7 +22,7 @@ description: Pick the right AWS primitive for a workload — compute (Lambda/ECS
    - **Storage** — data shape (objects vs filesystem vs block), access pattern (read-heavy / write-heavy / mixed), throughput, single-writer vs concurrent.
    - **Database** — query shape (point lookup vs aggregation), consistency, multi-region, transactional.
 2. **Compute decision tree.**
-   - `latency < 100ms` AND `idle most of the time` AND `stateless` AND `task < 15min` → **Lambda**.
+   - `idle most of the time` AND `stateless` AND `task < 15min` AND the latency budget tolerates occasional cold starts (or provisioned concurrency / SnapStart is budgeted) → **Lambda**.
    - Long tasks or steady RPS or websockets → **ECS Fargate** (serverless containers) for moderate scale; **EKS** when you need cluster-level controls (mesh, multi-tenancy, GPU).
    - Long-running stateful or licensed software → **EC2** with auto-scaling group.
 3. **Storage decision tree.**
@@ -31,7 +33,7 @@ description: Pick the right AWS primitive for a workload — compute (Lambda/ECS
    - Relational, < 64TB, predictable load → **RDS** (Postgres / MySQL).
    - Relational, very high throughput, serverless-ish → **Aurora** (Postgres-compatible).
    - KV / document, single-digit ms point lookup, scale-out → **DynamoDB**.
-   - Wide-column / time-series → **Timestream** or **Keyspaces**.
+   - Time-series → **Timestream for InfluxDB** (Timestream for LiveAnalytics closed to new customers in June 2025). Wide-column / Cassandra API → **Keyspaces**.
 5. **Networking.** Public-facing → ALB or API Gateway. Internal-only → PrivateLink + internal NLB. Cross-account → VPC Peering / Transit Gateway.
 6. **Cost shape.** Per primitive, name the *cost driver*: Lambda = invocations + GB-s; ECS = vCPU-hour × always-on; RDS = instance + storage + IOPS; DynamoDB = on-demand vs provisioned.
 7. **Ops shape.** Patch cadence, scaling levers, observability defaults (Lambda gets CloudWatch logs free; ECS needs explicit log driver; EKS adds CNI + cluster autoscaler complexity).
@@ -62,7 +64,12 @@ Database:
 Networking:
   Lambda → VPC for DB access (NAT $$). If DB is DynamoDB, no VPC needed.
 
-Cost driver: Lambda GB-s + DynamoDB on-demand read/write units. ~$300/mo at 500 RPS estimated.
+Cost driver: Lambda GB-s + DynamoDB on-demand request units.
+  Assumptions: average 50 RPS (500 RPS peaks), 500 ms, 512 MB, x86 list price.
+  Lambda: 50 × 2.59M s/mo = 130M invocations → ~$26 requests
+          + 130M × 0.5 s × 0.5 GB = 32M GB-s → ~$540 compute.
+  DynamoDB: price the per-refund read/write units the same way.
+  Verify in the AWS Pricing Calculator before quoting.
 
 Ops shape:
   Logs: CloudWatch out of the box.
@@ -76,6 +83,7 @@ Ops shape:
 - Chosen primitive justified, not asserted.
 - Runner-up named (the path back if assumptions break).
 - Flip conditions are quantitative.
+- Cost estimates show their assumptions and arithmetic; service availability and limits are checked against current AWS docs.
 
 ## Anti-patterns to avoid
 

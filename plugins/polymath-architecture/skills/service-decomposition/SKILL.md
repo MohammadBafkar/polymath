@@ -13,7 +13,7 @@ description: Map service boundaries in a monolith or split proposal — seam ana
 - A "let's do microservices" proposal needs a boundary critique before anyone writes a service.
 - A workflow invokes `polymath-architecture:service-decomposition`.
 
-Not this when: you are defining the domain language/contexts from scratch — do `bounded-context-map` first; this skill turns contexts into a *technical* extraction plan. For the cutover/rollback mechanics of a live migration, that is the migration playbook.
+Not this when: you are defining the domain language/contexts from scratch — do `bounded-context-map` first; this skill turns contexts into a *technical* extraction plan. For the cutover/rollback mechanics of a live migration, that is the `migrationPlaybook` workflow (`polymath-flows`).
 
 ## Inputs
 
@@ -26,7 +26,7 @@ Not this when: you are defining the domain language/contexts from scratch — do
 2. **Find seams** along subdomain boundaries and data ownership: a candidate service owns its data and exposes it only via API. A boundary that requires a shared/joined database is not a boundary.
 3. **Rank candidates** by *value ÷ risk*: high-churn or independently-scaling modules with clean data ownership extract first; tangled core modules last.
 4. **Plan a strangler-fig sequence**: route a slice of traffic/functionality through the new service behind a facade while the monolith still runs; migrate incrementally; never a big-bang rewrite.
-5. **Handle the data**: split the schema, choose the migration (dual-write + backfill, or change-data-capture), and define how cross-service queries that used to be JOINs now work (API composition or a read model).
+5. **Handle the data**: split the schema, choose the migration — change-data-capture or an outbox from the monolith (see `event-driven-design`), or app-level dual-write only with a reconciliation job that detects divergence, because two writes to two stores without a transaction will drift — and define how cross-service queries that used to be JOINs now work (API composition or a read model).
 6. **Protect behavior with characterization tests**: capture the monolith's current observable behavior as tests *before* extracting, so the extraction is verifiably behavior-preserving.
 7. **Account for the new costs**: network failure, eventual consistency, distributed tracing, deployment surface. If the list is long and the benefit thin, recommend staying modular-monolith.
 

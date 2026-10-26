@@ -36,17 +36,22 @@ substance from the owning skill rather than re-deriving it:
    Amber if metrics exist but no alert routes to an owner.
 4. **Operability** — is there a runbook, an on-call owner, and a tested rollback?
    Use `polymath-writing:runbook`. Red if no named owner.
+5. **Capacity** — has the service been load-tested at expected peak with headroom,
+   and are scaling triggers set? Use `polymath-test-automation:load-test` and
+   `polymath-sre:capacity-plan`. Amber if only extrapolated, not tested.
+6. **Data durability** — if it stores data: backups exist *and a restore has been
+   tested*, with known RPO/RTO. Red if backups have never been restored.
 
 Then:
-5. **Verdict** — **Go** only if every dimension is Green; **Conditional-go** if any
+7. **Verdict** — **Go** only if every dimension is Green; **Conditional-go** if any
    Amber, listing the conditions; **No-go** if any Red. The verdict follows the
    rule mechanically — do not average away a Red.
-6. **Remediation** — every Amber/Red becomes a tracked item with an owner and a
+8. **Remediation** — every Amber/Red becomes a tracked item with an owner and a
    due-before date. Write `docs/readiness/<slug>-prr.md`.
 
 ## Output
 
-- File: `docs/readiness/<slug>-prr.md` — the four scored dimensions with
+- File: `docs/readiness/<slug>-prr.md` — the scored dimensions with
   evidence, the verdict, and the remediation table (item, owner, due-before).
 - One-line summary: the verdict and the count of blocking (Red) items.
 

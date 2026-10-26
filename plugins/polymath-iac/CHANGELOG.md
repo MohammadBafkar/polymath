@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `terraform-state`: S3 native lockfile locking; `import`/`moved`/`removed` blocks preferred over CLI state surgery; `plan -refresh-only` for drift.
+- `terraform-module`: `moved` blocks on internal refactors; `terraform test`/tflint.
+- `policy-as-code`: tfsec → Trivy.
+
 ## [0.8.0]
 
 Infrastructure-as-Code authoring: reusable Terraform modules, state/backends/drift, policy-as-code guardrails (OPA/Sentinel/Checkov).

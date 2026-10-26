@@ -18,16 +18,21 @@ description: File tracker bug tickets from a postmortem's action items — one p
 
 ## Resolve the provider first
 
-Read `${capabilities.issue_tracker.provider}` (or infer from which credentials
-are configured: `jira*` → Jira, `linearApiKey` → Linear). The provider decides
-the create tool and the priority vocabulary:
+Read `${capabilities.issue_tracker.provider}` from `.polymath/capabilities.yaml`.
+Then check your own tool list for a server that backs it — it may be registered
+under another name (a Claude Code connector appears as `mcp__claude_ai_<Name>__*`);
+use the closest-matching create/update tools and say which server you used. Never
+install or start a second copy. The provider decides the create tool and the
+priority vocabulary:
 
 | Provider | Create tool | Sev → field |
 | --- | --- | --- |
 | Jira | `jira_create_issue` | severity: sev1→Critical, sev2→High, sev3→Medium, sev4→Low |
 | Linear | `issue.create` (team-scoped) | priority: sev1→Urgent, sev2→High, sev3→Medium, sev4→Low |
 
-If neither set of credentials is present, stop and say which to configure.
+If no provider is declared, ask which tracker to use. If the provider has no
+server in this session, draft the tickets as a Markdown table the user can file
+by hand, and ask before suggesting an install.
 
 ## Inputs
 
@@ -38,7 +43,11 @@ If neither set of credentials is present, stop and say which to configure.
 ## Procedure
 
 1. **Parse** the postmortem's "Action items" section. Each row is a candidate ticket.
-2. **For each action that is a bug:**
+2. **Check for tickets already filed** from this postmortem (re-runs must not
+   duplicate): keys already in its action-items table, or a tracker search for the
+   postmortem link / the marking tag. Skip those items and report them as existing.
+3. **For each remaining action** (type `bug` for defects, the tracker's task type
+   per the `work_item_types` map otherwise):
    - Title: imperative + concrete (e.g. "Add burn-rate alert at 6h window for refund SLO").
    - Description: link the postmortem, summarize the root cause in 2–3 sentences,
      paste the relevant timeline rows, attach the dashboard / log URLs.
@@ -46,11 +55,13 @@ If neither set of credentials is present, stop and say which to configure.
      explicit override; a silent downgrade requires a comment.
    - Routing: Jira → component by code area; Linear → component/area labels in
      the team's vocabulary.
-   - Due date: from the postmortem's action-item row. "TBD" is rejected.
-   - Owner/assignee: a specific person from the team named in the postmortem
-     (not a team name); if "TBD", file to the on-call rotation and add a
-     "@owner please confirm ownership" comment.
-3. **Apply the project's tracker block** (`tracker` in the project-context
+   - Due date: from the postmortem's action-item row. "TBD" is not filed —
+     ask the user for a date first.
+   - Owner/assignee: postmortems name owning *teams*; trackers need a person.
+     Use the person the user or team designates; if none is given, file to the
+     team's on-call/triage rotation with an "@owner please confirm ownership"
+     comment. Never guess an individual.
+4. **Apply the project's tracker block** (`tracker` in the project-context
    snapshot — see `polymath-core:project-context`): destination
    (`organization`/`project`/`area_path`/`iteration`, `work_item_types`
    mapping the `bug` category to the tracker's type name) and the 3-layer
@@ -59,15 +70,15 @@ If neither set of credentials is present, stop and say which to configure.
    in the body — creating surface (`polymath-tracker:file-bug-from-incident`),
    date, and the postmortem link. No snapshot or no `tracker` block → skip
    silently and file unmarked.
-4. **Confirm before pushing (HITL).** Present the full ticket set — titles,
+5. **Confirm before pushing (HITL).** Present the full ticket set — titles,
    destinations, assignees, due dates — and get one explicit confirmation.
    Never create silently.
-5. **Create** one ticket per action via the provider's create tool, capturing
+6. **Create** one ticket per action via the provider's create tool, capturing
    the returned key/identifier (e.g. `PROJ-481`, `ENG-89`).
-6. **Read back and verify marking.** Fetch each created item and check all
+7. **Read back and verify marking.** Fetch each created item and check all
    three marking layers landed (some trackers strip labels on create);
    re-apply whatever is missing via the provider's update tool.
-7. **Link back:** update the postmortem's action-items table with each key + URL
+8. **Link back:** update the postmortem's action-items table with each key + URL
    so the trail is bidirectional.
 
 ## Output
@@ -103,3 +114,4 @@ Confirmed once before push (HITL).
 - Combining two action items into one ticket to save effort — they were discrete
   in the postmortem; keep them discrete.
 - Skipping the postmortem-side update; future readers can't find the tickets.
+- Re-running and filing duplicates of tickets the first run already created.

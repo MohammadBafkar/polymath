@@ -31,18 +31,21 @@ description: Plan an A/B (or A/B/n) experiment — hypothesis, primary + guardra
 3. **Guardrails** — 2-3 max. Latency, error rate, key downstream conversions. State the regression tolerance per guardrail.
 4. **MDE + sample size.**
    - Statistical power 0.8, significance α = 0.05 are the usual defaults.
-   - Sample size per variant: `n ≈ 16 × (σ/MDE)²` for a means test (Cohen's rule of thumb); `n ≈ 16 × p(1-p)/MDE²` for proportions.
-   - At known daily traffic, the duration falls out: `days = (2 × n) / daily_eligible × allocation_fraction`.
+   - Sample size per variant (two variants, α = 0.05 two-sided, power 0.8 — Lehr's rule): `n ≈ 16 × σ²/MDE²` for a difference in means; `n ≈ 16 × p(1−p)/MDE²` for a proportion with an absolute MDE.
+   - At known daily traffic, the duration falls out: `days = (variants × n) / (daily_eligible × fraction_of_traffic_in_experiment)`.
+   - These formulas assume the metric is a mean or proportion **per randomization unit**. Percentiles (p99 latency) and ratios with a different denominator (per-request metrics under user randomization) need the delta method or a bootstrap — and usually far more samples.
 5. **Duration floor + cap.**
    - Floor: at least one full weekly cycle (weekday vs weekend behavior).
    - Cap: 4 weeks max; if MDE requires longer, the experiment is under-powered for your traffic — pick a bigger MDE or larger allocation.
 6. **Randomization unit.** User-level for product changes; session-level for content / UX experiments where multi-device matters; cluster-level (org / org-pair) for B2B to avoid contamination.
 7. **Allocation.** 50/50 once tooling supports it; 90/10 (ramp) only when risk is high and you accept lower power. Document.
 8. **Stop conditions.**
-   - **Success** — primary metric crosses MDE with statistical significance, guardrails clean.
+   - **Success** — at the planned sample size, the primary effect is statistically significant in the hypothesized direction and guardrails are clean. (The MDE sizes the test; the observed effect doesn't have to exceed it.)
    - **Failure** — primary regresses with confidence; or guardrail breach.
    - **Inconclusive** — at duration cap, primary effect is within noise.
    - **Emergency** — incident, ethics issue, regulatory; immediate halt independent of stats.
+   - **No peeking:** don't stop early because a daily look shows significance — repeated looks inflate false positives. Analyze at the planned sample size, or pre-register a sequential method (group-sequential bounds, always-valid p-values) that allows early stopping.
+   - **Sample-ratio mismatch:** check the observed split against the planned allocation (chi-square) before reading any metric; an SRM means the assignment is broken and the results are void.
 9. **Pre-registration.** Write the plan before launch and freeze. Post-hoc metric switching ("oh, let's check this other one") inflates false-positive rate.
 
 ## Output
@@ -62,21 +65,25 @@ Allocation
   50/50, user-level randomization.
 
 Primary metric
-  refund_p99_latency_ms (lower-is-better). Baseline 1,200ms; MDE 100ms.
+  mean refund latency per user, ms (lower-is-better). Baseline 1,200 ms;
+  σ = 2,000 ms (heavy tail); MDE 100 ms.
+  (p99 latency is tracked as a guardrail, analyzed by bootstrap.)
 
 Guardrails
   refund_completion_rate              tolerance: > -0.3 percentage points
   refund_5xx_rate                     tolerance: < +0.2 percentage points
 
 Sample size + duration
-  daily eligible users: 80,000
-  n per variant ≈ 14,000 (Cohen rule, σ=560ms, MDE=100ms)
-  → days ≈ 14k × 2 / 80k = 0.35 → round up to 1 weekly cycle: 7 days.
+  daily eligible users: 80,000; 100% of traffic in the experiment
+  n per variant ≈ 16 × 2,000² / 100² = 6,400
+  → days ≈ (2 × 6,400) / (80,000 × 1.0) = 0.16 → floor: 1 weekly cycle = 7 days.
+  SRM check: chi-square on assignment counts before analysis.
 
-Stop conditions
-  Success:     primary < baseline by ≥ 100ms (p < 0.05), guardrails clean.
-  Failure:     primary > baseline OR any guardrail breach.
-  Inconclusive: 7 days elapsed, effect within ±50ms of baseline.
+Stop conditions (evaluated once, at day 7 — no early stop on significance)
+  Success:     treatment mean lower than control, p < 0.05, guardrails clean.
+  Failure:     significant regression on primary OR any guardrail breach.
+  Inconclusive: not significant at day 7.
+  Emergency:   incident or guardrail breach → halt immediately.
 
 Pre-registration
   Frozen 2026-05-23. Plan file: docs/experiments/refund-async-writes.md
@@ -94,4 +101,5 @@ Pre-registration
 - Picking the primary metric after the experiment ran. Inflates false positives.
 - Multiple primary metrics. Statistical correction needed; usually skipped, results overstated.
 - Duration < one week. Day-of-week confounds.
+- Stopping the first day the dashboard shows p < 0.05.
 - No guardrails. The single number that "won" was bought by a drop somewhere else.

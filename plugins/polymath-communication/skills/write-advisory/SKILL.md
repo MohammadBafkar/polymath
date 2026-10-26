@@ -23,6 +23,7 @@ description: Author a security or breaking-change advisory — severity, affecte
 
 ## Procedure
 
+0. **Embargo check (security advisories).** Until the fix ships and the disclosure date passes, the advisory is confidential. Never draft it in a public repository's tracked files — a pushed draft *is* the disclosure. Draft in the private channel (a GitHub draft security advisory, a private repo, or a local file outside the repo) and move it to `docs/advisories/` only at publication.
 1. Read [`Advisory.md`](../../templates/Advisory.md).
 2. Compute slug from the advisory ID.
 3. Draft `docs/advisories/<slug>.md`:
@@ -58,6 +59,7 @@ description: Author a security or breaking-change advisory — severity, affecte
 ## Anti-patterns to avoid
 
 - "All versions before today are affected" — name a range.
-- No workaround offered. There's almost always one even if it's "block via firewall".
+- No workaround offered when one exists (often "block via firewall"). When there truly is none, say "No workaround — upgrade required" rather than inventing one.
 - No verification step. Customers can't confirm they're protected.
 - Marketing tone in the description. The reader is anxious; calm + concrete beats reassuring.
+- Committing an embargoed security advisory to a public repo before the disclosure date.

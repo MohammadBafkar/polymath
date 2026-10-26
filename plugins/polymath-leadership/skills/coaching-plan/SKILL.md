@@ -22,6 +22,8 @@ Not this when: you are writing an evaluation of past performance (`polymath-lead
 
 ## Procedure
 
+**Confidential.** Growth plans are personnel data. Default to a private, non-versioned location — outside the repo, or a repo path that `git check-ignore` confirms is ignored (add the ignore entry first if needed) — or the company's HR system; never commit or push them. Confirm the path with the user before writing. Use only evidence the user provided; never invent incidents, quotes, or feedback.
+
 1. **Anchor to expectations**: lay current demonstrated behavior next to the next-level rubric; the gap is the raw material. Be specific and evidence-based, not "be more strategic".
 2. **Pick 1–2 growth areas, not ten**: focus beats breadth. Choose areas that are both high-leverage for the role and motivating for the person (their goals matter — a plan they don't own won't happen).
 3. **Coaching vs directive**: where they can find the answer, ask questions (GROW: Goal, Reality, Options, Will) to build their judgment; where there's a clear skill/knowledge gap, teach/point directly. Name which mode per area.

@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `mobile-perf`: device tiers corrected (median Android is mid-range, not a flagship); measurement tools named.
+- `push-notifications`: Android 13+ `POST_NOTIFICATIONS`; collapse keys and token cleanup.
+- `deep-links`: saved post-login targets validated (open redirect).
+
 ## [0.8.0]
 
 Mobile craft: mobile perf budgets, push notification design, deep-link routing.

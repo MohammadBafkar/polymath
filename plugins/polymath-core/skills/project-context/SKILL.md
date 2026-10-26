@@ -18,22 +18,30 @@ description: Read .polymath/project.yaml — language, framework, conventions, e
 
 1. The polymath-core SessionStart hook runs `hooks/scripts/load-project-context.py` at every session start.
 2. The loader reads `.polymath/project.yaml` in the project → user (`${POLYMATH_CONFIG_DIR}/polymath/project.yaml`) → home order (first hit wins), then deep-merges the machine-local `./.polymath/project.local.yaml` overlay on top when one exists.
-3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time).
+3. After validation against [`registry/schemas/project.schema.json`](../../../../registry/schemas/project.schema.json), the loader writes a resolved snapshot to `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json` (plus a `_meta` block recording source path, overlay, ignored keys, and load time). When the host gives the hook its own plugin-data directory instead, the loader writes there **and** mirrors to that portable path, because commands run through the agent's shell never see the hook's environment.
 4. Skills read that JSON file directly.
+
+The snapshot is a single machine-wide file holding the **last** project a session started in. Hosts without a SessionStart hook never write it at all.
 
 ## Procedure
 
-To consume the context inside a skill, read the portable data-root snapshot:
+Resolve the context in this order — the first that applies wins:
+
+1. **Snapshot** — `${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json`, but only if `_meta.source` is this repo's `.polymath/project.yaml` (or a user/home-level file). A snapshot whose source is another repo is stale context from a different session — ignore it.
+2. **Raw project file** — `.polymath/project.yaml` at the repo root, with `.polymath/project.local.yaml` merged on top (mappings per key, overlay wins; lists and scalars replaced). This is the source of truth the snapshot was built from, and the only option on hosts without SessionStart hooks.
+3. **Neither** — use the skill's built-in defaults, silently.
 
 ```bash
 ctx="${POLYMATH_DATA_DIR:-$HOME/.polymath/data}/polymath-core/project-context.json"
-if [[ -f "$ctx" ]]; then
-  primary_lang="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); s=d.get('stack',{}).get('languages',[]); print(s[0]['lang'] if s else '')" "$ctx")"
-  # ...
-fi
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+src="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("_meta",{}).get("source",""))' "$ctx" 2>/dev/null)"
+case "$src" in
+  "$root"/*|"$HOME"/.polymath/*|"${POLYMATH_CONFIG_DIR:-/nonexistent}"/*) echo "use snapshot: $ctx" ;;
+  *) [[ -f "$root/.polymath/project.yaml" ]] && echo "read raw: $root/.polymath/project.yaml" ;;
+esac
 ```
 
-Inside a markdown skill (no shell), read the same JSON file as the procedure's first step; if it is absent, skip silently and use built-in defaults.
+Inside a markdown skill (no shell), apply the same order with your file-read tool.
 
 ### The consumption contract
 
@@ -84,8 +92,9 @@ If no project file exists, the snapshot is absent and skills fall back to their 
 
 ## Quality bar
 
-- A localizing skill reads the snapshot once and applies the five consumption blocks in order; it never re-derives project facts from scratch.
-- Absent snapshot or absent key is not an error — fall back to built-in defaults silently.
+- A localizing skill resolves the context once (snapshot → raw `.polymath/project.yaml` → defaults) and applies the five consumption blocks in order; it never re-derives project facts from scratch.
+- A snapshot whose `_meta.source` belongs to another repo is ignored, never applied.
+- Absent context or absent key is not an error — fall back to built-in defaults silently.
 - `[VERIFY: …]` content is surfaced, never silently treated as authoritative.
 
 ## What this skill does *not* do

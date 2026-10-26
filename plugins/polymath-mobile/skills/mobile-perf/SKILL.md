@@ -25,9 +25,11 @@ For each critical screen / journey, pin all four:
 
 Pin which device represents the audience. The fastest dev phone in the office is not it.
 
-- **Low-end Android baseline**: ~2-year-old mid-range Android. The Pixel 6a / Galaxy A series. < 6 GB RAM, mid-tier SoC.
-- **Median Android**: current-year flagship Android.
-- **iPhone tier**: current iPhone or 2-year-old iPhone — much smaller perf variance than Android.
+- **Low-end Android baseline**: an entry-level device a few years old — 3–4 GB RAM, budget SoC (Galaxy A0x/A1x-class). This is where a large share of real users are.
+- **Median Android**: a mid-range device ~2–3 years old (Galaxy A5x-class, 6–8 GB RAM) — not a flagship.
+- **High-end**: a current flagship — useful as a ceiling, never as the budget device.
+- **iPhone tier**: current iPhone or 2–3-year-old iPhone — much smaller perf variance than Android.
+Use your own analytics' device distribution when you have it.
 
 For consumer apps, low-end Android is almost always the right baseline.
 
@@ -35,7 +37,7 @@ For consumer apps, low-end Android is almost always the right baseline.
 
 1. **Pick the screen / journey** (one at a time; multiple screens = multiple passes).
 2. **Pin the 4 axes** with target values.
-3. **Measure current state** with the audience device tier. Real device, not simulator.
+3. **Measure current state** with the audience device tier. Real device, release build, not simulator — Android: Macrobenchmark / Perfetto traces and Play Console Android vitals; iOS: Instruments and MetricKit field data.
 4. **Identify the dominant cost** of any axis missing its target. Common culprits:
    - **Cold start**: too many libraries loaded synchronously, premature DB warm-up, oversized launch storyboard.
    - **Warm start**: app re-initializes state instead of restoring it.
@@ -48,7 +50,7 @@ For consumer apps, low-end Android is almost always the right baseline.
 ```text
 Mobile perf budget: /home screen (cold start)
 
-Audience device: low-end Android (Pixel 6a, 6 GB RAM, Cortex-A78).
+Audience device: low-end Android (Galaxy A14-class, 4 GB RAM, budget SoC).
 
 Targets:
   Cold start TTI    : < 2,000 ms
@@ -56,7 +58,7 @@ Targets:
   Scroll FPS        : ≥ 55 fps
   Memory (foreground): < 250 MB
 
-Current (measured on Pixel 6a, low-battery mode off, release build):
+Current (measured on that device, battery saver off, release build, Macrobenchmark median of 10):
   Cold start: 3,400 ms   ← over budget
   Warm start:   380 ms   ok
   Scroll FPS :  58 fps   ok
@@ -69,7 +71,7 @@ Dominant cost (cold start):
 First fix:
   Move 3 of 4 SDKs to async init after the first frame. The crash SDK stays
   synchronous (must capture early crashes). Expected: cold start ~1,800 ms,
-  under target. Validate on Pixel 6a release build.
+  under target. Validate on the same device and build.
 ```
 
 ## Quality bar
@@ -81,7 +83,7 @@ First fix:
 
 ## Anti-patterns to avoid
 
-- Measuring on a Pixel 9 Pro and shipping.
+- Measuring on this year's flagship and shipping.
 - Optimizing scroll FPS when cold start is failing. Fix the failing axis first.
 - "Add a splash screen" to hide cold start. Hides the symptom; doesn't fix it.
 - Single-axis budget. Always pin all 4.

@@ -2,6 +2,23 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `commit`: follows the repo's own message convention (`conventions.commit_style` now wired, commitlint, `git log`) instead of forcing Conventional Commits; explicit-path staging; hook failures produce a new commit, never `--amend`.
+- `changelog`: uses the repo's changelog generator (Changesets, release-please, towncrier, git-cliff) when present; refactor/style/test/chore are omitted; breaking changes flagged.
+- `pr`: the repo's own GitHub PR template wins over the catalog default; merge-base diff against the remote default branch.
+- `release-notes`: scoped to version release notes (it collided with `write-release-notes`); breaking-changes layer; no claims without a source.
+
+### Fixed
+
+- `changelog` and `pr` loaded templates from marketplace-only `plugins/...` paths.
+
+### Removed
+
+- The `/commit`, `/pr`, `/changelog`, and `/release-notes` commands — the same-named skills are already `/polymath-release:<name>`.
+
 ## [0.8.0]
 
 Release craft: Conventional Commits, PR descriptions, CHANGELOG, release notes.

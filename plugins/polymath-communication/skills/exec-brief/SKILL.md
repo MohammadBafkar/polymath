@@ -33,6 +33,7 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
    - **What we need from you**: the unambiguous ask + deadline.
    - **If yes / if no**: short consequences. Honest, not hyperbolic.
 4. Length target: ≤ 1 page.
+5. Never invent numbers, quotes, or dates — every figure traces to the source material; a missing one is written `[NEEDS DATA: <what>]` and listed in the summary.
 
 ## Quality bar
 
@@ -41,6 +42,7 @@ description: Write a BLUF exec brief — TL;DR first, one recommendation (not me
 - Ask is concrete ("approve $50k for Q3 work" not "align on direction").
 - "What if no" cost stated honestly.
 - No background section. Background goes in references.
+- Every number and quote traces to the source material; gaps are marked `[NEEDS DATA]`, not filled.
 
 ## Output
 

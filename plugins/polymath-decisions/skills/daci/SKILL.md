@@ -16,7 +16,7 @@ description: Run a DACI decision (Driver, Approver, Contributors, Informed) for 
 ## Inputs
 
 - The decision question (required).
-- Candidate Driver + Approver names (the script will challenge them if either is missing).
+- Candidate Driver + Approver names. If either is missing, ask — never invent a person; use a role placeholder (`<Approver: VP Eng>`) only if the user says to proceed without names.
 - Deadline (required; "no deadline" is not acceptable for a real DACI).
 
 ## Procedure

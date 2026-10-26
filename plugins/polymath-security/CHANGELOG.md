@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `owasp-review`: walks the OWASP Top 10:2025 (was the 2021 list while claiming "current"); traces source → sink before reporting.
+- `llm-security-review`: exfiltration channels and the private-data + untrusted-content + outbound-channel combination; PoCs only where authorized.
+- `auth-design`: refresh-token rotation with reuse detection, sender-constrained tokens, no tokens in `localStorage`, passkeys.
+- `crypto-review`: post-quantum hybrid key exchange note; `compliance-mapping`: not legal advice.
+
+### Fixed
+
+- `supply-chain-review` description pointed at a nonexistent `snyk:triage-vulns`.
+
 ## [0.8.0]
 
 Security craft: STRIDE, OWASP review, supply-chain, auth design, compliance mapping, DevSecOps pipeline, crypto review, LLM-security audit.

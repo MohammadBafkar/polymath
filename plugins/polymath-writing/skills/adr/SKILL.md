@@ -20,7 +20,7 @@ description: Write an Architecture Decision Record (Michael Nygard format) to do
 
 ## Procedure
 
-1. Determine the next ADR number: scan `docs/adrs/` for the highest existing `NNNN-` prefix and add 1. Default to 0001 if the directory is empty.
+1. Find the repo's existing ADR directory first (`docs/adrs/`, `docs/adr/`, `doc/architecture/decisions/`, an `.adr-dir` file from adr-tools) and use it; create `docs/adrs/` only if none exists. Determine the next number: the highest existing `NNNN-` prefix + 1 (default 0001).
 2. Compute slug from the title.
 3. Read [`ADR.md`](../../templates/ADR.md).
 4. Draft `docs/adrs/NNNN-<slug>.md`:
@@ -36,7 +36,7 @@ description: Write an Architecture Decision Record (Michael Nygard format) to do
 - One decision per ADR. If your decision implies others, write multiple linked ADRs.
 - "Consequences/Negative" is non-empty — every decision has a cost.
 - "Alternatives considered" lists at least two with concrete rejection reasons.
-- Never edit an accepted ADR. Supersede it with a new one.
+- Never edit an accepted ADR's decision. Supersede it with a new ADR; the only change to the old one is its status line (`Superseded by NNNN`), so readers can follow the chain.
 
 ## Output
 

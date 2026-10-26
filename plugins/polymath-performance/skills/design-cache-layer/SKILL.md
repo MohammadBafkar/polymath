@@ -43,16 +43,23 @@ description: Design a Redis cache layer — key schema, TTLs, eviction policy, s
    if value:
        return value
    # cache miss
-   if NOT SET nx:lock:key (NX, EX=5):
-       sleep + retry GET key                 # someone else is computing
-   else:
-       value = expensive_compute()
-       SET key value EX=TTL
-       DEL nx:lock:key
-       return value
+   token = random_uuid()
+   if SET nx:lock:key token NX EX=5:
+       try:
+           value = expensive_compute()
+           SET key value EX=jittered_ttl
+           return value
+       finally:
+           # release only OUR lock — compare-and-delete in one Lua call
+           EVAL "if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('del',KEYS[1]) end return 0" 1 nx:lock:key token
+   for attempt in 1..3:                      # someone else is computing
+       sleep(50ms × attempt)
+       value = GET key
+       if value: return value
+   return serve_stale_or_compute_without_caching()   # bounded wait, never spin forever
    ```
-   Single-flight by lock; concurrent misses don't all hammer the origin.
-6. **Write path.** Update-then-invalidate (`SET origin = new; DEL key`) is simpler than write-through; tolerate the brief window when a stale read can occur.
+   Single-flight by lock; concurrent misses don't all hammer the origin. A plain `DEL` would delete another worker's lock if compute outlived the 5 s expiry.
+6. **Write path.** Update-then-invalidate (`SET origin = new; DEL key`) is simpler than write-through. Know its race: a reader that fetched the old value before the write can re-populate the cache after the `DEL`. Bound it with the TTL, a version in the key/value, or a delayed second `DEL`, depending on how much staleness the data tolerates.
 7. **Hot keys.** A key with > 1% of total RPS is a hot key. Strategies:
    - Shard the value into multiple keys (`refund:profile:42:shard:{0..9}` round-robin).
    - Use a local in-process cache in front (Caffeine / lru-cache) for sub-second TTL.
@@ -98,7 +105,7 @@ Observability: hit ratio, miss latency p99, eviction rate, slow-log.
 
 - Key schema versioned for cheap global invalidation.
 - TTL has jitter.
-- Stampede protection in the read path.
+- Stampede protection in the read path: token-owned lock, compare-and-delete release, bounded waiting.
 - Failure modes named, not assumed.
 
 ## Anti-patterns to avoid

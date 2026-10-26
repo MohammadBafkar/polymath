@@ -26,7 +26,8 @@ Not this when: you are *designing* the controls — that is `polymath-ai:llm-gua
 2. **Prompt injection — direct**: can user input override the system prompt or extract it? Test instruction-override, role-play escapes, and delimiter breaking.
 3. **Prompt injection — indirect**: can retrieved documents, tool results, or third-party content carry instructions the model will follow? This is the most-missed class — treat all retrieved/tool content as untrusted.
 4. **Sensitive-data disclosure**: can the model leak secrets, other users' data, PII, or its system prompt? Check what's in context and what retrieval can reach (tenant isolation).
-5. **Insecure output handling**: is model output trusted downstream (rendered as HTML→XSS, run as SQL/shell, used as a URL→SSRF)? Output must be treated as untrusted and validated.
+5. **Insecure output handling**: is model output trusted downstream (rendered as HTML→XSS, run as SQL/shell, used as a URL→SSRF)? Output must be treated as untrusted and validated. Check **exfiltration channels** specifically: rendered Markdown images/links pointing at attacker URLs, outbound tool calls, and email/webhook sends can leak context data with no user click.
+   The highest-risk shape is the combination of private data access + untrusted content in context + any outbound channel — a system with all three must break at least one leg for untrusted inputs.
 6. **Excessive agency**: what actions can the model trigger, and is any irreversible/high-impact action authorized by model output alone? Confirm privilege separation (model proposes, code authorizes).
 7. **Supply chain & model**: provenance of models/plugins/training data; for RAG, poisoning of the knowledge base.
 8. **DoS / cost abuse**: unbounded loops, token-flooding, recursive tool calls — confirm rate/cost limits.
@@ -35,6 +36,8 @@ Not this when: you are *designing* the controls — that is `polymath-ai:llm-gua
 ## Output
 
 - A findings report keyed to the OWASP-LLM categories: each finding has the attack path, severity, a proof-of-concept sketch, and a mitigation + owner; plus an overall risk verdict.
+
+**Testing ethics:** run prompt-injection and exfiltration PoCs only against systems you are authorized to test — a staging instance or a production test tenant with the owner's OK — and never with real user data in the payload.
 
 ## Quality bar
 

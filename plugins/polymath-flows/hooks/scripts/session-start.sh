@@ -37,6 +37,9 @@ fi
 mute_marker="${data_root}/polymath-flows/index-muted"
 
 [[ -f "$mute_marker" ]] && exit 0
+# The documented mute command runs through the Bash tool, which never sees
+# CLAUDE_PLUGIN_DATA, so it lands under ~/.polymath/data — honor it there too.
+[[ -f "$HOME/.polymath/data/polymath-flows/index-muted" && -z "${POLYMATH_DATA_DIR:-}" ]] && exit 0
 command -v python3 >/dev/null 2>&1 || exit 0
 
 python3 "${root}/hooks/scripts/project-index.py" "$min_index" "$full_index" "$data_root" "$detect_index" 2>/dev/null || true

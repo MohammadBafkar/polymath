@@ -16,7 +16,7 @@ description: Explain a concept at a specified audience tier (ELI5 / curious-unde
 ## Inputs
 
 - The concept (required).
-- Audience tier (required; one of: `eli5`, `curious-undergrad`, `experienced-peer`, `domain-expert`).
+- Audience tier (one of: `eli5`, `curious-undergrad`, `experienced-peer`, `domain-expert`). If unstated, infer it from how the user writes and name the tier you chose at the top; ask only when the guess would change the answer a lot.
 - Optional: domain context (what the audience already knows).
 
 ## Procedure
@@ -50,7 +50,7 @@ explain: <concept> — tier: <ELI5 | undergrad | peer | expert>
 
 ## Anti-patterns to avoid
 
-- ELI5 that drops jargon ("it's like a hash table"). Not 5-year-old.
+- ELI5 that slips in jargon ("it's like a hash table"). Not 5-year-old.
 - Expert explanation that wastes time on prerequisites the expert already knows.
 - Analogy without limits ("the kernel is like a librarian"). Misleads.
 - Trying to cover multiple concepts in one explanation; the audience leaves with none.

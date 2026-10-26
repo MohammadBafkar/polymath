@@ -21,8 +21,10 @@ description: Draft a 1:1 agenda — direct-report items first, manager items sec
 
 ## Procedure
 
+**Confidential.** 1:1 notes are personnel data. Default to a private, non-versioned location — outside the repo, or a repo path that `git check-ignore` confirms is ignored (add the ignore entry first if needed) — or the company's HR system; never commit or push them. Confirm the path with the user before writing. Use only evidence the user provided; never invent incidents, quotes, or feedback.
+
 1. Read [`1-on-1.md`](../../templates/1-on-1.md).
-2. Write `docs/people/<direct-report>/1on1-<date>.md`:
+2. Write `<private-dir>/people/<direct-report>/1on1-<date>.md` (default `<private-dir>`: `~/.polymath/private`):
    - **Direct report's agenda** — left blank for them to fill. If they consistently leave it blank, that's a topic, not a reason to cancel.
    - **Manager's agenda** — career, feedback (both directions), strategic context, blockers you can unblock. Pick 1–2; don't dump 5.
    - **Pulse check** — pick ONE rotating question.
@@ -39,7 +41,7 @@ description: Draft a 1:1 agenda — direct-report items first, manager items sec
 
 ## Output
 
-- File: `docs/people/<direct-report>/1on1-<date>.md`.
+- File: `<private-dir>/people/<direct-report>/1on1-<date>.md` — never committed. Shape: the [`1-on-1.md`](../../templates/1-on-1.md) template.
 - Summary listing the pulse question + manager's 1–2 prepared topics.
 
 ## Anti-patterns to avoid

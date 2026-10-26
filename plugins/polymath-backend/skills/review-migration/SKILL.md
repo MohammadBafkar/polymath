@@ -31,19 +31,25 @@ description: Review a Postgres migration for lock surface, online/offline safety
    - `ALTER TABLE … ADD COLUMN` (without default) — `ACCESS EXCLUSIVE`, fast (PG 11+ tracks default separately).
    - `ALTER TABLE … ADD COLUMN … DEFAULT <volatile>` — `ACCESS EXCLUSIVE`, rewrites the table (slow + outage on large tables).
    - `ALTER TABLE … ADD COLUMN … DEFAULT <constant>` (PG 11+) — fast; uses fast-default optimization.
-   - `ALTER TABLE … SET NOT NULL` — `ACCESS EXCLUSIVE`, full scan unless a `CHECK CONSTRAINT NOT VALID` was added + validated first.
+   - `ALTER TABLE … SET NOT NULL` — `ACCESS EXCLUSIVE`, full scan unless a validated `CHECK (col IS NOT NULL)` constraint already exists (PG 12+ uses it to skip the scan; older versions always scan).
+   - `ALTER TABLE … ALTER COLUMN … TYPE` — `ACCESS EXCLUSIVE` and usually a full table rewrite (binary-coercible changes such as widening a `varchar` are the exception).
+   - `ALTER TABLE … ADD CONSTRAINT … UNIQUE / PRIMARY KEY` — builds the index under `ACCESS EXCLUSIVE`; instead `CREATE UNIQUE INDEX CONCURRENTLY`, then `ADD CONSTRAINT … USING INDEX`.
    - `ALTER TABLE … DROP COLUMN` — `ACCESS EXCLUSIVE`, metadata-only (fast).
    - `RENAME` — `ACCESS EXCLUSIVE`, but instant. Watch out for app code still using the old name.
+
+   **Even "instant" `ACCESS EXCLUSIVE` statements are dangerous on a busy table**: the lock request waits behind any long-running transaction, and every new query queues behind *it* — a metadata-only change can stall all traffic. That is why step 6's `lock_timeout` is non-negotiable.
 2. **Backfill plan.** If the migration rewrites data:
-   - Batch in chunks (`UPDATE … LIMIT 10000`) with explicit commits.
+   - Batch in chunks with explicit commits. Postgres `UPDATE` has no `LIMIT` — batch by primary-key range or a sub-select:
+     `UPDATE refunds SET currency = 'USD' WHERE id IN (SELECT id FROM refunds WHERE currency IS NULL ORDER BY id LIMIT 10000);`
    - Run outside the schema-migration tool (which usually wraps in a single tx).
    - Pace by `pg_sleep` or external orchestration so the WAL backlog stays manageable.
-3. **`NOT NULL` rollout (multi-step).** The safe pattern:
+3. **`NOT NULL` rollout (multi-step).** The safe pattern (PG 12+ for the fast step 4). A `NOT VALID` check is still enforced on every new INSERT/UPDATE — so before step 2, the app must already write the column (or the column needs a `DEFAULT`), or new writes start failing:
    ```sql
    ALTER TABLE refunds ADD COLUMN currency text;            -- step 1
+   -- deploy app that always writes currency (or: ALTER COLUMN currency SET DEFAULT 'USD')
    ALTER TABLE refunds ADD CONSTRAINT refunds_currency_not_null
      CHECK (currency IS NOT NULL) NOT VALID;               -- step 2
-   -- backfill: UPDATE refunds SET currency='USD' WHERE currency IS NULL; (batched, separate deploys)
+   -- backfill in batches (see step 2), in its own deploy/job
    ALTER TABLE refunds VALIDATE CONSTRAINT refunds_currency_not_null;  -- step 3
    ALTER TABLE refunds ALTER COLUMN currency SET NOT NULL; -- step 4 (fast because constraint is valid)
    ALTER TABLE refunds DROP CONSTRAINT refunds_currency_not_null;

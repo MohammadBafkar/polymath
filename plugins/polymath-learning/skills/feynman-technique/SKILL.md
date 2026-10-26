@@ -20,6 +20,8 @@ description: Verify your understanding of a concept by attempting an undergrad-l
 
 ## Procedure
 
+**Who writes what.** When coaching a person, *they* write Attempt 1 and Attempt 2 — you mark the cracks and point at sources. Writing their attempt for them defeats the technique. Write the attempts yourself only when the user asks you to pressure-test *your* understanding.
+
 1. **Step 1 — Attempt the explanation.** Write the concept in your own words, aimed at a curious undergrad who has not heard the term. Limit: ~250 words. Don't open the source material.
 2. **Step 2 — Identify the cracks.** Walk through the explanation and mark:
    - **Vague**: "somehow", "it just works", "magically".

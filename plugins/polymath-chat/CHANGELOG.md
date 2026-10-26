@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- All three posting skills show the exact message and channel and wait for approval before posting, and check for an existing post before retrying after a timeout (no duplicate updates).
+- `post-statuspage-update`: MCP-binding preamble; mandatory human approval for public posts; component-status mapping per severity; the incident ID comes from the step artifact (a skill cannot write `userConfig`).
+
 ## [0.10.1]
 
 ### Changed

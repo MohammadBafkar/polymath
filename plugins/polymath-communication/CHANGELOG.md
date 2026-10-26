@@ -2,6 +2,15 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Changed
+
+- `exec-brief`, `six-pager`, `write-release-notes`: no invented numbers or quotes — gaps are marked `[NEEDS DATA]`.
+- `write-advisory`: embargo step — never draft an unpublished security advisory in a public repo; no invented workaround.
+- `meeting-notes`: owners/dates are never guessed — `UNASSIGNED`/`UNSET` instead.
+- `write-sunset-notice`: date wording consistent; `write-release-notes` example no longer claims a server can detect retries without a key.
+
 ## [0.8.0]
 
 Communication craft: BLUF exec-brief, six-pager narrative, meeting-notes discipline.

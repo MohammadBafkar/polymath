@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `propose-pod-security-standards`: `readOnlyRootFilesystem` is not part of the restricted profile; violators found via `kubectl label --dry-run=server` (the old `get pods | grep warn` verified nothing); `enforce-version` pinned.
+- `write-manifest`: `/tmp` `emptyDir` for the read-only root filesystem, `automountServiceAccountToken: false`, digest-pinned image, graceful shutdown.
+- `audit-rbac-grants`: `list`/`watch` on Secrets is full read access; `bind`, `pods/exec`, `nodes/proxy`, `serviceaccounts/token` escalation paths.
+
 ## [0.8.0]
 
 Kubernetes craft: manifest defaults, RBAC audit, Pod Security Standards; prod-kubectl confirm hook.

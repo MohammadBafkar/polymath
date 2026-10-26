@@ -1,6 +1,6 @@
 ---
 name: policy-as-code
-description: Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/tfsec) — enforce tagging, security, and cost rules in CI/plan with severity gates and exemptions.
+description: Design policy-as-code guardrails (OPA/Rego, Sentinel, Checkov/Trivy) — enforce tagging, security, and cost rules in CI/plan with severity gates and exemptions.
 ---
 
 # policy-as-code
@@ -18,13 +18,13 @@ Not this when: you are scanning application code/CI broadly — that is `polymat
 ## Inputs
 
 - The rules to enforce and their severity (hard-block vs advisory).
-- The toolchain (OPA/Conftest, Sentinel, Checkov, tfsec/Trivy) and where it runs (plan-time, CI, admission).
+- The toolchain (OPA/Conftest, Sentinel, Checkov, Trivy — tfsec's successor) and where it runs (plan-time, CI, admission).
 
 ## Procedure
 
 1. **Catalog the rules** by intent: *security* (no public S3, no `0.0.0.0/0` ingress, encryption required), *cost* (instance-size/region caps, no orphaned resources), *governance* (mandatory tags, naming, allowed regions/services).
 2. **Pick the enforcement point**: evaluate against the `terraform plan` JSON in CI (pre-apply) and/or at admission (OPA Gatekeeper for K8s). Pre-apply is the cheapest place to stop a bad change.
-3. **Tool choice**: prebuilt rulesets (Checkov/tfsec/Trivy) for common misconfig coverage fast; OPA/Rego or Sentinel for custom org policy. Often both — prebuilt for breadth, custom for the org-specific.
+3. **Tool choice**: prebuilt rulesets (Checkov/Trivy) for common misconfig coverage fast; OPA/Rego or Sentinel for custom org policy. Often both — prebuilt for breadth, custom for the org-specific.
 4. **Severity tiers**: hard-fail on security/compliance violations; warn on style/cost-advisories. Don't hard-block on everything or people route around it.
 5. **Exemptions as code**: an explicit, reviewed, expiring waiver (with owner + reason) — never a silent skip. Track waivers.
 6. **Test the policies**: unit-test rules against pass/fail fixtures so a policy change can't silently stop enforcing.

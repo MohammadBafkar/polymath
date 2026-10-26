@@ -14,7 +14,8 @@ description: Triage an inbound alert or report — classify severity, name the I
 
 ## Procedure
 
-1. **Confirm impact** — is something user-visible broken? If not, downgrade to a ticket. (A noisy alert with no user impact is a tuning bug, not an incident.)
+1. **Confirm impact** — is something user-visible broken, or is data integrity or security at risk (even with nothing visible yet)? If none of these, it's a ticket — or sev4 when internal systems are impaired. (A noisy alert with no impact is a tuning bug, not an incident.)
+   **Security incident?** (suspected breach, leaked credential, unexpected access) — page the security on-call and preserve evidence (snapshots, logs) *before* any rollback, rebuild, or wipe that would destroy it.
 2. **Set severity** — pick from a fixed scale:
    - **sev1** — major user-visible outage, revenue impact, or data integrity at risk. All hands.
    - **sev2** — significant degradation; subset of users; workaround exists.
@@ -25,8 +26,9 @@ description: Triage an inbound alert or report — classify severity, name the I
    - **Operator** — touches systems.
    - **Comms lead** — talks to users and stakeholders.
    - **Scribe** — keeps a running timeline.
-   The IC can be one person; the operator and scribe should not.
-4. **Open comms** — incident channel (e.g. `#inc-2026-09`), status page set to `investigating` for sev1/sev2, internal stakeholder list pinged.
+   Keep IC and operator separate people whenever two responders exist — an IC who starts fixing stops coordinating. In a solo response, the IC role is the one you keep: coordinate first, operate second.
+   Name real people from the on-call schedule (`polymath-paging:page-context` or the paging tool); never invent a handle — leave the role `UNFILLED` and say who must fill it.
+4. **Open comms** — incident channel (e.g. `#inc-2026-09`) and internal stakeholder ping. For sev1/sev2, *recommend* a status-page `investigating` post; the comms lead approves the public text before it goes out (`polymath-chat:post-statuspage-update`).
 5. **Decide: mitigate or diagnose first?**
    - If a known rollback / failover restores service quickly → **mitigate first**, diagnose after.
    - If mitigation is risky or the root cause is unclear → **diagnose first**, but timebox (e.g. 10 min) before falling back to mitigation.
@@ -59,7 +61,7 @@ re-evaluates: deeper diagnosis or escalation.
 ## Quality bar
 
 - Severity assigned within 5 minutes.
-- IC named (a person, not "TBD").
+- IC named (a real person from the rotation — not "TBD", and not an invented handle).
 - Decision (mitigate vs diagnose) explicit with verification.
 - Timebox on diagnosis if chosen first.
 

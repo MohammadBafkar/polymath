@@ -25,23 +25,28 @@ Walk the four POUR principles. For each, name applicable WCAG 2.2 AA Success Cri
 1. **Perceivable**
    - SC 1.1.1 Non-text content — every image / icon / control has a text alternative (`alt`, `aria-label`, or `aria-labelledby`).
    - SC 1.3.1 Info and relationships — semantic HTML (`<button>`, `<nav>`, `<main>`, headings in order) — not all-`<div>`.
-   - SC 1.4.3 Contrast — text vs background ≥ 4.5:1 (3:1 for large text). Check via computed style.
+   - SC 1.4.1 Use of color — color is never the only way information is conveyed.
+   - SC 1.4.3 Contrast — text vs background ≥ 4.5:1 (3:1 for large text). Check via computed style; from a screenshot alone, report contrast as *estimated*.
    - SC 1.4.10 Reflow — content reflows at 320 CSS px without horizontal scroll.
    - SC 1.4.11 Non-text contrast — UI components vs adjacent colors ≥ 3:1.
 2. **Operable**
    - SC 2.1.1 Keyboard — every interactive element reachable + actionable via keyboard alone.
    - SC 2.4.3 Focus order — tab order matches visual order.
+   - SC 2.4.4 Link purpose / SC 2.4.6 Headings and labels — link text and headings make sense out of context.
    - SC 2.4.7 Focus visible — visible focus indicator on every focusable element.
-   - SC 2.5.5 / 2.5.8 Target size — interactive targets ≥ 24×24 CSS px (AA in 2.2).
+   - SC 2.4.11 Focus not obscured (minimum) — *new in 2.2* — a focused element isn't hidden behind sticky headers, banners, or chat widgets.
+   - SC 2.5.7 Dragging movements — *new in 2.2* — every drag action has a single-pointer alternative.
+   - SC 2.5.8 Target size (minimum) — *new in 2.2* — targets ≥ 24×24 CSS px, or enough spacing. (SC 2.5.5's 44×44 is AAA — recommend it, never fail on it.)
 3. **Understandable**
    - SC 3.2.2 On input — input changes don't trigger surprising context changes.
    - SC 3.3.1 Error identification — errors are named in text, not color alone.
    - SC 3.3.2 Labels or instructions — every form control has an associated label.
+   - SC 3.3.8 Accessible authentication (minimum) — *new in 2.2* — login doesn't require a cognitive test (transcribing, puzzles) unless an alternative exists; allow paste and password managers.
 4. **Robust**
    - SC 4.1.2 Name, role, value — every interactive element exposes accessible name + role + state to assistive tech.
    - SC 4.1.3 Status messages — async status (toast, loading) announced via `role="status"` or `aria-live`.
 
-For each finding cite **SC number + element selector + concrete fix**. Severity per WCAG: A > AA. AA is the target.
+For each finding cite **SC number + element selector + concrete fix**. Severity per WCAG: A > AA. AA is the target. Say what you could and couldn't verify from the inputs: keyboard flow, focus order, and screen-reader announcements need a running UI — from a screenshot they are "not verified", not "pass".
 
 ## Output
 

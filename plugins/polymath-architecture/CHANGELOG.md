@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `resilience-design`: `429`/`503`/`408` are retryable (honor `Retry-After`) — the old "never retry 4xx" rule was wrong; added deadline propagation and a single-layer retry budget.
+- `service-decomposition`: data migration prefers CDC/outbox; app-level dual-write only with reconciliation (it contradicted `event-driven-design`); names the `migrationPlaybook` workflow.
+- `event-driven-design`: dropped the stale "(when present)" on `streaming-design`.
+
 ## [0.8.0]
 
 Architecture design craft: DDD context maps + aggregates, event-driven/integration design, resilience, service decomposition, distributed consistency.

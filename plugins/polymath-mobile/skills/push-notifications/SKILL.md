@@ -15,7 +15,7 @@ description: Design push notifications — opt-in moment, payload shape, tap-dee
 
 ## Procedure
 
-1. **Opt-in moment**: never on app launch. Ask after the user has experienced enough value to want the notification. The contextual opt-in ("Get notified when your refund clears") wins over the cold OS prompt.
+1. **Opt-in moment**: never on app launch. Ask after the user has experienced enough value to want the notification. The contextual opt-in ("Get notified when your refund clears") wins over the cold OS prompt. Applies on both platforms: iOS requires authorization, and Android 13+ requires the runtime `POST_NOTIFICATIONS` permission.
 2. **Two channels minimum**:
    - **Transactional**: order updates, refund status, password resets. Default ON.
    - **Marketing / engagement**: discounts, "we miss you". Default OFF; explicit opt-in.
@@ -30,7 +30,8 @@ description: Design push notifications — opt-in moment, payload shape, tap-dee
    - **Silent (data-only)**: app processes in background. iOS APNs limits volume; Android FCM has Doze constraints. Don't use silent push for engagement.
 6. **Quiet hours**: respect them. Default 22:00–08:00 user-local for non-time-sensitive notifications. Tag time-sensitive (e.g. iOS `interruption-level: time-sensitive`) only when warranted.
 7. **Unsubscribe path**: in-app settings reachable in ≤ 2 taps. Per-channel toggles. Honor "do not contact" as the strict-deny default.
-8. **Tracking**: delivery rate, open rate, action rate, unsub rate. Alert when unsub rate doubles week-over-week.
+8. **Delivery hygiene**: dedupe retried sends with a collapse key (`apns-collapse-id`, FCM `collapse_key`) so a retry doesn't buzz twice; remove device tokens the provider reports invalid/unregistered.
+9. **Tracking**: delivery rate, open rate, action rate, unsub rate. Alert when unsub rate doubles week-over-week.
 
 ## OS constraints to respect
 

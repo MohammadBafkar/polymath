@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `intake`: `auto-headless` applies only to read-only, non-workflow surfaces in non-interactive sessions (it contradicted `run-workflow`); stale surface count removed.
+- `intake`, `feedback-capture`, `feedback-digest`: `polymath-pipeline` path resolves under Claude Code.
+
 ## [0.8.0]
 
 Opt-in routing pipeline (routing.mode classify|enforce): classify directives, enforce gate with audited kill switch, session markers, decision log.

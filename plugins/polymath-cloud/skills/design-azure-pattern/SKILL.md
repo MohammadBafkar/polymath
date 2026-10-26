@@ -7,6 +7,13 @@ description: Pick the right Azure primitive — compute (Functions / Container A
 
 > Pick an Azure primitive with the *why*. Output: chosen primitive, runner-up, flip conditions.
 
+## When to use
+
+- A PRD says "deploy on Azure" without naming services, or a workload is on the wrong Azure primitive.
+- Comparing Azure options for a new service before writing IaC.
+
+**Verify before you recommend.** Cloud catalogs change faster than this skill: confirm current availability, limits, and prices in the provider's own docs and pricing calculator, and show cost estimates as arithmetic with stated assumptions — never a bare monthly figure.
+
 ## Procedure
 
 1. **Characterize the workload** (compute pattern, DB shape, storage, networking).
@@ -18,7 +25,7 @@ description: Pick the right Azure primitive — compute (Functions / Container A
 3. **Database.**
    - Relational, regional → **Azure SQL Database** (Hyperscale tier for very large) or **Azure Database for PostgreSQL Flexible Server**.
    - Multi-region, multi-model (document/graph/key) → **Cosmos DB** (pick API: NoSQL / Mongo / Cassandra / Gremlin / Table).
-   - Strong consistency + cross-region writes → **Cosmos DB strong consistency** (cost premium) or Azure SQL multi-write groups.
+   - Strong consistency **and** cross-region writes is not on offer: Cosmos DB strong consistency requires a single write region, and Azure SQL failover groups have one writer. Choose single-write-region + strong consistency (writes pay cross-region latency), or multi-region writes with session/bounded-staleness consistency plus a conflict-resolution policy — and say which invariant that relaxes.
    - Analytical → **Synapse** or **Fabric**.
 4. **Storage.**
    - Object / blob → **Azure Blob Storage** (Hot / Cool / Cold / Archive tiers).
@@ -51,7 +58,9 @@ Messaging:
 Networking:
   Container Apps environment with VNet integration → private Postgres endpoint.
 
-Cost driver: Container Apps vCPU-s + Postgres compute. ~$250/mo at 500 RPS.
+Cost driver: Container Apps vCPU-s + memory GiB-s + Postgres compute hours.
+  Estimate from replica-seconds at the expected concurrency (show the
+  arithmetic and assumptions); verify in the Azure Pricing Calculator.
 
 Ops shape:
   Logs: Container Apps → Log Analytics workspace.
@@ -65,3 +74,10 @@ Ops shape:
 - "Functions Consumption for everything." Cold starts hit hard on .NET / Java; pick Flex or Container Apps.
 - App Service Plan "Basic" for prod. Always-on cost without prod-grade features (slots, scale-out).
 - Forgetting VNet integration for serverless → private DB. Default is internet egress.
+
+## Quality bar
+
+- Workload characterized in measurable terms (RPS, latency budget, task duration, data shape).
+- Chosen primitive justified, with a runner-up and quantitative flip conditions.
+- Consistency claims match what the service actually offers in the chosen topology.
+- Cost estimates show assumptions and arithmetic.

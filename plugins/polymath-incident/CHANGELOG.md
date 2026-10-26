@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `incident-triage`: sev4 vs ticket rule no longer contradicts itself; latent data/security risk counts; security incidents preserve evidence before rollback; status-page posts need comms-lead approval; never invents responder handles.
+- `comms-update`: drafts only; example no longer promises an outcome.
+- `postmortem-blameless`: contributing factors (not a single root cause), timeline gaps stay visible, stale "once connectors exist" note removed.
+
 ## [0.8.0]
 
 Incident craft: triage, blameless postmortem, comms-update; Postmortem/Comms-update templates.

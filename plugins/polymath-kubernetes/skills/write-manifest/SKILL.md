@@ -32,12 +32,15 @@ description: Write a Kubernetes Deployment + Service + PDB manifest with safe de
    - `startupProbe` — for slow boots; lets liveness/readiness use shorter intervals.
 4. **Security context** at pod and container:
    - `runAsNonRoot: true`, `runAsUser: 65532` (or workload-specific).
-   - `readOnlyRootFilesystem: true` + `emptyDir` for any writable need.
+   - `readOnlyRootFilesystem: true` + an `emptyDir` mounted wherever the app writes (at least `/tmp`) — without it many runtimes crash on start.
+   - `automountServiceAccountToken: false` unless the workload calls the Kubernetes API.
    - `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`.
    - `seccompProfile.type: RuntimeDefault`.
 5. **PodDisruptionBudget** — `minAvailable: 1` or `maxUnavailable: 25%`, sized to allow node upgrades.
 6. **Topology spread** — across zones (or hosts) so a single AZ failure doesn't take you down. `topologySpreadConstraints` with `whenUnsatisfiable: ScheduleAnyway`.
 7. **Labels & annotations** — `app.kubernetes.io/name`, `app.kubernetes.io/instance`, owner team, source repo annotation.
+8. **Graceful shutdown** — the app drains on SIGTERM within `terminationGracePeriodSeconds` (default 30s); add a short `preStop` sleep only if endpoints lag behind pod termination in your cluster.
+9. **Image** — pin by digest (`image@sha256:…`) for production; a mutable tag can change under a running Deployment.
 
 ## Output
 
@@ -60,6 +63,7 @@ spec:
       labels:
         app.kubernetes.io/name: refund
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
@@ -72,9 +76,12 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: refund
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: refund
-          image: example/refund:0.1.0
+          image: example/refund:0.1.0@sha256:<digest>
           ports:
             - containerPort: 8080
               name: http
@@ -89,6 +96,9 @@ spec:
           resources:
             requests: { cpu: 100m, memory: 128Mi }
             limits:   { memory: 256Mi }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

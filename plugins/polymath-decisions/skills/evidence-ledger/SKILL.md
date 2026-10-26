@@ -1,6 +1,6 @@
 ---
 name: evidence-ledger
-description: Frame a decision's evidence — separate facts, assumptions, and unknowns; per unknown name confidence and what would resolve it; not a full decision record (daci) or tradeoff scoring (tradeoff-matrix).
+description: Frame a decision's evidence — separate facts, assumptions, unknowns; per unknown, confidence and what resolves it; not a decision record (daci) or tradeoff scoring (tradeoff-matrix).
 ---
 
 # evidence-ledger
@@ -24,7 +24,7 @@ description: Frame a decision's evidence — separate facts, assumptions, and un
 
 1. Compute the slug from the decision.
 2. Draft `docs/decisions/<slug>-evidence.md`:
-   - **Facts** — things established by evidence. Cite the source (doc, metric, code path) per fact.
+   - **Facts** — things established by evidence. Cite the source (doc, metric, code path) per fact; a claim you cannot source goes under Assumptions, never Facts.
    - **Assumptions** — things being treated as true without proof. Each is a one-liner the reader could challenge.
    - **Unknowns** — a table, one row per open question:
 

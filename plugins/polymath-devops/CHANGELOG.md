@@ -2,6 +2,19 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [0.11.0]
+
+### Fixed
+
+- `ci-pipeline-github`: the example's `setup-node` pnpm cache ran before pnpm existed; third-party actions pinned by SHA (as the skill demands); `pull_request_target` and `${{ }}` script injection; deploy workflows don't cancel in progress; fork PRs have no OIDC.
+- `audit-dockerfile`: HEALTHCHECK uses a binary already in the image (curl advice contradicted `dockerize`).
+- `audit-compose`: host-escape findings (privileged, Docker socket, host network/PID, broad caps); When-to-use/Inputs.
+- `env-promotion`: promote by digest; rollback depends on backward-compatible migrations.
+
+### Removed
+
+- The `/audit-dockerfile` and `/audit-compose` commands (same-named skills already provide them).
+
 ## [0.8.0]
 
 DevOps craft: multi-stage Dockerfile, GitHub Actions pipelines, env-promotion.
