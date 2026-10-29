@@ -13,6 +13,7 @@
       "plugins": [
         "polymath-engineering",
         "polymath-backend",
+        "polymath-database",
         "polymath-qa",
         "polymath-security",
         "polymath-release",
@@ -44,7 +45,7 @@
         "polymath-paging",
         "polymath-chat"
       ],
-      "alwaysOnBudget": 1750
+      "alwaysOnBudget": 1850
     },
     "platform": {
       "title": "Platform / DevOps engineer",
@@ -78,6 +79,7 @@
       "plugins": [
         "polymath-thinking",
         "polymath-architecture",
+        "polymath-scalability",
         "polymath-decisions",
         "polymath-writing",
         "polymath-planning",
@@ -85,7 +87,7 @@
         "polymath-communication",
         "polymath-leadership"
       ],
-      "alwaysOnBudget": 2650
+      "alwaysOnBudget": 2800
     },
     "author": {
       "title": "Polymath plugin author",

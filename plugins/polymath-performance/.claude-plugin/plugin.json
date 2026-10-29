@@ -1,7 +1,7 @@
 {
   "name": "polymath-performance",
   "version": "0.12.0",
-  "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoff design.",
+  "description": "Performance craft: budgets, tail latency, caching (Redis and HTTP/edge), application profiling, high-load IO-bound service design.",
   "license": "MIT",
   "author": {
     "name": "Mohammad Bafkar",
@@ -14,6 +14,9 @@
     "performance",
     "latency",
     "caching",
-    "budget"
+    "budget",
+    "profiling",
+    "high-load",
+    "cdn"
   ]
 }

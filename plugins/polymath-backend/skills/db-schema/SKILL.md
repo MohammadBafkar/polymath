@@ -90,3 +90,7 @@ Rationale:
 - Nullable booleans.
 - Unbounded text for columns that are indexed or queried with `LIKE`.
 - Missing indexes on foreign keys (the most common slow-query cause).
+
+## Related skills
+
+- `polymath-database:index-strategy` — index design against the real query workload; `polymath-database:partitioning-sharding` and `nosql-partition-design` for large tables and non-relational stores.

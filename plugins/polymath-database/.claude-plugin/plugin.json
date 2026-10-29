@@ -1,0 +1,21 @@
+{
+  "name": "polymath-database",
+  "version": "0.12.0",
+  "description": "Database performance craft: triage, index strategy, IO tuning, Postgres tuning, partitioning/sharding, NoSQL partition design, retention and archiving.",
+  "license": "MIT",
+  "author": {
+    "name": "Mohammad Bafkar",
+    "url": "https://github.com/MohammadBafkar/Polymath"
+  },
+  "dependencies": [
+    "polymath-core"
+  ],
+  "keywords": [
+    "database",
+    "performance",
+    "indexes",
+    "postgres",
+    "sharding",
+    "retention"
+  ]
+}

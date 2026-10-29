@@ -21,7 +21,7 @@ New to the model? Read [The marketplace](#the-marketplace) and [Design principle
 
 ## The marketplace
 
-**<!-- count:plugins -->40<!-- /count --> plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **<!-- count:workflows -->32<!-- /count --> workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
+**<!-- count:plugins -->42<!-- /count --> plugins** across foundation, mind & craft, product & discovery, engineering, quality & safety, platform & operate, infra, people & content, connectors, orchestration, and authoring. **<!-- count:workflows -->32<!-- /count --> workflows** compose those plugins into SDLC journeys such as `activateProject`, `reviewPR`, `shipFeature`, `respondToIncident`, `designSystem`, `refactorWithSafety`, `securityFinding`, `bumpDependency`, `migrateLanguageVersion`, `experimentToGA`, `weeklyReleaseTrain`, and `deprecationToRemoval`.
 
 Install only what you need. Per-plugin always-on listing cost stays under 400 tokens. Most teams install 5–10.
 
@@ -68,7 +68,7 @@ claude
 
 ### Install profiles
 
-Picking a handful of plugins out of <!-- count:plugins -->40<!-- /count --> is the real first hurdle. Install
+Picking a handful of plugins out of <!-- count:plugins -->42<!-- /count --> is the real first hurdle. Install
 profiles in [`registry/polymath-profiles.json`](registry/polymath-profiles.json)
 are curated role spines — install one, then add more a-la-carte on top. Every
 profile implicitly includes the `polymath-core` + `polymath-flows` spine.
@@ -106,8 +106,8 @@ The full catalog is published as the marketplace's GitHub Pages site under `docs
 - **Foundation** — `polymath-core` (route prompts, conventions, glossary, project initialization, project-context loader, plugin-budget, SessionStart hook).
 - **Mind & craft** — `polymath-thinking`, `polymath-planning`, `polymath-writing`, `polymath-decisions`, `polymath-learning`.
 - **Product & discovery** — `polymath-product`, `polymath-research`, `polymath-design`.
-- **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-ai`.
-- **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`.
+- **Engineering** — `polymath-engineering`, `polymath-frontend`, `polymath-backend`, `polymath-mobile`, `polymath-data`, `polymath-database`, `polymath-ai`.
+- **Quality & safety** — `polymath-qa`, `polymath-security`, `polymath-performance`, `polymath-scalability`.
 - **Platform & operate** — `polymath-platform`, `polymath-devops`, `polymath-sre`, `polymath-observability`, `polymath-incident`, `polymath-release`.
 - **Infra** — `polymath-kubernetes`, `polymath-cloud` (Postgres migration/config craft now lives in `polymath-backend`).
 - **People & content** — `polymath-communication` (internal + customer-facing prose), `polymath-leadership`.

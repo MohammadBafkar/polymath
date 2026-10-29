@@ -7,6 +7,22 @@ All notable changes to this marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Principal/staff-level performance and scale coverage: database performance, caching, event-driven data platforms, high-load IO, and scalable system design. 22 new skills, 2 new plugins.
+
+### Added
+
+- **`polymath-database`** (new, 8 skills): `db-performance-triage` (engine-agnostic top-down triage with per-engine diagnostics), `index-strategy`, `db-io-tuning`, `postgres-performance` (with a catalog-query reference), `db-scaling-strategy`, `partitioning-sharding`, `nosql-partition-design`, `data-retention-archiving`.
+- **`polymath-scalability`** (new, 6 skills): `system-design`, `capacity-estimation` (tested `estimate.py` calculator), `scalability-review`, `async-workload-design`, `rate-limiting-design`, `multi-region-design`.
+- **`polymath-performance`** (+3): `app-profiling`, `high-load-io-design` (tested Little's-law `concurrency.py`), `http-edge-caching`.
+- **`polymath-streaming`** (+5): `kafka-performance-tuning`, `azure-event-hubs-design`, `lakehouse-performance` (Databricks/Spark/Delta), `data-lake-layout`, `event-schema-evolution`.
+- Golden fixtures for the new skills; both new plugins registered in the marketplace, catalog (`experimental`), stability ledger, and routing exemptions; added to the `backend`, `sre`, and `staff` install profiles.
+
+### Changed
+
+- Sibling skills now cross-link to the new ones (`sql-optimize`, `audit-pg-config`, `caching-tradeoffs`, `design-cache-layer`, `streaming-design`, `event-driven-design`, `resilience-design`, `capacity-plan`).
+
 ## [0.12.0]
 
 Hardening pass for determinism, creativity, and completeness. Every skill now declares how much latitude it has, computes its arithmetic with tested scripts instead of prose, and shows the exact output it produces.

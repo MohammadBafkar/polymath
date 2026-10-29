@@ -16,6 +16,7 @@ description: Design a streaming topology (Kafka/Pulsar/Kinesis) — topics, part
 - A workflow invokes `polymath-streaming:streaming-design`.
 
 Not this when: you are designing the *business* event flow (saga, choreography, outbox) — that is `polymath-architecture:event-driven-design`. For windowed/stateful computation over the stream, `polymath-streaming:stream-processing`.
+Throughput/lag tuning of an existing Kafka cluster is `polymath-streaming:kafka-performance-tuning`; Azure Event Hubs sizing is `polymath-streaming:azure-event-hubs-design`; schema compatibility and versioning is `polymath-streaming:event-schema-evolution`; long-term retention and archiving is `polymath-database:data-retention-archiving`.
 
 ## Inputs
 

@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [Unreleased]
+
+### Added
+
+- **app-profiling** — Profile CPU, memory and allocation hot spots — flame graphs, N+1, serialization, GC; one measured fix. Not tail latency (backend-tail-latency).
+- **high-load-io-design** — Design high-throughput IO-bound services — concurrency model, pool sizing (Little's law), batching, backpressure, load shedding. Ships `scripts/concurrency.py` (stdlib-only, unit-tested).
+- **http-edge-caching** — Design HTTP, CDN and edge caching — Cache-Control, cache keys, Vary, purge, stale-while-revalidate. Not Redis (design-cache-layer).
+
 ## [0.12.0]
 
 ### Changed

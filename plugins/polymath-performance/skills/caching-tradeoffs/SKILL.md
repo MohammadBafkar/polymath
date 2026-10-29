@@ -31,6 +31,9 @@ description: Design a cache — what's cached, where (local / regional / shared)
 - [`polymath-performance:audit-redis-config`](../audit-redis-config/SKILL.md)
   — review an existing Redis configuration once a cache layer is
   running.
+- `polymath-performance:http-edge-caching`
+  — when the cache is HTTP/CDN/edge: `Cache-Control`, cache keys,
+  `Vary`, purge, and personalized-content safety.
 
 ## The five hard questions
 

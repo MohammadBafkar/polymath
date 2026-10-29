@@ -136,6 +136,12 @@
     },
     "polymath-tracker": {
       "status": "experimental"
+    },
+    "polymath-database": {
+      "status": "experimental"
+    },
+    "polymath-scalability": {
+      "status": "experimental"
     }
   }
 }
