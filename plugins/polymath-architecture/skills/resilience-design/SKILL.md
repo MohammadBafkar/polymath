@@ -16,6 +16,7 @@ description: Design resilience for a dependency call path — timeout, retry wit
 - A workflow invokes `polymath-architecture:resilience-design`.
 
 Not this when: you are setting the latency/throughput target itself — that is `polymath-performance:perf-budget` / `backend-tail-latency`. This skill specifies behavior under failure, not the budget.
+Per-caller quotas and 429 contracts are `polymath-scalability:rate-limiting-design`; queue backpressure and worker sizing are `polymath-scalability:async-workload-design`; regional failure is `polymath-scalability:multi-region-design`.
 
 ## Inputs
 

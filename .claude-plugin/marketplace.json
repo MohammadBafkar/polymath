@@ -225,7 +225,7 @@
     {
       "name": "polymath-streaming",
       "source": "./plugins/polymath-streaming",
-      "description": "Data & streaming engineering: streaming topology + delivery semantics, ETL/ELT pipelines, dimensional/lakehouse modeling, stream processing.",
+      "description": "Data & streaming craft: Kafka and Event Hubs, stream processing, pipelines, lakehouse performance, lake layout, schema evolution.",
       "version": "0.12.0",
       "category": "data",
       "tags": [
@@ -470,13 +470,14 @@
     {
       "name": "polymath-performance",
       "source": "./plugins/polymath-performance",
-      "description": "Performance craft: budget setting, backend tail-latency investigation, caching tradeoffs.",
+      "description": "Performance craft: budgets, tail latency, caching (Redis and HTTP/edge), application profiling, high-load IO-bound design.",
       "version": "0.12.0",
       "category": "performance",
       "tags": [
         "performance",
         "latency",
-        "caching"
+        "caching",
+        "profiling"
       ]
     },
     {
@@ -527,6 +528,33 @@
         "jira",
         "linear",
         "atlassian"
+      ]
+    },
+    {
+      "name": "polymath-database",
+      "source": "./plugins/polymath-database",
+      "description": "Database performance craft: triage, indexes, IO tuning, Postgres, partitioning/sharding, NoSQL partition design, retention and archiving.",
+      "version": "0.12.0",
+      "category": "performance",
+      "tags": [
+        "database",
+        "postgres",
+        "indexes",
+        "sharding",
+        "retention"
+      ]
+    },
+    {
+      "name": "polymath-scalability",
+      "source": "./plugins/polymath-scalability",
+      "description": "Scalable architecture craft: system design, capacity estimation, scalability review, async workloads, rate limiting, multi-region.",
+      "version": "0.12.0",
+      "category": "architecture",
+      "tags": [
+        "scalability",
+        "system-design",
+        "capacity",
+        "multi-region"
       ]
     }
   ]

@@ -96,3 +96,9 @@ Validation:
 - Hedging or retrying a non-idempotent call (payments, sends, creates) to cut latency.
 - Tuning GC because GC is famous without checking the GC pause histogram first.
 - Adding cache without first checking the actual hit rate ceiling.
+
+## Related skills
+
+- `polymath-performance:app-profiling` — when the dominant cause is CPU, allocation, or lock cost inside the service.
+- `polymath-performance:high-load-io-design` — when it is pool/queue sizing, connection reuse, or missing backpressure.
+- `polymath-database:db-performance-triage` — when the slow span is the database.

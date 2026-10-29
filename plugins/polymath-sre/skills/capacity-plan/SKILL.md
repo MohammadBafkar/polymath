@@ -83,3 +83,7 @@ One-line summary: the constrained dimension and the must-act-by date.
 - Headroom is expressed as a date or event, not a bare percentage.
 - The scaling trigger fires before the SLO is at risk, with margin for failover.
 - Cost names both adding and not-adding capacity.
+
+## Related skills
+
+- `polymath-scalability:capacity-estimation` — sizes a *design* before it runs (QPS, storage, nodes); this skill projects a running system forward to a must-act date.

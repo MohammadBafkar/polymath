@@ -16,6 +16,7 @@ description: Design an event-driven flow — event catalog, choreography vs orch
 - A workflow invokes `polymath-architecture:event-driven-design`.
 
 Not this when: the integration is two services and request/response is fine — that is `integration-design`. For the broker's partitioning/throughput tuning, that is `polymath-streaming:streaming-design`.
+For event schema compatibility and versioning, `polymath-streaming:event-schema-evolution`; for worker/queue sizing, retries, and DLQs, `polymath-scalability:async-workload-design`.
 
 ## Inputs
 

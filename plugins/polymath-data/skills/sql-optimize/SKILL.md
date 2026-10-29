@@ -109,3 +109,5 @@ Likely permanent fix:
   — Postgres-specific lock review before shipping the index change.
 - [`polymath-data:sql-write`](../sql-write/SKILL.md)
   — when the right fix is rewriting the query rather than the schema.
+- `polymath-database:db-performance-triage` — when you don't yet know *which* query or resource is the problem; it finds the statement, this skill reads its plan.
+- `polymath-database:index-strategy` — designing the index set for a whole workload rather than one query; `polymath-database:postgres-performance` for Postgres statistics, vacuum, and HOT effects.

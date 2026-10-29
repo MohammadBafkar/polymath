@@ -89,3 +89,8 @@ Recommendation: 4 changes; mem + connections are the highest leverage.
 - Turning autovacuum off "for now". You will not turn it back on; bloat will eat you.
 - Setting `fsync = off` on production. Data loss on crash.
 - Cargo-culted `shared_buffers = 4GB` on a 256GB host. Match the workload, not the wiki.
+
+## Related skills
+
+- `polymath-database:postgres-performance` — runtime tuning from `pg_stat_*` evidence (bloat, HOT, index types, locks, pooling); this skill audits the settings, that one diagnoses the workload.
+- `polymath-database:db-performance-triage` — start there when the bottleneck isn't known.

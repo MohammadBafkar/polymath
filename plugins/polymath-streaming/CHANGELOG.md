@@ -2,6 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
+## [Unreleased]
+
+### Added
+
+- **kafka-performance-tuning** — Tune Kafka throughput, latency and consumer lag — producer batching, acks, fetch, rebalances, broker IO. Not topology (streaming-design).
+- **azure-event-hubs-design** — Design and size Azure Event Hubs — tier, throughput units, partitions, consumer groups, checkpointing, Capture, Kafka endpoint.
+- **lakehouse-performance** — Tune Databricks/Spark and Delta — small files, OPTIMIZE, clustering, shuffle, skew, Auto Loader, cluster cost. Not lake layout.
+- **data-lake-layout** — Design the physical data lake — zones, paths, Parquet and Delta/Iceberg, file sizing, partitioning, compaction, lifecycle tiers.
+- **event-schema-evolution** — Evolve event schemas safely — registry, Avro/Protobuf compatibility modes, upgrade order, breaking-change playbook, CI contract checks.
+
 ## [0.12.0]
 
 ### Changed
